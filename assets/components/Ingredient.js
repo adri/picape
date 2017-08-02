@@ -43,7 +43,7 @@ export default ({ name, imageUrl, isPlanned, unitQuantity, orderedQuantity }) =>
           width: 32px;
         }
 
-        .ingredient-image-wrapper {
+        .ingredient-quantity-wrapper {
           height: 16px;
           width: 16px;
         }
