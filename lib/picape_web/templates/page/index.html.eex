@@ -1,0 +1,49 @@
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="row">
+            <div class="col-md-9 border border-right-0">
+                <h5>Recipes</h5>
+                 <%= for recipe <- @recipes do %>
+                        <a href="/" class="recipe br-1">
+                            <div class="media pl-2 pt-2">
+                                <div class="media-body mb-2">
+                                    <h5 class="recipe-title mt-0 mb-0"><%= recipe.title %></h5>
+                                    <ul>
+                                        <%= for ingredient <- recipe.ingredients do %>
+                                            <li><%= ingredient.quantity %> <%= ingredient.ingredient.name %></li>
+                                        <% end %>
+                                    </ul>
+                                </div>
+                            </div>
+                        </a>
+                <% end %>
+                <h5>Essentials</h5>
+                <div class="row no-gutters ingredients-wrapper">
+                    <%= for ingredient <- @essentials do %>
+                    <div class="col-sm-3">
+                        <a href="/" class="ingredient br-1">
+                            <div class="media pl-2 pt-2">
+                                <div class="d-flex mr-3 mt-0 ingredient-image-wrapper">
+                                    <img
+                                        src="<%= ingredient[:image_url] %>"
+                                        class="ingredient-image rounded"
+                                        alt="<%= ingredient.name %>">
+                                </div>
+                                <div class="media-body mb-2">
+                                    <div class="ingredient-name mt-0 mb-0"><%= ingredient.name %></div>
+                                    <div class="ingredient-unit-quantity"><%= ingredient[:unit_quantity] %></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <% end %>
+                </div>
+            </div>
+            <div class="col-md-3 order-column">
+                <h5>Order</h5>
+
+            </div>
+        </div>
+    </div>
+</div>

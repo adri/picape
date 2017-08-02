@@ -9,6 +9,7 @@
 *.ez
 .vscode
 .idea
+/config/*.secret.exs
 
 # Generate on crash by the VM
 erl_crash.dump
