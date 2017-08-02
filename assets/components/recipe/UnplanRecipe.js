@@ -1,13 +1,14 @@
 import React from 'react';
 import { gql, graphql, compose} from 'react-apollo';
 import mutateable from '../../lib/mutateable';
+import Loading from '../Loading';
 
 function UnplanRecipe({ submit, loading, error, recipeId }) {
   if (error) alert(error);
-  if (loading) return <div>Loading</div>;
 
   return (
     <a href="#" onClick={(event) => submit(event, {recipeId})} className="btn">
+      {loading && <Loading />}
       Unplan
     </a>
   );
