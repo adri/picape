@@ -1,5 +1,5 @@
-export default ({ name, imageUrl, unitQuantity }) =>
-  <a href="#" className="ingredient br-1">
+export default ({ name, imageUrl, isPlanned, unitQuantity }) =>
+  <a href="#" className={"ingredient br-1 " + (isPlanned && "highlighted")}>
     <div className="media pl-2 pt-2">
       <div className="d-flex mr-3 mt-0 ingredient-image-wrapper">
         <img src={imageUrl} className="ingredient-image rounded" alt={name} />
@@ -25,6 +25,10 @@ export default ({ name, imageUrl, unitQuantity }) =>
 
         .ingredient:hover .media {
           box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, .1);
+        }
+
+        .ingredient.highlighted .media {
+          box-shadow: inset 0 0 25px #ffcca9, inset 0 0 0 1px rgba(0, 0, 0, .1);
         }
 
         .ingredient-name {

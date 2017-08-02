@@ -19,19 +19,25 @@ defmodule Picape.Recipe do
     end
   end
 
-  def essentials_quantity(recipe_ids) do
-    ingredients_quantity(recipe_ids, true)
-  end
-
-  def ingredients_quantity(recipe_ids, essentials \\ false) do
+  def ingredients_quantity(recipe_ids) do
     query = from r in IngredientRef,
         join: i in assoc(r, :ingredient),
         where: r.recipe_id in ^recipe_ids and
-               i.is_essential == ^essentials,
+               i.is_essential == false,
         group_by: i.supermarket_product_id,
         select: {i.supermarket_product_id, sum(r.quantity)}
 
      {:ok, Enum.into(Repo.all(query), %{})}
+  end
+
+  def ingredient_in_recipes?(recipe_ids, ingredient_id) do
+    query = from r in IngredientRef,
+       join: i in assoc(r, :ingredient),
+       where: r.recipe_id in ^recipe_ids and
+              r.ingredient_id == ^ingredient_id,
+       select: r.recipe_id
+
+    {:ok, Repo.aggregate(query, :count, :recipe_id) > 0}
   end
 
   def list_essentials() do

@@ -6,6 +6,15 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.current()
   end
 
+  def is_recipe_planned(recipe) do
+    {:ok, recipe_ids} = Order.planned_recipes(1)
+    {:ok, Enum.member?(recipe_ids, recipe.id)}
+  end
+
+  def is_ingredient_planned(ingredient) do
+    Order.ingredient_planned?(1, ingredient.id)
+  end
+
   def plan_recipe(attributes, _info) do
     Order.plan_recipe(1, attributes[:recipe_id])
   end

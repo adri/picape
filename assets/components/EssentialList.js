@@ -2,7 +2,7 @@ import { gql, graphql } from 'react-apollo';
 import ErrorMessage from './ErrorMessage';
 import Ingredient from './Ingredient';
 
-function EssentialList({ data: { loading, error, essentials }, loadMorePosts }) {
+function EssentialList({ data: { loading, error, essentials } }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <div>Loading</div>;
 
@@ -29,6 +29,7 @@ const recipesQuery = gql`
       id
       name
       imageUrl
+      isPlanned  
       unitQuantity
     }
   }

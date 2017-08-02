@@ -31,13 +31,14 @@ defmodule Picape.Order do
 
   def planned_recipes(order_id) do
     query = from p in PlannedRecipe, where: p.line_id == ^order_id, select: p.recipe_id
+
     {:ok, Repo.all(query)}
   end
 
   def sync_supermarket(order_id) do
     with {:ok, recipe_ids} <- planned_recipes(order_id),
          {:ok, planned } <- Recipe.ingredients_quantity(recipe_ids),
-         {:ok, existing } <- existing_ingredients(order_id),
+         {:ok, existing } <- ordered_ingredients(order_id),
          {:ok, changes} <- Sync.changes(planned, %{}, existing)
     do
       IO.inspect recipe_ids, label: "recipe_ids"
@@ -50,28 +51,25 @@ defmodule Picape.Order do
 
       current()
     else
-      err ->
-        IO.inspect err
-        err
+      err -> err
     end
   end
 
-  def existing_ingredients(oder_id) do
-    {:ok, cart} = current()
-    existing = Enum.reduce(cart.items, %{}, fn item, acc ->
+  def ordered_ingredients(oder_id) do
+    {:ok, order} = current()
+    existing = Enum.reduce(order.items, %{}, fn item, acc ->
       Map.update(acc, String.to_integer(item.id), item.quantity, &(&1 + 2))
     end)
 
     {:ok, existing}
   end
 
-  # List all supermarket products
-  # List all planned recipes
-  # - get their ingredients
-
-  # ingredients
-  # - filter deleted
-  # - filter
-  # Recipe.list_essentials()
-
+  def ingredient_planned?(order_id, ingredient_id) do
+    with {:ok, recipe_ids} <- planned_recipes(order_id)
+    do
+      Recipe.ingredient_in_recipes?(recipe_ids, ingredient_id)
+    else
+      err -> err
+    end
+  end
 end

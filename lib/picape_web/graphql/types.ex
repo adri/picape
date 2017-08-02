@@ -16,7 +16,7 @@ defmodule PicapeWeb.Graphql.Types do
     field :title, :string
     field :is_planned, :boolean do
       resolve fn _, %{source: source} ->
-         Resolver.Recipe.is_planned(source)
+         Resolver.Order.is_recipe_planned(source)
       end
     end
     field :ingredients, list_of(:ingredient_edge)
@@ -32,6 +32,11 @@ defmodule PicapeWeb.Graphql.Types do
     field :image_url, :string do
       resolve fn _, %{source: source} ->
         {:ok, source[:image_url]}
+      end
+    end
+    field :is_planned, :boolean do
+      resolve fn _, %{source: source} ->
+         Resolver.Order.is_ingredient_planned(source)
       end
     end
     field :unit_quantity, :string do
