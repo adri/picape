@@ -1,0 +1,25 @@
+# App artifacts
+/_build
+/cover
+/db
+/deps
+/doc
+*.beam
+*.env
+*.ez
+.vscode
+.idea
+
+# Generate on crash by the VM
+erl_crash.dump
+
+# Static artifacts
+/assets/node_modules
+/assets/.next
+
+# Since we are building assets from assets/
+# we ignore priv/static. You may want to comment
+# this depending on your deployment strategy.
+/priv/static/
+
+*.DS_Store
