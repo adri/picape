@@ -2,7 +2,7 @@ defmodule Picape.Supermarket do
   use HTTPoison.Base
 
   def products_by_id(product_id) do
-    get!("/product/#{product_id}")
+    get!("/product/#{product_id}").body
   end
 
   def add_product(product_id, count \\ 1) do
@@ -21,16 +21,21 @@ defmodule Picape.Supermarket do
     ).body
   end
 
-  def cart_cached() do
-    ConCache.get_or_store(:supermarket, :order, &cart/0)
+  def cart() do
+    ConCache.get_or_store(:supermarket, :order, fn ->
+      get!("/cart").body
+    end)
   end
 
-  def cart() do
-    get!("/cart").body
+  def invalidate_cart() do
+    ConCache.delete(:supermarket, :order)
   end
 
   def image_url(image_id) do
-    "https://static.supermarket.nl/images/" <> image_id <> "/small.png"
+    case image_id do
+      nil -> "http://placekitten.com/64/64"
+      id -> "https://static.supermarket.nl/images/" <> image_id <> "/small.png"
+    end
   end
 
   # ---

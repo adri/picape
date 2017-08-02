@@ -13,7 +13,10 @@ defmodule Picape.Recipe do
   end
 
   def find_by_id(id) do
-    Repo.one(where(Recipe, id: ^id))
+    case Repo.one(where(Recipe, id: ^id)) do
+      nil -> {:error, :recipe_not_found}
+      recipe -> {:ok, recipe}
+    end
   end
 
   def list_essentials() do

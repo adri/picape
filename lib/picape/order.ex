@@ -1,26 +1,29 @@
 defmodule Picape.Order do
-  alias Picape.Order.{LineFromSupermarket}
-  alias Picape.{Supermarket, Recipe}
+
+  alias Picape.Order.{LineFromSupermarket, PlannedRecipe}
+  alias Picape.{Repo, Supermarket, Recipe}
 
   defmodule Product, do: defstruct [:id, :quantity]
 
   def plan_recipe(recipe_id) do
-    {:ok, current()}
-#    with recipe <- Recipe.find_by_id(recipe_id)
-#    do
-#      {:ok, recipe}
-#    else
-#      {:error, err} -> {:error, err}
-#    end
-  end
+    with {:ok, recipe} <- Recipe.find_by_id(recipe_id),
+         {:ok, order} <- current()
+    do
+      %PlannedRecipe{}
+      |> PlannedRecipe.changeset(%{line_id: order.id, recipe_id: recipe_id})
+      |> Repo.insert!
 
-  def sync_supermarket() do
-    current()
+      current()
+    else
+      err -> err
+    end
   end
 
   def current() do
-    Supermarket.cart_cached()
+    order = Supermarket.cart()
     |> LineFromSupermarket.convert
+
+    {:ok, order}
   end
 
   # List all supermarket products

@@ -38,14 +38,9 @@ defmodule PicapeWeb.Graphql.Schema do
     @desc "Plan a recipe and order ingredients"
     field :plan_recipe, :order do
       arg :recipe_id, non_null(:id)
-      resolve &Resolver.Order.plan_recipe/3
+      resolve parsing_node_ids(&Resolver.Order.plan_recipe/2, @node_id_rules)
     end
   end
 
-  def middleware(middleware, _, %Absinthe.Type.Object{identifier: :query}) do
-    [{Absinthe.Relay.Node.ParseIDs, @node_id_rules} | middleware]
-  end
-  def middleware(middleware, _, _) do
-    middleware
-  end
+# Subscription example: https://github.com/absinthe-graphql/absinthe_phoenix
 end

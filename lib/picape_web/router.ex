@@ -24,13 +24,11 @@ defmodule PicapeWeb.Router do
     get "/", PageController, :index
   end
 
-#  get "/graphiql", Absinthe.Plug.GraphiQL, schema: PicapeWeb.Graphql.Schema
-#  post "/graphiql", Absinthe.Plug.GraphiQL, schema: PicapeWeb.Graphql.Schema
+  forward "/graphql", Absinthe.Plug, schema: PicapeWeb.Graphql.Schema
   forward "/graphiql", Absinthe.Plug.GraphiQL,
     schema: PicapeWeb.Graphql.Schema,
     socket: PicapeWeb.UserSocket,
     interface: :simple
-#  forward "/graphql", Absinthe.Plug, schema: PicapeWeb.Graphql.Schema
 
   if Mix.env == :dev do
     scope "/dev" do
