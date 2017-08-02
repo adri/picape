@@ -1,9 +1,13 @@
 defmodule PicapeWeb.Graphql.Resolver.Recipe do
 
-  alias Picape.Recipe
+  alias Picape.{Recipe, Order}
 
   def all(_parent, _args, _info) do
     {:ok, Recipe.list_recipes() }
+  end
+
+  def is_planned(recipe) do
+    {:ok, Enum.member?(Order.planned_recipes(1), recipe.id)}
   end
 
   def essentials(_parent, _args, _info) do

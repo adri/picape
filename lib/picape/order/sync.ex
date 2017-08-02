@@ -4,18 +4,20 @@ defmodule Picape.Order.Sync do
 
   defmodule Changes, do: defstruct add: [], remove: []
 
-  def sync(planned, manual, existing) do
+  def changes(planned, manual, existing) do
     with {:ok} <- validate(planned),
          {:ok} <- validate(manual),
          {:ok} <- validate(existing)
     do
       planned
       |> merge(manual)
-      |> changes(existing)
+      |> find_changes(existing)
     else
       err -> {:error, err}
     end
   end
+
+  # ---
 
   defp validate(map) do
     case Enum.all?(Map.values(map), &(&1 >= 0)) do
@@ -28,7 +30,7 @@ defmodule Picape.Order.Sync do
     Map.merge(a, b, fn _id, v1, v2 -> v1 + v2 end)
   end
 
-  defp changes(new, existing) do
+  defp find_changes(new, existing) do
     ids = Enum.uniq(Map.keys(new) ++ Map.keys(existing))
     changes = Enum.reduce(ids, struct(Changes), fn(id, changes) ->
       changes
@@ -49,10 +51,10 @@ defmodule Picape.Order.Sync do
   end
 
   defp add_change(changes, id, quantity) do
-    %{changes | add: [%Product{id: to_string(id), quantity: quantity} | changes.add]}
+    %{changes | add: [%Product{id: id, quantity: quantity} | changes.add]}
   end
 
   defp remove_change(changes, id, quantity) do
-    %{changes | remove: [%Product{id: to_string(id), quantity: quantity} | changes.remove]}
+    %{changes | remove: [%Product{id: id, quantity: quantity} | changes.remove]}
   end
 end

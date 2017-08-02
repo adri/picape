@@ -3,7 +3,7 @@ defmodule Picape.Recipe do
 
   alias Picape.Repo
   alias Picape.Supermarket
-  alias Picape.Recipe.{Ingredient, Recipe}
+  alias Picape.Recipe.{Ingredient, IngredientRef, Recipe}
 
   def list_recipes() do
     Repo.all(
@@ -17,6 +17,22 @@ defmodule Picape.Recipe do
       nil -> {:error, :recipe_not_found}
       recipe -> {:ok, recipe}
     end
+  end
+
+  def essentials_quantity(recipe_ids) do
+    ingredients_quantity(recipe_ids, true)
+  end
+
+  def ingredients_quantity(recipe_ids, essentials \\ false) do
+    query = from r in IngredientRef,
+        join: i in assoc(r, :ingredient),
+        where: r.recipe_id in ^recipe_ids and
+               i.is_essential == ^essentials,
+        group_by: r.ingredient_id,
+        select: {r.ingredient_id, sum(r.quantity)}
+
+    Repo.all(query)
+    |> Enum.into(%{})
   end
 
   def list_essentials() do

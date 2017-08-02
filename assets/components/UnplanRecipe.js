@@ -1,21 +1,21 @@
 import React from 'react';
 import { gql, graphql } from 'react-apollo';
 
-function PlanRecipe({ plan, recipeId }) {
+function UnplanRecipe({ plan, recipeId }) {
    const onClick = () => {
        plan(recipeId).catch(err => alert(err))
    };
 
   return (
     <a href="#" onClick={onClick} className="btn ">
-      Plan
+      Unplan
     </a>
   );
 }
 
-const planRecipeQuery = gql`
-  mutation planRecipe($recipeId: ID!) {
-    planRecipe(recipeId: $recipeId) {
+const query = gql`
+  mutation unplanRecipe($recipeId: ID!) {
+    unplanRecipe(recipeId: $recipeId) {
       id
       totalCount
       totalPrice
@@ -28,7 +28,7 @@ const planRecipeQuery = gql`
   }
 `;
 
-export default graphql(planRecipeQuery, {
+export default graphql(query, {
   options: {
     refetchQueries: [
       'OrderList',
@@ -41,4 +41,4 @@ export default graphql(planRecipeQuery, {
         variables: {recipeId},
       }),
   }),
-})(PlanRecipe);
+})(UnplanRecipe);

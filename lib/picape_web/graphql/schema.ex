@@ -11,12 +11,9 @@ defmodule PicapeWeb.Graphql.Schema do
 
   node interface do
     resolve_type fn
-      %Picape.Recipe.Recipe{}, _ ->
-        :recipe
-      %Picape.Recipe.Ingredient{}, _ ->
-        :ingredient
-      _, _ ->
-        nil
+      %Picape.Recipe.Recipe{}, _ -> :recipe
+      %Picape.Recipe.Ingredient{}, _ -> :ingredient
+      _, _ -> nil
     end
   end
 
@@ -38,8 +35,26 @@ defmodule PicapeWeb.Graphql.Schema do
     @desc "Plan a recipe and order ingredients"
     field :plan_recipe, :order do
       arg :recipe_id, non_null(:id)
-      resolve parsing_node_ids(&Resolver.Order.plan_recipe/2, @node_id_rules)
+      resolve handle_errors(parsing_node_ids(&Resolver.Order.plan_recipe/2, @node_id_rules))
     end
+  end
+
+  def handle_errors(fun) do
+    fn source, args, info ->
+      case Absinthe.Resolution.call(fun, source, args, info) do
+        {:error, %Ecto.Changeset{} = changeset} -> format_changeset(changeset)
+        val -> val
+      end
+    end
+  end
+
+  def format_changeset(changeset) do
+    #{:error, [email: {"has already been taken", []}]}
+    errors = changeset.errors
+      |> Enum.map(fn({key, {value, context}}) ->
+           [message: "#{key} #{value}", details: context]
+         end)
+    {:error, errors}
   end
 
 # Subscription example: https://github.com/absinthe-graphql/absinthe_phoenix

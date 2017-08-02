@@ -2,6 +2,8 @@ defmodule PicapeWeb.Graphql.Types do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation
 
+  alias PicapeWeb.Graphql.Resolver
+
   @desc """
   A user of the blog
   """
@@ -12,6 +14,11 @@ defmodule PicapeWeb.Graphql.Types do
 
   node object :recipe do
     field :title, :string
+    field :is_planned, :boolean do
+      resolve fn _, %{source: source} ->
+         Resolver.Recipe.is_planned(source)
+      end
+    end
     field :ingredients, list_of(:ingredient_edge)
   end
 
