@@ -2,18 +2,25 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
 
   alias Picape.Order
 
+# Queries
+
   def current(_parent, _args, _info) do
     Order.current()
   end
 
-  def is_recipe_planned(recipe) do
-    {:ok, recipe_ids} = Order.planned_recipes(1)
-    {:ok, Enum.member?(recipe_ids, recipe.id)}
+  def recipies_planned?(_, recipe_ids) do
+    {:ok, planned_ids} = Order.planned_recipes(1)
+
+    Map.new(recipe_ids, fn id -> {id, Enum.member?(planned_ids, id)} end)
   end
 
-  def is_ingredient_planned(ingredient) do
-    Order.ingredient_planned?(1, ingredient.id)
+  def ingredients_planned?(_, ingredient_ids) do
+    {:ok, ingredients} = Order.ingredients_planned?(1, ingredient_ids)
+
+    ingredients
   end
+
+# Mutations
 
   def plan_recipe(attributes, _info) do
     Order.plan_recipe(1, attributes[:recipe_id])

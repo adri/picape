@@ -15,8 +15,10 @@ defmodule PicapeWeb.Graphql.Types do
   node object :recipe do
     field :title, :string
     field :is_planned, :boolean do
-      resolve fn _, %{source: source} ->
-         Resolver.Order.is_recipe_planned(source)
+      resolve fn (recipe, _, _) ->
+        batch({Resolver.Order, :recipies_planned?}, recipe.id, fn batch_results ->
+          {:ok, Map.get(batch_results, recipe.id)}
+        end)
       end
     end
     field :ingredients, list_of(:ingredient_edge)
@@ -35,8 +37,10 @@ defmodule PicapeWeb.Graphql.Types do
       end
     end
     field :is_planned, :boolean do
-      resolve fn _, %{source: source} ->
-         Resolver.Order.is_ingredient_planned(source)
+      resolve fn (ingredient, _, _) ->
+         batch({Resolver.Order, :ingredients_planned?}, ingredient.id, fn batch_results ->
+             {:ok, Map.get(batch_results, ingredient.id)}
+         end)
       end
     end
     field :unit_quantity, :string do

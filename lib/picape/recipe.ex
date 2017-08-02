@@ -30,14 +30,16 @@ defmodule Picape.Recipe do
      {:ok, Enum.into(Repo.all(query), %{})}
   end
 
-  def ingredient_in_recipes?(recipe_ids, ingredient_id) do
-    query = from r in IngredientRef,
-       join: i in assoc(r, :ingredient),
+  @doc """
+  Returns if each ingredient is in one of the specified recipes.
+  """
+  def ingredients_in_recipes?(recipe_ids, ingredient_ids) do
+    ids = Repo.all from r in IngredientRef,
        where: r.recipe_id in ^recipe_ids and
-              r.ingredient_id == ^ingredient_id,
-       select: r.recipe_id
+              r.ingredient_id in ^ingredient_ids,
+       select: r.ingredient_id
 
-    {:ok, Repo.aggregate(query, :count, :recipe_id) > 0}
+    {:ok, Map.new(ingredient_ids, fn id -> {id, Enum.member?(ids, id)} end)}
   end
 
   def list_essentials() do

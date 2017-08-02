@@ -64,10 +64,10 @@ defmodule Picape.Order do
     {:ok, existing}
   end
 
-  def ingredient_planned?(order_id, ingredient_id) do
+  def ingredients_planned?(order_id, ingredient_ids) do
     with {:ok, recipe_ids} <- planned_recipes(order_id)
     do
-      Recipe.ingredient_in_recipes?(recipe_ids, ingredient_id)
+      Recipe.ingredients_in_recipes?(recipe_ids, ingredient_ids)
     else
       err -> err
     end
