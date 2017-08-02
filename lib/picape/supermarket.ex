@@ -5,6 +5,13 @@ defmodule Picape.Supermarket do
     get!("/product/#{product_id}").body
   end
 
+  def apply_changes(changes) do
+    changes.add
+    |> Enum.each(fn change -> add_product(change.id, change.quantity) end)
+    changes.remove
+    |> Enum.each(fn change -> remove_product(change.id, change.quantity) end)
+  end
+
   def add_product(product_id, count \\ 1) do
     post!(
       "/cart/add_product",

@@ -1,5 +1,5 @@
 export default ({ name, imageUrl, unitQuantity }) =>
-  <a href="/" className="ingredient br-1">
+  <a href="#" className="ingredient br-1">
     <div className="media pl-2 pt-2">
       <div className="d-flex mr-3 mt-0 ingredient-image-wrapper">
         <img src={imageUrl} className="ingredient-image rounded" alt={name} />

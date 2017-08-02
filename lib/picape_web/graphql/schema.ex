@@ -32,10 +32,21 @@ defmodule PicapeWeb.Graphql.Schema do
   end
 
   mutation do
-    @desc "Plan a recipe and order ingredients"
+    @desc "Plan a recipe and order ingredients."
     field :plan_recipe, :order do
       arg :recipe_id, non_null(:id)
       resolve handle_errors(parsing_node_ids(&Resolver.Order.plan_recipe/2, @node_id_rules))
+    end
+
+    @desc "Remove a planned recipe."
+    field :unplan_recipe, :order do
+      arg :recipe_id, non_null(:id)
+      resolve handle_errors(parsing_node_ids(&Resolver.Order.unplan_recipe/2, @node_id_rules))
+    end
+
+    @desc "Updates and synchronizes the current order."
+    field :sync_order, :order do
+      resolve handle_errors(parsing_node_ids(&Resolver.Order.sync_supermarket/2, @node_id_rules))
     end
   end
 

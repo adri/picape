@@ -7,7 +7,8 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
   end
 
   def is_planned(recipe) do
-    {:ok, Enum.member?(Order.planned_recipes(1), recipe.id)}
+    {:ok, recipe_ids} = Order.planned_recipes(1)
+    {:ok, Enum.member?(recipe_ids, recipe.id)}
   end
 
   def essentials(_parent, _args, _info) do

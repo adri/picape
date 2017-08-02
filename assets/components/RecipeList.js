@@ -1,9 +1,9 @@
 import { gql, graphql } from 'react-apollo';
 import ErrorMessage from './ErrorMessage';
-import PlanRecipe from './PlanRecipe';
-import UnplanRecipe from './UnplanRecipe';
+import PlanRecipe from './recipe/PlanRecipe';
+import UnplanRecipe from './recipe/UnplanRecipe';
 
-function RecipeList({ data: { loading, error, recipes }, loadMorePosts }) {
+function RecipeList({ data: { loading, error, recipes } }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <div>Loading</div>;
 
@@ -51,7 +51,7 @@ function RecipeList({ data: { loading, error, recipes }, loadMorePosts }) {
 //         quantity
 //       }
 const recipesQuery = gql`
-  query RecipesQuery {
+  query RecipeList {
     recipes {
       id
       title

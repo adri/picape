@@ -28,11 +28,10 @@ defmodule Picape.Recipe do
         join: i in assoc(r, :ingredient),
         where: r.recipe_id in ^recipe_ids and
                i.is_essential == ^essentials,
-        group_by: r.ingredient_id,
-        select: {r.ingredient_id, sum(r.quantity)}
+        group_by: i.supermarket_product_id,
+        select: {i.supermarket_product_id, sum(r.quantity)}
 
-    Repo.all(query)
-    |> Enum.into(%{})
+     {:ok, Enum.into(Repo.all(query), %{})}
   end
 
   def list_essentials() do

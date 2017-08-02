@@ -42,7 +42,7 @@ defmodule Picape.Order.Sync do
 
   defp changes_for_id(changes, id, new_count, existing_count) do
     cond do
-      new_count == nil            -> changes # If it wasn't removed, keep what's on Supermarket.
+      new_count == nil            -> remove_change(changes, id, existing_count)
       existing_count == nil       -> add_change(changes, id, new_count)
       new_count == existing_count -> changes
       new_count > existing_count  -> add_change(changes, id, new_count - existing_count)

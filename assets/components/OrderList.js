@@ -1,16 +1,24 @@
 import { gql, graphql } from 'react-apollo';
 import ErrorMessage from './ErrorMessage';
+import SyncOrder from './SyncOrder';
 import Ingredient from './Ingredient';
 import Money from './Money';
 
-function OrderList({ data: { loading, error, currentOrder }, loadMorePosts }) {
+function OrderList({ data: { loading, error, currentOrder }}) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <div>Loading</div>;
 
   return (
     <div>
-      <h5>Order</h5>
-      <Money price={currentOrder.totalPrice} />
+      <div className="d-flex justify-content-end">
+        <h5 className="mr-auto">Order</h5>
+        <div className="mt-1 mr-2">
+          <Money price={currentOrder.totalPrice} />
+        </div>
+        <div className="mt-1">
+          <SyncOrder />
+        </div>
+      </div>
       <div className="card">
         <div className="no-gutters">
           {currentOrder &&

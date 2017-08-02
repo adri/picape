@@ -24,7 +24,7 @@ function EssentialList({ data: { loading, error, essentials }, loadMorePosts }) 
 }
 
 const recipesQuery = gql`
-  query EssentialsQuery {
+  query EssentialList {
     essentials {
       id
       name
