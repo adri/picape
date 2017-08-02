@@ -1,5 +1,6 @@
 defmodule PicapeWeb.UserSocket do
   use Phoenix.Socket
+  use Absinthe.Phoenix.Socket
 
   ## Channels
   # channel "room:*", PicapeWeb.RoomChannel
@@ -19,8 +20,8 @@ defmodule PicapeWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
-    {:ok, socket}
+   def connect(_params, socket) do
+    {:ok, assign(socket, :absinthe, %{schema: PicapeWeb.Graphql.Schema})}
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

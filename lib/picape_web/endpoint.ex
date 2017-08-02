@@ -1,5 +1,6 @@
 defmodule PicapeWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :picape
+  use Absinthe.Phoenix.Endpoint
 
   socket "/socket", PicapeWeb.UserSocket
 

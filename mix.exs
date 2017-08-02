@@ -29,10 +29,12 @@ defmodule Picape.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [{:absinthe, "~> 1.4.0-beta", override: true},
+     {:absinthe_phoenix, "~> 1.4.0-beta"},
      {:absinthe_plug, "~> 1.4.0-beta"},
      {:absinthe_relay, "~> 1.3.0"},
     #  {:absinthe_ecto, "~> 1.0.0"},
      {:cors_plug, "~> 1.4"},
+     {:con_cache, "~> 0.12.0"},
      {:phoenix, "~> 1.3.0", override: true},
      {:phoenix_pubsub, "~> 1.0"},
      {:phoenix_ecto, "~> 3.2"},
@@ -42,6 +44,7 @@ defmodule Picape.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:swoosh, "~> 0.7"},
+     {:poison, "~> 2.0"},
      {:httpoison, "~> 0.12"},
      {:credo, "~> 0.7", only: [:dev, :test]},
      {:ex_doc, "~> 0.15", only: [:dev, :test]}]

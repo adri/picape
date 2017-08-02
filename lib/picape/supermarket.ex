@@ -21,6 +21,10 @@ defmodule Picape.Supermarket do
     ).body
   end
 
+  def cart_cached() do
+    ConCache.get_or_store(:supermarket, :order, &cart/0)
+  end
+
   def cart() do
     get!("/cart").body
   end

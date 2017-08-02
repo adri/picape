@@ -7,6 +7,8 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
   end
 
   def plan_recipe(_parent, attributes, _info) do
-    Order.plan_recipe(attributes[:recipeId])
+#    IO.inspect attributes
+#    Order.plan_recipe(attributes[:recipeId])
+    {:ok, Order.current()}
   end
 end

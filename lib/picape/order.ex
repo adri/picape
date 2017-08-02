@@ -5,12 +5,13 @@ defmodule Picape.Order do
   defmodule Product, do: defstruct [:id, :quantity]
 
   def plan_recipe(recipe_id) do
-    with {:ok, recipe} <- Recipe.find_by_id(recipe_id)
-    do
-      {:ok, recipe}
-    else
-      {:error, err} -> {:error, err}
-    end
+    {:ok, current()}
+#    with recipe <- Recipe.find_by_id(recipe_id)
+#    do
+#      {:ok, recipe}
+#    else
+#      {:error, err} -> {:error, err}
+#    end
   end
 
   def sync_supermarket() do
@@ -18,7 +19,7 @@ defmodule Picape.Order do
   end
 
   def current() do
-    Supermarket.cart()
+    Supermarket.cart_cached()
     |> LineFromSupermarket.convert
   end
 
