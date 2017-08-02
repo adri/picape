@@ -20,6 +20,12 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     ingredients
   end
 
+  def ingredients_ordered_quantity(_, ingredient_ids) do
+    {:ok, ingredients} = Order.ingredients_ordered_quantity(1, ingredient_ids)
+
+    ingredients
+  end
+
 # Mutations
 
   def plan_recipe(attributes, _info) do

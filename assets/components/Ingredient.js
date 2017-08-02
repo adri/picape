@@ -1,4 +1,4 @@
-export default ({ name, imageUrl, isPlanned, unitQuantity }) =>
+export default ({ name, imageUrl, isPlanned, unitQuantity, orderedQuantity }) =>
   <a href="#" className={"ingredient br-1 " + (isPlanned && "highlighted")}>
     <div className="media pl-2 pt-2">
       <div className="d-flex mr-3 mt-0 ingredient-image-wrapper">
@@ -11,6 +11,9 @@ export default ({ name, imageUrl, isPlanned, unitQuantity }) =>
         <div className="ingredient-unit-quantity">
           {unitQuantity}&nbsp;
         </div>
+      </div>
+      <div className="d-flex mr-3 mt-0 ingredient-quantity-wrapper">
+        {orderedQuantity}
       </div>
     </div>
      <style jsx>{`
@@ -38,6 +41,11 @@ export default ({ name, imageUrl, isPlanned, unitQuantity }) =>
         .ingredient-image-wrapper {
           height: 32px;
           width: 32px;
+        }
+
+        .ingredient-image-wrapper {
+          height: 16px;
+          width: 16px;
         }
 
         .ingredient-image {

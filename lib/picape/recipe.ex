@@ -30,6 +30,16 @@ defmodule Picape.Recipe do
      {:ok, Enum.into(Repo.all(query), %{})}
   end
 
+  def ingredients_by_item_ids(item_ids) do
+    query = from i in Ingredient,
+      where: i.supermarket_product_id in ^item_ids,
+      select: {i.supermarket_product_id, i.id}
+
+    ids = Enum.into(Repo.all(query), %{})
+
+    {:ok, Map.new(item_ids, fn item_id -> {ids[item_id], item_id} end)}
+  end
+
   @doc """
   Returns if each ingredient is in one of the specified recipes.
   """

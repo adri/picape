@@ -43,6 +43,13 @@ defmodule PicapeWeb.Graphql.Types do
          end)
       end
     end
+    field :ordered_quantity, :integer do
+      resolve fn (ingredient, _, _) ->
+         batch({Resolver.Order, :ingredients_ordered_quantity}, ingredient.id, fn batch_results ->
+             {:ok, Map.get(batch_results, ingredient.id)}
+         end)
+      end
+    end
     field :unit_quantity, :string do
       resolve fn _, %{source: source} ->
         {:ok, source[:unit_quantity]}

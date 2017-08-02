@@ -31,6 +31,7 @@ const recipesQuery = gql`
       imageUrl
       isPlanned  
       unitQuantity
+      orderedQuantity  
     }
   }
 `;

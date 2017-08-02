@@ -42,7 +42,7 @@ tomato_sauce = insert! :essential, name: "Tomatosauce", supermarket_product_id: 
 tomato_puree = insert! :essential, name: "Tomatopuree", supermarket_product_id: 10580454
 flour = insert! :essential, name: "Flour", supermarket_product_id: 10964101
 yeast = insert! :essential, name: "Yeast", supermarket_product_id: 10568334
-
+bananas = insert! :essential, name: "Bananas", supermarket_product_id: 10691218
 
 # Ingredients
 shoarma = insert! :ingredient, name: "Shoarma", supermarket_product_id: 10291907
