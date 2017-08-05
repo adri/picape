@@ -4,9 +4,14 @@
 #
 # Example usage:
 # bin/spawn_execute.sh node node_modules/bin/dist/next-dev -p 4001
-"$@"
-pid=$!
+
+# Start process in the background
+"$@ " &
+CHILD_PID=$!
+
 while read line ; do
+  # This will hang until EOF received from Elixir process
   :
 done
-kill -KILL $pid
+
+kill -s SIGKILL $CHILD_PID
