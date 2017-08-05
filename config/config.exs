@@ -23,7 +23,10 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :reverse_proxy,
-  upstreams: %{"0.0.0.0:4001" => ["http://0.0.0.0:4001"]}
+  upstreams: %{
+    "0.0.0.0:4001" => ["http://0.0.0.0:4001"],
+    "picape-beta.herokuapp.com" => ["http://0.0.0.0:4001"],
+  }
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
