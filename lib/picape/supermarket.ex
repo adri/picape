@@ -7,9 +7,14 @@ defmodule Picape.Supermarket do
 
   def apply_changes(changes) do
     changes.add
-    |> Enum.each(fn change -> add_product(change.id, change.quantity) end)
+    |> Enum.each(fn change ->
+        ConCache.put(:supermarket, :order, add_product(change.id, change.quantity))
+    end)
+
     changes.remove
-    |> Enum.each(fn change -> remove_product(change.id, change.quantity) end)
+    |> Enum.each(fn change ->
+        ConCache.put(:supermarket, :order, remove_product(change.id, change.quantity))
+    end)
   end
 
   def add_product(product_id, count \\ 1) do

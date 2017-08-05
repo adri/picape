@@ -16,9 +16,7 @@ defmodule Picape.Order.PlannedRecipe do
   @doc false
   def changeset(%PlannedRecipe{} = planned_recipe, attrs) do
     planned_recipe
-    |> cast(attrs, [:line_id, :recipe_id])
+    |> cast(attrs, [:line_id, :recipe_id, :unplanned])
     |> validate_required([:line_id, :recipe_id])
-    |> unique_constraint(:order_recipe_unique, name: :order_recipe_unique)
-    |> foreign_key_constraint(:recipe_id)
   end
 end

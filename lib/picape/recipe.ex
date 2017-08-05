@@ -19,15 +19,26 @@ defmodule Picape.Recipe do
     end
   end
 
-  def ingredients_quantity(recipe_ids) do
-    query = from r in IngredientRef,
-        join: i in assoc(r, :ingredient),
-        where: r.recipe_id in ^recipe_ids and
-               i.is_essential == false,
-        group_by: i.supermarket_product_id,
-        select: {i.supermarket_product_id, sum(r.quantity)}
+  @doc """
+  Returns a map of ingredients and their quantities needed
+  for the specified map of recipes and their quantities.
 
-     {:ok, Enum.into(Repo.all(query), %{})}
+  This excludes essentials.
+  """
+  def ingredient_quantities(recipes_quantities) do
+    query = from r in IngredientRef,
+      join: i in assoc(r, :ingredient),
+      where: r.recipe_id in ^Map.keys(recipes_quantities) and
+             i.is_essential == false,
+      select: {i.supermarket_product_id, {r.recipe_id, r.quantity}}
+
+    result = Repo.all(query)
+    |> Enum.map(fn ({id, {recipe_id, quantity}}) ->
+       {id, recipes_quantities[recipe_id] * quantity}
+    end)
+    |> Enum.into(%{})
+
+    {:ok, result}
   end
 
   def ingredients_by_item_ids(item_ids) do
