@@ -9,26 +9,12 @@ defmodule PicapeWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
-  # scope "/", PicapeWeb do
-  #   pipe_through :browser # Use the default browser stack
-  # end
-
-  # Other scopes may use custom stacks.
-  scope "/api", PicapeWeb do
-    pipe_through :api
-
-    get "/", PageController, :index
-  end
-
   forward "/graphql", Absinthe.Plug, schema: PicapeWeb.Graphql.Schema
   forward "/graphiql", Absinthe.Plug.GraphiQL,
     schema: PicapeWeb.Graphql.Schema,
     socket: PicapeWeb.UserSocket,
     interface: :simple
+  forward "/", ReverseProxy, upstream: ["localhost:4001"]
 
   if Mix.env == :dev do
     scope "/dev" do

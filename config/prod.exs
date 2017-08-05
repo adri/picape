@@ -18,7 +18,10 @@ config :picape, PicapeWeb.Endpoint,
   url: [scheme: "https", host: System.get_env("HOST"), port: 443],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/cache_manifest.json",
-  secret_key_base: System.get_env("SECRET_KEY_BASE")
+  secret_key_base: System.get_env("SECRET_KEY_BASE"),
+  watchers: [
+      bash: ["../bin/spawn_execute.sh", "node", "node_modules/next/dist/bin/next-start", "-p", "4001",
+              cd: Path.expand("../assets", __DIR__)]]
 
 config :picape, Picape.Repo,
   adapter: Ecto.Adapters.Postgres,

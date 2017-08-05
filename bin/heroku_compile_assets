@@ -8,11 +8,11 @@
 # See phoenix_static_buildpack.config for a little more context.
 
 cd $assets_dir
-MIX_ENV=prod ./node_modules/webpack/bin/webpack.js --progress --color;
+yarn build
 
 cd ../
 mix "${phoenix_ex}.digest"
 
 # We don't need the asset files after compile. This helps keep
 # the heroku slug size down.
-rm -rf $assets_dir
+#rm -rf $assets_dir

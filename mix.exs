@@ -44,6 +44,7 @@ defmodule Picape.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:swoosh, "~> 0.7"},
+     {:reverse_proxy, "~> 0.3.1"},
      {:poison, "~> 2.0"},
      {:httpoison, "~> 0.12"},
      {:credo, "~> 0.7", only: [:dev, :test]},
