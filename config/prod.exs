@@ -33,6 +33,7 @@ config :picape, Picape.Repo,
 config :logger, level: :info
 
 config :picape, Picape.Supermarket,
+  base_url: System.get_env("SUPERMARKET_BASE_URL"),
   agent: System.get_env("SUPERMARKET_AGENT"),
   did: System.get_env("SUPERMARKET_DID"),
   auth: System.get_env("SUPERMARKET_AUTH"),
