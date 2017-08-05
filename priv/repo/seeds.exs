@@ -53,7 +53,7 @@ graded_young_cheese = insert! :ingredient, name: "Graded Young Cheese", supermar
 graded_mozarella = insert! :ingredient, name: "Graded Mozarella", supermarket_product_id: 10762991
 
 # Recipes
-insert! :recipe, title: "Nasi", ingredients: [
+insert! :recipe, title: "Nasi", image_url: "https://user-images.githubusercontent.com/133832/28996360-3152b366-79ff-11e7-9d0e-01ffb907e32c.jpg", ingredients: [
   chicken,
   rice,
   chinese_veges,
@@ -62,12 +62,12 @@ insert! :recipe, title: "Nasi", ingredients: [
   egg,
   oil_cooking,
 ]
-insert! :recipe, title: "Shoarma", ingredients: [
+insert! :recipe, title: "Shoarma", image_url: "https://user-images.githubusercontent.com/133832/28996359-31513040-79ff-11e7-9dd1-59917a2247e5.jpg", ingredients: [
   shoarma,
   pita,
   rucola,
 ]
-insert! :recipe, title: "Pizza", ingredients: [
+insert! :recipe, title: "Pizza", image_url: "https://user-images.githubusercontent.com/133832/28996361-317307d8-79ff-11e7-9eea-f1dcafda8bfa.jpg", ingredients: [
   flour,
   yeast,
   graded_mozarella,
