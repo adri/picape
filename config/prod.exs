@@ -32,7 +32,7 @@ config :picape, Picape.Repo,
 # Do not print debug messages in production
 config :logger, level: :info
 
-config :supermarket,
+config :picape, Picape.Supermarket,
   agent: System.get_env("SUPERMARKET_AGENT"),
   did: System.get_env("SUPERMARKET_DID"),
   auth: System.get_env("SUPERMARKET_AUTH"),
