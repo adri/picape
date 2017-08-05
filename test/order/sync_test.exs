@@ -5,7 +5,7 @@ defmodule Picape.Order.SyncTest do
   import Picape.Factory, only: [build: 2, build: 1]
 
   test "no changes for empty lists" do
-    assert {:ok, build(:sync_changes)} == Sync.sync(%{}, %{}, %{})
+    assert {:ok, build(:sync_changes)} == Sync.changes(%{}, %{}, %{})
   end
 
   test "merges products for planned and manual lists" do
@@ -18,13 +18,13 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       add: [
-        build(:product, id: "12345"),
-        build(:product, id: "1234"),
-        build(:product, id: "123"),
+        build(:product, id: :"12345"),
+        build(:product, id: :"1234"),
+        build(:product, id: :"123"),
       ]
     )
 
-    assert {:ok, changes} == Sync.sync(planned, manual, %{})
+    assert {:ok, changes} == Sync.changes(planned, manual, %{})
   end
 
   test "sums product quantities for planned and manual lists" do
@@ -37,12 +37,12 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       add: [
-        build(:product, id: "sum_up", quantity: 3),
-        build(:product, id: "other"),
+        build(:product, id: :sum_up, quantity: 3),
+        build(:product, id: :other),
       ]
     )
 
-    assert {:ok, changes} == Sync.sync(planned, manual, %{})
+    assert {:ok, changes} == Sync.changes(planned, manual, %{})
   end
 
   test "ignores existing product with equal quantity" do
@@ -55,11 +55,11 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       add: [
-        build(:product, id: "other"),
+        build(:product, id: :other),
       ],
     )
 
-    assert {:ok, changes} == Sync.sync(planned, %{}, existing)
+    assert {:ok, changes} == Sync.changes(planned, %{}, existing)
   end
 
   test "adds one additional product to one existing to match 2 in total" do
@@ -74,11 +74,11 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       add: [
-        build(:product, id: "existing", quantity: 1),
+        build(:product, id: :existing, quantity: 1),
       ]
     )
 
-    assert {:ok, changes} == Sync.sync(planned, manual, existing)
+    assert {:ok, changes} == Sync.changes(planned, manual, existing)
   end
 
   test "adds two additional products to one existing to match 3 in total" do
@@ -93,11 +93,11 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       add: [
-        build(:product, id: "existing", quantity: 2),
+        build(:product, id: :existing, quantity: 2),
       ]
     )
 
-    assert {:ok, changes} == Sync.sync(planned, manual, existing)
+    assert {:ok, changes} == Sync.changes(planned, manual, existing)
   end
 
   test "removes one product with two existing" do
@@ -109,11 +109,11 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       remove: [
-        build(:product, id: "existing", quantity: 1),
+        build(:product, id: :existing, quantity: 1),
       ]
     )
 
-    assert {:ok, changes} == Sync.sync(%{}, manual, existing)
+    assert {:ok, changes} == Sync.changes(%{}, manual, existing)
   end
 
   test "removes 7 products to match 3 with 10 existing" do
@@ -125,11 +125,11 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       remove: [
-        build(:product, id: "existing", quantity: 7),
+        build(:product, id: :existing, quantity: 7),
       ]
     )
 
-    assert {:ok, changes} == Sync.sync(%{}, manual, existing)
+    assert {:ok, changes} == Sync.changes(%{}, manual, existing)
   end
 
   test "doesn't remove existing product" do
@@ -137,7 +137,7 @@ defmodule Picape.Order.SyncTest do
       "existing": 1,
     })
 
-    assert {:ok, build(:sync_changes)} == Sync.sync(%{}, %{}, existing)
+    assert {:ok, build(:sync_changes)} == Sync.changes(%{}, %{}, existing)
   end
 
   test "remove existing product" do
@@ -149,11 +149,11 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       remove: [
-        build(:product, id: "existing", quantity: 1),
+        build(:product, id: :existing, quantity: 1),
       ]
     )
 
-    assert {:ok, changes} == Sync.sync(%{}, manual, existing)
+    assert {:ok, changes} == Sync.changes(%{}, manual, existing)
   end
 
   test "manual quantities can never be negative" do
@@ -161,7 +161,7 @@ defmodule Picape.Order.SyncTest do
       "existing": -1,
     })
 
-    assert {:error, :negative_quantity} == Sync.sync(%{}, manual, %{})
+    assert {:error, :negative_quantity} == Sync.changes(%{}, manual, %{})
   end
 
   test "planned quantities can never be negative" do
@@ -169,6 +169,6 @@ defmodule Picape.Order.SyncTest do
       "existing": -1,
     })
 
-    assert {:error, :negative_quantity} == Sync.sync(planned, %{}, %{})
+    assert {:error, :negative_quantity} == Sync.changes(planned, %{}, %{})
   end
 end
