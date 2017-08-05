@@ -14,7 +14,7 @@ defmodule PicapeWeb.Router do
     schema: PicapeWeb.Graphql.Schema,
     socket: PicapeWeb.UserSocket,
     interface: :simple
-  forward "/", ReverseProxy, upstream: ["localhost:4001"]
+  forward "/", ReverseProxy, upstream: ["0.0.0.0:4001"]
 
   if Mix.env == :dev do
     scope "/dev" do
