@@ -40,7 +40,7 @@ defmodule Picape.Order do
       IO.inspect existing, label: "existing"
       IO.inspect changes, label: "changes"
 
-#      Supermarket.apply_changes(changes)
+      Supermarket.apply_changes(changes)
 
       current()
     end
@@ -65,6 +65,10 @@ defmodule Picape.Order do
     %ManualIngredient{}
     |> ManualIngredient.changeset(%{line_id: order_id, ingredient_id: ingredient_id, quantity: quantity})
     |> Repo.insert(on_conflict: [set: [quantity: quantity]], conflict_target: [:line_id, :ingredient_id])
+    |> case do
+      {:ok, planned_recipe} -> sync_supermarket(order_id)
+      err -> err
+    end
   end
 
   def manual_ingredients(order_id) do

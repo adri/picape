@@ -1,4 +1,6 @@
-export default ({ name, imageUrl, isPlanned, unitQuantity, orderedQuantity }) =>
+import OrderIngredient from './ingredient/OrderIngredient';
+
+export default ({ id, name, imageUrl, isPlanned, unitQuantity, orderedQuantity }) =>
   <a href="#" className={"ingredient br-1 " + (isPlanned && "highlighted")}>
     <div className="media pl-2 pt-2">
       <div className="d-flex mr-3 mt-0 ingredient-image-wrapper">
@@ -13,7 +15,7 @@ export default ({ name, imageUrl, isPlanned, unitQuantity, orderedQuantity }) =>
         </div>
       </div>
       <div className="d-flex mr-3 mt-0 ingredient-quantity-wrapper">
-        {orderedQuantity}
+        <OrderIngredient id={id} quantity={orderedQuantity} />
       </div>
     </div>
      <style jsx>{`
