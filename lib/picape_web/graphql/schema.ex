@@ -7,6 +7,7 @@ defmodule PicapeWeb.Graphql.Schema do
 
   @node_id_rules %{
       recipe_id: :recipe,
+      ingredient_id: :ingredient,
   }
 
   node interface do
@@ -47,6 +48,13 @@ defmodule PicapeWeb.Graphql.Schema do
     @desc "Updates and synchronizes the current order."
     field :sync_order, :order do
       resolve handle_errors(parsing_node_ids(&Resolver.Order.sync_supermarket/2, @node_id_rules))
+    end
+
+    @desc "Order an ingredient"
+    field :order_ingredient, :order do
+      arg :ingredient_id, non_null(:id)
+      arg :quantity, non_null(:integer), default_value: 1
+      resolve handle_errors(parsing_node_ids(&Resolver.Order.order_ingredient/2, @node_id_rules))
     end
   end
 

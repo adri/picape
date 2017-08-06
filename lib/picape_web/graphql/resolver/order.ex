@@ -36,7 +36,11 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.plan_recipe(1, attributes[:recipe_id], true)
   end
 
-  def sync_supermarket(_attributes, _info) do
+  def sync_supermarket(attributes, _info) do
     Order.sync_supermarket(1)
+  end
+
+  def order_ingredient(attributes, _info) do
+    Order.order_ingredient(1, attributes[:ingredient_id], attributes[:quantity])
   end
 end

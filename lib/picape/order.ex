@@ -1,7 +1,7 @@
 defmodule Picape.Order do
   import Ecto.Query
 
-  alias Picape.Order.{LineFromSupermarket, PlannedRecipe, Sync}
+  alias Picape.Order.{LineFromSupermarket, PlannedRecipe, ManualIngredient, Sync}
   alias Picape.{Repo, Supermarket, Recipe}
 
   defmodule Product, do: defstruct [:id, :quantity]
@@ -31,15 +31,16 @@ defmodule Picape.Order do
   def sync_supermarket(order_id) do
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
          {:ok, planned } <- Recipe.ingredient_quantities(recipe_quantities),
+         {:ok, manual } <- manual_ingredients(order_id),
          {:ok, existing } <- ordered_item_quantities(order_id),
-         {:ok, changes} <- Sync.changes(planned, %{}, existing)
+         {:ok, changes} <- Sync.changes(planned, manual, existing)
     do
       IO.inspect recipe_quantities, label: "recipe_quantities"
       IO.inspect planned, label: "planned"
       IO.inspect existing, label: "existing"
       IO.inspect changes, label: "changes"
 
-      Supermarket.apply_changes(changes)
+#      Supermarket.apply_changes(changes)
 
       current()
     end
@@ -58,6 +59,21 @@ defmodule Picape.Order do
     do
       {:ok, Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
     end
+  end
+
+  def order_ingredient(order_id, ingredient_id, quantity) do
+    %ManualIngredient{}
+    |> ManualIngredient.changeset(%{line_id: order_id, ingredient_id: ingredient_id, quantity: quantity})
+    |> Repo.insert(on_conflict: [set: [quantity: quantity]], conflict_target: [:line_id, :ingredient_id])
+  end
+
+  def manual_ingredients(order_id) do
+     query = from m in ManualIngredient,
+       join: i in assoc(m, :ingredient),
+       where: m.line_id == ^order_id,
+       select: {i.supermarket_product_id, m.quantity}
+
+     {:ok, Enum.into(Repo.all(query), %{})}
   end
 
   # --- private

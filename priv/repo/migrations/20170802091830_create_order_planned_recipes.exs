@@ -5,7 +5,6 @@ defmodule Picape.Repo.Migrations.CreateOrderPlannedRecipes do
     create table(:order_planned_recipe) do
       add :quantity, :integer, default: 1, null: false
       add :unplanned, :boolean, default: false, null: false
-#      add :line_id, references(:order_line, on_delete: :nothing)
       add :line_id, :integer
       add :recipe_id, references(:recipe, on_delete: :nothing)
 
