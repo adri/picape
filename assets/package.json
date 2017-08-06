@@ -4,12 +4,13 @@
   "main": "index.js",
   "repository": {},
   "license": "MIT",
+  "engines": {
+    "node": "7.5.0"
+  },
   "dependencies": {
     "graphql": "^0.10.5",
     "isomorphic-fetch": "^2.2.1",
     "next": "beta",
-    "phoenix": "file:../deps/phoenix",
-    "phoenix_html": "file:../deps/phoenix_html",
     "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-apollo": "^1.4.8",
