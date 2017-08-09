@@ -13,7 +13,7 @@ mkdir -p priv/static/
 MIX_ENV=prod mix phx.digest
 MIX_ENV=prod mix compile
 
-pkill phoenix.server
-MIX_ENV=prod elixir --detached --sname picape -S mix phoenix.server
+kill `lsof -i:4000 -t`
+MIX_ENV=prod elixir --detached --sname picape -S mix phx.server
 
 echo "Finished! Deployed."
