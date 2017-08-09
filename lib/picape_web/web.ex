@@ -18,7 +18,7 @@ defmodule PicapeWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: PicapeWeb
+      use Phoenix.Controller, log: false, namespace: PicapeWeb
       import Plug.Conn
       import PicapeWeb.Router.Helpers
       import PicapeWeb.Gettext
@@ -52,7 +52,7 @@ defmodule PicapeWeb do
 
   def channel do
     quote do
-      use Phoenix.Channel
+      use Phoenix.Channel, log_join: false, log_handle_in: false
       import PicapeWeb.Gettext
     end
   end

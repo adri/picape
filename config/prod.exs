@@ -86,3 +86,6 @@ config :picape, Picape.Mailer,
 #
 #     config :picape, PicapeWeb.Endpoint, server: true
 #
+
+# Import Timber, structured logging
+import_config "timber.exs"
