@@ -23,7 +23,7 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :reverse_proxy,
-  upstreams: %{nil => ["http://0.0.0.0:4001"]}
+  upstreams: %{:_ => ["http://0.0.0.0:4001"]}
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

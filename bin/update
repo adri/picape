@@ -15,6 +15,7 @@ mix deps.get
 # Get any new Node.js dependencies
 cd assets/ && {
   yarn install;
+  yarn build;
   cd -;
 }
 
