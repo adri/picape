@@ -15,7 +15,7 @@ export default ({ id, name, imageUrl, isPlanned, unitQuantity, orderedQuantity }
         </div>
       </div>
       <div className="d-flex mr-3 mt-0 ingredient-quantity-wrapper">
-        <OrderIngredient id={id} quantity={orderedQuantity} />
+        {orderedQuantity && <OrderIngredient id={id} quantity={orderedQuantity} />}
       </div>
     </div>
     <style jsx>{`

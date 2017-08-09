@@ -15,11 +15,11 @@ export default function mutatable({ mutationName = 'mutate' } = {}) {
       };
 
       submit = (event, variables, { handleError, handleSuccess } = {}) => {
-        event.preventDefault();
+        event && event.preventDefault();
 
         this.setState({ loading: true, error: '' });
 
-        this.props[mutationName]({ variables })
+        return this.props[mutationName]({ variables })
           .then(() => {
             this.setState({ loading: false });
             if (handleSuccess) {

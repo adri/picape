@@ -1,20 +1,29 @@
-import { gql, graphql } from 'react-apollo';
+import { gql, graphql, compose } from 'react-apollo';
 import ErrorMessage from './ErrorMessage';
 import Ingredient from './Ingredient';
+import AddIngredient from './ingredient/AddIngredient';
 
-function IngredientList({ data: { loading, error, essentials } }) {
+function IngredientList({ data: { loading, error, ingredients }} ) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <div>Loading</div>;
 
   return (
     <div>
+      <h4>New</h4>
+      <div className="">
+        <p>Select an ingredient to add from Supermarket.</p>
+        <div className="form-group">
+          <AddIngredient />
+        </div>
+      </div>
+
       <h5>Ingredients</h5>
       <div className="card">
         <div className="row no-gutters">
-          {essentials &&
-            essentials.map(ingredient =>
-              <div key={ingredient.id} className="col-sm-3">
-                <Ingredient {...ingredient} />
+          {ingredients.edges &&
+            ingredients.edges.map(ingredient =>
+              <div key={ingredient.node.id} className="col-sm-3">
+                <Ingredient {...ingredient.node} />
               </div>,
             )}
         </div>
@@ -24,25 +33,24 @@ function IngredientList({ data: { loading, error, essentials } }) {
 }
 
 const query = gql`
-  query EssentialList {
-    essentials {
-      id
-      name
-      imageUrl
-      isPlanned
-      unitQuantity
-      orderedQuantity
+  query IngredientList {
+    ingredients(first: 100) {
+      edges {
+        node {
+          id
+          name
+          imageUrl
+          isPlanned
+          unitQuantity
+          orderedQuantity
+        }
+      }
     }
   }
 `;
 
-// The `graphql` wrapper executes a GraphQL query and makes the results
-// available on the `data` prop of the wrapped component (PostList)
-export default graphql(query, {
-  options: {
-    variables: {},
-  },
-  props: ({ data }) => ({
-    data,
-  }),
-})(IngredientList);
+
+export default compose(
+  graphql(query, { options: { variables: { query: '' } } }),
+)(IngredientList);
+

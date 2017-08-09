@@ -27,8 +27,18 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve &Resolver.Recipe.essentials/3
     end
 
+    field :ingredients, :ingredient_connection do
+      arg :first, non_null(:integer)
+      resolve &Resolver.Recipe.list_ingredients/3
+    end
+
     field :current_order, :order do
       resolve &Resolver.Order.current/3
+    end
+
+    field :search_supermarket, list_of(:supermarket_search_result) do
+      arg :query, non_null(:string)
+      resolve &Resolver.Supermarket.search/3
     end
   end
 
@@ -56,6 +66,14 @@ defmodule PicapeWeb.Graphql.Schema do
       arg :quantity, non_null(:integer), default_value: 1
       resolve handle_errors(parsing_node_ids(&Resolver.Order.order_ingredient/2, @node_id_rules))
     end
+
+    @desc "Add ingredient"
+    field :add_ingredient, :ingredient do
+      arg :name, non_null(:string)
+      arg :is_essential, non_null(:boolean)
+      arg :supermarket_product_id, non_null(:string)
+      resolve handle_errors(&Resolver.Recipe.add_ingredient/3)
+    end
   end
 
   def handle_errors(fun) do
@@ -71,7 +89,7 @@ defmodule PicapeWeb.Graphql.Schema do
     #{:error, [email: {"has already been taken", []}]}
     errors = changeset.errors
       |> Enum.map(fn({key, {value, context}}) ->
-           [message: "#{key} #{value}", details: context]
+           [message: "#{key} #{value}"]
          end)
     {:error, errors}
   end

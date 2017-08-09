@@ -28,9 +28,9 @@ export default ({ children, title = 'Supermarket' }) =>
       }
     `}</style>
 
-    <Nav />
-
     <div className="wrapper">
+      <Nav />
+
       <div className="section section-recipes">
         <div className="container-fluid">
           <main role="main">

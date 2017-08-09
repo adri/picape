@@ -69,9 +69,14 @@ defmodule Picape.Recipe do
     |> Repo.all
   end
 
+  def add_ingredient(params) do
+    %Ingredient{}
+    |> Ingredient.changeset(Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(params[:supermarket_product_id])))
+    |> Repo.insert
+  end
+
   def match_supermarket_products() do
     Ingredient
-    |> where(is_essential: true)
     |> Repo.all
     |> Enum.map(fn ingredient ->
       ingredient

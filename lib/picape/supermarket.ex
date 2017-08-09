@@ -1,6 +1,13 @@
 defmodule Picape.Supermarket do
   use HTTPoison.Base
 
+  alias Picape.Supermarket.SearchResult
+
+  def search(query) do
+    get!("/search?search_term=#{query}").body
+    |> SearchResult.from_result
+  end
+
   def products_by_id(product_id) do
     get!("/product/#{product_id}").body
   end

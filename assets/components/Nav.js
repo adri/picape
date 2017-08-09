@@ -9,7 +9,7 @@ export default () => (
           <span className="navbar-toggler-bar bar2"/>
           <span className="navbar-toggler-bar bar3"/>
         </button>
-        <Link className="navbar-brand" href="/">Picape</Link>
+        <Link className="navbar-brand" href="/"><a>Picape</a></Link>
       </div>
       <div className="collapse navbar-collapse justify-content-end" id="navigation" data-nav-image="./assets/img/blurred-image-1.jpg">
         <ul className="navbar-nav">

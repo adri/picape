@@ -31,6 +31,7 @@ defmodule PicapeWeb.Graphql.Types do
 
   node object :ingredient do
     field :name, :string
+    field :is_essential, :string
     field :image_url, :string do
       resolve fn _, %{source: source} ->
         {:ok, source[:image_url]}
@@ -57,6 +58,8 @@ defmodule PicapeWeb.Graphql.Types do
     end
   end
 
+  connection node_type: :ingredient
+
   node object :order do
     field :total_count, :integer
     field :total_price, :integer
@@ -66,5 +69,13 @@ defmodule PicapeWeb.Graphql.Types do
   node object :order_item do
     field :name, :string
     field :image_url, :string
+  end
+
+  object :supermarket_search_result do
+    field :id, :string
+    field :name, :string
+    field :price, :string
+    field :image_url, :string
+    field :unit_quantity, :string
   end
 end
