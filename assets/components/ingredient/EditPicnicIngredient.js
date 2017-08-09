@@ -47,6 +47,11 @@ export default class extends React.Component {
                 className="btn btn-primary"
                 value="Save"
                 onClick={event => this.props.onSave(event, this.state)} />
+            <input
+              type="button"
+              className="btn btn-secondary ml-3"
+              value="Cancel"
+              onClick={event => this.props.onCancel(event, this.state)} />
           </form>
         </div>
         <style jsx>{`

@@ -11,6 +11,7 @@ class AddIngredient extends React.Component {
 
   render() {
     const {submit} = this.props;
+    const reset = () => this.setState({ingredient: null});
 
     return (
       <div>
@@ -20,10 +21,8 @@ class AddIngredient extends React.Component {
         {this.state.ingredient &&
           <EditSupermarketIngredient
             ingredient={this.state.ingredient}
-            onSave={(event, ingredient) => {
-              submit(event, ingredient)
-                .then(() => this.setState({ingredient: null}));
-            }}
+            onSave={(event, ingredient) => submit(event, ingredient).then(reset)}
+            onCancel={(event, ingredient) => reset()}
             />
         }
       </div>

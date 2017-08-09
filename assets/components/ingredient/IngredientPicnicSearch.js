@@ -19,9 +19,12 @@ class IngredientSupermarketSearch extends React.Component {
           getItemValue={(ingredient) => this.state.value}
           items={ingredients || []}
           inputProps={{
-            className: "form-control",
+            className: "form-control supermarket-autocomplete",
             placeholder: "Supermarket product (Nederlands)",
-            size: 90
+            size: 90,
+            style: {
+              backgroundColor: "white",
+            }
           }}
           renderMenu={(items, value, style) => {
             if (loading) return <Loading/>;
