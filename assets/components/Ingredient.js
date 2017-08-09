@@ -29,7 +29,7 @@ export default class extends React.Component {
             </div>
           </div>
           <div className="d-flex mr-3 mt-0 ingredient-quantity-wrapper">
-            {orderedQuantity !== null &&
+            {typeof orderedQuantity !== "undefined" &&
               <OrderIngredient
                 id={id}
                 hovered={hovered}
