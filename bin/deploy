@@ -10,7 +10,7 @@ cd assets/ && {
 }
 
 mkdir -p priv/static/
-MIX_ENV=prod mix phoenix.digest
+MIX_ENV=prod mix phx.digest
 MIX_ENV=prod mix compile
 
 pkill phoenix.server
