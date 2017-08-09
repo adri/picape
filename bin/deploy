@@ -13,8 +13,7 @@ mkdir -p priv/static/
 MIX_ENV=prod mix phoenix.digest
 MIX_ENV=prod mix compile
 
-elixir --detached -e "File.write! 'pid', :os.getpid" -S mix phoenix.server
-cat pid | kill
+pkill phoenix.server
 MIX_ENV=prod elixir --detached --sname picape -S mix phoenix.server
 
 echo "Finished! Deployed."
