@@ -21,6 +21,7 @@ defmodule PicapeWeb.Endpoint do
   end
 
   plug Plug.RequestId
+  plug Plug.Logger
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
@@ -40,11 +41,6 @@ defmodule PicapeWeb.Endpoint do
 
 
   plug CORSPlug
-  # Add Timber plugs for capturing HTTP context and events
-  plug Timber.Integrations.SessionContextPlug
-  plug Timber.Integrations.HTTPContextPlug
-  plug Timber.Integrations.EventPlug
-
   plug PicapeWeb.Router
 
   @doc """
