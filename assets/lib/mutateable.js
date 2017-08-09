@@ -7,9 +7,8 @@ function getDisplayName(WrappedComponent) {
 
 // See: https://facebook.github.io/react/docs/higher-order-components.html
 export default function mutatable({ mutationName = 'mutate' } = {}) {
-  return (SourceComponent) => {
+  return SourceComponent => {
     class Mutatable extends React.Component {
-
       state = {
         loading: false,
         error: '',
@@ -27,13 +26,13 @@ export default function mutatable({ mutationName = 'mutate' } = {}) {
               handleSuccess();
             }
           })
-          .catch((error) => {
+          .catch(error => {
             this.setState({ loading: false, error: error.message });
             if (handleError) {
               handleError();
             }
           });
-      }
+      };
 
       render() {
         return (

@@ -10,7 +10,7 @@ function EssentialList({ data: { loading, error, essentials } }) {
     <div>
       <h5>Essentials</h5>
       <div className="card">
-        <div className="row no-gutters ingredients-wrapper">
+        <div className="row no-gutters">
           {essentials &&
             essentials.map(ingredient =>
               <div key={ingredient.id} className="col-sm-3">
@@ -29,9 +29,9 @@ const recipesQuery = gql`
       id
       name
       imageUrl
-      isPlanned  
+      isPlanned
       unitQuantity
-      orderedQuantity  
+      orderedQuantity
     }
   }
 `;

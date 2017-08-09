@@ -35,7 +35,7 @@ function RecipeList({ data: { loading, error, recipes } }) {
                 </div>
               </li>
             )}
-          </ul>
+        </ul>
       </div>
       <style jsx>{``}</style>
     </div>

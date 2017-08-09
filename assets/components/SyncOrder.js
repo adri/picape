@@ -2,10 +2,10 @@ import React from 'react';
 import { gql, graphql, compose } from 'react-apollo';
 import mutateable from '../lib/mutateable';
 
-function SyncOrder({submit, loading }) {
+function SyncOrder({ submit, loading }) {
   return (
     <a href="#" onClick={submit} className="">
-      <i className={"fa fa-refresh fa-lg fa-fw " + (loading && "fa-spin")} />
+      <i className={'fa fa-refresh fa-lg fa-fw ' + (loading && 'fa-spin')} />
     </a>
   );
 }
@@ -13,7 +13,7 @@ function SyncOrder({submit, loading }) {
 const mutation = gql`
   mutation SyncOrder {
     syncOrder {
-        id
+      id
     }
   }
 `;
@@ -21,12 +21,8 @@ const mutation = gql`
 export default compose(
   graphql(mutation, {
     options: {
-      refetchQueries: [
-        'OrderList',
-        'RecipeList',
-        'EssentialList',
-      ],
+      refetchQueries: ['OrderList', 'RecipeList', 'EssentialList'],
     },
   }),
-  mutateable()
+  mutateable(),
 )(SyncOrder);

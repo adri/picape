@@ -4,7 +4,7 @@ import SyncOrder from './SyncOrder';
 import Ingredient from './Ingredient';
 import Money from './Money';
 
-function OrderList({ data: { loading, error, currentOrder }}) {
+function OrderList({ data: { loading, error, currentOrder } }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <div>Loading</div>;
 
@@ -41,10 +41,10 @@ const orderQuery = gql`
       totalCount
       totalPrice
       items {
-          id
-          name
-          imageUrl
-       }
+        id
+        name
+        imageUrl
+      }
     }
   }
 `;

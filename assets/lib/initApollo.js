@@ -14,7 +14,7 @@ function create(initialState) {
     ssrMode: !process.browser, // Disables forceFetch on the server (so queries are only run once)
     dataIdFromObject: o => o.id,
     networkInterface: createNetworkInterface({
-      uri: '/graphql', // Server URL (must be absolute)
+      uri: BACKEND_URL + '/graphql', // Server URL (must be absolute)
       opts: {
         // Additional fetch() options like `credentials` or `headers`
         credentials: 'same-origin',

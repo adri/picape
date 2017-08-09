@@ -1,5 +1,5 @@
 import React from 'react';
-import { gql, graphql, compose} from 'react-apollo';
+import { gql, graphql, compose } from 'react-apollo';
 import mutateable from '../../lib/mutateable';
 import Loading from '../Loading';
 
@@ -7,7 +7,7 @@ function PlanRecipe({ recipeId, submit, error, loading }) {
   if (error) alert(error);
 
   return (
-    <a href="#" onClick={event => submit(event, {recipeId})} className="btn">
+    <a href="#" onClick={event => submit(event, { recipeId })} className="btn">
       {loading && <Loading />}
       Plan
     </a>
@@ -24,7 +24,7 @@ const query = gql`
         id
         imageUrl
         name
-      }  
+      }
     }
   }
 `;
@@ -32,12 +32,8 @@ const query = gql`
 export default compose(
   graphql(query, {
     options: {
-      refetchQueries: [
-        'RecipeList',
-        'OrderList',
-        'EssentialList',
-      ],
-    }
+      refetchQueries: ['RecipeList', 'OrderList', 'EssentialList'],
+    },
   }),
-  mutateable()
+  mutateable(),
 )(PlanRecipe);
