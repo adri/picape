@@ -41,7 +41,7 @@ defmodule Picape.Mixfile do
      {:postgrex, ">= 0.0.0"},
      {:phoenix_html, "~> 2.10.3"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
-     {:timber, "~> 2.3"},
+     {:sentry, "~> 5.0.1", only: [:prod]},
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:swoosh, "~> 0.7"},
