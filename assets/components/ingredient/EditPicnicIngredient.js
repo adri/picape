@@ -15,14 +15,15 @@ export default class extends React.Component {
     const {name, isEssential} = this.state;
 
     return (
-      <div className="card">
+      <div className="card edit-ingredient">
         <div className="card-block">
           <form>
             <div className="form-group row">
-              <label htmlFor="lgFormGroupInput" className="col-sm-2 col-form-label">Ingredient name</label>
+              <label htmlFor="name" className="col-sm-2 col-form-label">Ingredient name</label>
               <div className="col-sm-10">
                 <input
-                  type="email"
+                  type="name"
+                  id="name"
                   className="form-control"
                   onChange={event => this.setState({name: event.target.value})}
                   defaultValue={name} />
@@ -30,16 +31,15 @@ export default class extends React.Component {
             </div>
 
             <div className="form-group row">
-            <div className="form-check">
-                <label className="form-check-label">
-                  <input
-                    checked={isEssential}
-                    className="form-check-input"
-                    onChange={event => this.setState({isEssential: event.target.checked})}
-                    type="checkbox" />
+                <label className="col-sm-2 col-form-label">
                   Essential
                 </label>
-            </div>
+                <input
+                  checked={isEssential}
+                  id="essential"
+                  className="bootstrap-switch form-control"
+                  onChange={event => this.setState({isEssential: event.target.checked})}
+                  type="checkbox" />
             </div>
 
             <input
@@ -49,6 +49,11 @@ export default class extends React.Component {
                 onClick={event => this.props.onSave(event, this.state)} />
           </form>
         </div>
+        <style jsx>{`
+        .edit-ingredient {
+          max-width: 550px;
+        }
+        `}</style>
       </div>
     )
   }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { gql, graphql, compose } from 'react-apollo';
 import IngredientSupermarketSearch from './IngredientSupermarketSearch';
-import EditIngredient from './EditIngredient';
+import EditSupermarketIngredient from './EditSupermarketIngredient';
 import mutateable from '../../lib/mutateable';
 
 class AddIngredient extends React.Component {
@@ -18,7 +18,7 @@ class AddIngredient extends React.Component {
           onSelect={ingredient => this.setState({ingredient})}
         />
         {this.state.ingredient &&
-          <EditIngredient
+          <EditSupermarketIngredient
             ingredient={this.state.ingredient}
             onSave={(event, ingredient) => {
               submit(event, ingredient)
