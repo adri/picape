@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import Head from 'next/head';
+import Nav from './Nav';
 
 export default ({ children, title = 'Supermarket' }) =>
   <div>
@@ -27,6 +27,8 @@ export default ({ children, title = 'Supermarket' }) =>
         background-color: #f9f7f5;
       }
     `}</style>
+
+    <Nav />
 
     <div className="wrapper">
       <div className="section section-recipes">
