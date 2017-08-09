@@ -17,6 +17,8 @@ function IngredientList({ data: { loading, error, ingredients }} ) {
         </div>
       </div>
 
+      <hr />
+
       <h5>Ingredients</h5>
       <div className="card">
         <div className="row no-gutters">

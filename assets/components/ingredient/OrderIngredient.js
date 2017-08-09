@@ -9,7 +9,7 @@ function OrderIngredient({ id, quantity, submit, loading, error, hovered }) {
   if (loading) return <Loading />;
 
   return (
-    <a className="quantity-selector">
+    <div className="quantity-selector">
       {hovered &&
         <a href="#"
            className="add-btn btn btn-sm btn-xs"
@@ -58,7 +58,7 @@ function OrderIngredient({ id, quantity, submit, loading, error, hovered }) {
           margin: 0;
        }
       `}</style>
-    </a>
+    </div>
   );
 }
 

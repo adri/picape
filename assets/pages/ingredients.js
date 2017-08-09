@@ -8,5 +8,5 @@ export default withData(({ data }) =>
     <div className="container">
       <IngredientList />
     </div>
-  </Layout>,
+  </Layout>
 );

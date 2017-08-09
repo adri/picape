@@ -17,7 +17,7 @@ class IngredientSupermarketSearch extends React.Component {
       <div style={{position: "relative"}}>
         <Autocomplete
           getItemValue={(ingredient) => this.state.value}
-          items={ingredients}
+          items={ingredients || []}
           inputProps={{
             className: "form-control",
             placeholder: "Supermarket product (Nederlands)",
