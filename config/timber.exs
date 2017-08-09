@@ -1,8 +1,7 @@
 use Mix.Config
 
 # Update the instrumenters so that we can structure Phoenix logs
-config :picape, PicapeWeb.Endpoint,
-  instrumenters: [Timber.Integrations.PhoenixInstrumenter]
+
 
 # Structure Ecto logs
 config :picape, Picape.Repo,

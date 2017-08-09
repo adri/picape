@@ -18,6 +18,7 @@ config :picape, PicapeWeb.Endpoint,
   url: [scheme: "https", host: {:system, "HOST"}, port: 443],
 # Not needed because this is handled by a proxy
 #  force_ssl: [rewrite_on: [:x_forwarded_proto]],
+  instrumenters: [Timber.Integrations.PhoenixInstrumenter],
   cache_static_manifest: "priv/static/cache_manifest.json",
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
   watchers: [
