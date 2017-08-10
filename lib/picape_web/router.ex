@@ -1,5 +1,7 @@
 defmodule PicapeWeb.Router do
   use PicapeWeb, :router
+  use Plug.ErrorHandler
+  use Sentry.Plug
 
   pipeline :browser do
     plug :accepts, ["html"]
