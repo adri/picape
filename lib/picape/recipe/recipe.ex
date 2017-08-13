@@ -16,7 +16,8 @@ defmodule Picape.Recipe.Recipe do
   @doc false
   def changeset(%Recipe{} = recipe, attrs) do
     recipe
-    |> cast(attrs, [:title, :image_url])
-    |> validate_required([:title, :image_url])
+    |> cast(attrs, [:title, :ingredients])
+    |> validate_required([:title, :ingredients])
+    |> cast_assoc(:ingredients_ref, required: true)
   end
 end

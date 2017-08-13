@@ -12,11 +12,20 @@ defmodule Picape.Recipe do
     )
   end
 
-  def find_by_id(id) do
-    case Repo.one(where(Recipe, id: ^id)) do
-      nil -> {:error, :recipe_not_found}
-      recipe -> {:ok, recipe}
-    end
+  def recipes_by_ids(ids) do
+    result = from(r in Recipe, where: r.id in ^ids)
+    |> Repo.all
+    |> Map.new(fn recipe -> {recipe.id, recipe} end)
+
+    {:ok, result}
+  end
+
+  def ingredients_by_ids(ids) do
+    result = from(i in Ingredient, where: i.id in ^ids)
+    |> Repo.all
+    |> Map.new(fn ingredient -> {ingredient.id, ingredient} end)
+
+    {:ok, result}
   end
 
   @doc """
@@ -51,6 +60,16 @@ defmodule Picape.Recipe do
     {:ok, Map.new(item_ids, fn item_id -> {ids[item_id], item_id} end)}
   end
 
+  def ingredients_by_recipe_ids(recipe_ids) do
+    result = Repo.all(from r in IngredientRef,
+      where: r.recipe_id in ^recipe_ids,
+      join: i in assoc(r, :ingredient),
+      select: {r.recipe_id, i})
+      |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
+
+    {:ok, result}
+  end
+
   @doc """
   Returns if each ingredient is in one of the specified recipes.
   """
@@ -73,6 +92,12 @@ defmodule Picape.Recipe do
     %Ingredient{}
     |> Ingredient.changeset(Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(params[:supermarket_product_id])))
     |> Repo.insert
+  end
+
+  def edit_recipe(params) do
+    %Recipe{}
+    |> Recipe.changeset(params)
+    |> Repo.update
   end
 
   def match_supermarket_products() do

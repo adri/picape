@@ -19,6 +19,19 @@ defmodule PicapeWeb.Graphql.Schema do
   end
 
   query do
+    node field do
+      resolve fn
+        %{type: :recipe, id: id}, _ ->
+          id
+          |> String.to_integer
+          |> Resolver.Recipe.recipe_by_id
+        %{type: :ingredient, id: id}, _ ->
+          id
+          |> String.to_integer
+          |> Resolver.Recipe.ingredient_by_id
+      end
+    end
+
     field :recipes, list_of(:recipe) do
       resolve &Resolver.Recipe.all/3
     end
@@ -73,6 +86,13 @@ defmodule PicapeWeb.Graphql.Schema do
       arg :is_essential, non_null(:boolean)
       arg :supermarket_product_id, non_null(:string)
       resolve handle_errors(&Resolver.Recipe.add_ingredient/3)
+    end
+
+    @desc "Edit recipe"
+    field :edit_recipe, :recipe do
+      arg :title, non_null(:string)
+      arg :igredients, non_null(list_of(:id))
+      resolve handle_errors(&Resolver.Recipe.edit_recipe/3)
     end
   end
 

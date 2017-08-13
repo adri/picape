@@ -21,7 +21,13 @@ defmodule PicapeWeb.Graphql.Types do
         end)
       end
     end
-    field :ingredients, list_of(:ingredient_edge)
+    field :ingredients, list_of(:ingredient) do
+      resolve fn (recipe, _, _) ->
+        batch({Resolver.Recipe, :ingredients_by_recipe_ids}, recipe.id, fn batch_results ->
+          {:ok, Map.get(batch_results, recipe.id)}
+        end)
+      end
+    end
   end
 
   object :ingredient_edge do

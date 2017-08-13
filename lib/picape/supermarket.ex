@@ -41,13 +41,19 @@ defmodule Picape.Supermarket do
   end
 
   def cart() do
-    ConCache.get_or_store(:supermarket, :order, fn ->
+    ConCache.get_or_store(:supermarket, :cart, fn ->
       get!("/cart").body
     end)
   end
 
   def invalidate_cart() do
-    ConCache.delete(:supermarket, :order)
+    ConCache.delete(:supermarket, :cart)
+  end
+
+  def orders() do
+    ConCache.get_or_store(:supermarket, :order, fn ->
+      get!("/order").body
+    end)
   end
 
   def image_url(image_id) do

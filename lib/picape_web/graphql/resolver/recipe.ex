@@ -4,6 +4,8 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
   alias Picape.Recipe.Ingredient
   alias Absinthe.Relay
 
+# Queries
+
   def all(_parent, _args, _info) do
     {:ok, Recipe.list_recipes() }
   end
@@ -17,8 +19,35 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
     |> Relay.Connection.from_query(&Repo.all/1, args)
   end
 
+  def recipe_by_id(id) do
+    case Recipe.recipes_by_ids([id]) do
+      {:ok, %{^id => result}} -> {:ok, result}
+      _ -> {:error, :not_found}
+    end
+  end
+
+  def recipes_by_ids(ids) do
+    Recipe.recipes_by_ids(ids)
+  end
+
+  def ingredients_by_ids(ids) do
+    Recipe.recipes_by_ids(ids)
+  end
+
+  def ingredients_by_recipe_ids(_, recipe_ids) do
+    {:ok, recipes_map} = Recipe.ingredients_by_recipe_ids(recipe_ids)
+
+    recipes_map
+  end
+
+# Mutations
+
    def add_ingredient(_parent, attributes, _info) do
      Recipe.add_ingredient(attributes)
+   end
+
+   def edit_recipe(_parent, attributes, _info) do
+     Recipe.edit_recipe(attributes)
    end
 
    # def find(_parent, %{id: id}, _info) do
