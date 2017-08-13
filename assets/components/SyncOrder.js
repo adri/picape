@@ -4,7 +4,7 @@ import mutateable from '../lib/mutateable';
 
 function SyncOrder({ submit, loading }) {
   return (
-    <a href="#" onClick={submit} className="">
+    <a href="#" onClick={submit} className="text-white">
       <i className={'fa fa-refresh fa-lg fa-fw ' + (loading && 'fa-spin')} />
     </a>
   );

@@ -5,8 +5,6 @@ import withData from '../lib/withData';
 
 export default withData(({ data }) =>
   <Layout title="Ingredients">
-    <div className="container">
-      <IngredientList />
-    </div>
+    <IngredientList />
   </Layout>
 );

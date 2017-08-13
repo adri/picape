@@ -8,7 +8,7 @@ function EssentialList({ data: { loading, error, essentials } }) {
 
   return (
     <div>
-      <h5>Essentials</h5>
+      <h5 className="text-white">Essentials</h5>
       <div className="card">
         <div className="row no-gutters">
           {essentials &&

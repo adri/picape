@@ -11,8 +11,8 @@ function OrderList({ data: { loading, error, currentOrder } }) {
   return (
     <div>
       <div className="d-flex justify-content-end">
-        <h5 className="mr-auto">Order</h5>
-        <div className="mt-1 mr-2">
+        <h5 className="mr-auto text-white">Order</h5>
+        <div className="mt-1 mr-2 text-white">
           <Money price={currentOrder.totalPrice} />
         </div>
         <div className="mt-1">
