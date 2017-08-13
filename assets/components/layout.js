@@ -41,11 +41,12 @@ export default ({ children, title = 'Supermarket' }) =>
       }
 
       .footer {
+        background-color: #333;
         color: white;
       }
 
       .page-wrapper {
-        background: #333;
+        background-color: #333;
         height: 100%;
       }
     `}</style>
