@@ -2,7 +2,6 @@ import { gql, graphql } from 'react-apollo';
 import ErrorMessage from './ErrorMessage';
 import Recipe from './recipe/Recipe';
 
-
 function RecipeList({ data: { loading, error, recipes } }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <div>Loading</div>;
@@ -25,14 +24,6 @@ function RecipeList({ data: { loading, error, recipes } }) {
   );
 }
 
-// ingredients {
-//         ingredient {
-//           id
-//           name
-//           imageUrl
-//         }
-//         quantity
-//       }
 const recipesQuery = gql`
   query RecipeList {
     recipes {
@@ -43,11 +34,4 @@ const recipesQuery = gql`
   }
 `;
 
-export default graphql(recipesQuery, {
-  options: {
-    variables: {},
-  },
-  props: ({ data }) => ({
-    data,
-  }),
-})(RecipeList);
+export default graphql(recipesQuery)(RecipeList);
