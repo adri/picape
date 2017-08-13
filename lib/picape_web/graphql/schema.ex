@@ -108,7 +108,7 @@ defmodule PicapeWeb.Graphql.Schema do
   def format_changeset(changeset) do
     #{:error, [email: {"has already been taken", []}]}
     errors = changeset.errors
-      |> Enum.map(fn({key, {value, context}}) ->
+      |> Enum.map(fn({key, {value, _context}}) ->
            [message: "#{key} #{value}"]
          end)
     {:error, errors}

@@ -3,7 +3,7 @@ import { gql, graphql, compose } from 'react-apollo';
 import mutateable from '../../lib/mutateable';
 import Loading from '../Loading';
 
-export default class extends React.Component {
+class EditRecipe extends React.Component {
   render() {
     const {title, description, ingredients} = this.state;
 

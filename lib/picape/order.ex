@@ -15,7 +15,7 @@ defmodule Picape.Order do
     |> PlannedRecipe.changeset(%{line_id: order_id, recipe_id: recipe_id, unplanned: unplan})
     |> Repo.insert(on_conflict: [set: [unplanned: unplan]], conflict_target: [:line_id, :recipe_id])
     |> case do
-      {:ok, planned_recipe} -> sync_supermarket(order_id)
+      {:ok, _planned_recipe} -> sync_supermarket(order_id)
       err -> err
     end
   end
@@ -66,7 +66,7 @@ defmodule Picape.Order do
     |> ManualIngredient.changeset(%{line_id: order_id, ingredient_id: ingredient_id, quantity: quantity})
     |> Repo.insert(on_conflict: [set: [quantity: quantity]], conflict_target: [:line_id, :ingredient_id])
     |> case do
-      {:ok, planned_recipe} -> sync_supermarket(order_id)
+      {:ok, _planned_recipe} -> sync_supermarket(order_id)
       err -> err
     end
   end
@@ -90,7 +90,7 @@ defmodule Picape.Order do
     {:ok, Enum.into(Repo.all(query), %{})}
   end
 
-  defp ordered_item_quantities(oder_id) do
+  defp ordered_item_quantities(_order_id) do
     {:ok, order} = current()
     existing = Enum.reduce(order.items, %{}, fn item, acc ->
       Map.update(acc, String.to_integer(item.id), item.quantity, &(&1 + 2))

@@ -26,6 +26,13 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
     end
   end
 
+  def ingredient_by_id(id) do
+    case Recipe.ingredients_by_ids([id]) do
+      {:ok, %{^id => result}} -> {:ok, result}
+      _ -> {:error, :not_found}
+    end
+  end
+
   def recipes_by_ids(ids) do
     Recipe.recipes_by_ids(ids)
   end

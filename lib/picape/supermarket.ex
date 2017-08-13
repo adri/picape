@@ -59,7 +59,7 @@ defmodule Picape.Supermarket do
   def image_url(image_id) do
     case image_id do
       nil -> "http://placekitten.com/64/64"
-      id -> "https://static.supermarket.nl/images/" <> image_id <> "/small.png"
+      _ -> "https://static.supermarket.nl/images/" <> image_id <> "/small.png"
     end
   end
 
