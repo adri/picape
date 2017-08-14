@@ -29,6 +29,7 @@ defmodule Picape.Order do
   end
 
   def sync_supermarket(order_id) do
+    ensure_order_is_current(order_id)
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
          {:ok, planned } <- Recipe.ingredient_quantities(recipe_quantities),
          {:ok, manual } <- manual_ingredients(order_id),
@@ -81,6 +82,18 @@ defmodule Picape.Order do
   end
 
   # --- private
+
+  defp ensure_order_is_current(order_id) do
+    with %{"items" => []} <- Supermarket.cart,
+         %{"current_orders" => orders} <- Supermarket.orders(),
+         order <- List.first(orders)
+    do
+        (from p in PlannedRecipe, where: p.line_id == ^order_id)
+        |> Repo.update_all(set: [line_id: order["order_id"]])
+        (from i in ManualIngredient, where: i.line_id == ^order_id)
+        |> Repo.update_all(set: [line_id: order["order_id"]])
+    end
+  end
 
   defp recipe_ingredient_quantities(order_id) do
     query = from p in PlannedRecipe,

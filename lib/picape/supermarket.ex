@@ -15,12 +15,12 @@ defmodule Picape.Supermarket do
   def apply_changes(changes) do
     changes.add
     |> Enum.each(fn change ->
-        ConCache.put(:supermarket, :order, add_product(change.id, change.quantity))
+        ConCache.put(:supermarket, :cart, add_product(change.id, change.quantity))
     end)
 
     changes.remove
     |> Enum.each(fn change ->
-        ConCache.put(:supermarket, :order, remove_product(change.id, change.quantity))
+        ConCache.put(:supermarket, :cart, remove_product(change.id, change.quantity))
     end)
   end
 
@@ -51,7 +51,7 @@ defmodule Picape.Supermarket do
   end
 
   def orders() do
-    ConCache.get_or_store(:supermarket, :order, fn ->
+    ConCache.get_or_store(:supermarket, :orders, fn ->
       get!("/order").body
     end)
   end

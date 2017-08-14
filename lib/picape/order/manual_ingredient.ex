@@ -5,7 +5,7 @@ defmodule Picape.Order.ManualIngredient do
 
   schema "order_manual_ingredient" do
     field :quantity, :integer
-    field :line_id, :id
+    field :line_id, :string
     belongs_to :ingredient, Picape.Recipe.Ingredient, foreign_key: :ingredient_id
 
     timestamps()

@@ -5,7 +5,7 @@ defmodule Picape.Order.PlannedRecipe do
 
 
   schema "order_planned_recipe" do
-    field :line_id, :id
+    field :line_id, :string
     field :recipe_id, :id
     field :unplanned, :boolean, default: false
     field :quantity, :integer, default: 1

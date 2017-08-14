@@ -3,7 +3,7 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
   alias Picape.{Supermarket, Order}
 
   defp order_id() do
-    1
+    "1"
   end
 
 # Queries
