@@ -19,6 +19,10 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
     |> Relay.Connection.from_query(&Repo.all/1, args)
   end
 
+  def search_ingredient(_parent, attributes, _info) do
+    {:ok, Recipe.search_ingredient(attributes[:query], [])}
+  end
+
   def recipe_by_id(id) do
     case Recipe.recipes_by_ids([id]) do
       {:ok, %{^id => result}} -> {:ok, result}

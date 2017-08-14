@@ -2,23 +2,42 @@ import React from 'react';
 import { gql, graphql, compose } from 'react-apollo';
 import mutateable from '../../lib/mutateable';
 import Loading from '../Loading';
+import IngredientSearch from '../ingredient/IngredientSearch';
 
 class EditRecipe extends React.Component {
 
   componentWillReceiveProps(props) {
-    console.log(props.data);
-    if (!props.data) return;
-    this.state = {
+    if (!props.data || !props.data.node) return;
+    this.setState({
       id: props.data.node.id,
       title: props.data.node.title,
       ingredients: props.data.node.ingredients,
-    };
+      changed: false,
+    });
+  }
+
+  deleteIngredient(event, ingredientId) {
+    event.preventDefault();
+    this.setState({
+      ingredients: this.state.ingredients.filter(ingredient => ingredient.id !== ingredientId),
+      changed: true,
+    })
+  }
+
+  addIngredient(ingredient) {
+    this.setState({
+      ingredients: [
+        ...this.state.ingredients,
+        ingredient,
+      ],
+      changed: true,
+    })
   }
 
   render() {
     const { data: {loading, error} } = this.props;
     if (loading || this.state === null) return <Loading />;
-    const {title, ingredients} = this.state;
+    const {title, ingredients, changed} = this.state;
 
     return (
       <div>
@@ -44,27 +63,56 @@ class EditRecipe extends React.Component {
                   <ul className="list-group">
                     {ingredients.map(ingredient =>
                       <li key={ingredient.id} className="list-group-item">
-                        <a href="#"><i className="now-ui-icons ui-1_simple-remove mr-2" /></a>
+                        <a href="#" onClick={event => this.deleteIngredient(event, ingredient.id)}>
+                          <i className="now-ui-icons ui-1_simple-remove mr-2" />
+                        </a>
                         {ingredient.name}
                       </li>
                     )}
+                    <li className="list-group-item">
+                      <div className="form-group mb-2 mr-sm-2 mb-sm-0">
+                        <IngredientSearch
+                          onSelect={ingredient => this.addIngredient(ingredient)}
+                          ignoreIds={ingredients.map(ingredient => ingredient.id)}
+                          defaultValue={this.state.newIngredient && this.state.newIngredient.title || ''}
+                        />
+                      </div>
+                    </li>
                   </ul>
                 </div>
               </div>
 
-              <input
-                type="submit"
-                className="btn btn-primary"
-                value="Save"
-                onClick={event => this.props.onSave(event, this.state)} />
-              <input
-                type="button"
-                className="btn btn-secondary ml-3"
-                value="Cancel"
-                onClick={event => this.props.onCancel(event, this.state)} />
+              <div className="form-group row">
+                <div className="offset-sm-2 col-sm-10">
+                  <input
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={!changed && "disabled"}
+                    value="Save"
+                    onClick={event => this.props.onSave(event, this.state)} />
+                  <input
+                    type="button"
+                    className="btn btn-secondary ml-3"
+                    value="Cancel"
+                    onClick={event => this.props.onCancel(event, this.state)} />
+                </div>
+              </div>
+
             </form>
           </div>
         </div>
+        <style jsx>{`
+        #newIngredient {
+          display: inline-block;
+        }
+        .card {
+          overflow: visible;
+        }
+
+        .list-group-item {
+          border: none
+        }
+        `}</style>
       </div>
     );
   }

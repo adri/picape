@@ -53,6 +53,12 @@ defmodule PicapeWeb.Graphql.Schema do
       arg :query, non_null(:string)
       resolve &Resolver.Supermarket.search/3
     end
+
+    field :search_ingredient, list_of(:ingredient) do
+      arg :query, non_null(:string)
+      arg :ignore_ids, list_of(:id)
+      resolve &Resolver.Recipe.search_ingredient/3
+    end
   end
 
   mutation do

@@ -88,6 +88,12 @@ defmodule Picape.Recipe do
     |> Repo.all
   end
 
+  def search_ingredient(query, ignore_ids) do
+    Repo.all(from i in Ingredient,
+      where: not i.id in ^ignore_ids and
+      ilike(i.name, ^("%#{query}%")) )
+  end
+
   def add_ingredient(params) do
     %Ingredient{}
     |> Ingredient.changeset(Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(params[:supermarket_product_id])))
