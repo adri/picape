@@ -32,7 +32,6 @@ export default ({ children, title = 'Supermarket' }) =>
     <style jsx>{`
       .page {
         background-color: #333;
-        background: url(/static/images/eat-bg.jpg) no-repeat center center fixed;
         -webkit-background-size: cover;
         -moz-background-size: cover;
         -o-background-size: cover;

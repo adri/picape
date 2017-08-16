@@ -8,3 +8,7 @@ body > div:first-child,
 #__next > div {
     height: 100%;
 }
+
+.page {
+    background: url(/static/images/eat-bg.jpg) no-repeat center center fixed;
+}
