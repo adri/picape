@@ -7,6 +7,6 @@ export default withData(({ data }) =>
   <Layout title="Recipes">
     <AddRecipe />
     <hr />
-    <RecipeList />
+    <RecipeList showEdit={true} />
   </Layout>
 );
