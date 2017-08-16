@@ -11,7 +11,7 @@ class IngredientSearch extends React.Component {
 
   render() {
     const {refetch, loading, ingredients} = this.props.data;
-    const {onSelect, ignoreIds} = this.props;
+    const {onSelect, excluded} = this.props;
 
     return (
       <div style={{position: "relative"}}>
@@ -47,7 +47,7 @@ class IngredientSearch extends React.Component {
             this.setState({ value });
             clearTimeout(this.debounced);
             this.debounced = setTimeout(() => {
-              refetch({query: value})
+              refetch({query: value, excluded})
             }, 300)
 
           }}
@@ -62,8 +62,8 @@ class IngredientSearch extends React.Component {
 }
 
 const query = gql`
-  query searchSupermarket($query: String!, $ignoreIds: [ID]) {
-    ingredients: searchIngredient(query: $query, ignoreIds: $ignoreIds) {
+  query searchIngredient($query: String!, $excluded: [ID]) {
+    ingredients: searchIngredient(query: $query, excluded: $excluded) {
       id
       name
       imageUrl
@@ -73,5 +73,5 @@ const query = gql`
 `;
 
 export default compose(
-  graphql(query, { options: ({ignoreIds}) => ({ variables: { query: '', ignoreIds } }) }),
+  graphql(query, { options: ({excluded}) => ({ variables: { query: '', excluded } }) }),
 )(IngredientSearch);

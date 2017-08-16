@@ -8,7 +8,6 @@ defmodule Picape.Recipe.IngredientRef do
     field :quantity, :integer
     field :recipe_id, :id
     belongs_to :ingredient, Picape.Recipe.Ingredient
-    # has_one :ingredient, Picape.Recipe.Ingredient
 
     timestamps()
   end
@@ -16,7 +15,7 @@ defmodule Picape.Recipe.IngredientRef do
   @doc false
   def changeset(%IngredientRef{} = ingredient_ref, attrs) do
     ingredient_ref
-    |> cast(attrs, [:quantity])
+    |> cast(attrs, [:ingredient_id, :quantity])
     |> validate_required([:quantity])
   end
 end

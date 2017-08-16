@@ -73,7 +73,7 @@ class EditRecipe extends React.Component {
                       <div className="form-group mb-2 mr-sm-2 mb-sm-0">
                         <IngredientSearch
                           onSelect={ingredient => this.addIngredient(ingredient)}
-                          ignoreIds={ingredients.map(ingredient => ingredient.id)}
+                          excluded={ingredients.map(ingredient => ingredient.id)}
                           defaultValue={this.state.newIngredient && this.state.newIngredient.title || ''}
                         />
                       </div>

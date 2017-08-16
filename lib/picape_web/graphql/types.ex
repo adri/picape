@@ -4,68 +4,6 @@ defmodule PicapeWeb.Graphql.Types do
 
   alias PicapeWeb.Graphql.Resolver
 
-  @desc """
-  A user of the blog
-  """
-  object :user do
-    field :id, :id
-    field :name, :string
-  end
-
-  node object :recipe do
-    field :title, :string
-    field :is_planned, :boolean do
-      resolve fn (recipe, _, _) ->
-        batch({Resolver.Order, :recipies_planned?}, recipe.id, fn batch_results ->
-          {:ok, Map.get(batch_results, recipe.id)}
-        end)
-      end
-    end
-    field :ingredients, list_of(:ingredient) do
-      resolve fn (recipe, _, _) ->
-        batch({Resolver.Recipe, :ingredients_by_recipe_ids}, recipe.id, fn batch_results ->
-          {:ok, Map.get(batch_results, recipe.id)}
-        end)
-      end
-    end
-  end
-
-  object :ingredient_edge do
-    field :quantity, :integer
-    field :ingredient, :ingredient
-  end
-
-  node object :ingredient do
-    field :name, :string
-    field :is_essential, :string
-    field :image_url, :string do
-      resolve fn _, %{source: source} ->
-        {:ok, source[:image_url]}
-      end
-    end
-    field :is_planned, :boolean do
-      resolve fn (ingredient, _, _) ->
-         batch({Resolver.Order, :ingredients_planned?}, ingredient.id, fn batch_results ->
-             {:ok, Map.get(batch_results, ingredient.id)}
-         end)
-      end
-    end
-    field :ordered_quantity, :integer do
-      resolve fn (ingredient, _, _) ->
-         batch({Resolver.Order, :ingredients_ordered_quantity}, ingredient.id, fn batch_results ->
-             {:ok, Map.get(batch_results, ingredient.id)}
-         end)
-      end
-    end
-    field :unit_quantity, :string do
-      resolve fn _, %{source: source} ->
-        {:ok, source[:unit_quantity]}
-      end
-    end
-  end
-
-  connection node_type: :ingredient
-
   node object :order do
     field :total_count, :integer
     field :total_price, :integer
@@ -83,5 +21,52 @@ defmodule PicapeWeb.Graphql.Types do
     field :price, :string
     field :image_url, :string
     field :unit_quantity, :string
+  end
+
+  node object :recipe do
+    field :title, :string
+    field :is_planned, :boolean do
+      resolve batched({Resolver.Order, :recipies_planned?})
+    end
+    field :ingredients, list_of(:ingredient) do
+      resolve batched({Resolver.Recipe, :ingredients_by_recipe_ids})
+    end
+  end
+
+  object :ingredient_edge do
+    field :quantity, :integer
+    field :ingredient, :ingredient
+  end
+
+  node object :ingredient do
+    field :name, :string
+    field :is_essential, :string
+    field :image_url, :string do
+      resolve fn _, %{source: source} ->
+        {:ok, source[:image_url]}
+      end
+    end
+    field :is_planned, :boolean do
+      resolve batched({Resolver.Order, :ingredients_planned?})
+    end
+    field :ordered_quantity, :integer do
+      resolve batched({Resolver.Order, :ingredients_ordered_quantity})
+    end
+    field :unit_quantity, :string do
+      resolve fn _, %{source: source} ->
+        {:ok, source[:unit_quantity]}
+      end
+    end
+  end
+
+  connection node_type: :ingredient
+
+
+  defp batched(batch_fun) do
+    fn parent, args, %{context: ctx} ->
+      batch(batch_fun, parent.id, fn batch_results ->
+        {:ok, Map.get(batch_results, parent.id)}
+      end)
+    end
   end
 end

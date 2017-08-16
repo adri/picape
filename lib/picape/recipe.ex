@@ -88,9 +88,9 @@ defmodule Picape.Recipe do
     |> Repo.all
   end
 
-  def search_ingredient(query, ignore_ids) do
+  def search_ingredient(query, excluded) do
     Repo.all(from i in Ingredient,
-      where: not i.id in ^ignore_ids and
+      where: not i.id in ^excluded and
       ilike(i.name, ^("%#{query}%")) )
   end
 
@@ -101,8 +101,9 @@ defmodule Picape.Recipe do
   end
 
   def edit_recipe(params) do
-    %Recipe{}
-    |> Recipe.changeset(params)
+    Repo.get(Recipe, params[:id])
+    |> Repo.preload(:ingredients)
+    |> Recipe.edit_changeset(params)
     |> Repo.update
   end
 

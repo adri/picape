@@ -8,7 +8,7 @@ defmodule PicapeWeb.Graphql.Schema do
   @node_id_rules %{
       recipe_id: :recipe,
       ingredient_id: :ingredient,
-      excluded: [ingredient: :ingredient],
+      ingredients: [ingredient_id: :ingredient],
   }
 
   node interface do
@@ -20,6 +20,7 @@ defmodule PicapeWeb.Graphql.Schema do
   end
 
   query do
+    @desc "Access recipes and ingredients by their ID."
     node field do
       resolve fn
         %{type: :recipe, id: id}, _ ->
@@ -33,28 +34,37 @@ defmodule PicapeWeb.Graphql.Schema do
       end
     end
 
+    @desc "Lists all recipes."
     field :recipes, list_of(:recipe) do
       resolve &Resolver.Recipe.all/3
     end
 
+    @desc "Lists all ingredients which are marked as essential."
     field :essentials, list_of(:ingredient) do
       resolve &Resolver.Recipe.essentials/3
     end
 
+    @desc "Page through all ingredients."
     field :ingredients, :ingredient_connection do
       arg :first, non_null(:integer)
       resolve &Resolver.Recipe.list_ingredients/3
     end
 
+    @desc "The current order including total price and ordered items."
     field :current_order, :order do
       resolve &Resolver.Order.current/3
     end
 
+    @desc "Search Supermarket products using a query string."
     field :search_supermarket, list_of(:supermarket_search_result) do
       arg :query, non_null(:string)
       resolve &Resolver.Supermarket.search/3
     end
 
+    @desc """
+    Search ingredients using a query string, excluding of
+    ingredient ids possible.
+    """
     field :search_ingredient, list_of(:ingredient) do
       arg :query, non_null(:string)
       arg :excluded, list_of(:id)
@@ -80,14 +90,14 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve handle_errors(&Resolver.Order.sync_supermarket/2)
     end
 
-    @desc "Order an ingredient"
+    @desc "Order an ingredient in a certain quantity."
     field :order_ingredient, :order do
       arg :ingredient_id, non_null(:id)
       arg :quantity, non_null(:integer), default_value: 1
       resolve handle_errors(&Resolver.Order.order_ingredient/2)
     end
 
-    @desc "Add ingredient"
+    @desc "Add a new ingredient."
     field :add_ingredient, :ingredient do
       arg :name, non_null(:string)
       arg :is_essential, non_null(:boolean)
@@ -95,13 +105,22 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve handle_errors(&Resolver.Recipe.add_ingredient/3)
     end
 
-    @desc "Edit recipe"
+    @desc "Change a recipe including its ingredients.'"
     field :edit_recipe, :recipe do
+      arg :recipe_id, non_null(:id)
       arg :title, non_null(:string)
-      arg :igredients, non_null(list_of(:id))
+      arg :ingredients, non_null(list_of(:ingredient_ref))
       resolve handle_errors(&Resolver.Recipe.edit_recipe/3)
     end
   end
+
+  @desc "An ingredient in a certain quantity."
+  input_object :ingredient_ref do
+    field :quantity, non_null(:integer)
+    field :ingredient_id, non_null(:id)
+  end
+
+  # ---- Helpers ----
 
   def middleware(middleware, _, %Absinthe.Type.Object{identifier: :mutation}) do
     [{Absinthe.Relay.Node.ParseIDs, @node_id_rules} | middleware]
