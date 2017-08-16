@@ -14,18 +14,18 @@ function OrderIngredient({ id, quantity, submit, loading, error, hovered }) {
         <a href="#"
            className="add-btn btn btn-sm btn-xs"
            onClick={event => submit(event, { ingredientId: id, quantity: quantity + 1 })}
-        >+</a>
+        ><i className="now-ui-icons ui-1_simple-add mr-2" /></a>
       }
 
       <div className={"btn-xs" + (quantity ? " btn" : " disabled")}>
-        {quantity && quantity}
+        {quantity || hovered && quantity}
       </div>
 
       {hovered &&
         <a href="#"
            className="subtract-btn btn btn-sm btn-xs"
            onClick={event => submit(event, {ingredientId: id, quantity: Math.max(0, quantity - 1)})}
-        >-</a>
+        ><i className="now-ui-icons ui-1_simple-delete mr-2" /></a>
       }
       <style jsx>{`
        .quantity-selector {

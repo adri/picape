@@ -1,5 +1,14 @@
 import Head from 'next/head';
 import Nav from './Nav';
+import NProgress from 'nprogress';
+import Router from 'next/router';
+
+Router.onRouteChangeStart = (url) => {
+  console.log(`Loading: ${url}`);
+  NProgress.start();
+};
+Router.onRouteChangeComplete = () => NProgress.done();
+Router.onRouteChangeError = () => NProgress.done();
 
 export default ({ children, title = 'Supermarket' }) =>
   <div className="page-wrapper">
@@ -17,6 +26,7 @@ export default ({ children, title = 'Supermarket' }) =>
       <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
       <link href="/static/css/now-ui-kit.css" rel="stylesheet" />
       <link href="/static/css/global.css" rel="stylesheet" />
+      <link href="/static/css/nprogress.css" rel="stylesheet" />
     </Head>
 
     <style jsx>{`
