@@ -74,13 +74,13 @@ defmodule PicapeWeb.Graphql.Schema do
 
   mutation do
     @desc "Plan a recipe and order ingredients."
-    field :plan_recipe, :order do
+    field :plan_recipe, :recipe do
       arg :recipe_id, non_null(:id)
       resolve handle_errors(&Resolver.Order.plan_recipe/2)
     end
 
     @desc "Remove a planned recipe."
-    field :unplan_recipe, :order do
+    field :unplan_recipe, :recipe do
       arg :recipe_id, non_null(:id)
       resolve handle_errors(&Resolver.Order.unplan_recipe/2)
     end

@@ -18,6 +18,12 @@ const query = gql`
   mutation unplanRecipe($recipeId: ID!) {
     unplanRecipe(recipeId: $recipeId) {
       id
+      isPlanned
+      ingredients {
+          id
+          isEssential
+          isPlanned
+      }
     }
   }
 `;

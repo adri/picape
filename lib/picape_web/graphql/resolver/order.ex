@@ -1,6 +1,7 @@
 defmodule PicapeWeb.Graphql.Resolver.Order do
 
   alias Picape.{Supermarket, Order}
+  alias PicapeWeb.Graphql.Resolver
 
   defp order_id() do
     "1"
@@ -34,10 +35,14 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
 
   def plan_recipe(attributes, _info) do
     Order.plan_recipe(order_id(), attributes[:recipe_id], false)
+
+    Resolver.Recipe.recipe_by_id(String.to_integer(attributes[:recipe_id]))
   end
 
   def unplan_recipe(attributes, _info) do
     Order.plan_recipe(order_id(), attributes[:recipe_id], true)
+
+    Resolver.Recipe.recipe_by_id(String.to_integer(attributes[:recipe_id]))
   end
 
   def sync_supermarket(attributes, _info) do

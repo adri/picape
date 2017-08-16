@@ -18,12 +18,11 @@ const query = gql`
   mutation planRecipe($recipeId: ID!) {
     planRecipe(recipeId: $recipeId) {
       id
-      totalCount
-      totalPrice
-      items {
+      isPlanned
+      ingredients {
         id
-        imageUrl
-        name
+        isEssential
+        isPlanned
       }
     }
   }
