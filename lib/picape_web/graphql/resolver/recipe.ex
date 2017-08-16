@@ -57,6 +57,14 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
      Recipe.add_ingredient(attributes)
    end
 
+   def edit_ingredient(_parent, attributes, _info) do
+     Recipe.edit_ingredient(attributes)
+   end
+
+   def delete_ingredient(_parent, attributes, _info) do
+     Recipe.delete_ingredient(attributes)
+   end
+
    def add_recipe(_parent, attributes, _info) do
      Recipe.add_recipe(attributes)
    end

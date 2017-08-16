@@ -96,8 +96,19 @@ defmodule Picape.Recipe do
 
   def add_ingredient(params) do
     %Ingredient{}
-    |> Ingredient.changeset(Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(params[:supermarket_product_id])))
+    |> Ingredient.add_changeset(Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(params[:supermarket_product_id])))
     |> Repo.insert
+  end
+
+  def edit_ingredient(params) do
+    Repo.get(Ingredient, params[:ingredient_id])
+    |> Ingredient.edit_changeset(params)
+    |> Repo.update
+  end
+
+  def delete_ingredient(params) do
+    Repo.get(Ingredient, params[:ingredient_id])
+    |> Repo.delete
   end
 
   def add_recipe(params) do

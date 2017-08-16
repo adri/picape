@@ -1,4 +1,5 @@
 import OrderIngredient from './ingredient/OrderIngredient';
+import Link from 'next/link';
 
 export default class extends React.Component {
   state = {
@@ -6,7 +7,7 @@ export default class extends React.Component {
   };
 
   render() {
-    const { id, name, imageUrl, isPlanned, unitQuantity, orderedQuantity } = this.props;
+    const { id, name, imageUrl, isPlanned, unitQuantity, orderedQuantity, showEdit } = this.props;
     const { hovered } = this.state;
 
     return (
@@ -21,7 +22,8 @@ export default class extends React.Component {
           </div>
           <div className="media-body mb-2">
             <div className="ingredient-name mt-0 mb-0">
-              {name}
+                {showEdit && <Link href={`/ingredient?id=${id}`}><a>{name}</a></Link>}
+                {!showEdit && name}
             </div>
             <div className="ingredient-unit-quantity">
               {unitQuantity}&nbsp;

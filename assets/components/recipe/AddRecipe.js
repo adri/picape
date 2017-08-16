@@ -57,6 +57,10 @@ const addRecipe = gql`
 `;
 
 export default compose(
-  graphql(addRecipe),
+  graphql(addRecipe, {
+    options: {
+      refetchQueries: ['RecipeList']
+    }
+  }),
   mutateable(),
 )(AddRecipe);

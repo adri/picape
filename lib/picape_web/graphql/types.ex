@@ -40,7 +40,7 @@ defmodule PicapeWeb.Graphql.Types do
 
   node object :ingredient do
     field :name, :string
-    field :is_essential, :string
+    field :is_essential, :boolean
     field :image_url, :string do
       resolve fn _, %{source: source} ->
         {:ok, source[:image_url]}

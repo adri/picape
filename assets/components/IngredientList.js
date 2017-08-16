@@ -25,7 +25,7 @@ function IngredientList({ data: { loading, error, ingredients }} ) {
           {ingredients.edges &&
             ingredients.edges.map(ingredient =>
               <div key={ingredient.node.id} className="col-sm-3">
-                <Ingredient {...ingredient.node} />
+                <Ingredient {...ingredient.node} showEdit={true} />
               </div>,
             )}
         </div>
