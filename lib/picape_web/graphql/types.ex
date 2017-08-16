@@ -63,7 +63,7 @@ defmodule PicapeWeb.Graphql.Types do
 
 
   defp batched(batch_fun) do
-    fn parent, args, %{context: ctx} ->
+    fn parent, _args, _ctx ->
       batch(batch_fun, parent.id, fn batch_results ->
         {:ok, Map.get(batch_results, parent.id)}
       end)

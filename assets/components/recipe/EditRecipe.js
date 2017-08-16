@@ -3,6 +3,7 @@ import { gql, graphql, compose } from 'react-apollo';
 import mutateable from '../../lib/mutateable';
 import Loading from '../Loading';
 import IngredientSearch from '../ingredient/IngredientSearch';
+import Router from 'next/router';
 
 class EditRecipe extends React.Component {
 
@@ -36,18 +37,20 @@ class EditRecipe extends React.Component {
 
   onSave(event) {
     this.props.submit(event, {
-      recipeId: this.state.id,
-      title: this.state.title,
-      ingredients: this.state.ingredients.map(ingredient => ({
-        ingredientId: ingredient.id,
-        quantity: ingredient.quantity || 1,
-      }))
-    })
+        recipeId: this.state.id,
+        title: this.state.title,
+        ingredients: this.state.ingredients.map(ingredient => ({
+          ingredientId: ingredient.id,
+          quantity: ingredient.quantity || 1,
+        }))
+      })
+      .then(() => Router.back());
   }
 
   onCancel() {
     this.props.data.refetch()
-      .then(props => this.componentWillReceiveProps(props));
+      .then(props => this.componentWillReceiveProps(props))
+      .then(() => Router.back());
   }
 
   render() {
@@ -68,7 +71,7 @@ class EditRecipe extends React.Component {
                     type="title"
                     id="title"
                     className="form-control"
-                    onChange={event => this.setState({title: event.target.value})}
+                    onChange={event => this.setState({title: event.target.value, changed: true})}
                     defaultValue={title} />
                 </div>
               </div>
@@ -91,7 +94,6 @@ class EditRecipe extends React.Component {
                         <IngredientSearch
                           onSelect={ingredient => this.addIngredient(ingredient)}
                           excluded={ingredients.map(ingredient => ingredient.id)}
-                          defaultValue={this.state.newIngredient && this.state.newIngredient.title || ''}
                         />
                       </div>
                     </li>

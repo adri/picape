@@ -54,6 +54,7 @@ class IngredientSearch extends React.Component {
           onSelect={(val, ingredient) => {
             this.setState({value: val});
             onSelect && onSelect(ingredient);
+            this.setState({value: this.props.defaultValue || ''});
           }}
         />
       </div>
