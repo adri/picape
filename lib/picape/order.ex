@@ -86,12 +86,23 @@ defmodule Picape.Order do
   defp ensure_order_is_current(order_id) do
     with %{"items" => []} <- Supermarket.cart,
          %{"current_orders" => orders} <- Supermarket.orders(),
-         order <- List.first(orders)
+         order <- List.first(orders),
+         true <- planned_items_in_order?(order["order_id"])
     do
         (from p in PlannedRecipe, where: p.line_id == ^order_id)
         |> Repo.update_all(set: [line_id: order["order_id"]])
         (from i in ManualIngredient, where: i.line_id == ^order_id)
         |> Repo.update_all(set: [line_id: order["order_id"]])
+    end
+  end
+
+  defp planned_items_in_order?(order_id) do
+    with [] <- Repo.all(from p in PlannedRecipe, where: p.line_id == ^order_id, limit: 1),
+         [] <-  Repo.all(from m in ManualIngredient, where: m.line_id == ^order_id, limit: 1)
+    do
+      true
+    else
+      _ -> false
     end
   end
 
