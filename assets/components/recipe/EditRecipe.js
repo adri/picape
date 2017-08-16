@@ -34,6 +34,17 @@ class EditRecipe extends React.Component {
     })
   }
 
+  onSave(event) {
+    this.props.submit(event, {
+      recipeId: this.state.id,
+      title: this.state.title,
+      ingredients: this.state.ingredients.map(ingredient => ({
+        ingredientId: ingredient.id,
+        quantity: ingredient.quantity || 1,
+      }))
+    })
+  }
+
   render() {
     const { data: {loading, error} } = this.props;
     if (loading || this.state === null) return <Loading />;
@@ -89,12 +100,12 @@ class EditRecipe extends React.Component {
                     className="btn btn-primary"
                     disabled={!changed && "disabled"}
                     value="Save"
-                    onClick={event => this.props.onSave(event, this.state)} />
+                    onClick={event => this.onSave(event)} />
                   <input
                     type="button"
                     className="btn btn-secondary ml-3"
                     value="Cancel"
-                    onClick={event => this.props.onCancel(event, this.state)} />
+                    onClick={event => this.onCancel(event, this.state)} />
                 </div>
               </div>
 
@@ -135,19 +146,19 @@ const GetRecipe = gql`
 
 
 const EditQuery = gql`
-  mutation EditRecipe($recipeId: ID!) {
-    editRecipe(recipeId: $recipeId) {
+  mutation EditRecipe($recipeId: ID!, $title: String!, $ingredients: [IngredientRef]) {
+    editRecipe(recipeId: $recipeId, title: $title, ingredients: $ingredients) {
       id
+      title  
+      ingredients {
+          id
+      }  
     }
   }
 `;
 
 export default compose(
   graphql(GetRecipe, { options: ({ recipeId }) => ({ variables: { recipeId } }) }),
-  // graphql(EditQuery, {
-  //   options: {
-  //     refetchQueries: ['RecipeList', 'OrderList', 'EssentialList'],
-  //   },
-  // }),
-  // mutateable(),
+  graphql(EditQuery),
+  mutateable(),
 )(EditRecipe);

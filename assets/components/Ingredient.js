@@ -14,7 +14,6 @@ export default class extends React.Component {
         className={'ingredient align-bottom br-1 ' + (isPlanned && 'highlighted')}
         onMouseEnter={event => this.setState({hovered: true})}
         onMouseLeave={event => this.setState({hovered: false})}
-        onClick={event => this.state({hovered: !this.state.hovered})}
       >
         <div className="media pl-2 pt-2">
           <div className="d-flex mr-3 mt-0 ingredient-image-wrapper">
