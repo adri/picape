@@ -10,16 +10,22 @@ function RecipeList({ data: { loading, error, recipes } }) {
     <div>
       <h5 className="text-white">Recipes</h5>
       <div className="card">
-        <ul className="list-group list-group-flush">
+        <div className="row no-gutters">
           {recipes &&
             recipes.map(recipe =>
-              <li key={recipe.id} className="list-group-item">
+              <div key={recipe.id} className="col-sm-4 recipe">
                 <Recipe recipe={recipe} />
-              </li>
+              </div>
             )}
-        </ul>
+        </div>
       </div>
-      <style jsx>{``}</style>
+      <style jsx>{`
+      .recipe {
+        box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, .1);
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+      `}</style>
     </div>
   );
 }

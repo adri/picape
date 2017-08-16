@@ -13,6 +13,12 @@ defmodule Picape.Recipe.Recipe do
     timestamps()
   end
 
+  def add_changeset(%Recipe{} = recipe, attrs) do
+    recipe
+    |> cast(attrs, [:title])
+    |> validate_required([:title])
+  end
+
   @doc false
   def edit_changeset(%Recipe{} = recipe, attrs) do
     recipe

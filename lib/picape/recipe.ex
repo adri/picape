@@ -100,6 +100,12 @@ defmodule Picape.Recipe do
     |> Repo.insert
   end
 
+  def add_recipe(params) do
+    %Recipe{}
+    |> Recipe.add_changeset(params)
+    |> Repo.insert
+  end
+
   def edit_recipe(params) do
     Repo.get(Recipe, params[:id])
     |> Repo.preload(:ingredients)

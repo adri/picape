@@ -57,6 +57,10 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
      Recipe.add_ingredient(attributes)
    end
 
+   def add_recipe(_parent, attributes, _info) do
+     Recipe.add_recipe(attributes)
+   end
+
    def edit_recipe(_parent, attributes, _info) do
      attributes
      |> Map.put(:id, attributes[:recipe_id])

@@ -105,6 +105,12 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve handle_errors(&Resolver.Recipe.add_ingredient/3)
     end
 
+    @desc "Add a new recipe.'"
+    field :add_recipe, :recipe do
+      arg :title, non_null(:string)
+      resolve handle_errors(&Resolver.Recipe.add_recipe/3)
+    end
+
     @desc "Change a recipe including its ingredients.'"
     field :edit_recipe, :recipe do
       arg :recipe_id, non_null(:id)

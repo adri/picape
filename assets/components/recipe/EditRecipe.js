@@ -11,7 +11,7 @@ class EditRecipe extends React.Component {
     this.setState({
       id: props.data.node.id,
       title: props.data.node.title,
-      ingredients: props.data.node.ingredients,
+      ingredients: props.data.node.ingredients || [],
       changed: false,
     });
   }
@@ -45,9 +45,14 @@ class EditRecipe extends React.Component {
     })
   }
 
+  onCancel() {
+    this.props.data.refetch()
+      .then(props => this.componentWillReceiveProps(props));
+  }
+
   render() {
     const { data: {loading, error} } = this.props;
-    if (loading || this.state === null) return <Loading />;
+    if (this.state === null) return <Loading />;
     const {title, ingredients, changed} = this.state;
 
     return (
@@ -81,6 +86,7 @@ class EditRecipe extends React.Component {
                       </li>
                     )}
                     <li className="list-group-item">
+                      <i className="now-ui-icons ui-1_simple-add mr-2" />
                       <div className="form-group mb-2 mr-sm-2 mb-sm-0">
                         <IngredientSearch
                           onSelect={ingredient => this.addIngredient(ingredient)}
@@ -103,7 +109,7 @@ class EditRecipe extends React.Component {
                     onClick={event => this.onSave(event)} />
                   <input
                     type="button"
-                    className="btn btn-secondary ml-3"
+                    className="btn btn-neutral ml-3"
                     value="Cancel"
                     onClick={event => this.onCancel(event, this.state)} />
                 </div>

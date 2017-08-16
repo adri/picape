@@ -20,11 +20,13 @@ export default function mutatable({ mutationName = 'mutate' } = {}) {
         this.setState({ loading: true, error: '' });
 
         return this.props[mutationName]({ variables })
-          .then(() => {
+          .then((res) => {
             this.setState({ loading: false });
             if (handleSuccess) {
               handleSuccess();
             }
+
+            return res;
           })
           .catch(error => {
             this.setState({ loading: false, error: error.message });

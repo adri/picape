@@ -10,13 +10,14 @@ export default function Recipe({recipe}) {
         <img src="" className="rounded" alt="" />
       </div>
       <div className="media-body mb-2">
-        <div className="ingredient-name mt-0 mb-0">
+        <div className="mt-0 mb-0">
           <h5>{recipe.title}</h5>
-          <EditRecipeButton recipeId={recipe.id} />
         </div>
-        <div>Description</div>
       </div>
       <div className="d-flex mr-3 align-self-center">
+        <div className="mr-2">
+          <EditRecipeButton recipeId={recipe.id} />
+        </div>
         {recipe.isPlanned ?
           <UnplanRecipe recipeId={recipe.id} /> :
           <PlanRecipe recipeId={recipe.id} />}
