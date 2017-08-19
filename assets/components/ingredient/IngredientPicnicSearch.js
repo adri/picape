@@ -10,7 +10,7 @@ class IngredientSupermarketSearch extends React.Component {
   };
 
   render() {
-    const {refetch, loading, ingredients} = this.props.data;
+    const {refetch, loading, ingredients} = this.props.data || {};
     const {onSelect} = this.props;
 
     return (
@@ -74,5 +74,10 @@ const query = gql`
 `;
 
 export default compose(
-  graphql(query, { options: { variables: { query: '' } } }),
+  graphql(query, {
+    skip: ({query}) => query === '',
+    options: {
+      variables: { query: '' }
+    }
+  }),
 )(IngredientSupermarketSearch);

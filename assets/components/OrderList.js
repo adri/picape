@@ -3,10 +3,11 @@ import ErrorMessage from './ErrorMessage';
 import SyncOrder from './SyncOrder';
 import Ingredient from './Ingredient';
 import Money from './Money';
+import Loading from './Loading';
 
 function OrderList({ data: { loading, error, currentOrder } }) {
   if (error) return <ErrorMessage message="Error loading." />;
-  if (loading) return <div>Loading</div>;
+  if (loading) return <Loading />;
 
   return (
     <div>

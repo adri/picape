@@ -1,10 +1,11 @@
 import { gql, graphql } from 'react-apollo';
 import ErrorMessage from './ErrorMessage';
 import Recipe from './recipe/Recipe';
+import Loading from './Loading';
 
 function RecipeList({ data: { loading, error, recipes }, showEdit}) {
   if (error) return <ErrorMessage message="Error loading." />;
-  if (loading) return <div>Loading</div>;
+  if (loading) return <Loading />;
 
   return (
     <div>
