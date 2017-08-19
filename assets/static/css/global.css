@@ -10,5 +10,6 @@ body > div:first-child,
 }
 
 .page {
-    background: url(/static/images/eat-bg.jpg) no-repeat center center fixed;
+    background: no-repeat center center fixed;
+    background-image: url(http://res.cloudinary.com/picape/image/upload/f_auto,fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg);
 }
