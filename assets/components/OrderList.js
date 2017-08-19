@@ -53,6 +53,7 @@ const orderQuery = gql`
           id
           name
           imageUrl
+          unitQuantity
           orderedQuantity
         }  
       }
