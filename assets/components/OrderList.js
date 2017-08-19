@@ -23,10 +23,14 @@ function OrderList({ data: { loading, error, currentOrder } }) {
       <div className="card">
         <div className="no-gutters">
           {currentOrder &&
-            currentOrder.items.map(ingredient =>
-              <div key={ingredient.id}>
-                <Ingredient {...ingredient} />
-              </div>
+            currentOrder.items.map(item => {
+              const ingredient = item.ingredient ? item.ingredient : item;
+              return (
+                <div key={item.id}>
+                  <Ingredient {...ingredient} />
+                </div>
+              );
+            }
             )}
         </div>
       </div>
@@ -45,6 +49,12 @@ const orderQuery = gql`
         id
         name
         imageUrl
+        ingredient {
+          id
+          name
+          imageUrl
+          orderedQuantity
+        }  
       }
     }
   }

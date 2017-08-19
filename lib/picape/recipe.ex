@@ -51,11 +51,18 @@ defmodule Picape.Recipe do
   end
 
   def ingredients_by_item_ids(item_ids) do
-    query = from i in Ingredient,
+    result = (from i in Ingredient,
       where: i.supermarket_product_id in ^item_ids,
-      select: {i.supermarket_product_id, i.id}
+      select: {i.supermarket_product_id, i})
+      |> Repo.all
+      |> Enum.into(%{})
 
-    ids = Enum.into(Repo.all(query), %{})
+    {:ok, result}
+  end
+
+  def ingredients_by_item_ids_reverse(item_ids) do
+    {:ok, ingredients} = ingredients_by_item_ids(item_ids)
+    ids = Map.new(ingredients, fn {k, ingredient} -> {k, ingredient.id} end)
 
     {:ok, Map.new(item_ids, fn item_id -> {ids[item_id], item_id} end)}
   end

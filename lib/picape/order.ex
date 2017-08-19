@@ -56,7 +56,7 @@ defmodule Picape.Order do
 
   def ingredients_ordered_quantity(order_id, ingredient_ids) do
     with {:ok, items} <- ordered_item_quantities(order_id),
-         {:ok, items_map} <- Recipe.ingredients_by_item_ids(Map.keys(items))
+         {:ok, items_map} <- Recipe.ingredients_by_item_ids_reverse(Map.keys(items))
     do
       {:ok, Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
     end
@@ -117,7 +117,7 @@ defmodule Picape.Order do
   defp ordered_item_quantities(_order_id) do
     {:ok, order} = current()
     existing = Enum.reduce(order.items, %{}, fn item, acc ->
-      Map.update(acc, String.to_integer(item.id), item.quantity, &(&1 + 2))
+      Map.update(acc, item.id, item.quantity, &(&1 + 2))
     end)
 
     {:ok, existing}

@@ -45,6 +45,12 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
     Recipe.recipes_by_ids(ids)
   end
 
+  def ingredients_by_item_ids(_, item_ids) do
+    {:ok, result} = Recipe.ingredients_by_item_ids(item_ids)
+
+    result
+  end
+
   def ingredients_by_recipe_ids(_, recipe_ids) do
     {:ok, recipes_map} = Recipe.ingredients_by_recipe_ids(recipe_ids)
 

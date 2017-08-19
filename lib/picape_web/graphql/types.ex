@@ -13,6 +13,10 @@ defmodule PicapeWeb.Graphql.Types do
   node object :order_item do
     field :name, :string
     field :image_url, :string
+    field :quantity, :string
+    field :ingredient, :ingredient do
+      resolve batched({Resolver.Recipe, :ingredients_by_item_ids})
+    end
   end
 
   object :supermarket_search_result do

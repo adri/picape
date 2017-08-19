@@ -14,7 +14,7 @@ defmodule Picape.Order.LineFromSupermarket do
 
   def convert_item(item = %{}) do
     %Item{
-      id: item["id"],
+      id: String.to_integer(item["id"]),
       name: item["name"],
       image_url: Supermarket.image_url(List.first(item["image_ids"])),
       quantity: Enum.find(
