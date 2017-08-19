@@ -27,7 +27,7 @@ export default ComposedComponent => {
 
       // Run all GraphQL queries in the component tree
       // and extract the resulting data
-      if (!process.browser) {
+      if (false && !process.browser) {
         const apollo = initApollo();
         // Provide the `url` prop data in case a GraphQL query uses it
         const url = { query: ctx.query, pathname: ctx.pathname };
