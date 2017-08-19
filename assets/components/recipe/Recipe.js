@@ -21,6 +21,7 @@ export default function Recipe({recipe, showEdit}) {
 
       <style jsx>{`
       .recipe {
+        flex-basis: 25%;
         margin-bottom: 0;
         box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, .1);
       }

@@ -12,10 +12,8 @@ function RecipeList({ data: { loading, error, recipes }, showEdit}) {
       <h5 className="text-white">Recipes</h5>
       <div className="card-group no-gutters">
         {recipes &&
-          recipes.map(recipe =>
-            <div key={recipe.id} className="col-sm-3">
-              <Recipe recipe={recipe} showEdit={showEdit} />
-            </div>
+          recipes.map((recipe, index)=>
+            <Recipe key={recipe.id} recipe={recipe} showEdit={showEdit} />
           )}
       </div>
     </div>
