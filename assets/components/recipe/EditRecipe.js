@@ -12,6 +12,7 @@ class EditRecipe extends React.Component {
     this.setState({
       id: props.data.node.id,
       title: props.data.node.title,
+      imageUrl: props.data.node.imageUrl,
       ingredients: props.data.node.ingredients || [],
       changed: false,
     });
@@ -39,6 +40,7 @@ class EditRecipe extends React.Component {
     this.props.submit(event, {
         recipeId: this.state.id,
         title: this.state.title,
+        imageUrl: this.state.imageUrl,
         ingredients: this.state.ingredients.map(ingredient => ({
           ingredientId: ingredient.id,
           quantity: ingredient.quantity || 1,
@@ -56,7 +58,7 @@ class EditRecipe extends React.Component {
   render() {
     const { data: {loading, error} } = this.props;
     if (this.state === null) return <Loading />;
-    const {title, ingredients, changed} = this.state;
+    const {title, imageUrl, ingredients, changed} = this.state;
 
     return (
       <div>
@@ -73,6 +75,18 @@ class EditRecipe extends React.Component {
                     className="form-control"
                     onChange={event => this.setState({title: event.target.value, changed: true})}
                     defaultValue={title} />
+                </div>
+              </div>
+
+              <div className="form-group row">
+                <label htmlFor="imageUrl" className="col-sm-2 col-form-label">Image URL</label>
+                <div className="col-sm-10">
+                  <input
+                    type="imageUrl"
+                    id="imageUrl"
+                    className="form-control"
+                    onChange={event => this.setState({imageUrl: event.target.value, changed: true})}
+                    defaultValue={imageUrl} />
                 </div>
               </div>
 
@@ -143,6 +157,7 @@ const GetRecipe = gql`
             ... on Recipe {
                 id
                 title
+                imageUrl
                 ingredients {
                     id 
                     name
@@ -154,10 +169,11 @@ const GetRecipe = gql`
 
 
 const EditQuery = gql`
-  mutation EditRecipe($recipeId: ID!, $title: String!, $ingredients: [IngredientRef]) {
-    editRecipe(recipeId: $recipeId, title: $title, ingredients: $ingredients) {
+  mutation EditRecipe($recipeId: ID!, $title: String!, $imageUrl: String, $ingredients: [IngredientRef]) {
+    editRecipe(recipeId: $recipeId, title: $title, imageUrl: $imageUrl, ingredients: $ingredients) {
       id
       title  
+      imageUrl  
       ingredients {
           id
       }  

@@ -2886,7 +2886,6 @@ Created using IcoMoon - icomoon.io
 .card {
   border: 0;
   border-radius: 0.1875rem;
-  display: inline-block;
   position: relative;
   overflow: hidden;
   width: 100%;
@@ -2904,6 +2903,14 @@ Created using IcoMoon - icomoon.io
   background-color: #2CA8FF; }
 .card[data-background-color="green"] {
   background-color: #18ce0f; }
+
+.card-group {
+  box-shadow: 0px 5px 25px 0px rgba(0, 0, 0, 0.2);
+}
+
+.card-group .card {
+  box-shadow: none;
+}
 
 .card-signup {
   max-width: 350px;

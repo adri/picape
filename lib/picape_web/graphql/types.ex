@@ -29,6 +29,7 @@ defmodule PicapeWeb.Graphql.Types do
 
   node object :recipe do
     field :title, :string
+    field :image_url, :string
     field :is_planned, :boolean do
       resolve batched({Resolver.Order, :recipies_planned?})
     end
