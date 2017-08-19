@@ -10,7 +10,25 @@ Router.onRouteChangeStart = (url) => {
 Router.onRouteChangeComplete = () => NProgress.done();
 Router.onRouteChangeError = () => NProgress.done();
 
-export default ({ children, title = 'Supermarket' }) =>
+export default class Layout extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      mounted: false
+    }
+  }
+
+  componentDidMount() {
+    // trick to make the animation work is to call the set state next run
+    setTimeout(() => {
+      this.setState({mounted: true})
+    }, 1)
+  }
+// export default ({ children, title = 'Supermarket' }) =>
+
+  render() {
+    const { children, title = 'Supermarket' } = this.props;
+    return (
   <div className="page-wrapper">
     <Head>
       <meta charSet="utf-8" />
@@ -58,13 +76,22 @@ export default ({ children, title = 'Supermarket' }) =>
         background-color: #333;
         height: 100%;
       }
+      .animated {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.1s ease-in;
+      }
+      .animated.mounted {
+        opacity: 1;
+        visibility: visible;
+      }
     `}</style>
 
     <div className="page">
       <Nav />
 
       <main role="main">
-        <div className="container">
+        <div className= {'container animated ' + (this.state.mounted ? 'mounted' : '')}>
             {children}
         </div>
       </main>
@@ -88,4 +115,7 @@ export default ({ children, title = 'Supermarket' }) =>
         <div className="copyright">&copy; Designed by </div>
       </div>
     </footer>
-  </div>;
+  </div>
+    )
+  }
+}
