@@ -7,51 +7,21 @@ function UnplanRecipe({ submit, loading, error, recipeId }) {
   if (error) alert(error);
 
   return (
-    <a key="plan-button" href="#" onClick={event => submit(event, { recipeId })} className={"btn btn-simple " + (loading && "loading")}>
-      <i className="check-bar fa fa-check-circle fa-lg fa-fw" />
-      <span className="loading-bar"><Loading /></span>
+    <a key="plan-button" href="#" onClick={event => submit(event, { recipeId })} className="btn btn-simple">
+      {loading && <Loading dark />}
       <span className="btn-text">Unplan</span>
       <style jsx>{`
-      .check-bar {
-        position:relative;
-        left: 0;
-        width: 0;
-        color: green;
-      }
-
-      .btn-text {
-        padding-left: 5px;
-      }
-
-      .btn {
+      .btn-simple {
         color: #636363;
         position: relative;
         transition: width 1s ease-out;
+        background-color: white;
       }
 
-      .btn:hover {
+      .btn-simple:hover {
         border-color: green;
         color: green;
-      }
-
-      .loading-bar {
-        position:relative;
-        left: 0;
-        width: 0;
-        opacity: 0;
-        transition: width 0s, opacity 0.5s linear;
-      }
-
-      .loading .loading-bar {
-        height: auto;
-        opacity: 1;
-      }
-
-      .loading .check-bar {
-        transition: opacity 1s ease-out;
-        opacity: 0;
-        height: 0;
-        overflow: hidden;
+        background-color: white;
       }
       `}</style>
     </a>

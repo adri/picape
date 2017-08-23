@@ -9,20 +9,23 @@ export default function Recipe({recipe, showEdit}) {
     <div className="card recipe">
       <Image className="card-img-top" src={recipe.imageUrl} alt={recipe.title} />
       <div className="card-block">
-        <h5 className="card-title">{recipe.title}</h5>
-        {showEdit && <EditRecipeButton recipeId={recipe.id} />}
-        {/*<p className="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>*/}
+        <h5 className="card-title">
+          {recipe.isPlanned && <i className="check-bar fa fa-check-circle fa-lg fa-fw" />}
+          {recipe.title}</h5>
       </div>
       <div className="card-footer text-center">
         {recipe.isPlanned ?
           <UnplanRecipe recipeId={recipe.id} /> :
           <PlanRecipe recipeId={recipe.id} />}
+          <div>
+            {showEdit && <EditRecipeButton recipeId={recipe.id} />}
+          </div>
       </div>
-
       <style jsx>{`
       .recipe {
         flex-basis: 25%;
         margin-bottom: 0;
+        position: relative;
         box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, .1);
       }
       .card-block {
@@ -32,8 +35,21 @@ export default function Recipe({recipe, showEdit}) {
         margin-top: 0;
         font-size: 16px;
       }
+      .check-bar {
+        color: green;
+      }
+      .recipe:hover .card-footer {
+        opacity: 1;
+        transition: all 0.1s ease-in-out;
+      }
       .card-footer {
-        background-color: rgba(20,20,20,0.1);
+        position: absolute;
+        width: 100%;
+        height: 53%;
+        opacity: 0;
+        bottom: 0;
+        background: linear-gradient(rgba(255,0,0,0), rgba(255,255,255,1) 55%);
+        border-top: 0;
       }
       .recipe .media {
         border-left: 1px solid #d9d5d0;
