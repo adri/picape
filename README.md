@@ -30,7 +30,8 @@ $ git push heroku master
 ```
 
 ## Screenshots
-![picapie-unplan](https://user-images.githubusercontent.com/133832/28908720-684074fc-7825-11e7-9da7-cfac3ea25066.gif)
-![picapie-essentials](https://user-images.githubusercontent.com/133832/28908719-683ff64e-7825-11e7-8a80-88af9bfdcdaf.gif)
+![picape whybug com- ipad pro](https://user-images.githubusercontent.com/133832/29629508-6650bcd2-8839-11e7-84a8-12fc94d230f9.png)
+[picapie-unplan](https://user-images.githubusercontent.com/133832/28908720-684074fc-7825-11e7-9da7-cfac3ea25066.gif)
+[picapie-essentials](https://user-images.githubusercontent.com/133832/28908719-683ff64e-7825-11e7-8a80-88af9bfdcdaf.gif)
 
 Generated using the [Firebird](https://github.com/infinitered/firebird) template.
