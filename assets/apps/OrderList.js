@@ -55,6 +55,13 @@ const orderQuery = gql`
           imageUrl
           unitQuantity
           orderedQuantity
+          plannedRecipes {
+              quantity
+              recipe {
+                  id
+                  title
+              }
+          }
         }  
       }
     }
