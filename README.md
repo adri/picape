@@ -20,6 +20,12 @@ $ bin/setup
 - `mix test`: Run the Elixir tests.
 - `cd assets/ && yarn run test`: Run Javascript tests.
 
+## Development
+
+- Web: http://localhost:4001
+- API: http://localhost:4001
+- GraphiQL: http://localhost:4001/graphiql
+
 ## Deploy
 
 ```
