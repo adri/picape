@@ -7,9 +7,18 @@ function PlanRecipe({ recipeId, submit, error, loading }) {
   if (error) alert(error);
 
   return (
-    <a href="#" onClick={event => submit(event, { recipeId })} className="btn">
+    <a key="plan-button" href="#" onClick={event => submit(event, { recipeId })} className="btn">
       {loading && <Loading />}
-      Plan
+      <span className="btn-text">Plan</span>
+      <style jsx>{`
+      .btn {
+         transition: width 1s ease-out;
+      }
+
+      .btn-text {
+        padding-left: 5px;
+      }
+      `}</style>
     </a>
   );
 }
