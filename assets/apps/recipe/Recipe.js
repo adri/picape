@@ -48,7 +48,7 @@ export default function Recipe({recipe, showEdit}) {
         height: 53%;
         opacity: 0;
         bottom: 0;
-        background: linear-gradient(rgba(255,0,0,0), rgba(255,255,255,1) 55%);
+        background: linear-gradient(rgba(255,255,255,0.0), rgba(255,255,255,1) 55%);
         border-top: 0;
       }
       .recipe .media {
