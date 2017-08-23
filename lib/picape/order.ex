@@ -6,20 +6,29 @@ defmodule Picape.Order do
 
   defmodule Product, do: defstruct [:id, :quantity]
 
+  @doc """
+  Returns the currently active cart.
+  """
   def current() do
     {:ok, LineFromSupermarket.convert(Supermarket.cart())}
   end
 
+  @doc """
+  Plans or unplans (unplan = true) a recipe.
+  """
   def plan_recipe(order_id, recipe_id, unplan \\ false) do
     %PlannedRecipe{}
     |> PlannedRecipe.changeset(%{line_id: order_id, recipe_id: recipe_id, unplanned: unplan})
     |> Repo.insert(on_conflict: [set: [unplanned: unplan]], conflict_target: [:line_id, :recipe_id])
     |> case do
-      {:ok, _planned_recipe} -> sync_supermarket(order_id)
+      {:ok, _recipe} -> sync_supermarket(order_id)
       err -> err
     end
   end
 
+  @doc """
+  Returns a list of planned recipe IDs.
+  """
   def planned_recipes(order_id) do
     query = from p in PlannedRecipe,
       where: p.line_id == ^order_id and p.unplanned == false,
@@ -28,12 +37,15 @@ defmodule Picape.Order do
     {:ok, Repo.all(query)}
   end
 
+  @doc """
+  Synchronizes planned ingredients with the cart on Supermarket.
+  """
   def sync_supermarket(order_id) do
     ensure_order_is_current(order_id)
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
-         {:ok, planned } <- Recipe.ingredient_quantities(recipe_quantities),
-         {:ok, manual } <- manual_ingredients(order_id),
-         {:ok, existing } <- ordered_item_quantities(order_id),
+         {:ok, planned} <- Recipe.ingredient_quantities(recipe_quantities),
+         {:ok, manual} <- manual_ingredients(order_id),
+         {:ok, existing} <- ordered_item_quantities(order_id),
          {:ok, changes} <- Sync.changes(planned, manual, existing)
     do
       IO.inspect recipe_quantities, label: "recipe_quantities"
@@ -47,6 +59,9 @@ defmodule Picape.Order do
     end
   end
 
+  @doc """
+  Returns a map of ingredient IDs to a boolean if that recipe was planned or not.
+  """
   def ingredients_planned?(order_id, ingredient_ids) do
     with {:ok, recipe_ids} <- planned_recipes(order_id)
     do
@@ -98,7 +113,7 @@ defmodule Picape.Order do
 
   defp planned_items_in_order?(order_id) do
     with [] <- Repo.all(from p in PlannedRecipe, where: p.line_id == ^order_id, limit: 1),
-         [] <-  Repo.all(from m in ManualIngredient, where: m.line_id == ^order_id, limit: 1)
+         [] <- Repo.all(from m in ManualIngredient, where: m.line_id == ^order_id, limit: 1)
     do
       true
     else
@@ -106,6 +121,9 @@ defmodule Picape.Order do
     end
   end
 
+  @doc """
+  Returns a map of recipe ID to how many times it is planned.
+  """
   defp recipe_ingredient_quantities(order_id) do
     query = from p in PlannedRecipe,
       where: p.line_id == ^order_id,
