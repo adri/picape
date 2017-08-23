@@ -9,10 +9,6 @@ config :picape, PicapeWeb.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
-# Configure mailer for test mode
-config :picape, Picape.Mailer,
-  adapter: Swoosh.Adapters.Test
-
 # Configure your database
 config :picape, Picape.Repo,
   adapter: Ecto.Adapters.Postgres,

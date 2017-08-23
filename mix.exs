@@ -44,12 +44,11 @@ defmodule Picape.Mixfile do
      {:sentry, "~> 5.0.1"},
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
-     {:swoosh, "~> 0.7"},
      {:reverse_proxy, "~> 0.3.1"},
      {:poison, "~> 2.0"},
      {:httpoison, "~> 0.12"},
-     {:credo, "~> 0.7", only: [:dev, :test]},
-     {:ex_doc, "~> 0.15", only: [:dev, :test]}]
+     {:credo, "~> 0.7", only: [:dev, :test]}
+     ]
   end
 
   # Aliases are shortcuts or tasks specific to the current project.

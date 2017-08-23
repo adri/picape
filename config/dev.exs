@@ -56,8 +56,4 @@ config :picape, Picape.Repo,
   hostname: "localhost",
   pool_size: 10
 
-# Configure mailer for local previews
-config :picape, Picape.Mailer,
-  adapter: Swoosh.Adapters.Local
-
 import_config "#{Mix.env}.secret.exs"

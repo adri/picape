@@ -41,10 +41,6 @@ config :picape, Picape.Supermarket,
   user_agent: System.get_env("SUPERMARKET_USER_AGENT"),
   cookie: System.get_env("SUPERMARKET_COOKIE")
 
-# TODO: Configure mailer for production.
-config :picape, Picape.Mailer,
-  adapter: Swoosh.Adapters.Local
-
 # config :picape, Picape.Mailer,
 #   adapter: Swoosh.Adapters.Sendgrid,
 #   api_key: {:system, "SENDGRID_API_KEY"}
