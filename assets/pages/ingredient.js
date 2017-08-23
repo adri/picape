@@ -1,5 +1,5 @@
-import Layout from '../components/layout';
-import EditIngredient from '../components/ingredient/EditIngredient'
+import Layout from '../components/Layout';
+import EditIngredient from '../apps/ingredient/EditIngredient'
 import withData from '../lib/withData';
 
 export default withData(({ data, url: { query: { id } } }) =>

@@ -1,7 +1,7 @@
 import { gql, graphql } from 'react-apollo';
-import ErrorMessage from './ErrorMessage';
+import ErrorMessage from '../components/ErrorMessage';
 import Recipe from './recipe/Recipe';
-import Loading from './Loading';
+import Loading from '../components/Loading';
 
 function RecipeList({ data: { loading, error, recipes }, showEdit}) {
   if (error) return <ErrorMessage message="Error loading." />;
@@ -16,6 +16,11 @@ function RecipeList({ data: { loading, error, recipes }, showEdit}) {
             <Recipe key={recipe.id} recipe={recipe} showEdit={showEdit} />
           )}
       </div>
+      <style jsx>{`
+      .card-group {
+        margin-bottom: 15px;
+      }
+      `}</style>
     </div>
   );
 }

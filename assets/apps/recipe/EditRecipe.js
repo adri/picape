@@ -1,7 +1,7 @@
 import React from 'react';
 import { gql, graphql, compose } from 'react-apollo';
 import mutateable from '../../lib/mutateable';
-import Loading from '../Loading';
+import Loading from '../../components/Loading';
 import IngredientSearch from '../ingredient/IngredientSearch';
 import Router from 'next/router';
 
@@ -169,7 +169,7 @@ const GetRecipe = gql`
 
 
 const EditQuery = gql`
-  mutation EditRecipe($recipeId: ID!, $title: String!, $imageUrl: String, $ingredients: [IngredientRef]) {
+  mutation EditRecipe($recipeId: ID!, $title: String!, $imageUrl: String, $ingredients: [IngredientRef]!) {
     editRecipe(recipeId: $recipeId, title: $title, imageUrl: $imageUrl, ingredients: $ingredients) {
       id
       title  

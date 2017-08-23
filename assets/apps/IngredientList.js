@@ -1,7 +1,7 @@
 import { gql, graphql, compose } from 'react-apollo';
-import ErrorMessage from './ErrorMessage';
-import Ingredient from './Ingredient';
-import Loading from './Loading';
+import ErrorMessage from '../components/ErrorMessage';
+import Ingredient from '../components/Ingredient';
+import Loading from '../components/Loading';
 import AddIngredient from './ingredient/AddIngredient';
 
 function IngredientList({ data: { loading, error, ingredients }} ) {

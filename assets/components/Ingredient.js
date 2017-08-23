@@ -1,4 +1,4 @@
-import OrderIngredient from './ingredient/OrderIngredient';
+import OrderIngredient from '../apps/ingredient/OrderIngredient';
 import Link from 'next/link';
 
 export default class extends React.Component {

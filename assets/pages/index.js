@@ -1,7 +1,7 @@
-import Layout from '../components/layout';
-import RecipeList from '../components/RecipeList';
-import EssentialList from '../components/EssentialList';
-import OrderList from '../components/OrderList';
+import Layout from '../components/Layout';
+import RecipeList from '../apps/RecipeList';
+import EssentialList from '../apps/EssentialList';
+import OrderList from '../apps/OrderList';
 import withData from '../lib/withData';
 
 export default withData(({ data }) =>

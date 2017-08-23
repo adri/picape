@@ -1,6 +1,6 @@
-import Layout from '../components/layout';
-import RecipeList from '../components/RecipeList';
-import AddRecipe from '../components/recipe/AddRecipe';
+import Layout from '../components/Layout';
+import RecipeList from '../apps/RecipeList';
+import AddRecipe from '../apps/recipe/AddRecipe';
 import withData from '../lib/withData';
 
 export default withData(({ data }) =>

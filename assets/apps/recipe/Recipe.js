@@ -1,7 +1,7 @@
 import React from 'react';
 import UnplanRecipe from './UnplanRecipe';
 import PlanRecipe from './PlanRecipe';
-import Image from '../Image';
+import Image from '../../components/Image';
 import EditRecipeButton from './EditRecipeButton';
 
 export default function Recipe({recipe, showEdit}) {
@@ -33,7 +33,7 @@ export default function Recipe({recipe, showEdit}) {
         font-size: 16px;
       }
       .card-footer {
-        background-color: transparent;
+        background-color: rgba(20,20,20,0.1);
       }
       .recipe .media {
         border-left: 1px solid #d9d5d0;

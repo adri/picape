@@ -1,5 +1,5 @@
-import Layout from '../components/layout';
-import EditRecipe from '../components/recipe/EditRecipe'
+import Layout from '../components/Layout';
+import EditRecipe from '../apps/recipe/EditRecipe'
 import withData from '../lib/withData';
 
 export default withData(({ data, url: { query: { id } } }) =>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { gql, graphql, compose } from 'react-apollo';
-import Loading from '../Loading';
+import Loading from '../../components/Loading';
 import DeleteIngredientButton from './DeleteIngredientButton';
 import Router from 'next/router';
 import mutateable from '../../lib/mutateable';

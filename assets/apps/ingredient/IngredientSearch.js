@@ -1,17 +1,17 @@
 import React from 'react';
 import { gql, graphql, compose } from 'react-apollo';
-import Loading from '../Loading';
-import Ingredient from '../Ingredient';
+import Loading from '../../components/Loading';
+import Ingredient from '../../components/Ingredient';
 import Autocomplete from 'react-autocomplete';
 
-class IngredientSupermarketSearch extends React.Component {
+class IngredientSearch extends React.Component {
   state = {
     value: '',
   };
 
   render() {
-    const {refetch, loading, ingredients} = this.props.data || {};
-    const {onSelect} = this.props;
+    const {refetch, loading, ingredients} = this.props.data;
+    const {onSelect, excluded} = this.props;
 
     return (
       <div style={{position: "relative"}}>
@@ -20,7 +20,7 @@ class IngredientSupermarketSearch extends React.Component {
           items={ingredients || []}
           inputProps={{
             className: "form-control supermarket-autocomplete",
-            placeholder: "Supermarket product (Nederlands)",
+            placeholder: "Ingredient",
             size: 90,
             style: {
               backgroundColor: "white",
@@ -47,13 +47,14 @@ class IngredientSupermarketSearch extends React.Component {
             this.setState({ value });
             clearTimeout(this.debounced);
             this.debounced = setTimeout(() => {
-              refetch({query: value})
+              refetch({query: value, excluded})
             }, 300)
 
           }}
           onSelect={(val, ingredient) => {
             this.setState({value: val});
             onSelect && onSelect(ingredient);
+            this.setState({value: this.props.defaultValue || ''});
           }}
         />
       </div>
@@ -62,11 +63,10 @@ class IngredientSupermarketSearch extends React.Component {
 }
 
 const query = gql`
-  query searchSupermarket($query: String!) {
-    ingredients: searchSupermarket(query: $query) {
+  query searchIngredient($query: String!, $excluded: [ID]) {
+    ingredients: searchIngredient(query: $query, excluded: $excluded) {
       id
       name
-      price
       imageUrl
       unitQuantity
     }
@@ -74,10 +74,5 @@ const query = gql`
 `;
 
 export default compose(
-  graphql(query, {
-    skip: ({query}) => query === '',
-    options: {
-      variables: { query: '' }
-    }
-  }),
-)(IngredientSupermarketSearch);
+  graphql(query, { options: ({excluded}) => ({ variables: { query: '', excluded } }) }),
+)(IngredientSearch);

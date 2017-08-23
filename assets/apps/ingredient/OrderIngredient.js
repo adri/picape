@@ -1,7 +1,7 @@
 import React from 'react';
 import { gql, graphql, compose } from 'react-apollo';
 import mutateable from '../../lib/mutateable';
-import Loading from '../Loading';
+import Loading from '../../components/Loading';
 
 function OrderIngredient({ id, quantity, submit, loading, error, hovered }) {
   if (error) alert(error);

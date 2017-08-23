@@ -1,7 +1,7 @@
 import { gql, graphql } from 'react-apollo';
-import ErrorMessage from './ErrorMessage';
-import Ingredient from './Ingredient';
-import Loading from './Loading';
+import ErrorMessage from '../components/ErrorMessage';
+import Ingredient from '../components/Ingredient';
+import Loading from '../components/Loading';
 
 function EssentialList({ data: { loading, error, essentials } }) {
   if (error) return <ErrorMessage message="Error loading." />;

@@ -1,9 +1,9 @@
 import { gql, graphql } from 'react-apollo';
-import ErrorMessage from './ErrorMessage';
+import ErrorMessage from '../components/ErrorMessage';
 import SyncOrder from './SyncOrder';
-import Ingredient from './Ingredient';
-import Money from './Money';
-import Loading from './Loading';
+import Ingredient from '../components/Ingredient';
+import Money from '../components/Money';
+import Loading from '../components/Loading';
 
 function OrderList({ data: { loading, error, currentOrder } }) {
   if (error) return <ErrorMessage message="Error loading." />;
