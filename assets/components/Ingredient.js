@@ -1,4 +1,5 @@
 import OrderIngredient from '../apps/ingredient/OrderIngredient';
+import Dropdown from './Dropdown';
 import Link from 'next/link';
 
 export default class extends React.Component {
@@ -7,7 +8,7 @@ export default class extends React.Component {
   };
 
   render() {
-    const { id, name, imageUrl, isPlanned, unitQuantity, orderedQuantity, showEdit } = this.props;
+    const { id, name, imageUrl, isPlanned, plannedRecipes, unitQuantity, orderedQuantity, showEdit } = this.props;
     const { hovered } = this.state;
 
     return (
@@ -23,7 +24,20 @@ export default class extends React.Component {
           <div className="media-body mb-2">
             <div className="ingredient-name mt-0 mb-0">
                 {showEdit && <Link href={`/ingredient?id=${id}`}><a>{name}</a></Link>}
-                {!showEdit && name}
+                {!showEdit && <Dropdown link={name}>
+                  {isPlanned && (
+                    <div>
+                      <h6 className="dropdown-header">Planned recipes</h6>
+                      {Array.isArray(plannedRecipes) && plannedRecipes.map(({quantity, recipe}) =>
+                        <Link href={`/recipe?id=${recipe.id}`}>
+                          <a className="dropdown-item" href="#">{quantity} {recipe.title}</a>
+                        </Link>
+                      )}
+                      <div className="dropdown-divider" />
+                    </div>
+                  )}
+                  <Link href={`/ingredient?id=${id}`}><a className="dropdown-item">Edit</a></Link>
+                </Dropdown>}
             </div>
             <div className="ingredient-unit-quantity">
               {unitQuantity}&nbsp;

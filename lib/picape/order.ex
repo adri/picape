@@ -43,7 +43,7 @@ defmodule Picape.Order do
   def sync_supermarket(order_id) do
     ensure_order_is_current(order_id)
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
-         {:ok, planned} <- Recipe.ingredient_quantities(recipe_quantities),
+         {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
          {:ok, manual} <- manual_ingredients(order_id),
          {:ok, existing} <- ordered_item_quantities(order_id),
          {:ok, changes} <- Sync.changes(planned, manual, existing)
@@ -94,6 +94,14 @@ defmodule Picape.Order do
        select: {i.supermarket_product_id, m.quantity}
 
      {:ok, Enum.into(Repo.all(query), %{})}
+  end
+
+  def recipes_planned_for_ingredient_ids(order_id, ingredient_ids) do
+    with {:ok, planned_recipe_ids} <- planned_recipes(order_id),
+         {:ok, recipes_by_ingredients} <- Recipe.recipes_by_ingredient_ids(ingredient_ids, planned_recipe_ids)
+    do
+      {:ok, recipes_by_ingredients}
+    end
   end
 
   # --- private

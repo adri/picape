@@ -30,12 +30,18 @@ defmodule PicapeWeb.Graphql.Types do
     field :image_url, :string, resolve: from_object(:image_url)
     field :is_planned, :boolean, resolve: batched({Resolver.Order, :ingredients_planned?})
     field :ordered_quantity, :integer, resolve: batched({Resolver.Order, :ingredients_ordered_quantity})
+    field :planned_recipes, list_of(:recipe_edge), resolve: batched({Resolver.Order, :recipes_planned_for_ingredient_ids})
     field :unit_quantity, :string, resolve: from_object(:unit_quantity)
   end
 
   object :ingredient_edge do
     field :quantity, :integer
     field :ingredient, :ingredient
+  end
+
+  object :recipe_edge do
+    field :quantity, :integer
+    field :recipe, :recipe
   end
 
   object :supermarket_search_result do
@@ -53,7 +59,8 @@ defmodule PicapeWeb.Graphql.Types do
   """
   defp batched(batch_fun) do
     fn parent, _args, _ctx ->
-      batch(batch_fun, parent.id, fn batch_results ->
+      batch(batch_fun, parent.id, fn results ->
+        {:ok, batch_results} = results
         {:ok, Map.get(batch_results, parent.id)}
       end)
     end

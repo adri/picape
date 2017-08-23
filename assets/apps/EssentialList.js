@@ -33,6 +33,13 @@ const recipesQuery = gql`
       isPlanned
       unitQuantity
       orderedQuantity
+      plannedRecipes {
+          quantity
+          recipe {
+              id
+              title
+          }
+      }
     }
   }
 `;

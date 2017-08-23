@@ -29,12 +29,12 @@ defmodule Picape.Recipe do
   end
 
   @doc """
-  Returns a map of ingredients and their quantities needed
+  Returns a map of items and their quantities needed
   for the specified map of recipes and their quantities.
 
   This excludes essentials.
   """
-  def ingredient_quantities(recipes_quantities) do
+  def item_quantities(recipes_quantities) do
     query = from r in IngredientRef,
       join: i in assoc(r, :ingredient),
       where: r.recipe_id in ^Map.keys(recipes_quantities) and
@@ -77,8 +77,19 @@ defmodule Picape.Recipe do
     {:ok, result}
   end
 
+  def recipes_by_ingredient_ids(ingredient_ids, recipe_ids) do
+    result = Repo.all(from ref in IngredientRef,
+      where: ref.recipe_id in ^recipe_ids and ref.ingredient_id in ^ingredient_ids,
+      join: r in assoc(ref, :recipe),
+      select: {ref.ingredient_id, ref},
+      preload: [:recipe])
+      |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
+
+    {:ok, result}
+  end
+
   @doc """
-  Returns if each ingredient is in one of the specified recipes.
+  Returns if each ingredient that is in one of the specified recipes.
   """
   def ingredients_in_recipes?(recipe_ids, ingredient_ids) do
     ids = Repo.all from r in IngredientRef,

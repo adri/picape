@@ -16,19 +16,19 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
   def recipies_planned?(_, recipe_ids) do
     {:ok, planned_ids} = Order.planned_recipes(order_id())
 
-    Map.new(recipe_ids, fn id -> {id, Enum.member?(planned_ids, id)} end)
+    {:ok, Map.new(recipe_ids, fn id -> {id, Enum.member?(planned_ids, id)} end)}
   end
 
   def ingredients_planned?(_, ingredient_ids) do
-    {:ok, ingredients} = Order.ingredients_planned?(order_id(), ingredient_ids)
-
-    ingredients
+     Order.ingredients_planned?(order_id(), ingredient_ids)
   end
 
   def ingredients_ordered_quantity(_, ingredient_ids) do
-    {:ok, ingredients} = Order.ingredients_ordered_quantity(order_id(), ingredient_ids)
+    Order.ingredients_ordered_quantity(order_id(), ingredient_ids)
+  end
 
-    ingredients
+  def recipes_planned_for_ingredient_ids(_, ingredient_ids) do
+    Order.recipes_planned_for_ingredient_ids(order_id(), ingredient_ids)
   end
 
 # Mutations

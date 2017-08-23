@@ -6,8 +6,8 @@ defmodule Picape.Recipe.IngredientRef do
 
   schema "recipe_ingredient_ref" do
     field :quantity, :integer
-    field :recipe_id, :id
     belongs_to :ingredient, Picape.Recipe.Ingredient
+    belongs_to :recipe, Picape.Recipe.Recipe
 
     timestamps()
   end
