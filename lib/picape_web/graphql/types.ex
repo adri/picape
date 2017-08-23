@@ -14,9 +14,28 @@ defmodule PicapeWeb.Graphql.Types do
     field :name, :string
     field :image_url, :string
     field :quantity, :string
-    field :ingredient, :ingredient do
-      resolve batched({Resolver.Recipe, :ingredients_by_item_ids})
-    end
+    field :ingredient, :ingredient, resolve: batched({Resolver.Recipe, :ingredients_by_item_ids})
+  end
+
+  node object :recipe do
+    field :title, :string
+    field :image_url, :string
+    field :is_planned, :boolean, resolve: batched({Resolver.Order, :recipies_planned?})
+    field :ingredients, list_of(:ingredient), resolve: batched({Resolver.Recipe, :ingredients_by_recipe_ids})
+  end
+
+  node object :ingredient do
+    field :name, :string
+    field :is_essential, :boolean
+    field :image_url, :string, resolve: from_object(:image_url)
+    field :is_planned, :boolean, resolve: batched({Resolver.Order, :ingredients_planned?})
+    field :ordered_quantity, :integer, resolve: batched({Resolver.Order, :ingredients_ordered_quantity})
+    field :unit_quantity, :string, resolve: from_object(:unit_quantity)
+  end
+
+  object :ingredient_edge do
+    field :quantity, :integer
+    field :ingredient, :ingredient
   end
 
   object :supermarket_search_result do
@@ -27,51 +46,25 @@ defmodule PicapeWeb.Graphql.Types do
     field :unit_quantity, :string
   end
 
-  node object :recipe do
-    field :title, :string
-    field :image_url, :string
-    field :is_planned, :boolean do
-      resolve batched({Resolver.Order, :recipies_planned?})
-    end
-    field :ingredients, list_of(:ingredient) do
-      resolve batched({Resolver.Recipe, :ingredients_by_recipe_ids})
-    end
-  end
-
-  object :ingredient_edge do
-    field :quantity, :integer
-    field :ingredient, :ingredient
-  end
-
-  node object :ingredient do
-    field :name, :string
-    field :is_essential, :boolean
-    field :image_url, :string do
-      resolve fn _, %{source: source} ->
-        {:ok, source[:image_url]}
-      end
-    end
-    field :is_planned, :boolean do
-      resolve batched({Resolver.Order, :ingredients_planned?})
-    end
-    field :ordered_quantity, :integer do
-      resolve batched({Resolver.Order, :ingredients_ordered_quantity})
-    end
-    field :unit_quantity, :string do
-      resolve fn _, %{source: source} ->
-        {:ok, source[:unit_quantity]}
-      end
-    end
-  end
-
   connection node_type: :ingredient
 
-
+  @doc """
+  Helper to collect all IDs of a parent and send it to a batch function.
+  """
   defp batched(batch_fun) do
     fn parent, _args, _ctx ->
       batch(batch_fun, parent.id, fn batch_results ->
         {:ok, Map.get(batch_results, parent.id)}
       end)
+    end
+  end
+
+  @doc """
+  Helper to access a dynamic property on a parent.
+  """
+  defp from_object(key) do
+    fn parent, _args, _ctx ->
+      {:ok, parent[key]}
     end
   end
 end
