@@ -2,7 +2,7 @@ defmodule QueryRecipeTest do
   use Picape.AbsintheCase
 
   test "returns an empty list of recipes" do
-    assert {:ok, %{data: %{"recipes" => []}}} = run("{ recipes { id } }", variables: %{"id" => "123"})
+    assert {:ok, %{data: %{"recipes" => []}}} = run("{ recipes { id } }")
   end
 
   @query """
