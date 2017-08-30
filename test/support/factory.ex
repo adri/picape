@@ -52,7 +52,7 @@ defmodule Picape.Factory do
   def build(:recipe, attrs) do
     build(:recipe)
     |> struct(attrs)
-    |> struct(ingredients: ref_ingredients(attrs[:ingredients]))
+    |> struct(ingredients: ref_ingredients(attrs[:ingredients] || []))
   end
 
 

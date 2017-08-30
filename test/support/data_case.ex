@@ -16,7 +16,7 @@ defmodule Picape.DataCase do
 
   using do
     quote do
-      alias Picape.Factory
+      import Picape.Factory
 
       import Ecto
       import Ecto.Changeset
