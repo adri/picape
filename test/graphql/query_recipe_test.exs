@@ -1,5 +1,6 @@
-defmodule QueryRecipeTest do
+defmodule Picape.Graphql.QueryRecipeTest do
   use Picape.AbsintheCase
+  alias Absinthe.Relay.Node
 
   test "returns an empty list of recipes" do
     assert {:ok, %{data: %{"recipes" => []}}} = run("{ recipes { id } }")
@@ -25,7 +26,6 @@ defmodule QueryRecipeTest do
     }
     assert {:ok, %{data: expected}} == run(query)
   end
-
 
   @query """
   {
@@ -53,5 +53,27 @@ defmodule QueryRecipeTest do
       ]
     }
     assert {:ok, %{data: expected}} == run(query)
+  end
+
+  @query """
+  query node($id: ID!) {
+    node(id: $id) {
+      ... on Recipe {
+        title
+        imageUrl
+      }
+    }
+  }
+  """
+  test "returns recipe node", %{query: query} do
+    recipe = insert! :recipe, title: "Shoarma", image_url: "https://server/shoarma.jpg"
+
+    expected = %{
+      "node" => %{
+        "title" => "Shoarma",
+        "imageUrl" => "https://server/shoarma.jpg"
+      },
+    }
+    assert {:ok, %{data: expected}} == run(query, variables: %{"id" => Node.to_global_id("Recipe", recipe.id)})
   end
 end
