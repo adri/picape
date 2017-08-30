@@ -29,9 +29,12 @@ const query = gql`
       id
       isPlanned
       ingredients {
-        id
-        isEssential
-        isPlanned
+        quantity 
+        ingredient {
+          id
+          isEssential
+          isPlanned
+        }
       }
     }
   }
