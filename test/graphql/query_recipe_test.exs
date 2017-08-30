@@ -43,9 +43,14 @@ defmodule QueryRecipeTest do
     ]
 
     expected = %{
-      "recipes" => [ %{ "title" => "Pizza", "ingredients" => [%{
-            "name" => "Flour"
-      }]}]
+      "recipes" => [
+        %{
+          "title" => "Pizza",
+          "ingredients" => [
+            %{ "name" => "Flour" }
+          ]
+        }
+      ]
     }
     assert {:ok, %{data: expected}} == run(query)
   end
