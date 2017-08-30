@@ -113,9 +113,9 @@ defmodule Picape.Order do
          true <- planned_items_in_order?(current_order_id)
     do
         (from p in PlannedRecipe, where: p.line_id == ^order_id)
-        |> Repo.update_all(set: [line_id: last_order_id])
+        |> Repo.update_all(set: [line_id: current_order_id])
         (from i in ManualIngredient, where: i.line_id == ^order_id)
-        |> Repo.update_all(set: [line_id: last_order_id])
+        |> Repo.update_all(set: [line_id: current_order_id])
     end
   end
 
