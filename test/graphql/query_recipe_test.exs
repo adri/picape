@@ -32,7 +32,10 @@ defmodule Picape.Graphql.QueryRecipeTest do
     recipes {
       title
       ingredients {
-        name
+        quantity
+        ingredient {
+          name
+        }
       }
     }
   }
@@ -47,7 +50,10 @@ defmodule Picape.Graphql.QueryRecipeTest do
         %{
           "title" => "Pizza",
           "ingredients" => [
-            %{ "name" => "Flour" }
+            %{
+              "quantity" => 1,
+              "ingredient" => %{ "name" => "Flour" },
+            }
           ]
         }
       ]
@@ -76,4 +82,44 @@ defmodule Picape.Graphql.QueryRecipeTest do
     }
     assert {:ok, %{data: expected}} == run(query, variables: %{"id" => Node.to_global_id("Recipe", recipe.id)})
   end
+
+  @query """
+  mutation add($title: String!) {
+    addRecipe(title: $title) {
+      title
+    }
+  }
+  """
+  @variables %{
+    "title" => "Test title"
+  }
+  test "adds new recipe", %{query: query, variables: variables} do
+    expected = %{
+      "addRecipe" => %{
+        "title" => "Test title",
+      },
+    }
+    assert {:ok, %{data: expected}} == run(query, variables: variables)
+  end
+
+# Todo: mock Supermarket API
+#  @query """
+#  mutation add($recipeId: ID!) {
+#    planRecipe(recipeId: $recipeId) {
+#      title
+#      isPlanned
+#    }
+#  }
+#  """
+#  test "plan recipe", %{query: query} do
+#    recipe = insert! :recipe, title: "Shoarma", image_url: "https://server/shoarma.jpg"
+#
+#    expected = %{
+#      "planRecipe" => %{
+#        "title" => "Shoarma",
+#        "isPlanned" => true,
+#      },
+#    }
+#    assert {:ok, %{data: expected}} == run(query, variables: %{"recipeId" => Node.to_global_id("Recipe", recipe.id)})
+#  end
 end

@@ -33,6 +33,7 @@ export default function mutatable({ mutationName = 'mutate' } = {}) {
             if (handleError) {
               handleError();
             }
+            return Promise.reject(error);
           });
       };
 

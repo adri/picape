@@ -21,7 +21,7 @@ defmodule PicapeWeb.Graphql.Types do
     field :title, :string
     field :image_url, :string
     field :is_planned, :boolean, resolve: batched({Resolver.Order, :recipies_planned?})
-    field :ingredients, list_of(:ingredient), resolve: batched({Resolver.Recipe, :ingredients_by_recipe_ids})
+    field :ingredients, list_of(:recipe_ingredient_edge), resolve: batched({Resolver.Recipe, :ingredients_by_recipe_ids})
   end
 
   node object :ingredient do
@@ -34,7 +34,7 @@ defmodule PicapeWeb.Graphql.Types do
     field :unit_quantity, :string, resolve: from_object(:unit_quantity)
   end
 
-  object :ingredient_edge do
+  object :recipe_ingredient_edge do
     field :quantity, :integer
     field :ingredient, :ingredient
   end

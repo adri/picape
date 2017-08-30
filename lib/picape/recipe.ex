@@ -68,10 +68,11 @@ defmodule Picape.Recipe do
   end
 
   def ingredients_by_recipe_ids(recipe_ids) do
-    result = Repo.all(from r in IngredientRef,
-      where: r.recipe_id in ^recipe_ids,
-      join: i in assoc(r, :ingredient),
-      select: {r.recipe_id, i})
+    result = Repo.all(from ref in IngredientRef,
+      where: ref.recipe_id in ^recipe_ids,
+      join: i in assoc(ref, :ingredient),
+      select: {ref.recipe_id, ref},
+      preload: [:ingredient])
       |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
 
     {:ok, result}

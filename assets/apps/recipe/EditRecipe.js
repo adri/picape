@@ -26,6 +26,23 @@ class EditRecipe extends React.Component {
     })
   }
 
+  setIngredientQuantity(event, ingredientId, quantity) {
+    event.preventDefault();
+    this.setState({
+      ingredients: this.state.ingredients.map(ref => {
+        if (ref.ingredient.id === ingredientId) {
+          return {
+            ...ref,
+            quantity: parseInt(quantity, 10) || 1
+          };
+        }
+
+        return ref;
+      }),
+      changed: true,
+    })
+  }
+
   addIngredient(ingredient) {
     this.setState({
       ingredients: [
@@ -41,9 +58,9 @@ class EditRecipe extends React.Component {
         recipeId: this.state.id,
         title: this.state.title,
         imageUrl: this.state.imageUrl,
-        ingredients: this.state.ingredients.map(ingredient => ({
-          ingredientId: ingredient.id,
-          quantity: ingredient.quantity || 1,
+        ingredients: this.state.ingredients.map(ref => ({
+          ingredientId: ref.ingredient.id,
+          quantity: ref.quantity || 1,
         }))
       })
       .then(() => Router.back());
@@ -94,12 +111,22 @@ class EditRecipe extends React.Component {
                 <label htmlFor="title" className="col-sm-2 col-form-label">Ingredients</label>
                 <div className="col-sm-10">
                   <ul className="list-group">
-                    {ingredients.map(ingredient =>
-                      <li key={ingredient.id} className="list-group-item">
-                        <a href="#" onClick={event => this.deleteIngredient(event, ingredient.id)}>
-                          <i className="now-ui-icons ui-1_simple-remove mr-2" />
-                        </a>
-                        {ingredient.name}
+                    {ingredients.map(ref =>
+                      <li key={ref.ingredient.id} className="list-group-item">
+                        <div className="form-inline">
+                            <a href="#" onClick={event => this.deleteIngredient(event, ref.ingredient.id)}>
+                              <i className="now-ui-icons ui-1_simple-remove mr-2" />
+                            </a>
+                            <input
+                              type="number"
+                              className="form-control mr-3"
+                              style={{width: 70}}
+                              onChange={event => this.setIngredientQuantity(event, ref.ingredient.id, event.target.value)}
+                              defaultValue={ref.quantity} />
+                            <span>
+                            {ref.ingredient.name}
+                            </span>
+                        </div>
                       </li>
                     )}
                     <li className="list-group-item">
@@ -107,7 +134,7 @@ class EditRecipe extends React.Component {
                       <div className="form-group mb-2 mr-sm-2 mb-sm-0">
                         <IngredientSearch
                           onSelect={ingredient => this.addIngredient(ingredient)}
-                          excluded={ingredients.map(ingredient => ingredient.id)}
+                          excluded={ingredients.map(ref => ref.ingredient.id)}
                         />
                       </div>
                     </li>
@@ -159,8 +186,11 @@ const GetRecipe = gql`
                 title
                 imageUrl
                 ingredients {
-                    id 
-                    name
+                    quantity
+                    ingredient {
+                        id
+                        name
+                    }
                 }
             }
         }
@@ -175,7 +205,11 @@ const EditQuery = gql`
       title  
       imageUrl  
       ingredients {
-          id
+        quantity
+        ingredient {
+            id
+            name
+        }
       }  
     }
   }
