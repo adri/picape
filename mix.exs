@@ -47,7 +47,8 @@ defmodule Picape.Mixfile do
      {:reverse_proxy, "~> 0.3.1"},
      {:poison, "~> 2.0"},
      {:httpoison, "~> 0.12"},
-     {:credo, "~> 0.7", only: [:dev, :test]}
+     {:credo, "~> 0.7", only: [:dev, :test]},
+     {:mix_docker, "~> 0.5.0"}
      ]
   end
 
