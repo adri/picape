@@ -20,7 +20,7 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
   end
 
   def search_ingredient(_parent, attributes, _info) do
-    {:ok, Recipe.search_ingredient(attributes[:query], attributes[:excluded])}
+    {:ok, Recipe.search_ingredient(attributes[:query], attributes[:excluded] || [])}
   end
 
   def recipe_by_id(id) do
