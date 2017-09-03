@@ -6,10 +6,7 @@ defmodule Picape.Recipe do
   alias Picape.Recipe.{Ingredient, IngredientRef, Recipe}
 
   def list_recipes() do
-    Repo.all(
-      from recipe in Recipe
-      # preload: [ingredients: :ingredient]
-    )
+    Repo.all(from recipe in Recipe)
   end
 
   def recipes_by_ids(ids) do
