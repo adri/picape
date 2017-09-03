@@ -68,6 +68,7 @@ defmodule PicapeWeb.Graphql.Schema do
     field :search_ingredient, list_of(:ingredient) do
       arg :query, non_null(:string)
       arg :excluded, list_of(:id)
+      middleware Absinthe.Relay.Node.ParseIDs, excluded: :ingredient
       resolve &Resolver.Recipe.search_ingredient/3
     end
   end
