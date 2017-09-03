@@ -21,7 +21,7 @@ class EditRecipe extends React.Component {
   deleteIngredient(event, ingredientId) {
     event.preventDefault();
     this.setState({
-      ingredients: this.state.ingredients.filter(ingredient => ingredient.id !== ingredientId),
+      ingredients: this.state.ingredients.filter(ref => ref.ingredient.id !== ingredientId),
       changed: true,
     })
   }
@@ -47,7 +47,8 @@ class EditRecipe extends React.Component {
     this.setState({
       ingredients: [
         ...this.state.ingredients,
-        ingredient,
+        { quantity: 1,
+          ingredient },
       ],
       changed: true,
     })
