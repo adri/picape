@@ -41,11 +41,11 @@ defmodule Picape.Mixfile do
      {:postgrex, ">= 0.0.0"},
      {:phoenix_html, "~> 2.10.3"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
-     {:sentry, "~> 5.0.1"},
+     {:sentry, "~> 6.0.0"},
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:reverse_proxy, "~> 0.3.1"},
-     {:poison, "~> 2.0"},
+     {:poison, "~> 3.0"},
      {:httpoison, "~> 0.12"},
      {:credo, "~> 0.7", only: [:dev, :test]},
      {:mix_docker, "~> 0.5.0"}
