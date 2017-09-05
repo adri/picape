@@ -45,7 +45,7 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Resolver.Recipe.recipe_by_id(String.to_integer(attributes[:recipe_id]))
   end
 
-  def sync_supermarket(attributes, _info) do
+  def sync_supermarket(_attributes, _info) do
     Supermarket.invalidate_cart()
     Order.sync_supermarket(order_id())
   end

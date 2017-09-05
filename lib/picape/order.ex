@@ -129,9 +129,6 @@ defmodule Picape.Order do
     end
   end
 
-  @doc """
-  Returns a map of recipe ID to how many times it is planned.
-  """
   defp recipe_ingredient_quantities(order_id) do
     query = from p in PlannedRecipe,
       where: p.line_id == ^order_id,

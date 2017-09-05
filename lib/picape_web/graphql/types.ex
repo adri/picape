@@ -54,9 +54,6 @@ defmodule PicapeWeb.Graphql.Types do
 
   connection node_type: :ingredient
 
-  @doc """
-  Helper to collect all IDs of a parent and send it to a batch function.
-  """
   defp batched(batch_fun) do
     fn parent, _args, _ctx ->
       batch(batch_fun, parent.id, fn results ->
@@ -66,9 +63,6 @@ defmodule PicapeWeb.Graphql.Types do
     end
   end
 
-  @doc """
-  Helper to access a dynamic property on a parent.
-  """
   defp from_object(key) do
     fn parent, _args, _ctx ->
       {:ok, parent[key]}
