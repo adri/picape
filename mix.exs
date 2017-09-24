@@ -28,9 +28,9 @@ defmodule Picape.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:absinthe, "~> 1.4.0-beta", override: true},
-     {:absinthe_phoenix, "~> 1.4.0-beta"},
-     {:absinthe_plug, "~> 1.4.0-beta"},
+    [{:absinthe, "~> 1.4.0-rc", override: true},
+     {:absinthe_phoenix, "~> 1.4.0-rc"},
+     {:absinthe_plug, "~> 1.4.0-rc"},
      {:absinthe_relay, "~> 1.3.0"},
     #  {:absinthe_ecto, "~> 1.0.0"},
      {:cors_plug, "~> 1.4"},
