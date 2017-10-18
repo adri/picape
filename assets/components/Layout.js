@@ -52,6 +52,7 @@ export default class Layout extends React.Component {
       <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
       <link href="/static/css/now-ui-kit.css" rel="stylesheet" />
       <link href="/static/css/nprogress.css" rel="stylesheet" />
+      <link rel="prefetch" href="https://res.cloudinary.com/picape/image/upload/f_auto,fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg" />
     </Head>
     <style jsx global>{`
       html, body {
