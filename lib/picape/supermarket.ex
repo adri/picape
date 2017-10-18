@@ -59,7 +59,7 @@ defmodule Picape.Supermarket do
   def image_url(image_id) do
     case image_id do
       nil -> "http://placekitten.com/64/64"
-      _ -> "https://static.supermarket.nl/images/" <> image_id <> "/small.png"
+      _ -> config(:static_url) <> image_id <> "/small.png"
     end
   end
 
@@ -74,14 +74,9 @@ defmodule Picape.Supermarket do
   end
 
   defp process_request_headers(headers) do
-    Enum.into(headers, [
-      "Accept": "*/*",
-      "Accept-Language": "nl-NL",
-      "x-supermarket-agent": config(:agent),
-      "x-supermarket-did": config(:did),
-      "x-supermarket-auth": config(:auth),
-      "User-Agent": config(:user_agent),
-    ])
+    headers
+    |> Enum.into([ "Accept": "*/*", ])
+    |> Enum.into(config(:headers) || [])
   end
 
   defp process_request_body(body) do
@@ -89,9 +84,8 @@ defmodule Picape.Supermarket do
   end
 
   defp process_request_options(options) do
-    Enum.into(options, [
-      cookie: [config(:cookie)]
-    ])
+    options
+    |> Enum.into([ cookie: [config(:cookie)] ])
   end
 
   defp config(key) do
