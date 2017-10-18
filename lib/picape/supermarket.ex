@@ -56,6 +56,19 @@ defmodule Picape.Supermarket do
     end)
   end
 
+  def latest_order_id(orders) do
+    try do
+      # before delivering, the latest order is in "current_orders"
+      # after delivering, in "orders"
+      processing_order_id = get_in(orders, ["current_orders", Access.at(0), "order_id"])
+      delivered_order_id = get_in(orders, ["orders", Access.at(0), "order_id"])
+
+      processing_order_id || delivered_order_id
+    rescue
+      _e in RuntimeError -> nil
+    end
+  end
+
   def image_url(image_id) do
     case image_id do
       nil -> "http://placekitten.com/64/64"
