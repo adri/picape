@@ -34,7 +34,6 @@ function OrderList({ data: { loading, error, currentOrder } }) {
             )}
         </div>
       </div>
-      <style jsx>{``}</style>
     </div>
   );
 }
