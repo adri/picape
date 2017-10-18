@@ -2,6 +2,9 @@ import Head from 'next/head';
 import Nav from './Nav';
 import NProgress from 'nprogress';
 import Router from 'next/router';
+import Raven from 'raven-js';
+
+Raven.config(SENTRY_PUBLIC_DSN).install();
 
 Router.onRouteChangeStart = (url) => {
   console.log(`Loading: ${url}`);
@@ -24,6 +27,11 @@ export default class Layout extends React.Component {
       this.setState({mounted: true})
     }, 1)
   }
+
+  componentDidCatch(error, errorInfo) {
+      Raven.captureException(error, { extra: errorInfo });
+  }
+
 // export default ({ children, title = 'Supermarket' }) =>
 
   render() {
