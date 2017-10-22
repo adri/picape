@@ -20,7 +20,7 @@
     "raven-js": "^3.19.1",
     "react": "^16.0.0",
     "react-apollo": "^1.4.16",
-    "react-autocomplete": "^1.5.10",
+    "react-autocomplete": "^1.7.2",
     "react-autosize-textarea": "^0.4.9",
     "react-dom": "^16.0.0",
     "recompose": "^0.26.0"

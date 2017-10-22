@@ -26,18 +26,14 @@ class IngredientSupermarketSearch extends React.Component {
               backgroundColor: "white",
             }
           }}
-          renderMenu={(items, value, style) => {
-            if (loading) return <Loading/>;
-
-            return <div style={{ ...style,
+          menuStyle={{
               position: "absolute",
               top: 37,
               left: 0,
               zIndex: 9,
-            }} children={items}/>
           }}
           renderItem={(ingredient, isHighlighted) =>
-            <div style={{ cursor: 'pointer', background: isHighlighted ? '#e4e4e4' : 'white' }}>
+            <div key={ingredient.id} style={{ cursor: 'pointer', background: isHighlighted ? '#e4e4e4' : 'white' }}>
               <Ingredient {...ingredient} />
             </div>
           }

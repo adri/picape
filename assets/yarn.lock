@@ -3696,7 +3696,7 @@ react-apollo@^1.4.16:
     object-assign "^4.0.1"
     prop-types "^15.5.8"
 
-react-autocomplete@^1.5.10:
+react-autocomplete@^1.7.2:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/react-autocomplete/-/react-autocomplete-1.7.2.tgz#c55a0a4b8a9f4cba911dfccb74ef74f2161c46e0"
   dependencies:

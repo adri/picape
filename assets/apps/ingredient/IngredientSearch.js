@@ -16,7 +16,7 @@ class IngredientSearch extends React.Component {
     return (
       <div style={{position: "relative"}}>
         <Autocomplete
-          getItemValue={(ingredient) => this.state.value}
+          getItemValue={() => this.state.value}
           items={ingredients || []}
           inputProps={{
             className: "form-control supermarket-autocomplete",
@@ -26,18 +26,14 @@ class IngredientSearch extends React.Component {
               backgroundColor: "white",
             }
           }}
-          renderMenu={(items, value, style) => {
-            if (loading) return <Loading/>;
-
-            return <div style={{ ...style,
-              position: "absolute",
-              top: 37,
-              left: 0,
-              zIndex: 9,
-            }} children={items}/>
+          menuStyle={{
+            position: "absolute",
+            top: 37,
+            left: 0,
+            zIndex: 9,
           }}
           renderItem={(ingredient, isHighlighted) =>
-            <div style={{ cursor: 'pointer', background: isHighlighted ? '#e4e4e4' : 'white' }}>
+            <div key={ingredient.id} style={{ cursor: 'pointer', background: isHighlighted ? '#e4e4e4' : 'white' }}>
               <Ingredient {...ingredient} />
             </div>
           }

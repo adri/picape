@@ -106,7 +106,7 @@ class EditRecipe extends React.Component {
                     <TextareaAutosize
                       type="description"
                       id="description"
-                      className="form-control description"
+                      className="form-control instruction"
                       rows={3}
                       onChange={event => this.setState({description: event.target.value, changed: true})}
                       defaultValue={description} />
@@ -191,7 +191,8 @@ class EditRecipe extends React.Component {
           border: none;
         }
 
-        .description {
+        .card .instruction {
+          color: #2c2c2c;
           border: 1px solid #E3E3E3;
           border-radius: 20px;
         }
