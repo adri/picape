@@ -7,6 +7,7 @@ defmodule Picape.Recipe.Recipe do
   schema "recipe" do
     field :title, :string
     field :image_url, :string
+    field :description, :string
     has_many :ingredients, Picape.Recipe.IngredientRef, on_replace: :delete
     has_many :ingredients_ref, through: [:ingredients, :ingredient]
 
@@ -22,7 +23,7 @@ defmodule Picape.Recipe.Recipe do
   @doc false
   def edit_changeset(%Recipe{} = recipe, attrs) do
     recipe
-    |> cast(attrs, [:id, :title, :image_url])
+    |> cast(attrs, [:id, :title, :description, :image_url])
     |> cast_assoc(:ingredients, required: true)
     |> validate_required([:title, :ingredients])
   end

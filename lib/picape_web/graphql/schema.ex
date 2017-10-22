@@ -130,6 +130,7 @@ defmodule PicapeWeb.Graphql.Schema do
     field :edit_recipe, :recipe do
       arg :recipe_id, non_null(:id)
       arg :title, non_null(:string)
+      arg :description, :string
       arg :image_url, :string
       arg :ingredients, non_null(list_of(:ingredient_ref))
       resolve handle_errors(&Resolver.Recipe.edit_recipe/3)
