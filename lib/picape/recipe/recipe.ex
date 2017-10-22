@@ -14,6 +14,14 @@ defmodule Picape.Recipe.Recipe do
     timestamps()
   end
 
+  def fetch(recipe, :image_url) do
+    cond do
+      recipe.image_url == nil -> {:ok, nil}
+      false === String.contains?(recipe.image_url, "res.cloudinary.com") -> {:ok, "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/" <> recipe.image_url}
+      true -> {:ok, recipe.image_url}
+    end
+  end
+
   def add_changeset(%Recipe{} = recipe, attrs) do
     recipe
     |> cast(attrs, [:title, :image_url])

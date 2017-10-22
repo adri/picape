@@ -20,7 +20,7 @@ defmodule PicapeWeb.Graphql.Types do
   node object :recipe do
     field :title, :string
     field :description, :string
-    field :image_url, :string
+    field :image_url, :string, resolve: from_object(:image_url)
     field :is_planned, :boolean, resolve: batched({Resolver.Order, :recipies_planned?})
     field :ingredients, list_of(:recipe_ingredient_edge), resolve: batched({Resolver.Recipe, :ingredients_by_recipe_ids})
   end

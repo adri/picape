@@ -122,6 +122,7 @@ class EditRecipe extends React.Component {
                     className="form-control"
                     onChange={event => this.setState({imageUrl: event.target.value, changed: true})}
                     defaultValue={imageUrl} />
+                  <a href={`https://www.google.com/search?tbm=isch&q=${encodeURI(title)}`} target="_blank">Open Google Images</a>
                 </div>
               </div>
 
