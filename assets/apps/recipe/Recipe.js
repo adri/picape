@@ -2,25 +2,29 @@ import React from 'react';
 import UnplanRecipe from './UnplanRecipe';
 import PlanRecipe from './PlanRecipe';
 import Image from '../../components/Image';
+import FlipDirectionAware from '../../components/FlipDirectionAware';
 import EditRecipeButton from './EditRecipeButton';
 
 export default function Recipe({recipe, showEdit}) {
   return (
     <div className="card recipe">
-      <Image className="card-img-top" src={recipe.imageUrl} alt={recipe.title} />
-      <div className="card-block">
-        <h5 className="card-title">
-          {recipe.isPlanned && <i className="check-bar fa fa-check-circle fa-lg fa-fw" />}
-          {recipe.title}</h5>
-      </div>
-      <div className="card-footer text-center">
-        {recipe.isPlanned ?
-          <UnplanRecipe recipeId={recipe.id} /> :
-          <PlanRecipe recipeId={recipe.id} />}
+      <FlipDirectionAware backside={
           <div>
-            {showEdit && <EditRecipeButton recipeId={recipe.id} />}
+              {recipe.isPlanned ?
+                  <UnplanRecipe recipeId={recipe.id}/>
+                  : <PlanRecipe recipeId={recipe.id}/>
+              }
+              <br />
+              {showEdit && <EditRecipeButton recipeId={recipe.id} />}
           </div>
-      </div>
+      }>
+          <Image className="card-img-top" src={recipe.imageUrl} alt={recipe.title} />
+          <div className="card-block">
+            <h5 className="card-title">
+              {recipe.isPlanned && <i className="check-bar fa fa-check-circle fa-lg fa-fw" />}
+              {recipe.title}</h5>
+          </div>
+      </FlipDirectionAware>
       <style jsx>{`
       .recipe {
         flex-basis: 25%;

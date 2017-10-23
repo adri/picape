@@ -8,7 +8,7 @@ export default withData(({ data }) =>
   <Layout title="Picape">
     <div className="row">
       <div className="col-md-9 border border-right-0">
-        <RecipeList />
+        <RecipeList showEdit={true} />
         <EssentialList />
       </div>
       <div className="col-md-3 order-column">
