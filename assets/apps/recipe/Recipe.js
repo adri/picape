@@ -37,6 +37,7 @@ export default function Recipe({recipe, showEdit}) {
       }
       .card-title {
         margin-top: 0;
+        margin-bottom: 0;
         font-size: 16px;
       }
       .check-bar {
