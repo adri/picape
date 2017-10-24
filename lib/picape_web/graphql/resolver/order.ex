@@ -47,6 +47,7 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
 
   def sync_supermarket(_attributes, _info) do
     Supermarket.invalidate_cart()
+    Supermarket.invalidate_order()
     Order.sync_supermarket(order_id())
   end
 
