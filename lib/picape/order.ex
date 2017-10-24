@@ -34,7 +34,7 @@ defmodule Picape.Order do
       where: p.line_id == ^order_id and p.unplanned == false,
       select: p.recipe_id
 
-    {:ok, Repo.all(query)}
+    {:ok, Repo.all(query) || []}
   end
 
   @doc """

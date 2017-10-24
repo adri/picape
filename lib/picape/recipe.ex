@@ -9,10 +9,6 @@ defmodule Picape.Recipe do
     Repo.all(from recipe in Recipe)
   end
 
-  def list_last_ordered() do
-    Repo.all(from recipe in Recipe)
-  end
-
   def recipes_by_ids(ids) do
     result = from(r in Recipe, where: r.id in ^ids)
     |> Repo.all
