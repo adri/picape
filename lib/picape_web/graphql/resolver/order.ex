@@ -1,6 +1,6 @@
 defmodule PicapeWeb.Graphql.Resolver.Order do
 
-  alias Picape.{Supermarket, Order}
+  alias Picape.{Supermarket, Order, Recipe}
   alias PicapeWeb.Graphql.Resolver
 
   defp order_id() do
@@ -14,7 +14,10 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
   end
 
   def last_ordered(_parent, _args, _info) do
-    Order.planned_recipes(Order.last_order_id())
+    case Recipe.recipes_by_ids(Order.planned_recipes(Order.last_order_id())) do
+      {:ok, result} -> {:ok, Map.values(result)}
+      _ -> {:error, []}
+    end
   end
 
   def recipies_planned?(_, recipe_ids) do

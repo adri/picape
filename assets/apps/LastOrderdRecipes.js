@@ -25,7 +25,7 @@ function LastOrderedRecipes({ data: { loading, error, recipes }}) {
 }
 
 const recipesQuery = gql`
-  query RecipeList {
+  query LastOrderedRecipes {
     recipes: lastOrderedRecipes {
       id
       title

@@ -9,12 +9,16 @@ defmodule Picape.Recipe do
     Repo.all(from recipe in Recipe)
   end
 
-  def recipes_by_ids(ids) do
+  def recipes_by_ids(ids) when is_list(ids) do
     result = from(r in Recipe, where: r.id in ^ids)
     |> Repo.all
     |> Map.new(fn recipe -> {recipe.id, recipe} end)
 
     {:ok, result}
+  end
+
+  def recipes_by_ids(_) do
+    {:ok, %{}}
   end
 
   def ingredients_by_ids(ids) do
