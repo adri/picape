@@ -3,8 +3,8 @@ defmodule Picape.Graphql.QueryRecipeTest do
   alias Absinthe.Relay.Node
 
   test "returns a list of two recipes" do
-    insert! :recipe, title: "Shoarma", image_url: "https://server/shoarma.jpg"
-    insert! :recipe, title: "Pizza", image_url: "https://server/pizza.jpg"
+    insert! :recipe, title: "Shoarma", image_url: "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
+    insert! :recipe, title: "Pizza", image_url: "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/pizza.jpg"
 
     actual = run("{
       recipes {
@@ -15,8 +15,8 @@ defmodule Picape.Graphql.QueryRecipeTest do
 
     assert actual === {:ok, %{data: %{
       "recipes" => [
-        %{ "title" => "Shoarma", "imageUrl" => "https://server/shoarma.jpg" },
-        %{ "title" => "Pizza", "imageUrl" => "https://server/pizza.jpg" },
+        %{ "title" => "Shoarma", "imageUrl" => "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg" },
+        %{ "title" => "Pizza", "imageUrl" => "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/pizza.jpg" },
       ]
     }}}
   end
@@ -56,7 +56,7 @@ defmodule Picape.Graphql.QueryRecipeTest do
   end
 
   test "returns recipe node" do
-    recipe = insert! :recipe, title: "Shoarma", image_url: "https://server/shoarma.jpg"
+    recipe = insert! :recipe, title: "Shoarma", image_url: "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
 
     actual = run("
       query node($id: ID!) {
@@ -73,7 +73,7 @@ defmodule Picape.Graphql.QueryRecipeTest do
     assert actual === {:ok, %{data: %{
       "node" => %{
         "title" => "Shoarma",
-        "imageUrl" => "https://server/shoarma.jpg"
+        "imageUrl" => "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
       },
      }}}
   end

@@ -104,10 +104,14 @@ defmodule Picape.Order do
     end
   end
 
+  def last_order_id() do
+    Supermarket.latest_order_id(Supermarket.orders())
+  end
+
   # --- private
 
   defp ensure_order_is_current(order_id) do
-    with latest_order_id <- Supermarket.latest_order_id(Supermarket.orders()),
+    with latest_order_id <- last_order_id(),
          false <- planned_items_in_order?(latest_order_id)
     do
       (from p in PlannedRecipe, where: p.line_id == ^order_id)

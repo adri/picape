@@ -7,11 +7,11 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
 # Queries
 
   def all(_parent, _args, _info) do
-    {:ok, Recipe.list_recipes() }
+    {:ok, Recipe.list_recipes()}
   end
 
   def essentials(_parent, _args, _info) do
-    {:ok, Recipe.list_essentials() }
+    {:ok, Recipe.list_essentials()}
   end
 
   def list_ingredients(_parent, args, _info) do

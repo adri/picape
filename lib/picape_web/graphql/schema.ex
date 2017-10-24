@@ -39,6 +39,11 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve &Resolver.Recipe.all/3
     end
 
+    @desc "Lists all recipes that were planned in the last order."
+    field :last_ordered_recipes, list_of(:recipe) do
+      resolve &Resolver.Order.last_ordered/3
+    end
+
     @desc "Lists all ingredients which are marked as essential."
     field :essentials, list_of(:ingredient) do
       resolve &Resolver.Recipe.essentials/3

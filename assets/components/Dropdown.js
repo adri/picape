@@ -6,15 +6,16 @@ const enhance = compose(
 
 export default enhance(({ opened, toggle, link, children }) =>
   <aside className={"dropdown " + (opened && "show")}>
-    {/*<button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">*/}
     <a className="dropdown-toggle " onClick={() => toggle(opened => !opened)} aria-haspopup="true" aria-expanded={opened}>
       {link}
     </a>
-    {/*</button>*/}
     <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
       {children}
     </div>
     <style jsx>{`
+    aside {
+      display: inline-block;
+    }
     .dropdown-toggle {
       cursor: pointer;
     }

@@ -13,6 +13,10 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.current()
   end
 
+  def last_ordered(_parent, _args, _info) do
+    Order.planned_recipes(Order.last_order_id())
+  end
+
   def recipies_planned?(_, recipe_ids) do
     {:ok, planned_ids} = Order.planned_recipes(order_id())
 
@@ -47,7 +51,7 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
 
   def sync_supermarket(_attributes, _info) do
     Supermarket.invalidate_cart()
-    Supermarket.invalidate_order()
+    Supermarket.invalidate_orders()
     Order.sync_supermarket(order_id())
   end
 
