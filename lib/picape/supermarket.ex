@@ -56,6 +56,10 @@ defmodule Picape.Supermarket do
     end)
   end
 
+  def invalidate_orders() do
+    ConCache.delete(:supermarket, :orders)
+  end
+
   def latest_order_id(orders) do
     try do
       # before delivering, the latest order is in "current_orders"
