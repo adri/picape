@@ -2,7 +2,6 @@ defmodule Picape.Recipe do
   import Ecto.Query
 
   alias Picape.Repo
-  alias Picape.Supermarket
   alias Picape.Recipe.{Ingredient, IngredientRef, Recipe}
 
   def list_recipes() do
@@ -19,14 +18,6 @@ defmodule Picape.Recipe do
 
   def recipes_by_ids(_) do
     {:ok, %{}}
-  end
-
-  def ingredients_by_ids(ids) do
-    result = from(i in Ingredient, where: i.id in ^ids)
-    |> Repo.all
-    |> Map.new(fn ingredient -> {ingredient.id, ingredient} end)
-
-    {:ok, result}
   end
 
   @doc """
@@ -108,29 +99,6 @@ defmodule Picape.Recipe do
     |> Repo.all
   end
 
-  def search_ingredient(query, excluded) do
-    Repo.all(from i in Ingredient,
-      where: not i.id in ^excluded and
-      ilike(i.name, ^("%#{query}%")) )
-  end
-
-  def add_ingredient(params) do
-    %Ingredient{}
-    |> Ingredient.add_changeset(Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(params[:supermarket_product_id])))
-    |> Repo.insert
-  end
-
-  def edit_ingredient(params) do
-    Repo.get(Ingredient, params[:ingredient_id])
-    |> Ingredient.edit_changeset(params)
-    |> Repo.update
-  end
-
-  def delete_ingredient(params) do
-    Repo.get(Ingredient, params[:ingredient_id])
-    |> Repo.delete
-  end
-
   def add_recipe(params) do
     %Recipe{}
     |> Recipe.add_changeset(params)
@@ -142,15 +110,5 @@ defmodule Picape.Recipe do
     |> Repo.preload(:ingredients)
     |> Recipe.edit_changeset(params)
     |> Repo.update
-  end
-
-  def match_supermarket_products() do
-    Ingredient
-    |> Repo.all
-    |> Enum.map(fn ingredient ->
-      ingredient
-      |> Ingredient.raw_changeset(%{supermarket_product_raw: Supermarket.products_by_id(ingredient.supermarket_product_id)})
-    end)
-    |> Enum.map(&Repo.update!/1)
   end
 end

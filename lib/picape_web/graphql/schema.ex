@@ -8,6 +8,11 @@ defmodule PicapeWeb.Graphql.Schema do
   @node_id_rules %{
       recipe_id: :recipe,
       ingredient_id: :ingredient,
+      input: [
+        ingredient_id: :ingredient,
+        tag_ids: :ingredient_tag,
+      ],
+      filter: [tag_ids: :ingredient_tag],
       ingredients: [ingredient_id: :ingredient],
   }
 
@@ -15,6 +20,7 @@ defmodule PicapeWeb.Graphql.Schema do
     resolve_type fn
       %Picape.Recipe.Recipe{}, _ -> :recipe
       %Picape.Recipe.Ingredient{}, _ -> :ingredient
+      %Picape.Recipe.IngredientTag{}, _ -> :ingredient_tag
       _, _ -> nil
     end
   end
@@ -52,6 +58,7 @@ defmodule PicapeWeb.Graphql.Schema do
     @desc "Page through all ingredients."
     field :ingredients, :ingredient_connection do
       arg :first, non_null(:integer)
+      arg :filter, :ingredient_filter
       resolve &Resolver.Recipe.list_ingredients/3
     end
 
@@ -113,9 +120,7 @@ defmodule PicapeWeb.Graphql.Schema do
 
     @desc "Edit an new ingredient."
     field :edit_ingredient, :ingredient do
-      arg :ingredient_id, non_null(:id)
-      arg :name, non_null(:string)
-      arg :is_essential, non_null(:boolean)
+      arg :input, non_null(:edit_ingredient_input)
       resolve handle_errors(&Resolver.Recipe.edit_ingredient/3)
     end
 
@@ -150,6 +155,9 @@ defmodule PicapeWeb.Graphql.Schema do
 
   # ---- Helpers ----
 
+  def middleware(middleware, _, %Absinthe.Type.Object{identifier: :query}) do
+    [{Absinthe.Relay.Node.ParseIDs, @node_id_rules} | middleware]
+  end
   def middleware(middleware, _, %Absinthe.Type.Object{identifier: :mutation}) do
     [{Absinthe.Relay.Node.ParseIDs, @node_id_rules} | middleware]
   end

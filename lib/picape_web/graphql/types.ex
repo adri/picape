@@ -28,11 +28,33 @@ defmodule PicapeWeb.Graphql.Types do
   node object :ingredient do
     field :name, :string
     field :is_essential, :boolean
+    field :tags, list_of(:ingredient_tag)
     field :image_url, :string, resolve: from_object(:image_url)
     field :is_planned, :boolean, resolve: batched({Resolver.Order, :ingredients_planned?})
     field :ordered_quantity, :integer, resolve: batched({Resolver.Order, :ingredients_ordered_quantity})
     field :planned_recipes, list_of(:recipe_edge), resolve: batched({Resolver.Order, :recipes_planned_for_ingredient_ids})
     field :unit_quantity, :string, resolve: from_object(:unit_quantity)
+  end
+
+  node object :ingredient_tag do
+    field :count, :integer
+    field :name, :string
+  end
+
+  @desc "Filtering options for the ingredients"
+  input_object :ingredient_filter do
+    @desc "Matching a tag"
+    field :tag_ids, list_of(:id)
+    @desc "Ingredient is marked as an essential"
+    field :essential, :boolean
+  end
+
+  @desc "Edit an ingredient"
+  input_object :edit_ingredient_input do
+    field :ingredient_id, non_null(:id)
+    field :name, non_null(:string)
+    field :is_essential, non_null(:boolean)
+    field :tag_ids, list_of(:id)
   end
 
   object :recipe_ingredient_edge do
@@ -45,6 +67,11 @@ defmodule PicapeWeb.Graphql.Types do
     field :recipe, :recipe
   end
 
+  object :ingredient_edge do
+    field :quantity, :integer
+    field :node, :ingredient
+  end
+
   object :supermarket_search_result do
     field :id, :string
     field :name, :string
@@ -53,7 +80,15 @@ defmodule PicapeWeb.Graphql.Types do
     field :unit_quantity, :string
   end
 
-  connection node_type: :ingredient
+  connection node_type: :ingredient do
+    @desc "Ingredient tags and their counts"
+    field :tags, list_of(:ingredient_tag) do
+      resolve &Resolver.Recipe.list_ingredient_tags/3
+    end
+    field :total_count, :integer do
+      resolve &Resolver.Recipe.count_ingredients/3
+    end
+  end
 
   defp batched(batch_fun) do
     fn parent, _args, _ctx ->

@@ -1,7 +1,6 @@
 defmodule PicapeWeb.Graphql.Resolver.Recipe do
 
-  alias Picape.{Recipe, Repo}
-  alias Picape.Recipe.Ingredient
+  alias Picape.{Recipe, Ingredients, Repo}
   alias Absinthe.Relay
 
 # Queries
@@ -15,12 +14,25 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
   end
 
   def list_ingredients(_parent, args, _info) do
-    Ingredient
-    |> Relay.Connection.from_query(&Repo.all/1, args)
+    Relay.Connection.from_query(Ingredients.list_query(args), &Repo.all/1, args)
+  end
+
+  def list_ingredient_tags(_parent, _args, _info) do
+    Ingredients.list_tags()
+  end
+
+  def count_ingredients(_parent, _args, _info) do
+    Ingredients.count_all()
   end
 
   def search_ingredient(_parent, attributes, _info) do
-    {:ok, Recipe.search_ingredient(attributes[:query], attributes[:excluded] || [])}
+    args = [
+      {:filter, [
+        {:name, attributes[:query]},
+        {:excluded, attributes[:excluded] || []}
+      ]}
+    ]
+    {:ok, Ingredients.list(args)}
   end
 
   def recipe_by_id(id) do
@@ -31,7 +43,7 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
   end
 
   def ingredient_by_id(id) do
-    case Recipe.ingredients_by_ids([id]) do
+    case Ingredients.ingredients_by_ids([id]) do
       {:ok, %{^id => result}} -> {:ok, result}
       _ -> {:error, :not_found}
     end
@@ -56,15 +68,15 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
 # Mutations
 
   def add_ingredient(_parent, attributes, _info) do
-    Recipe.add_ingredient(attributes)
+    Ingredients.add_ingredient(attributes)
   end
 
   def edit_ingredient(_parent, attributes, _info) do
-    Recipe.edit_ingredient(attributes)
+    Ingredients.edit_ingredient(attributes[:input])
   end
 
   def delete_ingredient(_parent, attributes, _info) do
-    Recipe.delete_ingredient(attributes)
+    Ingredients.delete_ingredient(attributes)
   end
 
   def add_recipe(_parent, attributes, _info) do
@@ -76,11 +88,4 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
     |> Map.put(:id, attributes[:recipe_id])
     |> Recipe.edit_recipe
   end
-
-  # def find(_parent, %{id: id}, _info) do
-  #   case Repo.get(Customer, id) do
-  #     nil  -> {:error, "Customer id #{id} not found"}
-  #     user -> {:ok, user}
-  #   end
-  # end
 end

@@ -25,6 +25,10 @@ defmodule Picape.Factory do
     %Picape.Recipe.Ingredient{name: "Butter"}
   end
 
+  def build(:ingredient_tag) do
+    %Picape.Recipe.IngredientTag{}
+  end
+
   def build(:essential) do
     build(:ingredient, is_essential: true)
   end

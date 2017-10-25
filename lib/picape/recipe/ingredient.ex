@@ -10,6 +10,10 @@ defmodule Picape.Recipe.Ingredient do
     field :supermarket_product_id, :integer
     field :supermarket_product_raw, :map
 
+    many_to_many :tags, Picape.Recipe.IngredientTag,
+      join_through: "recipe_ingredient_tagging",
+      on_replace: :delete
+
     timestamps()
   end
 
