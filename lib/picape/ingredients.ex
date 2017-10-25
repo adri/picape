@@ -63,7 +63,7 @@ defmodule Picape.Ingredients do
   end
 
   def count_all() do
-    {:ok, Repo.aggregate(IngredientTag, :count, :id)}
+    {:ok, Repo.aggregate(Ingredient, :count, :id)}
   end
 
   def add_ingredient(params) do
