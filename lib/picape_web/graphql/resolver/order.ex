@@ -14,8 +14,11 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
   end
 
   def last_ordered(_parent, _args, _info) do
-    case Recipe.recipes_by_ids(Order.planned_recipes(Order.last_order_id())) do
-      {:ok, result} -> {:ok, Map.values(result)}
+    with {:ok, recipe_ids} <- Order.planned_recipes(Order.last_order_id()),
+         {:ok, recipe_map} <- Recipe.recipes_by_ids(recipe_ids)
+    do
+      {:ok, Map.values(recipe_map)}
+    else
       _ -> {:error, []}
     end
   end
