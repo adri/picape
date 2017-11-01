@@ -1,5 +1,6 @@
 import React from 'react';
-import { gql, graphql, compose } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
+import gql from 'graphql-tag';
 import mutateable from '../../lib/mutateable';
 import Router from 'next/router'
 

@@ -1,4 +1,5 @@
-import { gql, graphql } from 'react-apollo';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 import ErrorMessage from '../components/ErrorMessage';
 import Recipe from './recipe/Recipe';
 import Loading from '../components/Loading';

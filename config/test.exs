@@ -18,3 +18,5 @@ config :picape, Picape.Repo,
   password: System.get_env("DATABASE_POSTGRESQL_PASSWORD") || "postgres",
   pool: Ecto.Adapters.SQL.Sandbox,
   ownership_timeout: 60_000
+
+config :picape, :supermarket, Picape.SupermarketMock

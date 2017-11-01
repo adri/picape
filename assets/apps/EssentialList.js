@@ -1,4 +1,5 @@
-import { gql, graphql } from 'react-apollo';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 import { withState, compose } from 'recompose';
 import ErrorMessage from '../components/ErrorMessage';
 import Ingredient from '../components/Ingredient';
@@ -44,7 +45,6 @@ const recipesQuery = gql`
         name
         count
       }
-      totalCount
       edges {
         node {
           id
