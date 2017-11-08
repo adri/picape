@@ -36,7 +36,7 @@ if Enum.member?(environments_to_exclude, Mix.env()) do
     format: :logfmt,
     print_timestamps: true,
     print_log_level: true,
-    print_metadata: false # turn this on to view the additional metadata
+    print_metadata: true # turn this on to view the additional metadata
 end
 
 # Need help?
