@@ -42,6 +42,7 @@ defmodule Picape.Mixfile do
      {:phoenix_html, "~> 2.10.3"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:sentry, "~> 6.0.0"},
+     {:timber, "~> 2.5"},
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:reverse_proxy, "~> 0.3.1"},
