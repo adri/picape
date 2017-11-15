@@ -11,6 +11,13 @@ export default function Recipe({recipe, showEdit}) {
     <div className="card recipe">
       <FlipDirectionAware backside={
           <div>
+              <span className="ingredient-list">
+              {recipe.ingredients
+                  .map(ref => `${ref.ingredient.name} (${ref.quantity})`)
+                  .join(', ')
+              }
+              </span>
+              <br />
               {recipe.isPlanned ?
                   <UnplanRecipe recipeId={recipe.id}/>
                   : <PlanRecipe recipeId={recipe.id}/>
@@ -72,6 +79,9 @@ export default function Recipe({recipe, showEdit}) {
       .recipe.highlighted {
         box-shadow: inset 0 0 25px #ffcca9, inset 0 0 0 1px rgba(0, 0, 0, .1);
       }
+      .ingredient-list {
+        font-size: 11px;
+      }
       `}</style>
     </div>
   );
@@ -84,6 +94,13 @@ Recipe.fragments = {
         title
         imageUrl
         isPlanned
+        ingredients {
+          quantity
+          ingredient {
+            id
+            name
+          }
+        }
       }
     `,
 };
