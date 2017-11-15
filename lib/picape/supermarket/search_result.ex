@@ -1,6 +1,5 @@
 defmodule Picape.Supermarket.SearchResult do
   use Ecto.Schema
-  import Ecto.Changeset
   alias Picape.Supermarket.SearchResult
   alias Picape.Supermarket
 

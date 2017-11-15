@@ -1,6 +1,6 @@
 defmodule PicapeWeb.Graphql.Types do
   use Absinthe.Schema.Notation
-  use Absinthe.Relay.Schema.Notation
+  use Absinthe.Relay.Schema.Notation, :modern
 
   alias PicapeWeb.Graphql.Resolver
 
@@ -68,7 +68,6 @@ defmodule PicapeWeb.Graphql.Types do
   end
 
   object :ingredient_edge do
-    field :quantity, :integer
     field :node, :ingredient
   end
 
@@ -84,9 +83,6 @@ defmodule PicapeWeb.Graphql.Types do
     @desc "Ingredient tags and their counts"
     field :tags, list_of(:ingredient_tag) do
       resolve &Resolver.Recipe.list_ingredient_tags/3
-    end
-    field :total_count, :integer do
-      resolve &Resolver.Recipe.count_ingredients/3
     end
   end
 

@@ -21,7 +21,7 @@ defmodule Picape.Order do
     |> PlannedRecipe.changeset(%{line_id: order_id, recipe_id: recipe_id, unplanned: unplan})
     |> Repo.insert(on_conflict: [set: [unplanned: unplan]], conflict_target: [:line_id, :recipe_id])
     |> case do
-      {:ok, _recipe} -> sync_supermarket(order_id)
+      {:ok, recipe} -> {:ok, recipe}
       err -> err
     end
   end

@@ -1,4 +1,5 @@
-import { gql, graphql } from 'react-apollo';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 import ErrorMessage from '../components/ErrorMessage';
 import Loading from '../components/Loading';
 import Dropdown from '../components/Dropdown';

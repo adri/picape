@@ -1,5 +1,6 @@
 import React from 'react';
-import { gql, graphql, compose } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
+import gql from 'graphql-tag';
 import Loading from '../../components/Loading';
 import Ingredient from '../../components/Ingredient';
 import Autocomplete from 'react-autocomplete';

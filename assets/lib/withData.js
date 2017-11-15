@@ -47,13 +47,10 @@ export default ComposedComponent => {
                 // head side effect therefore need to be cleared manually
                 Head.rewind()
 
-                // Extract query data from the Apollo store
-                const state = apollo.getInitialState()
-
                 serverState = {
                     apollo: {
                         // Only include the Apollo data state
-                        data: state.data
+                        data: apollo.cache.extract()
                     }
                 }
             }

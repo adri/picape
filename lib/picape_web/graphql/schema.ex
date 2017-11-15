@@ -1,6 +1,6 @@
 defmodule PicapeWeb.Graphql.Schema do
   use Absinthe.Schema
-  use Absinthe.Relay.Schema
+  use Absinthe.Relay.Schema, :modern
 
   alias PicapeWeb.Graphql.Resolver
   import_types PicapeWeb.Graphql.Types
@@ -142,8 +142,23 @@ defmodule PicapeWeb.Graphql.Schema do
       arg :title, non_null(:string)
       arg :description, :string
       arg :image_url, :string
-      arg :ingredients, non_null(list_of(:ingredient_ref))
+      arg :ingredients, non_null(list_of(non_null(:ingredient_ref)))
       resolve handle_errors(&Resolver.Recipe.edit_recipe/3)
+    end
+  end
+
+  subscription do
+    field :recipe_planned, :recipe do
+      config fn _args, _info ->
+        {:ok, topic: "*"}
+      end
+      trigger :plan_recipe, topic: fn _recipe -> "*" end
+    end
+    field :recipe_unplanned, :recipe do
+      config fn _args, _info ->
+        {:ok, topic: "*"}
+      end
+      trigger :unplan_recipe, topic: fn _recipe -> "*" end
     end
   end
 

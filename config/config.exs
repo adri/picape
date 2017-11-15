@@ -36,6 +36,8 @@ config :sentry,
     env: "production"
   }
 
+config :picape, :supermarket, Picape.Supermarket
+
 config :mix_docker, image: "adri/picape"
 
 # Import environment specific config. This must remain at the bottom
