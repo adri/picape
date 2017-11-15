@@ -12,8 +12,8 @@ function SyncOrder({ submit, loading }) {
 }
 
 const mutation = gql`
-  mutation SyncOrder {
-    syncOrder {
+  mutation SyncOrder($refresh: Boolean) {
+    syncOrder(refresh: $refresh) {
       id
     }
   }
@@ -22,6 +22,7 @@ const mutation = gql`
 export default compose(
   graphql(mutation, {
     options: {
+      variables: { refresh: true },
       refetchQueries: ['OrderList', 'RecipeList', 'EssentialList'],
     },
   }),
