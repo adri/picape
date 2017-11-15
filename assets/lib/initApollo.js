@@ -16,7 +16,7 @@ if (!process.browser) {
 function createLink() {
     if (process.browser) {
         return createAbsintheSocketLink(AbsintheSocket.create(
-            new PhoenixSocket("ws://localhost:4000/socket")
+            new PhoenixSocket("ws://" + BACKEND_URL + "/socket")
         ));
     }
 
