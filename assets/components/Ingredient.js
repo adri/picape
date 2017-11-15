@@ -29,7 +29,7 @@ export default class extends React.Component {
                     <div>
                       <h6 className="dropdown-header">Planned recipes</h6>
                       {Array.isArray(plannedRecipes) && plannedRecipes.map(({quantity, recipe}) =>
-                        <Link href={`/recipe?id=${recipe.id}`}>
+                        <Link key={recipe.id} href={`/recipe?id=${recipe.id}`}>
                           <a className="dropdown-item" href="#">{quantity} {recipe.title}</a>
                         </Link>
                       )}

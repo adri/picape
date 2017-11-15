@@ -50,6 +50,7 @@ defmodule Picape.Order do
     do
       IO.inspect recipe_quantities, label: "recipe_quantities"
       IO.inspect planned, label: "planned"
+      IO.inspect manual, label: "manual"
       IO.inspect existing, label: "existing"
       IO.inspect changes, label: "changes"
 

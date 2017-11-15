@@ -67,6 +67,7 @@ const query = gql`
   mutation orderIngredient($ingredientId: ID!, $quantity: Int!) {
     orderIngredient(ingredientId: $ingredientId, quantity: $quantity) {
       id
+      orderedQuantity
     }
   }
 `;
