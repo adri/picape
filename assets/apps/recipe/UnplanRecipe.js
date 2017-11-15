@@ -37,9 +37,10 @@ const query = gql`
       ingredients {
         quantity
         ingredient {
-            id
-            isEssential
-            isPlanned
+          id
+          isEssential
+          isPlanned
+          orderedQuantity
         }
       }
     }
@@ -49,7 +50,7 @@ const query = gql`
 export default compose(
   graphql(query, {
     options: {
-      refetchQueries: ['RecipeList', 'OrderList', 'EssentialList'],
+      refetchQueries: [ 'OrderList'],
     },
   }),
   mutateable(),

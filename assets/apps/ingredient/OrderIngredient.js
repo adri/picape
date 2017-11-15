@@ -75,7 +75,7 @@ const query = gql`
 export default compose(
   graphql(query, {
     options: {
-      refetchQueries: ['OrderList', 'EssentialList'],
+      refetchQueries: ['OrderList'],
     },
   }),
   mutateable(),

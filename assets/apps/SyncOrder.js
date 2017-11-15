@@ -15,6 +15,12 @@ const mutation = gql`
   mutation SyncOrder($refresh: Boolean) {
     syncOrder(refresh: $refresh) {
       id
+      items {
+        ingredient {
+          id
+          orderedQuantity
+        }
+      }
     }
   }
 `;
@@ -23,7 +29,7 @@ export default compose(
   graphql(mutation, {
     options: {
       variables: { refresh: true },
-      refetchQueries: ['OrderList', 'RecipeList', 'EssentialList'],
+      refetchQueries: ['OrderList'],
     },
   }),
   mutateable(),

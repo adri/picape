@@ -29,12 +29,10 @@ function RecipeList({ data: { loading, error, recipes }, showEdit}) {
 const recipesQuery = gql`
   query RecipeList {
     recipes {
-      id
-      title
-      imageUrl
-      isPlanned
+      ...recipe
     }
   }
+  ${Recipe.fragments.recipe}  
 `;
 
 export default graphql(recipesQuery)(RecipeList);

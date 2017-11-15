@@ -35,6 +35,7 @@ const query = gql`
           id
           isEssential
           isPlanned
+          orderedQuantity
         }
       }
     }
@@ -44,7 +45,7 @@ const query = gql`
 export default compose(
   graphql(query, {
     options: {
-      refetchQueries: ['RecipeList', 'OrderList', 'EssentialList'],
+      refetchQueries: ['OrderList'],
     },
   }),
   mutateable(),

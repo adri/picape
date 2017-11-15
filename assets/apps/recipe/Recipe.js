@@ -4,6 +4,7 @@ import PlanRecipe from './PlanRecipe';
 import Image from '../../components/Image';
 import FlipDirectionAware from '../../components/FlipDirectionAware';
 import EditRecipeButton from './EditRecipeButton';
+import gql from "graphql-tag";
 
 export default function Recipe({recipe, showEdit}) {
   return (
@@ -76,3 +77,13 @@ export default function Recipe({recipe, showEdit}) {
   );
 }
 
+Recipe.fragments = {
+    recipe: gql`
+      fragment recipe on Recipe {
+        id
+        title
+        imageUrl
+        isPlanned
+      }
+    `,
+};
