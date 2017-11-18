@@ -7,6 +7,7 @@ defmodule PicapeWeb.Router do
   forward "/graphiql", Absinthe.Plug.GraphiQL,
     schema: PicapeWeb.Graphql.Schema,
     socket: PicapeWeb.UserSocket,
-    interface: :simple
-  forward "/", ReverseProxy, upstream: ["0.0.0.0:4001"]
+    interface: :playground
+
+forward "/", ReverseProxy, upstream: ["0.0.0.0:4001"]
 end
