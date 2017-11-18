@@ -47,33 +47,15 @@ const orderQuery = gql`
       totalPrice
       items {
         id
-        name
         imageUrl
+        name
         ingredient {
-          id
-          name
-          imageUrl
-          isPlanned
-          unitQuantity
-          orderedQuantity
-          plannedRecipes {
-              quantity
-              recipe {
-                  id
-                  title
-              }
-          }
-        }  
+          ... ingredient
+        }
       }
     }
   }
+  ${Ingredient.fragments.ingredient}
 `;
 
-export default graphql(orderQuery, {
-  options: {
-    variables: {},
-  },
-  props: ({ data }) => ({
-    data,
-  }),
-})(OrderList);
+export default graphql(orderQuery)(OrderList);

@@ -1,8 +1,9 @@
 import OrderIngredient from '../apps/ingredient/OrderIngredient';
+import gql from 'graphql-tag';
 import Dropdown from './Dropdown';
 import Link from 'next/link';
 
-export default class extends React.Component {
+export default class Ingredient extends React.Component {
   state = {
     hovered: false
   };
@@ -100,4 +101,24 @@ export default class extends React.Component {
       </div>
     );
   }
+}
+
+Ingredient.fragments = {
+  ingredient: gql`
+    fragment ingredient on Ingredient {
+      id
+      name
+      imageUrl
+      isPlanned
+      unitQuantity
+      orderedQuantity
+      plannedRecipes {
+        quantity
+        recipe {
+          id
+          title
+        }
+      }
+    }   
+  `
 }
