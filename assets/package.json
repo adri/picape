@@ -34,9 +34,11 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "prettier": "prettier --bracket-spacing --single-quote --tab-width 2 --trailing-comma all --parser babylon --print-width 120  --write \"{{components,epics,lib,mutations,pages,reducers,scripts,test,themes,types},__{tests,mocks,generated}__}/**/*.js\""
+    "prettier": "prettier --bracket-spacing --single-quote --tab-width 2 --trailing-comma all --parser babylon --print-width 120  --write \"{{components,epics,lib,mutations,pages,reducers,scripts,test,themes,types},__{tests,mocks,generated}__}/**/*.js\"",
+    "analyze": "ANALYZE=1 next build"
   },
   "devDependencies": {
-    "prettier": "^1.5.3"
+    "prettier": "^1.5.3",
+    "webpack-bundle-analyzer": "^2.9.1"
   }
 }
