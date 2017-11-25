@@ -1,11 +1,11 @@
-import { graphql, compose } from 'react-apollo';
-import gql from 'graphql-tag';
-import ErrorMessage from '../components/ErrorMessage';
-import Ingredient from '../components/Ingredient';
-import Loading from '../components/Loading';
-import AddIngredient from './ingredient/AddIngredient';
+import { graphql, compose } from "react-apollo";
+import gql from "graphql-tag";
+import ErrorMessage from "../components/ErrorMessage";
+import Ingredient from "../components/Ingredient";
+import Loading from "../components/Loading";
+import AddIngredient from "./ingredient/AddIngredient";
 
-function IngredientList({ data: { loading, error, ingredients }} ) {
+function IngredientList({ data: { loading, error, ingredients } }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <Loading />;
 
@@ -25,11 +25,11 @@ function IngredientList({ data: { loading, error, ingredients }} ) {
       <div className="card">
         <div className="row no-gutters">
           {ingredients.edges &&
-            ingredients.edges.map(ingredient =>
+            ingredients.edges.map(ingredient => (
               <div key={ingredient.node.id} className="col-sm-3">
                 <Ingredient {...ingredient.node} showEdit={true} />
-              </div>,
-            )}
+              </div>
+            ))}
         </div>
       </div>
     </div>
@@ -53,8 +53,4 @@ const query = gql`
   }
 `;
 
-
-export default compose(
-  graphql(query, { options: { variables: { query: '' } } }),
-)(IngredientList);
-
+export default compose(graphql(query, { options: { variables: { query: "" } } }))(IngredientList);

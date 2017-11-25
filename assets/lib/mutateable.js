@@ -1,26 +1,27 @@
-import hoistNonReactStatic from 'hoist-non-react-statics';
-import React from 'react';
+import hoistNonReactStatic from "hoist-non-react-statics";
+import React from "react";
 
 function getDisplayName(WrappedComponent) {
-  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+  return WrappedComponent.displayName || WrappedComponent.name || "Component";
 }
 
 // See: https://facebook.github.io/react/docs/higher-order-components.html
-export default function mutatable({ mutationName = 'mutate' } = {}) {
+export default function mutatable({ mutationName = "mutate" } = {}) {
   return SourceComponent => {
     class Mutatable extends React.Component {
       state = {
         loading: false,
-        error: '',
+        error: "",
       };
 
       submit = (event, variables, { handleError, handleSuccess } = {}) => {
         event && event.preventDefault();
 
-        this.setState({ loading: true, error: '' });
+        this.setState({ loading: true, error: "" });
 
-        return this.props[mutationName]({ variables })
-          .then((res) => {
+        return this.props
+          [mutationName]({ variables })
+          .then(res => {
             this.setState({ loading: false });
             if (handleSuccess) {
               handleSuccess();
@@ -39,12 +40,7 @@ export default function mutatable({ mutationName = 'mutate' } = {}) {
 
       render() {
         return (
-          <SourceComponent
-            {...this.props}
-            loading={this.state.loading}
-            error={this.state.error}
-            submit={this.submit}
-          />
+          <SourceComponent {...this.props} loading={this.state.loading} error={this.state.error} submit={this.submit} />
         );
       }
     }

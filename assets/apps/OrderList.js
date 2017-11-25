@@ -1,10 +1,10 @@
-import { graphql } from 'react-apollo';
-import gql from 'graphql-tag';
-import ErrorMessage from '../components/ErrorMessage';
-import SyncOrder from './SyncOrder';
-import Ingredient from '../components/Ingredient';
-import Money from '../components/Money';
-import Loading from '../components/Loading';
+import { graphql } from "react-apollo";
+import gql from "graphql-tag";
+import ErrorMessage from "../components/ErrorMessage";
+import SyncOrder from "./SyncOrder";
+import Ingredient from "../components/Ingredient";
+import Money from "../components/Money";
+import Loading from "../components/Loading";
 
 function OrderList({ data: { loading, error, currentOrder } }) {
   if (error) return <ErrorMessage message="Error loading." />;
@@ -31,8 +31,7 @@ function OrderList({ data: { loading, error, currentOrder } }) {
                   <Ingredient {...ingredient} />
                 </div>
               );
-            }
-            )}
+            })}
         </div>
       </div>
     </div>

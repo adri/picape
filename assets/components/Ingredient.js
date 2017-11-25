@@ -1,11 +1,11 @@
-import OrderIngredient from '../apps/ingredient/OrderIngredient';
-import gql from 'graphql-tag';
-import Dropdown from './Dropdown';
-import Link from 'next/link';
+import OrderIngredient from "../apps/ingredient/OrderIngredient";
+import gql from "graphql-tag";
+import Dropdown from "./Dropdown";
+import Link from "next/link";
 
 export default class Ingredient extends React.Component {
   state = {
-    hovered: false
+    hovered: false,
   };
 
   render() {
@@ -14,9 +14,9 @@ export default class Ingredient extends React.Component {
 
     return (
       <div
-        className={'ingredient align-bottom br-1 ' + (isPlanned && 'highlighted')}
-        onMouseEnter={event => this.setState({hovered: true})}
-        onMouseLeave={event => this.setState({hovered: false})}
+        className={"ingredient align-bottom br-1 " + (isPlanned && "highlighted")}
+        onMouseEnter={event => this.setState({ hovered: true })}
+        onMouseLeave={event => this.setState({ hovered: false })}
       >
         <div className="media pl-2 pt-2">
           <div className="d-flex mr-3 mt-0 ingredient-image-wrapper">
@@ -24,38 +24,45 @@ export default class Ingredient extends React.Component {
           </div>
           <div className="media-body mb-2">
             <div className="ingredient-name mt-0 mb-0">
-                {showEdit && <Link href={`/ingredient?id=${id}`}><a>{name}</a></Link>}
-                {!showEdit && <Dropdown link={name}>
+              {showEdit && (
+                <Link href={`/ingredient?id=${id}`}>
+                  <a>{name}</a>
+                </Link>
+              )}
+              {!showEdit && (
+                <Dropdown link={name}>
                   {isPlanned && (
                     <div>
                       <h6 className="dropdown-header">Planned recipes</h6>
-                      {Array.isArray(plannedRecipes) && plannedRecipes.map(({quantity, recipe}) =>
-                        <Link key={recipe.id} href={`/recipe?id=${recipe.id}`}>
-                          <a className="dropdown-item" href="#">{quantity} {recipe.title}</a>
-                        </Link>
-                      )}
+                      {Array.isArray(plannedRecipes) &&
+                        plannedRecipes.map(({ quantity, recipe }) => (
+                          <Link key={recipe.id} href={`/recipe?id=${recipe.id}`}>
+                            <a className="dropdown-item" href="#">
+                              {quantity} {recipe.title}
+                            </a>
+                          </Link>
+                        ))}
                       <div className="dropdown-divider" />
                     </div>
                   )}
-                  <Link href={`/ingredient?id=${id}`}><a className="dropdown-item">Edit</a></Link>
-                </Dropdown>}
+                  <Link href={`/ingredient?id=${id}`}>
+                    <a className="dropdown-item">Edit</a>
+                  </Link>
+                </Dropdown>
+              )}
             </div>
-            <div className="ingredient-unit-quantity">
-              {unitQuantity}&nbsp;
-            </div>
+            <div className="ingredient-unit-quantity">{unitQuantity}&nbsp;</div>
           </div>
           <div className="d-flex mr-3 mt-0 ingredient-quantity-wrapper">
-            {typeof orderedQuantity !== "undefined" &&
-              <OrderIngredient
-                id={id}
-                hovered={hovered}
-                quantity={orderedQuantity} />}
+            {typeof orderedQuantity !== "undefined" && (
+              <OrderIngredient id={id} hovered={hovered} quantity={orderedQuantity} />
+            )}
           </div>
         </div>
         <style jsx>{`
           .ingredient {
             height: 100%;
-            box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, .1);
+            box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient .media {
@@ -65,11 +72,11 @@ export default class Ingredient extends React.Component {
 
           .ingredient:hover {
             text-decoration: none;
-            box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, .1);
+            box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient.highlighted {
-            box-shadow: inset 0 0 25px #ffcca9, inset 0 0 0 1px rgba(0, 0, 0, .1);
+            box-shadow: inset 0 0 25px #ffcca9, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient-name {
@@ -119,6 +126,6 @@ Ingredient.fragments = {
           title
         }
       }
-    }   
-  `
-}
+    }
+  `,
+};

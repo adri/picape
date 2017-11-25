@@ -1,11 +1,11 @@
-import React from 'react';
-import { graphql, compose } from 'react-apollo';
-import gql from 'graphql-tag';
-import Loading from '../../components/Loading';
-import TagSelection from '../../components/TagSelection';
-import DeleteIngredientButton from './DeleteIngredientButton';
-import Router from 'next/router';
-import mutateable from '../../lib/mutateable';
+import React from "react";
+import { graphql, compose } from "react-apollo";
+import gql from "graphql-tag";
+import Loading from "../../components/Loading";
+import TagSelection from "../../components/TagSelection";
+import DeleteIngredientButton from "./DeleteIngredientButton";
+import Router from "next/router";
+import mutateable from "../../lib/mutateable";
 
 class EditIngredient extends React.Component {
   componentWillReceiveProps(props) {
@@ -14,38 +14,40 @@ class EditIngredient extends React.Component {
       id: props.data.node.id,
       name: props.data.node.name,
       isEssential: props.data.node.isEssential,
-      tagIds: props.data.node.tags.map((tag) => tag.id),
+      tagIds: props.data.node.tags.map(tag => tag.id),
       allTags: props.data.ingredients.tags,
       changed: false,
     });
   }
 
   onSave(event) {
-    this.props.submit(event, {
+    this.props
+      .submit(event, {
         input: {
           ingredientId: this.state.id,
           name: this.state.name,
           isEssential: this.state.isEssential,
           tagIds: this.state.tagIds,
-        }
+        },
       })
       .then(data => {
         if (data) {
-          Router.back()
+          Router.back();
         }
       });
   }
 
   onCancel() {
-    this.props.data.refetch()
+    this.props.data
+      .refetch()
       .then(props => this.componentWillReceiveProps(props))
       .then(() => Router.back());
   }
 
   render() {
     if (this.state === null) return <Loading />;
-    const {submit} = this.props;
-    const {id, name, isEssential, tagIds, allTags, changed} = this.state;
+    const { submit } = this.props;
+    const { id, name, isEssential, tagIds, allTags, changed } = this.state;
 
     return (
       <div>
@@ -53,50 +55,50 @@ class EditIngredient extends React.Component {
           <div className="card-block">
             <form>
               {/*<div className="form-group row">*/}
-                {/*<label htmlFor="name" className="col-sm-2 col-form-label">Supermarket product</label>*/}
-                {/*<div className="col-sm-10">*/}
-                  {/*<IngredientSupermarketSearch*/}
-                    {/*onSelect={ingredient => this.setState({ingredient})}*/}
-                  {/*/>*/}
-                {/*</div>*/}
+              {/*<label htmlFor="name" className="col-sm-2 col-form-label">Supermarket product</label>*/}
+              {/*<div className="col-sm-10">*/}
+              {/*<IngredientSupermarketSearch*/}
+              {/*onSelect={ingredient => this.setState({ingredient})}*/}
+              {/*/>*/}
+              {/*</div>*/}
               {/*</div>*/}
 
               <div className="form-group row">
-                <label htmlFor="name" className="col-sm-2 col-form-label">Ingredient name</label>
+                <label htmlFor="name" className="col-sm-2 col-form-label">
+                  Ingredient name
+                </label>
                 <div className="col-sm-10">
                   <input
                     type="name"
                     id="name"
                     className="form-control"
-                    onChange={event => this.setState({name: event.target.value, changed: true})}
-                    defaultValue={name} />
-                </div>
-              </div>
-
-              <div className="form-group row">
-                <label className="col-sm-2 col-form-label">
-                  Tags
-                </label>
-                <div className="col-sm-10">
-                  <TagSelection
-                    tags={allTags}
-                    selectedTags={tagIds}
-                    onChange={tag => this.setState({tagIds: [tag], changed: true})}
+                    onChange={event => this.setState({ name: event.target.value, changed: true })}
+                    defaultValue={name}
                   />
                 </div>
               </div>
 
               <div className="form-group row">
-                <label className="col-sm-2 col-form-label">
-                  Essential
-                </label>
+                <label className="col-sm-2 col-form-label">Tags</label>
                 <div className="col-sm-10">
-                <input
-                  checked={isEssential}
-                  id="essential"
-                  className="bootstrap-switch form-control"
-                  onChange={event => this.setState({isEssential: event.target.checked, changed: true})}
-                  type="checkbox" />
+                  <TagSelection
+                    tags={allTags}
+                    selectedTags={tagIds}
+                    onChange={tag => this.setState({ tagIds: [tag], changed: true })}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group row">
+                <label className="col-sm-2 col-form-label">Essential</label>
+                <div className="col-sm-10">
+                  <input
+                    checked={isEssential}
+                    id="essential"
+                    className="bootstrap-switch form-control"
+                    onChange={event => this.setState({ isEssential: event.target.checked, changed: true })}
+                    type="checkbox"
+                  />
                 </div>
               </div>
 
@@ -107,12 +109,14 @@ class EditIngredient extends React.Component {
                     className="btn btn-primary"
                     disabled={!changed && "disabled"}
                     value="Save"
-                    onClick={event => this.onSave(event)} />
+                    onClick={event => this.onSave(event)}
+                  />
                   <input
                     type="button"
                     className="btn btn-neutral ml-3"
                     value="Cancel"
-                    onClick={event => this.onCancel(event, this.state)} />
+                    onClick={event => this.onCancel(event, this.state)}
+                  />
                   <DeleteIngredientButton ingredientId={id} />
                 </div>
               </div>
@@ -120,24 +124,24 @@ class EditIngredient extends React.Component {
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
 
 const GetIngredient = gql`
   query GetIngredient($ingredientId: ID!) {
     node(id: $ingredientId) {
-        ... on Ingredient {
+      ... on Ingredient {
+        id
+        name
+        imageUrl
+        isEssential
+        tags {
           id
           name
-          imageUrl
-          isEssential
-          tags {
-            id
-            name
-            count
-          }
+          count
         }
+      }
     }
     ingredients(first: 1000) {
       tags {
@@ -161,9 +165,11 @@ const AddIngredient = gql`
 `;
 
 export default compose(
-  graphql(GetIngredient, { options: ({ ingredientId }) => ({ variables: {ingredientId} }) }),
-  graphql(AddIngredient, { options: {
-    refetchQueries: ['IngredientList', 'EssentialList'],
-  }}),
+  graphql(GetIngredient, { options: ({ ingredientId }) => ({ variables: { ingredientId } }) }),
+  graphql(AddIngredient, {
+    options: {
+      refetchQueries: ["IngredientList", "EssentialList"],
+    },
+  }),
   mutateable(),
 )(EditIngredient);

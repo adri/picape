@@ -34,7 +34,7 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "prettier": "prettier --bracket-spacing --single-quote --tab-width 2 --trailing-comma all --parser babylon --print-width 120  --write \"{{components,epics,lib,mutations,pages,reducers,scripts,test,themes,types},__{tests,mocks,generated}__}/**/*.js\"",
+    "prettier": "prettier --bracket-spacing --tab-width 2 --trailing-comma all --parser babylon --print-width 120  --write \"{{components,apps,lib,mutations,pages,test,themes,types},__{tests,mocks,generated}__}/**/*.js\"",
     "analyze": "ANALYZE=1 next build"
   },
   "devDependencies": {

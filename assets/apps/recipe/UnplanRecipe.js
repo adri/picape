@@ -1,8 +1,8 @@
-import React from 'react';
-import { graphql, compose } from 'react-apollo';
-import gql from 'graphql-tag';
-import mutateable from '../../lib/mutateable';
-import Loading from '../../components/Loading';
+import React from "react";
+import { graphql, compose } from "react-apollo";
+import gql from "graphql-tag";
+import mutateable from "../../lib/mutateable";
+import Loading from "../../components/Loading";
 
 function UnplanRecipe({ submit, loading, error, recipeId }) {
   if (error) alert(error);
@@ -12,18 +12,18 @@ function UnplanRecipe({ submit, loading, error, recipeId }) {
       {loading && <Loading dark />}
       <span className="btn-text">Unplan</span>
       <style jsx>{`
-      .btn-simple {
-        color: #636363;
-        position: relative;
-        transition: width 1s ease-out;
-        background-color: white;
-      }
+        .btn-simple {
+          color: #636363;
+          position: relative;
+          transition: width 1s ease-out;
+          background-color: white;
+        }
 
-      .btn-simple:hover {
-        border-color: green;
-        color: green;
-        background-color: white;
-      }
+        .btn-simple:hover {
+          border-color: green;
+          color: green;
+          background-color: white;
+        }
       `}</style>
     </a>
   );
@@ -50,7 +50,7 @@ const query = gql`
 export default compose(
   graphql(query, {
     options: {
-      refetchQueries: [ 'OrderList'],
+      refetchQueries: ["OrderList"],
     },
   }),
   mutateable(),
