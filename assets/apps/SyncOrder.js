@@ -31,4 +31,11 @@ const mutation = gql`
   ${Ingredient.fragments.ingredient}  
 `;
 
-export default compose(graphql(mutation), mutateable())(SyncOrder);
+export default compose(
+  graphql(mutation, {
+    options: {
+      refetchQueries: ["RecipeList"],
+    },
+  }),
+  mutateable(),
+)(SyncOrder);
