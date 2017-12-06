@@ -12,8 +12,8 @@ function IngredientList({ data: { loading, error, ingredients } }) {
   return (
     <div>
       <h4 className="text-white">New</h4>
-      <div className="text-white">
-        <p>Select an ingredient to add from Supermarket.</p>
+      <div>
+        <p className="text-white">Select an ingredient to add from Supermarket.</p>
         <div className="form-group">
           <AddIngredient />
         </div>

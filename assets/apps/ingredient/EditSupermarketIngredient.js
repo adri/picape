@@ -33,15 +33,19 @@ export default class extends React.Component {
             </div>
 
             <div className="form-group row">
-              <label className="col-sm-2 col-form-label">Essential</label>
-              <input
-                checked={isEssential}
-                id="essential"
-                className="bootstrap-switch form-control"
-                onChange={event => this.setState({ isEssential: event.target.checked })}
-                type="checkbox"
-              />
-              Essential
+              <div className="col-sm-2 col-form-label">&nbsp;</div>
+              <div className="col-sm-10">
+                <label htmlFor="essential">
+                  <input
+                    checked={isEssential}
+                    id="essential"
+                    className="essential-check"
+                    onChange={event => this.setState({ isEssential: event.target.checked })}
+                    type="checkbox"
+                  />
+                  Essential
+                </label>
+              </div>
             </div>
 
             <input
@@ -61,6 +65,10 @@ export default class extends React.Component {
         <style jsx>{`
           .edit-ingredient {
             max-width: 550px;
+            margin-top: 10px;
+          }
+          .essential-check {
+            margin-right: 7px;
           }
         `}</style>
       </div>
