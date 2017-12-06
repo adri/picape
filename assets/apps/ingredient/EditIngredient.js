@@ -6,12 +6,14 @@ import TagSelection from "../../components/TagSelection";
 import DeleteIngredientButton from "./DeleteIngredientButton";
 import Router from "next/router";
 import mutateable from "../../lib/mutateable";
+import IngredientSupermarketSearch from "./IngredientSupermarketSearch";
 
 class EditIngredient extends React.Component {
   componentWillReceiveProps(props) {
     if (!props.data || !props.data.node) return;
     this.setState({
       id: props.data.node.id,
+      supermarketProductId: props.data.node.supermarketProductId,
       name: props.data.node.name,
       isEssential: props.data.node.isEssential,
       tagIds: props.data.node.tags.map(tag => tag.id),
@@ -25,6 +27,7 @@ class EditIngredient extends React.Component {
       .submit(event, {
         input: {
           ingredientId: this.state.id,
+          supermarketProductId: this.state.supermarketProductId,
           name: this.state.name,
           isEssential: this.state.isEssential,
           tagIds: this.state.tagIds,
@@ -47,22 +50,13 @@ class EditIngredient extends React.Component {
   render() {
     if (this.state === null) return <Loading />;
     const { submit } = this.props;
-    const { id, name, isEssential, tagIds, allTags, changed } = this.state;
+    const { id, name, isEssential, supermarketProductId, tagIds, allTags, changed } = this.state;
 
     return (
       <div>
         <div className="card edit-ingredient">
           <div className="card-block">
             <form>
-              {/*<div className="form-group row">*/}
-              {/*<label htmlFor="name" className="col-sm-2 col-form-label">Supermarket product</label>*/}
-              {/*<div className="col-sm-10">*/}
-              {/*<IngredientSupermarketSearch*/}
-              {/*onSelect={ingredient => this.setState({ingredient})}*/}
-              {/*/>*/}
-              {/*</div>*/}
-              {/*</div>*/}
-
               <div className="form-group row">
                 <label htmlFor="name" className="col-sm-2 col-form-label">
                   Ingredient name
@@ -74,6 +68,18 @@ class EditIngredient extends React.Component {
                     className="form-control"
                     onChange={event => this.setState({ name: event.target.value, changed: true })}
                     defaultValue={name}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group row">
+                <label htmlFor="name" className="col-sm-2 col-form-label">
+                  Supermarket product
+                </label>
+                <div className="col-sm-10">
+                  <IngredientSupermarketSearch
+                    onSelect={ingredient => this.setState({ supermarketProductId: ingredient.id, changed: true })}
+                    query={supermarketProductId}
                   />
                 </div>
               </div>
@@ -136,6 +142,7 @@ const GetIngredient = gql`
         name
         imageUrl
         isEssential
+        supermarketProductId
         tags {
           id
           name
@@ -153,10 +160,11 @@ const GetIngredient = gql`
   }
 `;
 
-const AddIngredient = gql`
+const EditIngredientQuery = gql`
   mutation editIngredient($input: EditIngredientInput!) {
     editIngredient(input: $input) {
       id
+      supermarketProductId
       name
       imageUrl
       isEssential
@@ -166,7 +174,7 @@ const AddIngredient = gql`
 
 export default compose(
   graphql(GetIngredient, { options: ({ ingredientId }) => ({ variables: { ingredientId } }) }),
-  graphql(AddIngredient, {
+  graphql(EditIngredientQuery, {
     options: {
       refetchQueries: ["IngredientList", "EssentialList"],
     },

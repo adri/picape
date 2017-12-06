@@ -1,14 +1,14 @@
 import React from "react";
 import { graphql, compose } from "react-apollo";
 import gql from "graphql-tag";
-import Loading from "../../components/Loading";
 import Ingredient from "../../components/Ingredient";
 import Autocomplete from "react-autocomplete";
 
 class IngredientSupermarketSearch extends React.Component {
-  state = {
-    value: "",
-  };
+  constructor(props) {
+    super(props);
+    this.state = { value: props.query || "" };
+  }
 
   render() {
     const { refetch, loading, ingredients } = this.props.data || {};
@@ -72,8 +72,10 @@ const query = gql`
 export default compose(
   graphql(query, {
     skip: ({ query }) => query === "",
-    options: {
-      variables: { query: "" },
+    options: ({ query }) => {
+      return {
+        variables: { query: query || "" },
+      };
     },
   }),
 )(IngredientSupermarketSearch);

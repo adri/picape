@@ -77,7 +77,7 @@ defmodule Picape.Ingredients do
 
     Repo.get(Ingredient, params[:ingredient_id])
     |> Repo.preload(:tags)
-    |> Ingredient.edit_changeset(params)
+    |> Ingredient.edit_changeset(Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(params[:supermarket_product_id])))
     |> Ecto.Changeset.put_assoc(:tags, tags)
     |> Repo.update
   end

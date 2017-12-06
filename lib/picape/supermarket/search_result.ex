@@ -12,6 +12,7 @@ defmodule Picape.Supermarket.SearchResult do
 
   def from_result(search_result) do
     List.first(search_result)["items"]
+    |> Enum.filter(&(&1["id"] !== "item_suggestion_dialog"))
     |> Enum.map(&convert(&1))
   end
 

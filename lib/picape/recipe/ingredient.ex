@@ -28,7 +28,7 @@ defmodule Picape.Recipe.Ingredient do
   @doc false
   def edit_changeset(%Ingredient{} = ingredient, attrs) do
     ingredient
-    |> cast(attrs, [:name, :is_essential])
+    |> cast(attrs, [:name, :is_essential, :supermarket_product_id, :supermarket_product_raw])
     |> validate_required([:name, :is_essential])
   end
 

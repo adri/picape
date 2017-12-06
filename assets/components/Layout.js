@@ -71,7 +71,7 @@ export default class Layout extends React.Component {
 
             .page {
               background: no-repeat center center fixed;
-              background-image: url(https: fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg);
+              background-image: url("https://res.cloudinary.com/picape/image/upload/f_auto,fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg");
             }
           `}
         </style>
@@ -123,25 +123,6 @@ export default class Layout extends React.Component {
             <div className={"container animated " + (this.state.mounted ? "mounted" : "")}>{children}</div>
           </main>
         </div>
-
-        <footer className="footer">
-          <div className="container">
-            <nav>
-              <ul>
-                <li>
-                  <a href="http://presentation.creative-tim.com">About Us</a>
-                </li>
-                <li>
-                  <a href="http://blog.creative-tim.com">Blog</a>
-                </li>
-                <li>
-                  <a href="https://github.com/creativetimofficial/now-ui-kit/blob/master/LICENSE.md">MIT License</a>
-                </li>
-              </ul>
-            </nav>
-            <div className="copyright">&copy; Designed by </div>
-          </div>
-        </footer>
       </div>
     );
   }

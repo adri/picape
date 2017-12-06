@@ -27,6 +27,7 @@ defmodule PicapeWeb.Graphql.Types do
 
   node object :ingredient do
     field :name, :string
+    field :supermarket_product_id, :string
     field :is_essential, :boolean
     field :tags, list_of(:ingredient_tag)
     field :image_url, :string, resolve: from_object(:image_url)
@@ -52,6 +53,7 @@ defmodule PicapeWeb.Graphql.Types do
   @desc "Edit an ingredient"
   input_object :edit_ingredient_input do
     field :ingredient_id, non_null(:id)
+    field :supermarket_product_id, non_null(:string)
     field :name, non_null(:string)
     field :is_essential, non_null(:boolean)
     field :tag_ids, list_of(:id)

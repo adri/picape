@@ -41,6 +41,7 @@ export default class extends React.Component {
                 onChange={event => this.setState({ isEssential: event.target.checked })}
                 type="checkbox"
               />
+              Essential
             </div>
 
             <input
