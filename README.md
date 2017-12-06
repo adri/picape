@@ -1,5 +1,5 @@
 # Picape
-[![CircleCI](https://circleci.com/gh/adri/picape.svg?style=svg)](https://circleci.com/gh/adri/picape)
+[![CircleCI](https://circleci.com/gh/adri/picape.svg?style=svg)](https://circleci.com/gh/adri/picape) [![codecov](https://codecov.io/gh/adri/picape/branch/master/graph/badge.svg)](https://codecov.io/gh/adri/picape)
 
 Supermarket meets recipes.
 
