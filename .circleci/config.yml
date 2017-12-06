@@ -25,6 +25,7 @@ jobs:
       - run: MIX_ENV=test mix do compile --warnings-as-errors, coveralls.json
       - run: MIX_ENV=test mix archive.install hex sobelow --force
       - run: MIX_ENV=test mix sobelow --exit Low --with-code --ignore Config.HTTPS
+      - run: bash <(curl -s https://codecov.io/bash)
       - store_test_results:
           path: /tmp/
       - save_cache:
