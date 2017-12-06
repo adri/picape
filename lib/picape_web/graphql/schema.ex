@@ -59,6 +59,7 @@ defmodule PicapeWeb.Graphql.Schema do
     field :ingredients, :ingredient_connection do
       arg :first, non_null(:integer)
       arg :filter, :ingredient_filter
+      arg :order, list_of(:ingredient_order)
       resolve &Resolver.Recipe.list_ingredients/3
     end
 

@@ -24,6 +24,8 @@ defmodule Picape.Ingredients do
     |> Enum.reduce(Ingredient, fn
       {:filter, filter}, query ->
         query |> filter_with(filter)
+      {:order, order}, query ->
+        query |> order_by_field(order)
       _, query -> query
     end)
   end
@@ -41,6 +43,13 @@ defmodule Picape.Ingredients do
         from q in query,
           join: t in assoc(q, :tags),
           where: t.id in ^tag_ids
+    end)
+  end
+
+  defp order_by_field(query, order) do
+    Enum.reduce(order, query, fn
+      %{field: :name, direction: direction}, query ->
+        from q in query, order_by: {^direction, :name}
     end)
   end
 

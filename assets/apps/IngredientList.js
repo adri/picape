@@ -38,7 +38,7 @@ function IngredientList({ data: { loading, error, ingredients } }) {
 
 const query = gql`
   query IngredientList {
-    ingredients(first: 1000) {
+    ingredients(first: 1000, order: [{ field: NAME, direction: ASC }]) {
       edges {
         node {
           id

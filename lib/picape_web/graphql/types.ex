@@ -50,6 +50,25 @@ defmodule PicapeWeb.Graphql.Types do
     field :essential, :boolean
   end
 
+  @desc "Ordering options for the ingredients"
+  input_object :ingredient_order do
+    @desc "Field to sort on"
+    field :field, :ingredient_order_field
+    @desc "Direction to sort on"
+    field :direction, :order_direction
+  end
+
+  @desc "Fields that ingredients can be sorted on"
+  enum :ingredient_order_field do
+    value :name, description: "Sort by ingredient name"
+  end
+
+  @desc "Direction to sort in"
+  enum :order_direction do
+    value :asc, description: "Ascending"
+    value :desc, description: "Descending"
+  end
+
   @desc "Edit an ingredient"
   input_object :edit_ingredient_input do
     field :ingredient_id, non_null(:id)

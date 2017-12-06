@@ -37,7 +37,11 @@ function EssentialList({ data: { loading, error, essentials }, selectedTags, cha
 
 const recipesQuery = gql`
   query EssentialList($tagIds: [ID]) {
-    essentials: ingredients(first: 1000, filter: { essential: true, tagIds: $tagIds }) {
+    essentials: ingredients(
+      first: 1000
+      filter: { essential: true, tagIds: $tagIds }
+      order: [{ field: NAME, direction: ASC }]
+    ) {
       tags {
         id
         name
