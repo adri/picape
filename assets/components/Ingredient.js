@@ -9,12 +9,23 @@ export default class Ingredient extends React.Component {
   };
 
   render() {
-    const { id, name, imageUrl, isPlanned, plannedRecipes, unitQuantity, orderedQuantity, showEdit } = this.props;
+    const {
+      id,
+      name,
+      imageUrl,
+      bigImage,
+      isPlanned,
+      plannedRecipes,
+      unitQuantity,
+      orderedQuantity,
+      showEdit,
+    } = this.props;
+
     const { hovered } = this.state;
 
     return (
       <div
-        className={"ingredient align-bottom br-1 " + (isPlanned && "highlighted")}
+        className={"ingredient align-bottom br-1" + (isPlanned && " highlighted") + (bigImage && " big-image")}
         onMouseEnter={event => this.setState({ hovered: true })}
         onMouseLeave={event => this.setState({ hovered: false })}
       >
@@ -98,6 +109,15 @@ export default class Ingredient extends React.Component {
             max-height: 32px;
             max-width: 32px;
             margin: 0 auto;
+          }
+
+          .big-image .ingredient-image {
+            max-height: 160px;
+            max-width: 160px;
+          }
+          .big-image .ingredient-image-wrapper {
+            height: 160px;
+            width: 160px;
           }
 
           .ingredient-unit-quantity {

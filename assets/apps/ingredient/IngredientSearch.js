@@ -35,7 +35,7 @@ class IngredientSearch extends React.Component {
           }}
           renderItem={(ingredient, isHighlighted) => (
             <div key={ingredient.id} style={{ cursor: "pointer", background: isHighlighted ? "#e4e4e4" : "white" }}>
-              <Ingredient {...ingredient} />
+              <Ingredient {...ingredient} bigImage />
             </div>
           )}
           value={this.state.value}
