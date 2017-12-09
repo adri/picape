@@ -17,6 +17,12 @@ config :picape, PicapeWeb.Endpoint,
   pubsub: [name: Picape.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
+config :picape, Picape.Scheduler,
+  jobs: [
+    # Runs every midnight:
+    {"@daily", {Picape.Order, :sync_supermarket, ["1"]}}
+  ]
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

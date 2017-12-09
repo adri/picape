@@ -25,7 +25,7 @@ defmodule Picape.Order.Sync do
   end
 
   defp overwrite(a, b) do
-    Map.merge(a, b, fn _id, quantity1, quantity2 -> quantity2 end)
+    Map.merge(a, b, fn _id, _quantity1, quantity2 -> quantity2 end)
   end
 
   defp find_changes(new, existing) do
