@@ -27,7 +27,7 @@ defmodule Picape.Order.SyncTest do
     assert {:ok, changes} == Sync.changes(planned, manual, %{})
   end
 
-  test "sums product quantities for planned and manual lists" do
+  test "replaces product quantities for planned and manual lists" do
     planned = build(:product_map, %{
       "sum_up": 1,
       "other": 1,
@@ -37,7 +37,7 @@ defmodule Picape.Order.SyncTest do
     })
     changes = build(:sync_changes,
       add: [
-        build(:product, id: :sum_up, quantity: 3),
+        build(:product, id: :sum_up, quantity: 2),
         build(:product, id: :other),
       ]
     )
@@ -67,7 +67,7 @@ defmodule Picape.Order.SyncTest do
       "existing": 1
     })
     manual = build(:product_map, %{
-      "existing": 1
+      "existing": 2
     })
     existing = build(:product_map, %{
       "existing": 1,
@@ -86,7 +86,7 @@ defmodule Picape.Order.SyncTest do
       "existing": 1
     })
     manual = build(:product_map, %{
-      "existing": 2
+      "existing": 3
     })
     existing = build(:product_map, %{
       "existing": 1,
@@ -110,6 +110,22 @@ defmodule Picape.Order.SyncTest do
     changes = build(:sync_changes,
       remove: [
         build(:product, id: :existing, quantity: 1),
+      ]
+    )
+
+    assert {:ok, changes} == Sync.changes(%{}, manual, existing)
+  end
+
+  test "remove all existing products" do
+    manual = build(:product_map, %{
+      "existing": 0
+    })
+    existing = build(:product_map, %{
+      "existing": 2,
+    })
+    changes = build(:sync_changes,
+      remove: [
+        build(:product, id: :existing, quantity: 2),
       ]
     )
 

@@ -10,10 +10,8 @@ defmodule Picape.Order.Sync do
          {:ok} <- validate(existing)
     do
       planned
-      |> merge(manual)
+      |> overwrite(manual)
       |> find_changes(existing)
-    else
-      err -> {:error, err}
     end
   end
 
@@ -22,12 +20,12 @@ defmodule Picape.Order.Sync do
   defp validate(map) do
     case Enum.all?(Map.values(map), &(&1 >= 0)) do
       true -> {:ok}
-      false -> :negative_quantity
+      false -> {:error, :negative_quantity}
     end
   end
 
-  defp merge(a, b) do
-    Map.merge(a, b, fn _id, v1, v2 -> v1 + v2 end)
+  defp overwrite(a, b) do
+    Map.merge(a, b, fn _id, quantity1, quantity2 -> quantity2 end)
   end
 
   defp find_changes(new, existing) do
