@@ -1,0 +1,28 @@
+{
+  expo: {
+    name: "My New Project",
+    description: "No description",
+    slug: "my-new-project",
+    privacy: "unlisted",
+    sdkVersion: "UNVERSIONED",
+    version: "1.0.0",
+    orientation: "portrait",
+    primaryColor: "#cccccc",
+    icon: "./assets/images/icon.png",
+    splash: {
+      image: "./assets/images/splash.png",
+      resizeMode: "contain",
+      backgroundColor: "#ffffff"
+    },
+    packagerOpts: {
+      assetExts: [
+        "ttf"
+      ],
+      config: "./_universe/rn-cli.config.js"
+    },
+    ios: {
+      supportsTablet: true
+    },
+    entryPoint: "_universe/entry.js"
+  }
+}

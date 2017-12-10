@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "picape",
+    "description": "No description",
+    "slug": "picape",
+    "privacy": "unlisted",
+    "sdkVersion": "23.0.0",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "primaryColor": "#cccccc",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    }
+  }
+}
