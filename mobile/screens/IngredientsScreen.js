@@ -1,17 +1,12 @@
 import React from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, FlatList, Text, View, Image } from "react-native";
 import { ExpoLinksView } from "@expo/samples";
+import { Entypo } from "@expo/vector-icons";
+
 import gql from "graphql-tag";
 import { graphql } from "react-apollo";
 
-const toListData = ingredients =>
-  ingredients.edges.map(edge => ({
-    ...edge.node,
-    key: edge.node.id,
-  }));
-
-const IngredientsScreenComponent = function({ data: { loading, error, ingredients } }) {
-  console.log(ingredients && toListData(ingredients));
+const IngredientsScreen = ({ data: { loading, error, ingredients } }) => {
   if (loading) {
     return <ActivityIndicator />;
   }
@@ -28,18 +23,24 @@ const IngredientsScreenComponent = function({ data: { loading, error, ingredient
         * Wishlist:
         * - Local search 🔍
         * - Offline sync
-        *
         **/}
       {ingredients && (
         <FlatList
-          contentContainerStyle={styles.listContainer}
           style={styles.container}
           keyExtractor={edge => edge.node.id}
           data={ingredients.edges}
           renderItem={({ item: { node } }) => (
             <View style={styles.listItem}>
-              <Image source={{ url: node.imageUrl }} style={styles.image} />
-              <Text>{node.name}</Text>
+              <Image source={{ url: node.imageUrl }} style={styles.image} resizeMode="contain" />
+              <View style={styles.descriptionContainer}>
+                <Text style={styles.ingredientName}>{node.name}</Text>
+                <Text style={styles.unitQuantity}>{node.unitQuantity}</Text>
+              </View>
+              <View style={styles.ingredientQuantityContainer}>
+                <Entypo name="circle-with-plus" size={16} color="grey" />
+                <Text style={styles.orderedQuantity}>{node.orderedQuantity}</Text>
+                <Entypo name="circle-with-minus" size={16} color="grey" />
+              </View>
             </View>
           )}
         />
@@ -49,23 +50,47 @@ const IngredientsScreenComponent = function({ data: { loading, error, ingredient
   );
 };
 
-IngredientsScreenComponent.navigationOptions = {
+IngredientsScreen.navigationOptions = {
   title: "Ingredients",
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 15,
     backgroundColor: "#fff",
   },
   image: {
     width: 32,
     height: 32,
+    overflow: "hidden",
   },
-  listContainer: {},
   listItem: {
     flex: 1,
+    flexDirection: "row",
+    paddingHorizontal: 15,
+    paddingVertical: 15,
+    marginLeft: 15,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#EDEDED",
+  },
+  descriptionContainer: {
+    marginTop: 3,
+    paddingLeft: 15,
+  },
+  ingredientName: {
+    fontSize: 15,
+  },
+  ingredientQuantityContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignSelf: "flex-end",
+  },
+  unitQuantity: {
+    fontSize: 12,
+    color: "#CCCCCC",
+  },
+  orderedQuantity: {
+    fontSize: 12,
   },
 });
 
@@ -86,4 +111,4 @@ const ingredientsListQuery = gql`
   }
 `;
 
-export const IngredientsScreen = graphql(ingredientsListQuery)(IngredientsScreenComponent);
+export const IngredientsScreenWithData = graphql(ingredientsListQuery)(IngredientsScreen);

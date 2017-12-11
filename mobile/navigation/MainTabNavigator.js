@@ -6,16 +6,16 @@ import { TabNavigator, TabBarBottom } from "react-navigation";
 import Colors from "../constants/Colors";
 
 import HomeScreen from "../screens/HomeScreen";
-import { IngredientsScreen } from "../screens/IngredientsScreen";
+import { IngredientsScreenWithData } from "../screens/IngredientsScreen";
 import RecipesScreen from "../screens/RecipesScreen";
 
 export default TabNavigator(
   {
+    Ingredients: {
+      screen: IngredientsScreenWithData,
+    },
     Home: {
       screen: HomeScreen,
-    },
-    Ingredients: {
-      screen: IngredientsScreen,
     },
     Recipes: {
       screen: RecipesScreen,
