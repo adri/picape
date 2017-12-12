@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Text, Image } from "react-native";
-import { Entypo } from "@expo/vector-icons";
 import gql from "graphql-tag";
+import { OrderIngredientWithData } from "./OrderIngredient";
 
 export const IngredientListItem = ({ ingredient }) => (
   <View style={styles.listItem}>
@@ -10,10 +10,8 @@ export const IngredientListItem = ({ ingredient }) => (
       <Text style={styles.ingredientName}>{ingredient.name}</Text>
       <Text style={styles.unitQuantity}>{ingredient.unitQuantity}</Text>
     </View>
-    <View style={styles.orderedQuantityContainer}>
-      <Entypo name="circle-with-plus" size={16} color="grey" />
-      <Text style={styles.orderedQuantity}>{ingredient.orderedQuantity}</Text>
-      <Entypo name="circle-with-minus" size={16} color="grey" />
+    <View style={{ flex: 1, marginTop: 0 }}>
+      <OrderIngredientWithData id={ingredient.id} quantity={ingredient.orderedQuantity} />
     </View>
   </View>
 );
@@ -56,15 +54,5 @@ const styles = StyleSheet.create({
   unitQuantity: {
     fontSize: 12,
     color: "#CCCCCC",
-  },
-  orderedQuantityContainer: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignSelf: "flex-end",
-  },
-  orderedQuantity: {
-    fontSize: 12,
-    paddingHorizontal: 5,
   },
 });
