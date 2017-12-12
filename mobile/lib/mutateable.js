@@ -13,9 +13,7 @@ export const mutateable = ({ mutationName = "mutate", handleErrors = true } = {}
         error: "",
       };
 
-      submit = (event, variables) => {
-        event && event.preventDefault();
-
+      submit = variables => {
         this.setState({ loading: true, error: "" });
 
         return this.props[mutationName]({ variables })

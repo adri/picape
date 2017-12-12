@@ -2,29 +2,24 @@ import React from "react";
 import { graphql, compose } from "react-apollo";
 import gql from "graphql-tag";
 import { Loading } from "../Loading";
-import { Entypo } from "@expo/vector-icons";
+import { IconMinus, IconPlus } from "../Icon";
 import { mutateable } from "../../lib/mutateable";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 
 const hitSlop = { top: 10, left: 10, right: 10, bottom: 10 };
+const modify = (id, quantity, diff) => ({ ingredientId: id, quantity: Math.max(0, quantity + diff) });
 
 const OrderIngredient = ({ id, quantity, submit, loading }) => (
   <View style={styles.container}>
-    <TouchableOpacity
-      hitSlop={hitSlop}
-      onPress={event => submit(event, { ingredientId: id, quantity: Math.max(0, quantity - 1) })}
-    >
-      <Entypo name="circle-with-minus" size={16} color="grey" />
+    <TouchableOpacity hitSlop={hitSlop} onPress={() => submit(modify(id, quantity, -1))}>
+      <IconMinus />
     </TouchableOpacity>
 
     {loading && <Loading />}
     {!loading && <Text style={styles.quantity}>{quantity}</Text>}
 
-    <TouchableOpacity
-      hitSlop={hitSlop}
-      onPress={event => submit(event, { ingredientId: id, quantity: Math.max(quantity + 1) })}
-    >
-      <Entypo name="circle-with-plus" size={16} color="grey" />
+    <TouchableOpacity hitSlop={hitSlop} onPress={() => submit(modify(id, quantity, 1))}>
+      <IconPlus />
     </TouchableOpacity>
   </View>
 );
