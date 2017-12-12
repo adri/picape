@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const query = gql`
+const orderMutation = gql`
   mutation orderIngredient($ingredientId: ID!, $quantity: Int!) {
     orderIngredient(ingredientId: $ingredientId, quantity: $quantity) {
       id
@@ -47,7 +47,7 @@ const query = gql`
 `;
 
 export const OrderIngredientWithData = compose(
-  graphql(query, {
+  graphql(orderMutation, {
     options: {
       refetchQueries: ["OrderList"],
     },

@@ -1,16 +1,16 @@
 import React from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, FlatList, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, FlatList, Text, View, RefreshControl } from "react-native";
 import { IngredientListItem } from "../components/ingredients/IngredientListItem";
 import gql from "graphql-tag";
 import { graphql } from "react-apollo";
 
-const IngredientsScreen = ({ data: { loading, error, ingredients } }) => {
+const IngredientsScreen = ({ data: { loading, error, ingredients, refetch } }) => {
   if (loading) {
     return <ActivityIndicator />;
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} />} style={styles.container}>
       {error && (
         <View>
           <Text>Error! {error.message}</Text>
