@@ -7,18 +7,18 @@ import Colors from "../constants/Colors";
 
 import HomeScreen from "../screens/HomeScreen";
 import { IngredientsScreenWithData } from "../screens/IngredientsScreen";
-import RecipesScreen from "../screens/RecipesScreen";
+import { RecipesScreenWithData } from "../screens/RecipesScreen";
 
 export default TabNavigator(
   {
+    Recipes: {
+      screen: RecipesScreenWithData,
+    },
     Ingredients: {
       screen: IngredientsScreenWithData,
     },
     Home: {
       screen: HomeScreen,
-    },
-    Recipes: {
-      screen: RecipesScreen,
     },
   },
   {
