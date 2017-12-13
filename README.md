@@ -4,14 +4,12 @@
 Supermarket meets recipes.
 
 ## Setup
-
 ```
 $ cd picape
 $ bin/setup
 ```
 
 ## Scripts
-
 - `bin/setup`: Install all dependencies and run tests. Use this on your CI server.
 - `bin/update`: Update all dependencies, after pulling or merging.
 - `bin/ci`: Run this locally to run all commands run by CI.
@@ -22,13 +20,11 @@ $ bin/setup
 - `cd assets/ && yarn run test`: Run Javascript tests.
 
 ## Development
-
 - Web: http://localhost:4001
-- API: http://localhost:4001
-- GraphiQL: http://localhost:4001/graphiql
+- API: http://localhost:4000/graphql
+- GraphiQL: http://localhost:4000/graphiql
 
 ## Deploy
-
 ```
 $ heroku create
 $ heroku buildpacks:set https://github.com/HashNuke/heroku-buildpack-elixir
