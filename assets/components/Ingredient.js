@@ -25,7 +25,7 @@ export default class Ingredient extends React.Component {
 
     return (
       <div
-        className={"ingredient align-bottom br-1" + (isPlanned && " highlighted") + (bigImage && " big-image")}
+        className={"ingredient align-bottom br-1 " + (isPlanned && " highlighted ") + (bigImage && " big-image")}
         onMouseEnter={event => this.setState({ hovered: true })}
         onMouseLeave={event => this.setState({ hovered: false })}
       >
