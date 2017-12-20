@@ -34,10 +34,13 @@ defmodule Picape.Recipe do
       select: {i.supermarket_product_id, {r.recipe_id, r.quantity}}
 
     result = Repo.all(query)
-    |> Enum.map(fn ({id, {recipe_id, quantity}}) ->
-       {id, recipes_quantities[recipe_id] * quantity}
+    |> Enum.reduce(%{}, fn ({id, {recipe_id, quantity}}, item_quantities) ->
+       Map.merge(
+         item_quantities,
+         %{id => recipes_quantities[recipe_id] * quantity},
+         fn _id, quantity1, quantity2 -> quantity1 + quantity2 end
+       )
     end)
-    |> Enum.into(%{})
 
     {:ok, result}
   end
