@@ -59,7 +59,6 @@ defmodule Picape.Factory do
     |> struct(ingredients: ref_ingredients(attrs[:ingredients] || []))
   end
 
-
   @doc """
   Build a schema struct with custom attributes.
 
@@ -106,7 +105,6 @@ defmodule Picape.Factory do
   def insert!(factory_name, attributes \\ []) do
     factory_name
     |> build(attributes)
-    |> Repo.insert!
+    |> Repo.insert!()
   end
 end
-

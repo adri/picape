@@ -12,8 +12,15 @@ config :picape, PicapeWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [
-    bash: ["../bin/spawn_execute.sh", "node", "node_modules/next/dist/bin/next-dev", "-p", "4001",
-            cd: Path.expand("../assets", __DIR__)]]
+    bash: [
+      "../bin/spawn_execute.sh",
+      "node",
+      "node_modules/next/dist/bin/next-dev",
+      "-p",
+      "4001",
+      cd: Path.expand("../assets", __DIR__)
+    ]
+  ]
 
 # ## SSL Support
 #
@@ -56,4 +63,4 @@ config :picape, Picape.Repo,
   hostname: "localhost",
   pool_size: 10
 
-import_config "#{Mix.env}.secret.exs"
+import_config "#{Mix.env()}.secret.exs"

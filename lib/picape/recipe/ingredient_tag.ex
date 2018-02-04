@@ -4,11 +4,14 @@ defmodule Picape.Recipe.IngredientTag do
   alias Picape.Recipe.IngredientTag
 
   schema "recipe_ingredient_tag" do
-    field :description
-    field :name, :string, null: false
+    field(:description)
+    field(:name, :string, null: false)
 
-    many_to_many :ingredients, Picape.Recipe.Ingredient,
+    many_to_many(
+      :ingredients,
+      Picape.Recipe.Ingredient,
       join_through: "recipe_ingredient_tagging"
+    )
 
     timestamps()
   end

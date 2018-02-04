@@ -3,11 +3,15 @@ defmodule PicapeWeb.Router do
   use Plug.ErrorHandler
   use Sentry.Plug
 
-  forward "/graphql", Absinthe.Plug, schema: PicapeWeb.Graphql.Schema
-  forward "/graphiql", Absinthe.Plug.GraphiQL,
+  forward("/graphql", Absinthe.Plug, schema: PicapeWeb.Graphql.Schema)
+
+  forward(
+    "/graphiql",
+    Absinthe.Plug.GraphiQL,
     schema: PicapeWeb.Graphql.Schema,
     socket: PicapeWeb.UserSocket,
     interface: :playground
+  )
 
-forward "/", ReverseProxy, upstream: ["0.0.0.0:4001"]
+  forward("/", ReverseProxy, upstream: ["0.0.0.0:4001"])
 end

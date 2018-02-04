@@ -6,7 +6,7 @@ defmodule PicapeWeb.UserSocket do
   # channel "room:*", PicapeWeb.RoomChannel
 
   ## Transports
-  transport :websocket, Phoenix.Transports.WebSocket
+  transport(:websocket, Phoenix.Transports.WebSocket)
   # transport :longpoll, Phoenix.Transports.LongPoll
 
   # Socket params are passed from the client and can
@@ -20,10 +20,11 @@ defmodule PicapeWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-   def connect(_params, socket) do
+  def connect(_params, socket) do
     absinthe_config = %{
-      schema: PicapeWeb.Graphql.Schema,
+      schema: PicapeWeb.Graphql.Schema
     }
+
     {:ok, assign(socket, :absinthe, absinthe_config)}
   end
 

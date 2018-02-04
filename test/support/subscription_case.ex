@@ -5,8 +5,7 @@ defmodule Picape.SubscriptionCase do
     quote do
       # use Picape.DataCase, async: true
       use PicapeWeb.ChannelCase
-      use Absinthe.Phoenix.SubscriptionTest,
-        schema: PicapeWeb.Graphql.Schema
+      use Absinthe.Phoenix.SubscriptionTest, schema: PicapeWeb.Graphql.Schema
 
       setup do
         {:ok, socket} = Phoenix.ChannelTest.connect(PicapeWeb.UserSocket, %{})
@@ -14,7 +13,6 @@ defmodule Picape.SubscriptionCase do
 
         {:ok, socket: socket}
       end
-
     end
   end
 end

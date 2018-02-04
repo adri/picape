@@ -5,20 +5,24 @@ defmodule Picape.Recipe.Ingredient do
   alias Picape.Supermarket
 
   schema "recipe_ingredient" do
-    field :is_essential, :boolean, default: false
-    field :name, :string
-    field :supermarket_product_id, :integer
-    field :supermarket_product_raw, :map
+    field(:is_essential, :boolean, default: false)
+    field(:name, :string)
+    field(:supermarket_product_id, :integer)
+    field(:supermarket_product_raw, :map)
 
-    many_to_many :tags, Picape.Recipe.IngredientTag,
+    many_to_many(
+      :tags,
+      Picape.Recipe.IngredientTag,
       join_through: "recipe_ingredient_tagging",
       on_replace: :delete
+    )
 
     timestamps()
   end
 
   def fetch(ingredient, :image_url) do
-    {:ok, Supermarket.image_url(ingredient.supermarket_product_raw["product_details"]["image_id"])}
+    {:ok,
+     Supermarket.image_url(ingredient.supermarket_product_raw["product_details"]["image_id"])}
   end
 
   def fetch(ingredient, :unit_quantity) do

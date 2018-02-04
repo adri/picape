@@ -5,7 +5,7 @@ defmodule Picape.Supermarket do
 
   def search(query) do
     get!("/search?search_term=#{query}").body
-    |> SearchResult.from_result
+    |> SearchResult.from_result()
   end
 
   def products_by_id(product_id) do
@@ -15,29 +15,25 @@ defmodule Picape.Supermarket do
   def apply_changes(changes) do
     changes.add
     |> Enum.each(fn change ->
-        ConCache.put(:supermarket, :cart, add_product(change.id, change.quantity))
+      ConCache.put(:supermarket, :cart, add_product(change.id, change.quantity))
     end)
 
     changes.remove
     |> Enum.each(fn change ->
-        ConCache.put(:supermarket, :cart, remove_product(change.id, change.quantity))
+      ConCache.put(:supermarket, :cart, remove_product(change.id, change.quantity))
     end)
   end
 
   def add_product(product_id, count \\ 1) do
-    post!(
-      "/cart/add_product",
-      %{"product_id": product_id, "count": count},
-      [{"Content-type", "application/json"}]
-    ).body
+    post!("/cart/add_product", %{product_id: product_id, count: count}, [
+      {"Content-type", "application/json"}
+    ]).body
   end
 
   def remove_product(product_id, count \\ 1) do
-    post!(
-      "/cart/remove_product",
-      %{"product_id": product_id, "count": count},
-      [{"Content-type", "application/json"}]
-    ).body
+    post!("/cart/remove_product", %{product_id: product_id, count: count}, [
+      {"Content-type", "application/json"}
+    ]).body
   end
 
   def cart() do
@@ -92,7 +88,7 @@ defmodule Picape.Supermarket do
 
   defp process_request_headers(headers) do
     headers
-    |> Enum.into([ "Accept": "*/*", ])
+    |> Enum.into(Accept: "*/*")
     |> Enum.into(config(:headers) || [])
   end
 
@@ -102,7 +98,7 @@ defmodule Picape.Supermarket do
 
   defp process_request_options(options) do
     options
-    |> Enum.into([ cookie: [config(:cookie)] ])
+    |> Enum.into(cookie: [config(:cookie)])
   end
 
   defp config(key) do

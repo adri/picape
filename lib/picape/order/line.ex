@@ -3,11 +3,10 @@ defmodule Picape.Order.Line do
   import Ecto.Changeset
   alias Picape.Order.Line
 
-
   schema "order_line" do
-    has_many :items, Picape.Order.Item
-    field :total_count, :integer
-    field :total_price, :integer
+    has_many(:items, Picape.Order.Item)
+    field(:total_count, :integer)
+    field(:total_price, :integer)
 
     timestamps()
   end

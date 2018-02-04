@@ -3,11 +3,10 @@ defmodule Picape.Recipe.IngredientRef do
   import Ecto.Changeset
   alias Picape.Recipe.IngredientRef
 
-
   schema "recipe_ingredient_ref" do
-    field :quantity, :integer
-    belongs_to :ingredient, Picape.Recipe.Ingredient
-    belongs_to :recipe, Picape.Recipe.Recipe
+    field(:quantity, :integer)
+    belongs_to(:ingredient, Picape.Recipe.Ingredient)
+    belongs_to(:recipe, Picape.Recipe.Recipe)
 
     timestamps()
   end

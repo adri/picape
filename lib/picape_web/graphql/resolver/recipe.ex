@@ -1,9 +1,8 @@
 defmodule PicapeWeb.Graphql.Resolver.Recipe do
-
   alias Picape.{Recipe, Ingredients, Repo}
   alias Absinthe.Relay
 
-# Queries
+  # Queries
 
   def all(_parent, _args, _info) do
     {:ok, Recipe.list_recipes()}
@@ -27,11 +26,13 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
 
   def search_ingredient(_parent, attributes, _info) do
     args = [
-      {:filter, [
-        {:name, attributes[:query]},
-        {:excluded, attributes[:excluded] || []}
-      ]}
+      {:filter,
+       [
+         {:name, attributes[:query]},
+         {:excluded, attributes[:excluded] || []}
+       ]}
     ]
+
     {:ok, Ingredients.list(args)}
   end
 
@@ -65,7 +66,7 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
     Recipe.ingredients_by_recipe_ids(recipe_ids)
   end
 
-# Mutations
+  # Mutations
 
   def add_ingredient(_parent, attributes, _info) do
     Ingredients.add_ingredient(attributes)
@@ -86,6 +87,6 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
   def edit_recipe(_parent, attributes, _info) do
     attributes
     |> Map.put(:id, attributes[:recipe_id])
-    |> Recipe.edit_recipe
+    |> Recipe.edit_recipe()
   end
 end

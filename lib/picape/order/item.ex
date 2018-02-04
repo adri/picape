@@ -3,14 +3,13 @@ defmodule Picape.Order.Item do
   import Ecto.Changeset
   alias Picape.Order.Item
 
-
   schema "order_item" do
-    field :name, :string
-    field :image_url, :string
-    field :quantity, :integer
-    field :recipe_ids, {:array, :integer}
-    field :line_id, :id
-    field :ingredient_id, :id
+    field(:name, :string)
+    field(:image_url, :string)
+    field(:quantity, :integer)
+    field(:recipe_ids, {:array, :integer})
+    field(:line_id, :id)
+    field(:ingredient_id, :id)
 
     timestamps()
   end

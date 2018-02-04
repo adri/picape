@@ -4,8 +4,11 @@ defmodule PicapeWeb.PageController do
   alias Picape.{Recipe}
 
   def index(conn, _params) do
-    render conn, "index.json",
+    render(
+      conn,
+      "index.json",
       recipes: Recipe.list_recipes(),
       essentials: Recipe.list_essentials()
+    )
   end
 end

@@ -15,10 +15,10 @@ defmodule Picape.Application do
       # Start the endpoint when the application starts
       supervisor(PicapeWeb.Endpoint, []),
       supervisor(Absinthe.Subscription, [PicapeWeb.Endpoint]),
-    # Start your own worker by calling: Picape.Worker.start_link(arg1, arg2, arg3)
+      # Start your own worker by calling: Picape.Worker.start_link(arg1, arg2, arg3)
       # worker(Picape.Worker, [arg1, arg2, arg3]),
       worker(Picape.Scheduler, []),
-      supervisor(ConCache, [[ttl: :timer.hours(5)], [name: :supermarket]]),
+      supervisor(ConCache, [[ttl: :timer.hours(5)], [name: :supermarket]])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
