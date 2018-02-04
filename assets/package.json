@@ -23,7 +23,7 @@
     "raven": "^2.2.1",
     "raven-js": "^3.22.1",
     "react": "^16.2.0",
-    "react-apollo": "^2.0.1",
+    "react-apollo": "^2.0.4",
     "react-autocomplete": "^1.7.2",
     "react-autosize-textarea": "^3.0.2",
     "react-dom": "^16.2.0",
