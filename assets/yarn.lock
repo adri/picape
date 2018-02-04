@@ -443,9 +443,9 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
-autosize@^3.0.15:
-  version "3.0.21"
-  resolved "https://registry.yarnpkg.com/autosize/-/autosize-3.0.21.tgz#f182f40d17757d978a139a4c9ca40c4c0e448603"
+autosize@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/autosize/-/autosize-4.0.0.tgz#7a0599b1ba84d73bd7589b0d9da3870152c69237"
 
 aws-sign2@~0.6.0:
   version "0.6.0"
@@ -3776,9 +3776,6 @@ phoenix@1.3.0, phoenix@^1.2.1, phoenix@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/phoenix/-/phoenix-1.3.0.tgz#1df2c27f986ee295e37c9983ec28ebac1d7f4a3e"
 
-"phoenix_html@file:../deps/phoenix_html":
-  version "2.10.5"
-
 pify@^2.0.0, pify@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
@@ -3990,11 +3987,11 @@ react-autocomplete@^1.7.2:
     dom-scroll-into-view "1.0.1"
     prop-types "^15.5.10"
 
-react-autosize-textarea@^0.4.9:
-  version "0.4.9"
-  resolved "https://registry.yarnpkg.com/react-autosize-textarea/-/react-autosize-textarea-0.4.9.tgz#8d55c85f4c665a6d6359e84af286109c504ab29b"
+react-autosize-textarea@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/react-autosize-textarea/-/react-autosize-textarea-3.0.2.tgz#2b6840a69f7138719abcea5a429ecf7301768c07"
   dependencies:
-    autosize "^3.0.15"
+    autosize "^4.0.0"
     line-height "^0.3.1"
     prop-types "^15.5.6"
 

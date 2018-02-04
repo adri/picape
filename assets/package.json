@@ -25,7 +25,7 @@
     "react": "^16.2.0",
     "react-apollo": "^2.0.1",
     "react-autocomplete": "^1.7.2",
-    "react-autosize-textarea": "^0.4.9",
+    "react-autosize-textarea": "^3.0.2",
     "react-dom": "^16.2.0",
     "recompose": "^0.26.0"
   },
