@@ -61,10 +61,6 @@
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-3.5.2.tgz#c11cd2817d3a401b7ba0f5a420f35c56139b1c1e"
 
-"@types/graphql@>=0.8.6 <=0.11.7":
-  version "0.11.7"
-  resolved "https://registry.yarnpkg.com/@types/graphql/-/graphql-0.11.7.tgz#da39a2f7c74e793e32e2bb7b3b68da1691532dd5"
-
 "@types/graphql@^0.8.0":
   version "0.8.6"
   resolved "https://registry.yarnpkg.com/@types/graphql/-/graphql-0.8.6.tgz#b34fb880493ba835b0c067024ee70130d6f9bb68"
@@ -2259,11 +2255,9 @@ graphql-tag@^2.4.2:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.5.0.tgz#b43bfd8b5babcd2c205ad680c03e98b238934e0f"
 
-graphql-tag@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.7.0.tgz#3d4412b87a894f2c7ccd73b515f887dc67736203"
-  dependencies:
-    "@types/graphql" ">=0.8.6 <=0.11.7"
+graphql-tag@^2.7.3:
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.7.3.tgz#5040112a1b4623285ef017c252276f0dea37f03f"
 
 graphql@0.11.7:
   version "0.11.7"
