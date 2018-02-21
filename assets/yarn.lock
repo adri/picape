@@ -3582,9 +3582,9 @@ react-apollo@^2.0.4:
     lodash.pick "^4.4.0"
     prop-types "^15.5.8"
 
-react-autocomplete@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/react-autocomplete/-/react-autocomplete-1.8.0.tgz#9ab2d2a7af2603166b80c499308d931861aaab33"
+react-autocomplete@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/react-autocomplete/-/react-autocomplete-1.8.1.tgz#ebbbc400006aa91ad538b2d14727b9e7e5d06310"
   dependencies:
     dom-scroll-into-view "1.0.1"
     prop-types "^15.5.10"
