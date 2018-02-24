@@ -41,6 +41,8 @@ config :sentry,
 
 config :picape, :supermarket, Picape.Supermarket
 
+config :phoenix, :format_encoders,
+       json: Jason
 config :mix_docker, image: "adri/picape"
 
 # Import environment specific config. This must remain at the bottom
