@@ -3497,9 +3497,9 @@ raven-js@^3.22.3:
   version "3.22.3"
   resolved "https://registry.yarnpkg.com/raven-js/-/raven-js-3.22.3.tgz#8330dcc102b699ffbc2f48790978b997bf4d8f75"
 
-raven@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/raven/-/raven-2.4.1.tgz#7a6a6ff1c42d0a3892308f44c94273e7f88677fd"
+raven@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/raven/-/raven-2.4.2.tgz#0129e2adc30788646fd530b67d08a8ce25d4f6dc"
   dependencies:
     cookie "0.3.1"
     md5 "^2.2.1"
