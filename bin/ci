@@ -6,12 +6,24 @@
 # This way, developers can run all the same commands that CI uses to determine
 # if the build passes.
 
-cd assets/ && {
-  yarn run test || { echo 'Javascript tests failed!'; exit 1; };
-  cd -;
-}
+set -xe
+MIX_ENV=test
 
-MIX_ENV=test mix compile --warnings-as-errors --force || { echo 'Please fix all compiler warnings.'; exit 1; }
-MIX_ENV=test mix credo --strict --ignore design,consistency || { echo 'Elixir code failed Credo linting. See warnings above.'; exit 1; }
-MIX_ENV=test mix docs  || { echo 'Elixir HTML docs were not generated!'; exit 1; }
-mix test || { echo 'Elixir tests failed!'; exit 1; }
+# Install dependencies
+mix local.rebar --force
+mix local.hex --force
+mix deps.get --only test
+
+# Prepare database
+mix ecto.create
+
+# Run tests
+mix do compile --warnings-as-errors, coveralls.json
+
+# Security
+mix archive.install hex sobelow --force
+mix sobelow --exit Low --with-code --ignore Config.HTTPS
+
+# Code coverage
+bash <(curl -s https://codecov.io/bash)
+
