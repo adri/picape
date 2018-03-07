@@ -26,10 +26,7 @@ $ bin/setup
 
 ## Deploy
 ```
-$ heroku create
-$ heroku buildpacks:set https://github.com/HashNuke/heroku-buildpack-elixir
-$ heroku buildpacks:add https://github.com/gjaldon/heroku-buildpack-phoenix-static
-$ git push heroku master
+mix release --env=prod
 ```
 
 ## Screenshots
