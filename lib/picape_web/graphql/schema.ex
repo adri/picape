@@ -109,7 +109,7 @@ defmodule PicapeWeb.Graphql.Schema do
     @desc "Order an ingredient in a certain quantity."
     field :order_ingredient, :ingredient do
       arg(:ingredient_id, non_null(:id))
-      arg(:quantity, non_null(:integer), default_value: 1)
+      arg(:quantity, :integer, default_value: 1)
       resolve(handle_errors(&Resolver.Order.order_ingredient/2))
     end
 
