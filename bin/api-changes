@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Pushes the GraphQL schema to Delta
+# Delta detects API changes and notifies e.g. a Slack channel
+set -e # Stop on error
+
+if [ "${CIRCLE_BRANCH}" == "master" ]; then
+  # Generate schema
+  MIX_ENV=test mix graphql.schema
+
+  # Push to GraphQL Delta
+  curl https://delta-push.whybug.com/df73g6fga \
+    -H "Authorization: token $DELTA_TOKEN" \
+    -F "schema=@schema.json" \
+    -F "more_info_url=$CIRCLE_COMPARE_URL"
+fi

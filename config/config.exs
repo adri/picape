@@ -28,6 +28,9 @@ config :logger, :console,
 
 config :reverse_proxy, upstreams: %{:_ => ["http://0.0.0.0:4001"]}
 
+config :absinthe,
+  schema: PicapeWeb.Graphql.Schema
+
 config :sentry,
   dsn: System.get_env("SENTRY_DSN"),
   included_environments: [:prod],

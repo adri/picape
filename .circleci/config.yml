@@ -25,6 +25,7 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: bin/ci
+      - run: bin/api-changes
       - store_test_results:
           path: /tmp/
 
