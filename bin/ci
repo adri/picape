@@ -7,7 +7,7 @@
 # if the build passes.
 
 set -xe
-MIX_ENV=test
+export MIX_ENV=test
 
 # Install dependencies
 mix local.rebar --force
