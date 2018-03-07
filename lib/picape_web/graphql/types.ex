@@ -11,6 +11,7 @@ defmodule PicapeWeb.Graphql.Types do
     field(:items, list_of(:order_item))
   end
 
+  @desc "Item that is part of an order"
   node object(:order_item) do
     field(:name, :string)
     field(:image_url, :string)
@@ -18,6 +19,7 @@ defmodule PicapeWeb.Graphql.Types do
     field(:ingredient, :ingredient, resolve: batched({Resolver.Recipe, :ingredients_by_item_ids}))
   end
 
+  @desc "Recipe containing ingredients and metadata"
   node object(:recipe) do
     field(:title, :string)
     field(:description, :string)
