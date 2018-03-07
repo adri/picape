@@ -4,6 +4,7 @@ defmodule PicapeWeb.Graphql.Types do
 
   alias PicapeWeb.Graphql.Resolver
 
+  @desc "Current order, there can only be one order at a time."
   node object(:order) do
     field(:total_count, :integer)
     field(:total_price, :integer)
