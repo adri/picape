@@ -1,18 +1,25 @@
 # Check https://circleci.com/docs/2.0/language-elixir/ for more details
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    # specify the version here
+    - image: circleci/elixir:1.6
+      environment:
+        MIX_ENV: test
+
 version: 2
 jobs:
   build:
+    <<: *defaults
     docker:
-      # specify the version here
-      - image: circleci/elixir:1.6
-      - image: circleci/postgres:9.6
-        environment:
-          POSTGRES_USER: picape_test
-          MIX_ENV: test
-
-    working_directory: ~/repo
+    - image: circleci/postgres:9.6
+      environment:
+        POSTGRES_USER: picape_test
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
       - restore_cache:  # restores saved mix cache
           keys:  # list of cache keys, in decreasing specificity
             - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
@@ -25,23 +32,50 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: bin/ci
-      - run: bin/api-changes
       - store_test_results:
           path: /tmp/
-
       - save_cache:  # generate and store cache so `restore_cache` works
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-          paths: "deps"
+          paths: ["deps", ".mix"]
       - save_cache:  # make another less specific cache
           key: v1-mix-cache-{{ .Branch }}
-          paths: "deps"
+          paths: ["deps", ".mix"]
       - save_cache:  # you should really save one more cache just in case
           key: v1-mix-cache
-          paths: "deps"
+          paths: ["deps", ".mix"]
       - save_cache: # don't forget to save a *build* cache, too
           key: v1-build-cache-{{ .Branch }}
           paths: "_build"
       - save_cache: # and one more build cache for good measure
           key: v1-build-cache
           paths: "_build"
+      - persist_to_workspace:
+          root: .
+          paths: .
 
+  api-changes:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: bin/api-changes
+
+  security:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: mix archive.install hex sobelow --force
+      - run: mix sobelow --exit Low --with-code --ignore Config.HTTPS
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - security:
+          requires:
+            - build
+      - api-changes:
+          requires:
+            - build

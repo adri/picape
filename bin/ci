@@ -20,10 +20,6 @@ mix ecto.create
 # Run tests
 mix do compile --warnings-as-errors, coveralls.json
 
-# Security
-mix archive.install hex sobelow --force
-mix sobelow --exit Low --with-code --ignore Config.HTTPS
-
 # Code coverage
 bash <(curl -s https://codecov.io/bash)
 
