@@ -4,7 +4,6 @@ import { withState, compose } from "recompose";
 import ErrorMessage from "../components/ErrorMessage";
 import Ingredient from "../components/Ingredient";
 import Loading from "../components/Loading";
-import TagSelection from "../components/TagSelection";
 
 const enhance = compose(withState("selectedTags", "changeTags", []));
 
@@ -16,12 +15,6 @@ function EssentialList({ data: { loading, error, essentials }, selectedTags, cha
     <div>
       <h5 className="text-white">Essentials</h5>
       <div className="card">
-        <TagSelection
-          allCount={essentials.totalCount}
-          tags={essentials.tags}
-          selectedTags={selectedTags}
-          onChange={changeTags}
-        />
         <div className="row no-gutters">
           {essentials &&
             essentials.edges.map(edge => (
