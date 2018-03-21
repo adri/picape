@@ -1,18 +1,13 @@
 # Check https://circleci.com/docs/2.0/language-elixir/ for more details
-
-defaults: &defaults
-  working_directory: ~/repo
-  docker:
+version: 2
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
     # specify the version here
     - image: circleci/elixir:1.6
       environment:
         MIX_ENV: test
-
-version: 2
-jobs:
-  build:
-    <<: *defaults
-    docker:
     - image: circleci/postgres:9.6
       environment:
         POSTGRES_USER: picape_test
@@ -48,12 +43,20 @@ jobs:
           paths: "_build"
 
   api-changes:
-    <<: *defaults
+    working_directory: ~/repo
+    docker:
+      - image: circleci/elixir:1.6
+        environment:
+          MIX_ENV: test
     steps:
       - run: bin/api-changes
 
   security:
-    <<: *defaults
+    working_directory: ~/repo
+    docker:
+      - image: circleci/elixir:1.6
+        environment:
+          MIX_ENV: test
     steps:
       - run: mix archive.install hex sobelow --force
       - run: mix sobelow --exit Low --with-code --ignore Config.HTTPS
