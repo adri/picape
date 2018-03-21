@@ -46,6 +46,15 @@ jobs:
            POSTGRES_USER: picape_test
      steps:
        - checkout
+       - restore_cache:
+          keys:
+             - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+             - v1-mix-cache-{{ .Branch }}
+             - v1-mix-cache
+       - restore_cache:
+           keys:
+             - v1-build-cache-{{ .Branch }}
+             - v1-build-cache
        - run:
            name: Test
            command: MIX_ENV=test mix coveralls.json
@@ -56,6 +65,15 @@ jobs:
       - image: circleci/elixir:1.6
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
       - run: MIX_ENV=test bin/api-changes
 
   security:
