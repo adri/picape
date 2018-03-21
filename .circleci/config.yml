@@ -60,6 +60,15 @@ jobs:
           MIX_ENV: test
     steps:
       - checkout
+      - restore_cache:  # restores saved mix cache
+          keys:  # list of cache keys, in decreasing specificity
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - restore_cache:  # restores saved build cache
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
       - run: mix archive.install hex sobelow --force
       - run: mix sobelow --exit Low --with-code --ignore Config.HTTPS
 
