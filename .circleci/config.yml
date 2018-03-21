@@ -8,6 +8,17 @@ defaults: &defaults
       environment:
         MIX_ENV: test
 
+restore_cache: &restore_cache
+  - restore_cache:  # restores saved mix cache
+      keys:  # list of cache keys, in decreasing specificity
+        - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+        - v1-mix-cache-{{ .Branch }}
+        - v1-mix-cache
+  - restore_cache:  # restores saved build cache
+      keys:
+        - v1-build-cache-{{ .Branch }}
+        - v1-build-cache
+
 version: 2
 jobs:
   build:
@@ -18,18 +29,7 @@ jobs:
         POSTGRES_USER: picape_test
     steps:
       - checkout
-      - attach_workspace:
-          at: .
-      - restore_cache:  # restores saved mix cache
-          keys:  # list of cache keys, in decreasing specificity
-            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-mix-cache-{{ .Branch }}
-            - v1-mix-cache
-      - restore_cache:  # restores saved build cache
-          keys:
-            - v1-build-cache-{{ .Branch }}
-            - v1-build-cache
-
+      <<: *restore_cache
       # specify any bash command here prefixed with `run: `
       - run: bin/ci
       - store_test_results:
@@ -49,22 +49,15 @@ jobs:
       - save_cache: # and one more build cache for good measure
           key: v1-build-cache
           paths: "_build"
-      - persist_to_workspace:
-          root: .
-          paths: .
 
   api-changes:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
       - run: bin/api-changes
 
   security:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
       - run: mix archive.install hex sobelow --force
       - run: mix sobelow --exit Low --with-code --ignore Config.HTTPS
 
