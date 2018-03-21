@@ -17,8 +17,11 @@ config :picape, PicapeWeb.Endpoint,
 
 config :picape, Picape.Scheduler,
   jobs: [
-    # Runs every midnight:
-    {"@daily", {Picape.Order, :sync_supermarket, ["1"]}}
+    # Runs every midnight
+    {"@daily", fn ->
+      Picape.Supermarket.invalidate_orders()
+      Picape.Order.sync_supermarket("1")
+    end}
   ]
 
 # Configures Elixir's Logger
