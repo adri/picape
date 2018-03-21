@@ -49,6 +49,7 @@ jobs:
         environment:
           MIX_ENV: test
     steps:
+      - checkout
       - run: bin/api-changes
 
   security:
@@ -58,6 +59,7 @@ jobs:
         environment:
           MIX_ENV: test
     steps:
+      - checkout
       - run: mix archive.install hex sobelow --force
       - run: mix sobelow --exit Low --with-code --ignore Config.HTTPS
 
