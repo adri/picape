@@ -41,6 +41,7 @@ jobs:
   test:
      working_directory: ~/repo
      docker:
+       - image: circleci/elixir:1.6
        - image: circleci/postgres:9.6
          environment:
            POSTGRES_USER: picape_test
