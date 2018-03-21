@@ -8,17 +8,6 @@ defaults: &defaults
       environment:
         MIX_ENV: test
 
-restore_cache: &restore_cache
-  - restore_cache:  # restores saved mix cache
-      keys:  # list of cache keys, in decreasing specificity
-        - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-        - v1-mix-cache-{{ .Branch }}
-        - v1-mix-cache
-  - restore_cache:  # restores saved build cache
-      keys:
-        - v1-build-cache-{{ .Branch }}
-        - v1-build-cache
-
 version: 2
 jobs:
   build:
@@ -29,7 +18,15 @@ jobs:
         POSTGRES_USER: picape_test
     steps:
       - checkout
-      <<: *restore_cache
+      - restore_cache:  # restores saved mix cache
+          keys:  # list of cache keys, in decreasing specificity
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - restore_cache:  # restores saved build cache
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
       # specify any bash command here prefixed with `run: `
       - run: bin/ci
       - store_test_results:
