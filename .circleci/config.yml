@@ -18,8 +18,8 @@ jobs:
         POSTGRES_USER: picape_test
     steps:
       - checkout
-#      - attach_workspace:
-#          at: ~/
+      - attach_workspace:
+          at: ~/
       - restore_cache:  # restores saved mix cache
           keys:  # list of cache keys, in decreasing specificity
             - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
@@ -56,15 +56,15 @@ jobs:
   api-changes:
     <<: *defaults
     steps:
-#      - attach_workspace:
-#          at: ~/
+      - attach_workspace:
+          at: ~/
       - run: bin/api-changes
 
   security:
     <<: *defaults
     steps:
-#      - attach_workspace:
-#          at: ~/
+      - attach_workspace:
+          at: ~/
       - run: mix archive.install hex sobelow --force
       - run: mix sobelow --exit Low --with-code --ignore Config.HTTPS
 
