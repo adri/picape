@@ -2,46 +2,101 @@
 version: 2
 jobs:
   build:
-    docker:
-      # specify the version here
-      - image: circleci/elixir:1.6
-      - image: circleci/postgres:9.6
-        environment:
-          POSTGRES_USER: picape_test
-          MIX_ENV: test
-
     working_directory: ~/repo
+    docker:
+      - image: circleci/elixir:1.6
     steps:
       - checkout
-      - restore_cache:  # restores saved mix cache
-          keys:  # list of cache keys, in decreasing specificity
+      - restore_cache:
+          keys:
             - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
             - v1-mix-cache-{{ .Branch }}
             - v1-mix-cache
-      - restore_cache:  # restores saved build cache
+      - restore_cache:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
-
       # specify any bash command here prefixed with `run: `
-      - run: bin/ci
-      - run: bin/api-changes
+      - run:
+          name: Compile
+          command: bin/ci
       - store_test_results:
           path: /tmp/
-
-      - save_cache:  # generate and store cache so `restore_cache` works
+      - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-          paths: "deps"
-      - save_cache:  # make another less specific cache
+          paths: ["deps", ".mix"]
+      - save_cache:
           key: v1-mix-cache-{{ .Branch }}
-          paths: "deps"
-      - save_cache:  # you should really save one more cache just in case
+          paths: ["deps", ".mix"]
+      - save_cache:
           key: v1-mix-cache
-          paths: "deps"
-      - save_cache: # don't forget to save a *build* cache, too
+          paths: ["deps", ".mix"]
+      - save_cache:
           key: v1-build-cache-{{ .Branch }}
           paths: "_build"
-      - save_cache: # and one more build cache for good measure
+      - save_cache:
           key: v1-build-cache
           paths: "_build"
 
+  test:
+     working_directory: ~/repo
+     docker:
+       - image: circleci/elixir:1.6
+       - image: circleci/postgres:9.6
+         environment:
+           POSTGRES_USER: picape_test
+     steps:
+       - checkout
+       - restore_cache:
+          keys:
+             - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+             - v1-mix-cache-{{ .Branch }}
+             - v1-mix-cache
+       - restore_cache:
+           keys:
+             - v1-build-cache-{{ .Branch }}
+             - v1-build-cache
+       - run:
+           name: Test
+           command: MIX_ENV=test mix coveralls.json
+
+  api-changes:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/elixir:1.6
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
+      - run: MIX_ENV=test bin/api-changes
+
+  security:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/elixir:1.6
+    steps:
+      - checkout
+      - run: MIX_ENV=test mix archive.install hex sobelow --force
+      - run: MIX_ENV=test mix sobelow --exit Low --with-code --ignore Config.HTTPS
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - security:
+          requires:
+            - build
+      - api-changes:
+          requires:
+            - build
