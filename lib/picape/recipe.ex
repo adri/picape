@@ -5,7 +5,7 @@ defmodule Picape.Recipe do
   alias Picape.Recipe.{Ingredient, IngredientRef, Recipe}
 
   def list_recipes() do
-    Repo.all(from(recipe in Recipe))
+    Repo.all(from(r in Recipe, order_by: [:title]))
   end
 
   def recipes_by_ids(ids) when is_list(ids) do
