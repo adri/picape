@@ -3512,9 +3512,9 @@ react-autocomplete@^1.8.1:
     dom-scroll-into-view "1.0.1"
     prop-types "^15.5.10"
 
-react-autosize-textarea@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/react-autosize-textarea/-/react-autosize-textarea-3.0.2.tgz#2b6840a69f7138719abcea5a429ecf7301768c07"
+react-autosize-textarea@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/react-autosize-textarea/-/react-autosize-textarea-3.0.3.tgz#30e8e081f35eb73b3667dc01cf4e8927c278466b"
   dependencies:
     autosize "^4.0.0"
     line-height "^0.3.1"
