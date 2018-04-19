@@ -30,15 +30,15 @@ defmodule Picape.Graphql.QueryRecipeTest do
                 data: %{
                   "recipes" => [
                     %{
+                      "title" => "Pizza",
+                      "imageUrl" =>
+                        "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/pizza.jpg"
+                    },
+                    %{
                       "title" => "Shoarma",
                       "imageUrl" =>
                         "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
                     },
-                    %{
-                      "title" => "Pizza",
-                      "imageUrl" =>
-                        "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/pizza.jpg"
-                    }
                   ]
                 }
               }}
