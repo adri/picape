@@ -38,7 +38,7 @@ defmodule Picape.Mixfile do
       #  {:absinthe_ecto, "~> 1.0.0"},
       {:cors_plug, "~> 1.4"},
       {:con_cache, "~> 0.12.0"},
-      {:excoveralls, "~> 0.8.0", only: :test},
+      {:excoveralls, "~> 0.9.0", only: :test},
       {:jason, "~> 1.0"},
       {:phoenix, "~> 1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},
