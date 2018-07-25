@@ -1,7 +1,13 @@
 defmodule Picape.Order do
   import Ecto.Query
 
-  alias Picape.Order.{LineFromSupermarket, PlannedRecipe, ManualIngredient, Sync}
+  alias Picape.Order.{
+    LineFromSupermarket,
+    PlannedRecipe,
+    ManualIngredient,
+    Sync
+  }
+
   alias Picape.{Repo, Supermarket, Recipe}
 
   defmodule(Product, do: defstruct([:id, :quantity]))
@@ -18,7 +24,11 @@ defmodule Picape.Order do
   """
   def plan_recipe(order_id, recipe_id, unplan \\ false) do
     %PlannedRecipe{}
-    |> PlannedRecipe.changeset(%{line_id: order_id, recipe_id: recipe_id, unplanned: unplan})
+    |> PlannedRecipe.changeset(%{
+      line_id: order_id,
+      recipe_id: recipe_id,
+      unplanned: unplan
+    })
     |> Repo.insert(
       on_conflict: [set: [unplanned: unplan]],
       conflict_target: [:line_id, :recipe_id]
@@ -77,8 +87,10 @@ defmodule Picape.Order do
 
   def ingredients_ordered_quantity(order_id, ingredient_ids) do
     with {:ok, items} <- ordered_item_quantities(order_id),
-         {:ok, items_map} <- Recipe.ingredients_by_item_ids_reverse(Map.keys(items)) do
-      {:ok, Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
+         {:ok, items_map} <-
+           Recipe.ingredients_by_item_ids_reverse(Map.keys(items)) do
+      {:ok,
+       Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
     end
   end
 
@@ -137,8 +149,18 @@ defmodule Picape.Order do
   end
 
   defp planned_items_in_order?(order_id) do
-    with [] <- Repo.all(from(p in PlannedRecipe, where: p.line_id == ^order_id, limit: 1)),
-         [] <- Repo.all(from(m in ManualIngredient, where: m.line_id == ^order_id, limit: 1)) do
+    with [] <-
+           Repo.all(
+             from(p in PlannedRecipe, where: p.line_id == ^order_id, limit: 1)
+           ),
+         [] <-
+           Repo.all(
+             from(
+               m in ManualIngredient,
+               where: m.line_id == ^order_id,
+               limit: 1
+             )
+           ) do
       false
     else
       _ -> true
@@ -150,7 +172,9 @@ defmodule Picape.Order do
       from(
         p in PlannedRecipe,
         where: p.line_id == ^order_id,
-        select: {p.recipe_id, fragment("? * Cast(NOT ? as integer)", p.quantity, p.unplanned)}
+        select:
+          {p.recipe_id,
+           fragment("? * Cast(NOT ? as integer)", p.quantity, p.unplanned)}
       )
 
     {:ok, Enum.into(Repo.all(query), %{})}

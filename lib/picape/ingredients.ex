@@ -127,7 +127,8 @@ defmodule Picape.Ingredients do
     |> Enum.map(fn ingredient ->
       ingredient
       |> Ingredient.raw_changeset(%{
-        supermarket_product_raw: Supermarket.products_by_id(ingredient.supermarket_product_id)
+        supermarket_product_raw:
+          Supermarket.products_by_id(ingredient.supermarket_product_id)
       })
     end)
     |> Enum.map(&Repo.update!/1)

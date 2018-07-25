@@ -32,18 +32,22 @@ defmodule Picape.Recipe do
       from(
         r in IngredientRef,
         join: i in assoc(r, :ingredient),
-        where: r.recipe_id in ^Map.keys(recipes_quantities) and i.is_essential == false,
+        where:
+          r.recipe_id in ^Map.keys(recipes_quantities) and
+            i.is_essential == false,
         select: {i.supermarket_product_id, {r.recipe_id, r.quantity}}
       )
 
     result =
       Repo.all(query)
       |> Enum.reduce(%{}, fn {id, {recipe_id, quantity}}, item_quantities ->
-        Map.merge(item_quantities, %{id => recipes_quantities[recipe_id] * quantity}, fn _id,
-                                                                                         quantity1,
-                                                                                         quantity2 ->
-          quantity1 + quantity2
-        end)
+        Map.merge(
+          item_quantities,
+          %{id => recipes_quantities[recipe_id] * quantity},
+          fn _id, quantity1, quantity2 ->
+            quantity1 + quantity2
+          end
+        )
       end)
 
     {:ok, result}
@@ -90,7 +94,9 @@ defmodule Picape.Recipe do
       Repo.all(
         from(
           ref in IngredientRef,
-          where: ref.recipe_id in ^recipe_ids and ref.ingredient_id in ^ingredient_ids,
+          where:
+            ref.recipe_id in ^recipe_ids and
+              ref.ingredient_id in ^ingredient_ids,
           join: r in assoc(ref, :recipe),
           select: {ref.ingredient_id, ref},
           preload: [:recipe]
@@ -109,7 +115,8 @@ defmodule Picape.Recipe do
       Repo.all(
         from(
           r in IngredientRef,
-          where: r.recipe_id in ^recipe_ids and r.ingredient_id in ^ingredient_ids,
+          where:
+            r.recipe_id in ^recipe_ids and r.ingredient_id in ^ingredient_ids,
           select: r.ingredient_id
         )
       )

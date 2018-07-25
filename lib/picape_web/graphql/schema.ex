@@ -102,7 +102,12 @@ defmodule PicapeWeb.Graphql.Schema do
 
     @desc "Updates and synchronizes the current order."
     field :sync_order, :order do
-      arg(:refresh, :boolean, description: "Make sure the supermarket card is refreshed")
+      arg(
+        :refresh,
+        :boolean,
+        description: "Make sure the supermarket card is refreshed"
+      )
+
       resolve(handle_errors(&Resolver.Order.sync_supermarket/2))
     end
 

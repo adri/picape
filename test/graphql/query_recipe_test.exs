@@ -38,7 +38,7 @@ defmodule Picape.Graphql.QueryRecipeTest do
                       "title" => "Shoarma",
                       "imageUrl" =>
                         "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
-                    },
+                    }
                   ]
                 }
               }}

@@ -16,7 +16,12 @@ defmodule PicapeWeb.Graphql.Types do
     field(:name, :string)
     field(:image_url, :string)
     field(:quantity, :string)
-    field(:ingredient, :ingredient, resolve: batched({Resolver.Recipe, :ingredients_by_item_ids}))
+
+    field(
+      :ingredient,
+      :ingredient,
+      resolve: batched({Resolver.Recipe, :ingredients_by_item_ids})
+    )
   end
 
   @desc "Recipe containing ingredients and metadata"
@@ -24,7 +29,12 @@ defmodule PicapeWeb.Graphql.Types do
     field(:title, :string)
     field(:description, :string)
     field(:image_url, :string, resolve: from_object(:image_url))
-    field(:is_planned, :boolean, resolve: batched({Resolver.Order, :recipies_planned?}))
+
+    field(
+      :is_planned,
+      :boolean,
+      resolve: batched({Resolver.Order, :recipies_planned?})
+    )
 
     field(
       :ingredients,
@@ -39,7 +49,12 @@ defmodule PicapeWeb.Graphql.Types do
     field(:is_essential, :boolean)
     field(:tags, list_of(:ingredient_tag))
     field(:image_url, :string, resolve: from_object(:image_url))
-    field(:is_planned, :boolean, resolve: batched({Resolver.Order, :ingredients_planned?}))
+
+    field(
+      :is_planned,
+      :boolean,
+      resolve: batched({Resolver.Order, :ingredients_planned?})
+    )
 
     field(
       :ordered_quantity,

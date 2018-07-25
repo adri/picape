@@ -19,7 +19,10 @@ defmodule Picape.Mixfile do
   #
   # Type `mix help compile.app` for more information.
   def application do
-    [mod: {Picape.Application, []}, extra_applications: [:logger, :runtime_tools]]
+    [
+      mod: {Picape.Application, []},
+      extra_applications: [:logger, :runtime_tools]
+    ]
   end
 
   # Specifies which paths to compile per environment.
@@ -37,8 +40,9 @@ defmodule Picape.Mixfile do
       {:absinthe_relay, "~> 1.4.0"},
       #  {:absinthe_ecto, "~> 1.0.0"},
       {:cors_plug, "~> 1.4"},
-      {:con_cache, "~> 0.12.0"},
+      {:con_cache, "~> 0.13.0"},
       {:excoveralls, "~> 0.8.0", only: :test},
+      {:floki, "~> 0.20.0"},
       {:jason, "~> 1.0"},
       {:phoenix, "~> 1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},

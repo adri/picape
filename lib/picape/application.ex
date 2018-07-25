@@ -18,7 +18,12 @@ defmodule Picape.Application do
       # Start your own worker by calling: Picape.Worker.start_link(arg1, arg2, arg3)
       # worker(Picape.Worker, [arg1, arg2, arg3]),
       worker(Picape.Scheduler, []),
-      supervisor(ConCache, [[ttl: :timer.hours(5)], [name: :supermarket]])
+      {ConCache,
+       [
+         name: :supermarket,
+         global_ttl: :timer.hours(5),
+         ttl_check_interval: :timer.seconds(60)
+       ]}
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

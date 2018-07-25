@@ -64,8 +64,14 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
 
   def order_ingredient(attributes, _info) do
     {:ok, _} =
-      Order.order_ingredient(order_id(), attributes[:ingredient_id], attributes[:quantity])
+      Order.order_ingredient(
+        order_id(),
+        attributes[:ingredient_id],
+        attributes[:quantity]
+      )
 
-    Resolver.Recipe.ingredient_by_id(String.to_integer(attributes[:ingredient_id]))
+    Resolver.Recipe.ingredient_by_id(
+      String.to_integer(attributes[:ingredient_id])
+    )
   end
 end

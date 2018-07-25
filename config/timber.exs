@@ -22,10 +22,12 @@ if Enum.member?(environments_to_exclude, Mix.env()) do
   #    print_metadata: false # turn this on to view the additional metadata
 else
   # Update the instrumenters so that we can structure Phoenix logs
-  config :picape, PicapeWeb.Endpoint, instrumenters: [Timber.Integrations.PhoenixInstrumenter]
+  config :picape, PicapeWeb.Endpoint,
+    instrumenters: [Timber.Integrations.PhoenixInstrumenter]
 
   # Structure Ecto logs
-  config :picape, Picape.Repo, loggers: [{Timber.Integrations.EctoLogger, :log, []}]
+  config :picape, Picape.Repo,
+    loggers: [{Timber.Integrations.EctoLogger, :log, []}]
 
   # Use Timber as the logger backend
   # Feel free to add additional backends if you want to send you logs to multiple devices.

@@ -3,7 +3,12 @@ defmodule PicapeWeb.Router do
   use Plug.ErrorHandler
   use Sentry.Plug
 
-  forward("/graphql", Absinthe.Plug, schema: PicapeWeb.Graphql.Schema, json_codec: Jason)
+  forward(
+    "/graphql",
+    Absinthe.Plug,
+    schema: PicapeWeb.Graphql.Schema,
+    json_codec: Jason
+  )
 
   forward(
     "/graphiql",

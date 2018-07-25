@@ -36,7 +36,10 @@ defmodule Picape.Graphql.QueryIngredientTest do
           name
         }
       }",
-        variables: %{"query" => "Mil", "excluded" => [Node.to_global_id("Ingredient", milk.id)]}
+        variables: %{
+          "query" => "Mil",
+          "excluded" => [Node.to_global_id("Ingredient", milk.id)]
+        }
       )
 
     assert actual === {:ok, %{data: %{"searchIngredient" => []}}}

@@ -27,7 +27,11 @@ defmodule Picape.Graphql.SubscriptionRecipeTest do
     }"
 
     ref =
-      push_doc(socket, mutation, variables: %{recipeId: Node.to_global_id("Recipe", recipe.id)})
+      push_doc(
+        socket,
+        mutation,
+        variables: %{recipeId: Node.to_global_id("Recipe", recipe.id)}
+      )
 
     assert_reply(ref, :ok, %{data: %{"planRecipe" => %{"title" => "Pizza"}}})
 
@@ -65,7 +69,11 @@ defmodule Picape.Graphql.SubscriptionRecipeTest do
     }"
 
     ref =
-      push_doc(socket, mutation, variables: %{recipeId: Node.to_global_id("Recipe", recipe.id)})
+      push_doc(
+        socket,
+        mutation,
+        variables: %{recipeId: Node.to_global_id("Recipe", recipe.id)}
+      )
 
     assert_reply(ref, :ok, %{data: %{"planRecipe" => %{"title" => "Pizza"}}})
 
@@ -75,7 +83,11 @@ defmodule Picape.Graphql.SubscriptionRecipeTest do
     }"
 
     ref =
-      push_doc(socket, mutation, variables: %{recipeId: Node.to_global_id("Recipe", recipe.id)})
+      push_doc(
+        socket,
+        mutation,
+        variables: %{recipeId: Node.to_global_id("Recipe", recipe.id)}
+      )
 
     assert_reply(ref, :ok, %{data: %{"unplanRecipe" => %{"title" => "Pizza"}}})
 

@@ -20,7 +20,11 @@ defmodule Picape.Supermarket do
 
     changes.remove
     |> Enum.each(fn change ->
-      ConCache.put(:supermarket, :cart, remove_product(change.id, change.quantity))
+      ConCache.put(
+        :supermarket,
+        :cart,
+        remove_product(change.id, change.quantity)
+      )
     end)
   end
 
@@ -60,7 +64,9 @@ defmodule Picape.Supermarket do
     try do
       # before delivering, the latest order is in "current_orders"
       # after delivering, in "orders"
-      processing_order_id = get_in(orders, ["current_orders", Access.at(0), "order_id"])
+      processing_order_id =
+        get_in(orders, ["current_orders", Access.at(0), "order_id"])
+
       delivered_order_id = get_in(orders, ["orders", Access.at(0), "order_id"])
 
       processing_order_id || delivered_order_id
