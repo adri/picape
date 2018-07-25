@@ -11,17 +11,19 @@ config :picape, ecto_repos: [Picape.Repo]
 # Configures the endpoint
 config :picape, PicapeWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "/XS66yr6BbUsl0+u0pjJIxa0lK5whxGGWGZLuWuBSCbnmNcsRLz+gvyRathkiAM8",
+  secret_key_base:
+    "/XS66yr6BbUsl0+u0pjJIxa0lK5whxGGWGZLuWuBSCbnmNcsRLz+gvyRathkiAM8",
   render_errors: [view: PicapeWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Picape.PubSub, adapter: Phoenix.PubSub.PG2]
 
 config :picape, Picape.Scheduler,
   jobs: [
     # Runs every midnight
-    {"@daily", fn ->
-      Picape.Supermarket.invalidate_orders()
-      Picape.Order.sync_supermarket("1")
-    end}
+    {"@daily",
+     fn ->
+       Picape.Supermarket.invalidate_orders()
+       Picape.Order.sync_supermarket("1")
+     end}
   ]
 
 # Configures Elixir's Logger
@@ -31,8 +33,7 @@ config :logger, :console,
 
 config :reverse_proxy, upstreams: %{:_ => ["http://0.0.0.0:4001"]}
 
-config :absinthe,
-  schema: PicapeWeb.Graphql.Schema
+config :absinthe, schema: PicapeWeb.Graphql.Schema
 
 config :sentry,
   dsn: System.get_env("SENTRY_DSN"),
@@ -47,8 +48,10 @@ config :sentry,
 
 config :picape, :supermarket, Picape.Supermarket
 
-config :phoenix, :format_encoders,
-       json: Jason
+config :picape, Picape.Seasonal,
+  base_url: "https://groentefruit.milieucentraal.nl/"
+
+config :phoenix, :format_encoders, json: Jason
 config :mix_docker, image: "adri/picape"
 
 # Import environment specific config. This must remain at the bottom

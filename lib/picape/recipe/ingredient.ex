@@ -32,6 +32,12 @@ defmodule Picape.Recipe.Ingredient do
      ingredient.supermarket_product_raw["product_details"]["unit_quantity"]}
   end
 
+  def fetch(ingredient, :additional_info) do
+    {:ok,
+     ingredient.supermarket_product_raw["product_details"]["additional_info"] ||
+       ""}
+  end
+
   @doc false
   def edit_changeset(%Ingredient{} = ingredient, attrs) do
     ingredient
