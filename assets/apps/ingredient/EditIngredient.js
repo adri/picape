@@ -15,6 +15,7 @@ class EditIngredient extends React.Component {
       id: props.data.node.id,
       supermarketProductId: props.data.node.supermarketProductId,
       name: props.data.node.name,
+      seasonalName: props.data.node.seasonalName,
       isEssential: props.data.node.isEssential,
       tagIds: props.data.node.tags.map(tag => tag.id),
       allTags: props.data.ingredients.tags,
@@ -29,6 +30,7 @@ class EditIngredient extends React.Component {
           ingredientId: this.state.id,
           supermarketProductId: this.state.supermarketProductId,
           name: this.state.name,
+          seasonalName: this.state.seasonalName,
           isEssential: this.state.isEssential,
           tagIds: this.state.tagIds,
         },
@@ -50,7 +52,7 @@ class EditIngredient extends React.Component {
   render() {
     if (this.state === null) return <Loading />;
     const { submit } = this.props;
-    const { id, name, isEssential, supermarketProductId, tagIds, allTags, changed } = this.state;
+    const { id, name, seasonalName, isEssential, supermarketProductId, tagIds, allTags, changed } = this.state;
 
     return (
       <div>
@@ -63,12 +65,30 @@ class EditIngredient extends React.Component {
                 </label>
                 <div className="col-sm-10">
                   <input
-                    type="name"
+                    type="text"
                     id="name"
                     className="form-control"
                     onChange={event => this.setState({ name: event.target.value, changed: true })}
                     defaultValue={name}
                   />
+                </div>
+              </div>
+
+              <div className="form-group row">
+                <label htmlFor="name" className="col-sm-2 col-form-label">
+                  Season name
+                </label>
+                <div className="col-sm-10">
+                  <input
+                    type="text"
+                    id="seasonalName"
+                    className="form-control"
+                    onChange={event => this.setState({ seasonalName: event.target.value, changed: true })}
+                    defaultValue={seasonalName}
+                  />
+                  <a href={`https://groentefruit.milieucentraal.nl/?prod=&month=alle&labela=A&labelb=B&labelc=C&labeld=D&labele=E&action=searching`} target="_blank">
+                    Should match an ingredient name here exactly
+                  </a>
                 </div>
               </div>
 
@@ -140,6 +160,7 @@ const GetIngredient = gql`
       ... on Ingredient {
         id
         name
+        seasonalName
         imageUrl
         isEssential
         supermarketProductId
@@ -166,6 +187,7 @@ const EditIngredientQuery = gql`
       id
       supermarketProductId
       name
+      seasonalName
       imageUrl
       isEssential
     }

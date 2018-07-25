@@ -7,6 +7,7 @@ defmodule Picape.Recipe.Ingredient do
   schema "recipe_ingredient" do
     field(:is_essential, :boolean, default: false)
     field(:name, :string)
+    field(:seasonal_name, :string)
     field(:supermarket_product_id, :integer)
     field(:supermarket_product_raw, :map)
 
@@ -43,6 +44,7 @@ defmodule Picape.Recipe.Ingredient do
     ingredient
     |> cast(attrs, [
       :name,
+      :seasonal_name,
       :is_essential,
       :supermarket_product_id,
       :supermarket_product_raw

@@ -27,8 +27,9 @@ defmodule Picape.Seasonal do
   defp find_season(product_infos, ingredient, month) do
     info =
       Enum.find(product_infos, fn info ->
-        #    && ingredient.seasonal_name == info.product_name_nl
-        info.month === month && ingredient[:additional_info] =~ info.country_nl
+       info.month === month
+        && ingredient[:additional_info] =~ info.country_nl
+        && ingredient.seasonal_name == info.product_name_nl
       end)
   end
 

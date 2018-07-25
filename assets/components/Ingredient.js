@@ -19,6 +19,7 @@ export default class Ingredient extends React.Component {
       unitQuantity,
       orderedQuantity,
       showEdit,
+      season,
     } = this.props;
 
     const { hovered } = this.state;
@@ -37,7 +38,7 @@ export default class Ingredient extends React.Component {
             <div className="ingredient-name mt-0 mb-0">
               {showEdit && (
                 <Link href={`/ingredient?id=${id}`}>
-                  <a>{name}</a>
+                  <a>{name} {season && season.label}</a>
                 </Link>
               )}
               {!showEdit && (

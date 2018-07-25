@@ -1,5 +1,5 @@
 defmodule PicapeWeb.Graphql.Resolver.Recipe do
-  alias Picape.{Recipe, Ingredients, Repo}
+  alias Picape.{Recipe, Ingredients, Seasonal, Repo}
   alias Absinthe.Relay
 
   # Queries
@@ -64,6 +64,10 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
 
   def ingredients_by_recipe_ids(_, recipe_ids) do
     Recipe.ingredients_by_recipe_ids(recipe_ids)
+  end
+
+  def seasons_for_ingredients(ingredients) do
+    Seasonal.seasons_for_ingredients(ingredients)
   end
 
   # Mutations

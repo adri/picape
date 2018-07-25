@@ -47,6 +47,9 @@ const query = gql`
           isPlanned
           unitQuantity
           orderedQuantity
+          season {
+            label
+          }
         }
       }
     }
