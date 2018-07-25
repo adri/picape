@@ -73,6 +73,9 @@ export default class Layout extends React.Component {
               background: no-repeat center center fixed;
               background-image: url("https://res.cloudinary.com/picape/image/upload/f_auto,fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg");
             }
+            .card {
+              transform: "translateZ(0)"
+            }
           `}
         </style>
         <style jsx>{`
