@@ -6,15 +6,13 @@ defmodule Picape.Graphql.QueryRecipeTest do
     insert!(
       :recipe,
       title: "Shoarma",
-      image_url:
-        "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
+      image_url: "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
     )
 
     insert!(
       :recipe,
       title: "Pizza",
-      image_url:
-        "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/pizza.jpg"
+      image_url: "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/pizza.jpg"
     )
 
     actual = run("{
@@ -91,11 +89,11 @@ defmodule Picape.Graphql.QueryRecipeTest do
       insert!(
         :recipe,
         title: "Shoarma",
-        image_url:
-          "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
+        image_url: "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/https://server/shoarma.jpg"
       )
 
-    actual = run("
+    actual =
+      run("
       query node($id: ID!) {
         node(id: $id) {
           ... on Recipe {
@@ -103,7 +101,9 @@ defmodule Picape.Graphql.QueryRecipeTest do
             imageUrl
           }
         }
-      }", variables: %{"id" => Node.to_global_id("Recipe", recipe.id)})
+      }",
+        variables: %{"id" => Node.to_global_id("Recipe", recipe.id)}
+      )
 
     assert actual ===
              {:ok,
@@ -119,12 +119,15 @@ defmodule Picape.Graphql.QueryRecipeTest do
   end
 
   test "adds new recipe" do
-    actual = run("
+    actual =
+      run("
       mutation add($title: String!) {
         addRecipe(title: $title) {
           title
         }
-      }", variables: %{"title" => "Test title"})
+      }",
+        variables: %{"title" => "Test title"}
+      )
 
     assert actual ===
              {:ok,

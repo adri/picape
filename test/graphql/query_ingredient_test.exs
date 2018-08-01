@@ -6,12 +6,15 @@ defmodule Picape.Graphql.QueryIngredientTest do
     insert!(:ingredient, name: "Flour")
     insert!(:ingredient, name: "Milk")
 
-    actual = run("
+    actual =
+      run("
       query search($query: String!) {
        searchIngredient(query: $query) {
           name
         }
-      }", variables: %{"query" => "Mil"})
+      }",
+        variables: %{"query" => "Mil"}
+      )
 
     assert actual ===
              {:ok,

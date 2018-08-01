@@ -70,8 +70,6 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
         attributes[:quantity]
       )
 
-    Resolver.Recipe.ingredient_by_id(
-      String.to_integer(attributes[:ingredient_id])
-    )
+    Resolver.Recipe.ingredient_by_id(String.to_integer(attributes[:ingredient_id]))
   end
 end

@@ -32,9 +32,7 @@ defmodule Picape.Recipe do
       from(
         r in IngredientRef,
         join: i in assoc(r, :ingredient),
-        where:
-          r.recipe_id in ^Map.keys(recipes_quantities) and
-            i.is_essential == false,
+        where: r.recipe_id in ^Map.keys(recipes_quantities) and i.is_essential == false,
         select: {i.supermarket_product_id, {r.recipe_id, r.quantity}}
       )
 
@@ -94,9 +92,7 @@ defmodule Picape.Recipe do
       Repo.all(
         from(
           ref in IngredientRef,
-          where:
-            ref.recipe_id in ^recipe_ids and
-              ref.ingredient_id in ^ingredient_ids,
+          where: ref.recipe_id in ^recipe_ids and ref.ingredient_id in ^ingredient_ids,
           join: r in assoc(ref, :recipe),
           select: {ref.ingredient_id, ref},
           preload: [:recipe]
@@ -115,8 +111,7 @@ defmodule Picape.Recipe do
       Repo.all(
         from(
           r in IngredientRef,
-          where:
-            r.recipe_id in ^recipe_ids and r.ingredient_id in ^ingredient_ids,
+          where: r.recipe_id in ^recipe_ids and r.ingredient_id in ^ingredient_ids,
           select: r.ingredient_id
         )
       )

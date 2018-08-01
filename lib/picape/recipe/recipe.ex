@@ -19,9 +19,7 @@ defmodule Picape.Recipe.Recipe do
         {:ok, nil}
 
       false === String.contains?(recipe.image_url, "res.cloudinary.com") ->
-        {:ok,
-         "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/" <>
-           recipe.image_url}
+        {:ok, "https://res.cloudinary.com/picape/image/fetch/t_all_images,f_auto/" <> recipe.image_url}
 
       true ->
         {:ok, recipe.image_url}

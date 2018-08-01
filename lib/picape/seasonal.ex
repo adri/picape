@@ -37,8 +37,7 @@ defmodule Picape.Seasonal do
   defp find_season(country_info, seasonal_name, month) do
     Agent.get(__MODULE__, fn product_infos ->
       Enum.find(product_infos, fn info ->
-        info.month === month && country_info =~ info.country_nl &&
-          seasonal_name == info.product_name_nl
+        info.month === month && country_info =~ info.country_nl && seasonal_name == info.product_name_nl
       end)
     end)
   end

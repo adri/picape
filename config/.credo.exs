@@ -61,7 +61,6 @@
         # set this value to 0 (zero).
         {Credo.Check.Design.TagTODO, exit_status: 2},
         {Credo.Check.Design.TagFIXME},
-
         {Credo.Check.Readability.FunctionNames},
         {Credo.Check.Readability.LargeNumbers, false},
         {Credo.Check.Readability.MaxLineLength, priority: :low, max_length: 120},
@@ -76,7 +75,6 @@
         {Credo.Check.Readability.Specs, false},
         {Credo.Check.Readability.StringSigils, false},
         {Credo.Check.Readability.PreferImplicitTry, false},
-
         {Credo.Check.Refactor.ABCSize, max_size: 40},
         {Credo.Check.Refactor.CondStatements},
         {Credo.Check.Refactor.FunctionArity},
@@ -88,7 +86,6 @@
         {Credo.Check.Refactor.Nesting},
         {Credo.Check.Refactor.UnlessWithElse},
         {Credo.Check.Refactor.VariableRebinding, false},
-
         {Credo.Check.Warning.IExPry},
         {Credo.Check.Warning.IoInspect},
         {Credo.Check.Warning.NameRedeclarationByAssignment},
@@ -102,7 +99,7 @@
         {Credo.Check.Warning.UnusedListOperation},
         {Credo.Check.Warning.UnusedStringOperation},
         {Credo.Check.Warning.UnusedTupleOperation},
-        {Credo.Check.Warning.OperationWithConstantResult},
+        {Credo.Check.Warning.OperationWithConstantResult}
 
         # Custom checks can be created using `mix credo.gen.check`.
         #

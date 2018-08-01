@@ -11,8 +11,7 @@ config :picape, ecto_repos: [Picape.Repo]
 # Configures the endpoint
 config :picape, PicapeWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base:
-    "/XS66yr6BbUsl0+u0pjJIxa0lK5whxGGWGZLuWuBSCbnmNcsRLz+gvyRathkiAM8",
+  secret_key_base: "/XS66yr6BbUsl0+u0pjJIxa0lK5whxGGWGZLuWuBSCbnmNcsRLz+gvyRathkiAM8",
   render_errors: [view: PicapeWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Picape.PubSub, adapter: Phoenix.PubSub.PG2]
 
@@ -48,8 +47,7 @@ config :sentry,
 
 config :picape, :supermarket, Picape.Supermarket
 
-config :picape, Picape.Seasonal,
-  base_url: "https://groentefruit.milieucentraal.nl/"
+config :picape, Picape.Seasonal, base_url: "https://groentefruit.milieucentraal.nl/"
 
 config :phoenix, :format_encoders, json: Jason
 config :mix_docker, image: "adri/picape"

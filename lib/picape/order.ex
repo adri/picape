@@ -87,10 +87,8 @@ defmodule Picape.Order do
 
   def ingredients_ordered_quantity(order_id, ingredient_ids) do
     with {:ok, items} <- ordered_item_quantities(order_id),
-         {:ok, items_map} <-
-           Recipe.ingredients_by_item_ids_reverse(Map.keys(items)) do
-      {:ok,
-       Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
+         {:ok, items_map} <- Recipe.ingredients_by_item_ids_reverse(Map.keys(items)) do
+      {:ok, Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
     end
   end
 
@@ -125,8 +123,7 @@ defmodule Picape.Order do
 
   def recipes_planned_for_ingredient_ids(order_id, ingredient_ids) do
     with {:ok, planned_recipe_ids} <- planned_recipes(order_id),
-         {:ok, recipes_by_ingredients} <-
-           Recipe.recipes_by_ingredient_ids(ingredient_ids, planned_recipe_ids) do
+         {:ok, recipes_by_ingredients} <- Recipe.recipes_by_ingredient_ids(ingredient_ids, planned_recipe_ids) do
       {:ok, recipes_by_ingredients}
     end
   end
@@ -149,10 +146,7 @@ defmodule Picape.Order do
   end
 
   defp planned_items_in_order?(order_id) do
-    with [] <-
-           Repo.all(
-             from(p in PlannedRecipe, where: p.line_id == ^order_id, limit: 1)
-           ),
+    with [] <- Repo.all(from(p in PlannedRecipe, where: p.line_id == ^order_id, limit: 1)),
          [] <-
            Repo.all(
              from(
@@ -172,9 +166,7 @@ defmodule Picape.Order do
       from(
         p in PlannedRecipe,
         where: p.line_id == ^order_id,
-        select:
-          {p.recipe_id,
-           fragment("? * Cast(NOT ? as integer)", p.quantity, p.unplanned)}
+        select: {p.recipe_id, fragment("? * Cast(NOT ? as integer)", p.quantity, p.unplanned)}
       )
 
     {:ok, Enum.into(Repo.all(query), %{})}

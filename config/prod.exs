@@ -45,12 +45,9 @@ config :picape, Picape.Supermarket,
   static_url: System.get_env("SUPERMARKET_STATIC_URL"),
   headers: [
     "Accept-Language": "nl-NL",
-    "x-#{System.get_env("SUPERMARKET_HEADER")}-agent":
-      System.get_env("SUPERMARKET_AGENT"),
-    "x-#{System.get_env("SUPERMARKET_HEADER")}-did":
-      System.get_env("SUPERMARKET_DID"),
-    "x-#{System.get_env("SUPERMARKET_HEADER")}-auth":
-      System.get_env("SUPERMARKET_AUTH"),
+    "x-#{System.get_env("SUPERMARKET_HEADER")}-agent": System.get_env("SUPERMARKET_AGENT"),
+    "x-#{System.get_env("SUPERMARKET_HEADER")}-did": System.get_env("SUPERMARKET_DID"),
+    "x-#{System.get_env("SUPERMARKET_HEADER")}-auth": System.get_env("SUPERMARKET_AUTH"),
     "User-Agent": System.get_env("SUPERMARKET_USER_AGENT")
   ],
   cookie: System.get_env("SUPERMARKET_COOKIE")

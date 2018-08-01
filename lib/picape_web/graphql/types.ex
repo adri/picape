@@ -69,11 +69,11 @@ defmodule PicapeWeb.Graphql.Types do
       resolve: batched({Resolver.Order, :recipes_planned_for_ingredient_ids})
     )
 
-
-    field(:season, :season, resolve: fn parent, _args, _ctx ->
-      {:ok, List.first(Map.values(Resolver.Recipe.seasons_for_ingredients([parent])))}
-    end)
-
+    field(:season, :season,
+      resolve: fn parent, _args, _ctx ->
+        {:ok, List.first(Map.values(Resolver.Recipe.seasons_for_ingredients([parent])))}
+      end
+    )
 
     field(:unit_quantity, :string, resolve: from_object(:unit_quantity))
   end

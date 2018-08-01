@@ -22,21 +22,15 @@ defmodule Picape.Recipe.Ingredient do
   end
 
   def fetch(ingredient, :image_url) do
-    {:ok,
-     Supermarket.image_url(
-       ingredient.supermarket_product_raw["product_details"]["image_id"]
-     )}
+    {:ok, Supermarket.image_url(ingredient.supermarket_product_raw["product_details"]["image_id"])}
   end
 
   def fetch(ingredient, :unit_quantity) do
-    {:ok,
-     ingredient.supermarket_product_raw["product_details"]["unit_quantity"]}
+    {:ok, ingredient.supermarket_product_raw["product_details"]["unit_quantity"]}
   end
 
   def fetch(ingredient, :additional_info) do
-    {:ok,
-     ingredient.supermarket_product_raw["product_details"]["additional_info"] ||
-       ""}
+    {:ok, ingredient.supermarket_product_raw["product_details"]["additional_info"] || ""}
   end
 
   @doc false
