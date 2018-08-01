@@ -23,7 +23,8 @@ defmodule Picape.Application do
          name: :supermarket,
          global_ttl: :timer.hours(5),
          ttl_check_interval: :timer.seconds(60)
-       ]}
+       ]},
+      supervisor(Picape.Seasonal, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
