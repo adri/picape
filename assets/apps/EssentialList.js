@@ -55,6 +55,9 @@ const recipesQuery = gql`
               title
             }
           }
+          season {
+            label
+          }
         }
       }
     }

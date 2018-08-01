@@ -23,12 +23,12 @@ const mutation = gql`
         imageUrl
         name
         ingredient {
-          ... ingredient
+          ...ingredient
         }
       }
     }
   }
-  ${Ingredient.fragments.ingredient}  
+  ${Ingredient.fragments.ingredient}
 `;
 
 export default compose(

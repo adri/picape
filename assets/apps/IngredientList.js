@@ -22,9 +22,12 @@ function IngredientList({ data: { loading, error, ingredients } }) {
       <hr />
 
       <h5 className="text-white">Ingredients</h5>
-      <div className="card" style={{
-        transform: "translateZ(0)"
-        }}>
+      <div
+        className="card"
+        style={{
+          transform: "translateZ(0)",
+        }}
+      >
         <div className="row no-gutters">
           {ingredients.edges &&
             ingredients.edges.map(ingredient => (

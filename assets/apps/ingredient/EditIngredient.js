@@ -86,7 +86,10 @@ class EditIngredient extends React.Component {
                     onChange={event => this.setState({ seasonalName: event.target.value, changed: true })}
                     defaultValue={seasonalName}
                   />
-                  <a href={`https://groentefruit.milieucentraal.nl/?prod=&month=alle&labela=A&labelb=B&labelc=C&labeld=D&labele=E&action=searching`} target="_blank">
+                  <a
+                    href={`https://groentefruit.milieucentraal.nl/?prod=&month=alle&labela=A&labelb=B&labelc=C&labeld=D&labele=E&action=searching`}
+                    target="_blank"
+                  >
                     Should match an ingredient name here exactly
                   </a>
                 </div>

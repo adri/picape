@@ -38,11 +38,13 @@ export default class Ingredient extends React.Component {
             <div className="ingredient-name mt-0 mb-0">
               {showEdit && (
                 <Link href={`/ingredient?id=${id}`}>
-                  <a>{name} {season && season.label}</a>
+                  <a>
+                    {name} {season && season.label}
+                  </a>
                 </Link>
               )}
               {!showEdit && (
-                <Dropdown link={name}>
+                <Dropdown link={`${name} ${season ? season.label : ""}`}>
                   {isPlanned && (
                     <div>
                       <h6 className="dropdown-header">Planned recipes</h6>
@@ -146,6 +148,9 @@ Ingredient.fragments = {
           id
           title
         }
+      }
+      season {
+        label
       }
     }
   `,

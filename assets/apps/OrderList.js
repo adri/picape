@@ -49,7 +49,7 @@ const orderQuery = gql`
         imageUrl
         name
         ingredient {
-          ... ingredient
+          ...ingredient
         }
       }
     }
