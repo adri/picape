@@ -12,20 +12,32 @@ export default function Recipe({ recipe, showEdit }) {
       <FlipDirectionAware
         backside={
           <div>
-            <span className="ingredient-list">
-              {recipe.ingredients.map(ref => `${ref.ingredient.name} (${ref.quantity})`).join(", ")}
-            </span>
-            <br />
-            {recipe.isPlanned ? <UnplanRecipe recipeId={recipe.id} /> : <PlanRecipe recipeId={recipe.id} />}
+            {recipe.isPlanned ? (
+              <UnplanRecipe recipeId={recipe.id} />
+            ) : (
+              <PlanRecipe recipeId={recipe.id} />
+            )}
             <br />
             {showEdit && <EditRecipeButton recipeId={recipe.id} />}
+            <br />
+            <span className="ingredient-list">
+              {recipe.ingredients
+                .map(ref => `${ref.ingredient.name} (${ref.quantity})`)
+                .join(", ")}
+            </span>
           </div>
         }
       >
-        <Image className="card-img-top" src={recipe.imageUrl} alt={recipe.title} />
+        <Image
+          className="card-img-top"
+          src={recipe.imageUrl}
+          alt={recipe.title}
+        />
         <div className="card-block">
           <h5 className="card-title">
-            {recipe.isPlanned && <i className="check-bar fa fa-check-circle fa-lg fa-fw" />}
+            {recipe.isPlanned && (
+              <i className="check-bar fa fa-check-circle fa-lg fa-fw" />
+            )}
             {recipe.title}
           </h5>
         </div>
@@ -58,7 +70,10 @@ export default function Recipe({ recipe, showEdit }) {
           height: 53%;
           opacity: 0;
           bottom: 0;
-          background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 55%);
+          background: linear-gradient(
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 1) 55%
+          );
           border-top: 0;
         }
         .recipe .media {
@@ -99,5 +114,5 @@ Recipe.fragments = {
         }
       }
     }
-  `,
+  `
 };
