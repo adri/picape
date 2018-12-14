@@ -26,18 +26,22 @@
     "react-apollo": "^2.0.4",
     "react-autocomplete": "^1.8.1",
     "react-autosize-textarea": "^3.0.2",
-    "react-dom": "^16.2.0",
-    "recompose": "^0.26.0"
+    "react-dom": "^16.2.1",
+    "recompose": "^0.26.0",
+    "snyk": "^1.117.1"
   },
   "scripts": {
     "dev": "next",
     "build": "next build",
     "start": "next start",
     "prettier": "prettier --bracket-spacing --tab-width 2 --trailing-comma all --parser babylon --print-width 120  --write \"{{components,apps,lib,mutations,pages,test,themes,types},__{tests,mocks,generated}__}/**/*.js\"",
-    "analyze": "ANALYZE=1 next build"
+    "analyze": "ANALYZE=1 next build",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "devDependencies": {
     "prettier": "^1.11.1",
     "webpack-bundle-analyzer": "^2.11.1"
-  }
+  },
+  "snyk": true
 }
