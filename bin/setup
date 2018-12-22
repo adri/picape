@@ -19,7 +19,8 @@ command -v npm >/dev/null 2>&1 || {
   exit 1
 }
 
-# Ensure Yarn is installed
+# Ensure 
+is installed
 command -v yarn >/dev/null 2>&1 || {
   echo "This app requires Yarn package manager, but it was not found on your system."
   echo "Install it using the instructions at https://yarnpkg.com/en/"
@@ -44,7 +45,7 @@ echo "Installing Node.js dependencies (for assets)"
 echo "----------------------------------------------------------"
 
 cd assets/ && {
-  yarn install || { echo "Node dependencies could not be installed!"; exit 1; };
+  yarn install --ignore-engines || { echo "Node dependencies could not be installed!"; exit 1; };
   cd -;
 }
 
