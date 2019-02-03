@@ -3,6 +3,7 @@ defmodule Picape.Order do
 
   alias Picape.Order.{
     LineFromSupermarket,
+    LineFromDb,
     PlannedRecipe,
     ManualIngredient,
     Sync
@@ -16,7 +17,9 @@ defmodule Picape.Order do
   Returns the currently active cart.
   """
   def current() do
-    {:ok, LineFromSupermarket.convert(Supermarket.cart())}
+#    {:ok, LineFromSupermarket.convert(Supermarket.cart())}
+    {:ok, cart} = cart("1")
+    {:ok, LineFromDb.convert(cart)}
   end
 
   @doc """
@@ -41,6 +44,28 @@ defmodule Picape.Order do
 
   def planned_recipes(nil) do
     {:ok, []}
+  end
+
+  def cart(order_id) do
+    with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
+         {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
+         {:ok, manual} <- manual_ingredients(order_id) do
+      merged = Map.merge(planned, manual, fn _id, _quantity1, quantity2 -> quantity2 end)
+               |> Enum.reject(fn {_, v} -> v == 0 end)
+               |> Map.new
+      {:ok, ingredients} = Recipe.ingredients_by_item_ids(Map.keys(merged))
+
+      cart = Enum.map(merged, fn {id, quantity} ->
+        {id, %{
+          id: id,
+          ingredient: ingredients[id],
+          quantity: quantity
+        }}
+      end)
+      |> Enum.into(%{})
+
+      {:ok, cart}
+    end
   end
 
   @doc """
@@ -74,7 +99,7 @@ defmodule Picape.Order do
       IO.inspect(existing, label: "existing")
       IO.inspect(changes, label: "changes")
 
-      Supermarket.apply_changes(changes)
+      # Supermarket.apply_changes(changes)
 
       current()
     end
@@ -108,7 +133,7 @@ defmodule Picape.Order do
       conflict_target: [:line_id, :ingredient_id]
     )
     |> case do
-      {:ok, _planned_recipe} -> sync_supermarket(order_id)
+      {:ok, _planned_recipe} -> current()
       err -> err
     end
   end
@@ -133,7 +158,12 @@ defmodule Picape.Order do
   end
 
   def last_order_id() do
-    Supermarket.latest_order_id(Supermarket.orders())
+    Repo.one(
+      from(
+        p in PlannedRecipe,
+        select: max(p.line_id)
+      )
+    )
   end
 
   # --- private
@@ -163,6 +193,18 @@ defmodule Picape.Order do
     else
       _ -> true
     end
+  end
+
+  defp planned_ingredients(order_id) do
+    all =
+      from(
+        m in ManualIngredient,
+        where: m.line_id == ^order_id
+      )
+      |> Repo.all()
+      |> Repo.preload(:ingredient)
+
+    {:ok, all}
   end
 
   defp recipe_ingredient_quantities(order_id) do
