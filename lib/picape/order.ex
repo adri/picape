@@ -39,6 +39,10 @@ defmodule Picape.Order do
     end
   end
 
+  def planned_recipes(nil) do
+    {:ok, []}
+  end
+
   @doc """
   Returns a list of planned recipe IDs.
   """

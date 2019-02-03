@@ -2,6 +2,15 @@ defmodule Picape.Order.LineFromSupermarket do
   alias Picape.Order.{Line, Item}
   alias Picape.Supermarket
 
+  def convert(cart = %{"error" => %{}}) do
+    %Line{
+      id: 1,
+      items: [],
+      total_count: 0,
+      total_price: 0,
+    }
+  end
+
   def convert(cart = %{}) do
     %Line{
       id: 1,
