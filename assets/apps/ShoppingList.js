@@ -4,7 +4,7 @@ import ErrorMessage from "../components/ErrorMessage";
 import Ingredient from "../components/Ingredient";
 import Loading from "../components/Loading";
 
-function ShoppingList({ data: { loading, error, currentOrder } }) {
+function ShoppingList({ data: { loading, error, lastOrder } }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <Loading />;
 
@@ -15,8 +15,8 @@ function ShoppingList({ data: { loading, error, currentOrder } }) {
       </div>
       <div className="card">
         <div className="no-gutters">
-          {currentOrder &&
-            currentOrder.items.map(item => {
+          {lastOrder &&
+           lastOrder.items.map(item => {
               const ingredient = item.ingredient ? item.ingredient : item;
               return (
                 <div key={item.id}>
@@ -32,7 +32,7 @@ function ShoppingList({ data: { loading, error, currentOrder } }) {
 
 const shoppingQuery = gql`
   query ShoppingList {
-    currentOrder {
+    lastOrder {
       id
       totalCount
       totalPrice

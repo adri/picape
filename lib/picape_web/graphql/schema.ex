@@ -69,6 +69,11 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(&Resolver.Order.current/3)
     end
 
+    @desc "The last order including total price and ordered items."
+    field :last_order, :order do
+      resolve(&Resolver.Order.last/3)
+    end
+
     @desc "Search Supermarket products using a query string."
     field :search_supermarket, list_of(:supermarket_search_result) do
       arg(:query, non_null(:string))
@@ -109,6 +114,11 @@ defmodule PicapeWeb.Graphql.Schema do
       )
 
       resolve(handle_errors(&Resolver.Order.sync_supermarket/2))
+    end
+
+    @desc "Starts shopping"
+    field :start_shopping, :order do
+      resolve(handle_errors(&Resolver.Order.start_shopping/2))
     end
 
     @desc "Order an ingredient in a certain quantity."

@@ -22,6 +22,11 @@ defmodule Picape.Order do
     {:ok, LineFromDb.convert(cart)}
   end
 
+  def last() do
+    {:ok, cart} = cart(last_order_id())
+    {:ok, LineFromDb.convert(cart)}
+  end
+
   @doc """
   Plans or unplans (unplan = true) a recipe.
   """
@@ -105,6 +110,14 @@ defmodule Picape.Order do
     end
   end
 
+  def start_shopping(order_id) do
+    new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
+    IO.inspect new_order_id, label: "new_order_id"
+    finish_order(order_id, new_order_id)
+
+    last()
+  end
+
   @doc """
   Returns a map of ingredient IDs to a boolean if that recipe was planned or not.
   """
@@ -161,6 +174,7 @@ defmodule Picape.Order do
     Repo.one(
       from(
         p in PlannedRecipe,
+        where: fragment("? ~ ?", p.line_id, "^([0-9]+[.]?[0-9]*|[.][0-9]+)$"),
         select: max(p.line_id)
       )
     )
@@ -171,12 +185,16 @@ defmodule Picape.Order do
   defp ensure_order_is_current(order_id) do
     with latest_order_id <- last_order_id(),
          false <- planned_items_in_order?(latest_order_id) do
-      from(p in PlannedRecipe, where: p.line_id == ^order_id)
-      |> Repo.update_all(set: [line_id: latest_order_id])
-
-      from(i in ManualIngredient, where: i.line_id == ^order_id)
-      |> Repo.update_all(set: [line_id: latest_order_id])
+      finish_order(order_id, latest_order_id)
     end
+  end
+
+  defp finish_order(order_id, latest_order_id) do
+    from(p in PlannedRecipe, where: p.line_id == ^order_id)
+    |> Repo.update_all(set: [line_id: latest_order_id])
+
+    from(i in ManualIngredient, where: i.line_id == ^order_id)
+    |> Repo.update_all(set: [line_id: latest_order_id])
   end
 
   defp planned_items_in_order?(order_id) do

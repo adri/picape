@@ -33,7 +33,7 @@ defmodule PicapeWeb.Graphql.Types do
     field(
       :is_planned,
       :boolean,
-      resolve: batched({Resolver.Order, :recipies_planned?})
+      resolve: batched({Resolver.Order, :recipes_planned?})
     )
 
     field(

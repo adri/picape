@@ -12,6 +12,10 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.current()
   end
 
+  def last(_parent, _args, _info) do
+    Order.last()
+  end
+
   def last_ordered(_parent, _args, _info) do
     with {:ok, recipe_ids} <- Order.planned_recipes(Order.last_order_id()),
          {:ok, recipe_map} <- Recipe.recipes_by_ids(recipe_ids) do
@@ -21,7 +25,7 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     end
   end
 
-  def recipies_planned?(_, recipe_ids) do
+  def recipes_planned?(_, recipe_ids) do
     {:ok, planned_ids} = Order.planned_recipes(order_id())
 
     {:ok, Map.new(recipe_ids, fn id -> {id, Enum.member?(planned_ids, id)} end)}
@@ -60,6 +64,10 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     end
 
     Order.sync_supermarket(order_id())
+  end
+
+  def start_shopping(attributes, _info) do
+    Order.start_shopping(order_id())
   end
 
   def order_ingredient(attributes, _info) do
