@@ -21,6 +21,14 @@ export default () => {
               </Link>
             </li>
             <li className="nav-item">
+              <Link href="/shopping">
+                <a className="nav-link link">
+                  <i className="now-ui-icons files_paper" />
+                  <p>Shopping</p>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link href="/recipes">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />

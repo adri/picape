@@ -19,6 +19,7 @@ export default class Ingredient extends React.Component {
       unitQuantity,
       orderedQuantity,
       showEdit,
+      showOrder,
       season,
     } = this.props;
 
@@ -69,7 +70,7 @@ export default class Ingredient extends React.Component {
           </div>
           <div className="d-flex mr-3 mt-0 ingredient-quantity-wrapper">
             {typeof orderedQuantity !== "undefined" && (
-              <OrderIngredient id={id} hovered={hovered} quantity={orderedQuantity} />
+              <OrderIngredient id={id} hovered={showOrder && hovered} quantity={orderedQuantity} />
             )}
           </div>
         </div>
@@ -132,6 +133,10 @@ export default class Ingredient extends React.Component {
     );
   }
 }
+
+Ingredient.defaultProps = {
+  showOrder: true,
+};
 
 Ingredient.fragments = {
   ingredient: gql`
