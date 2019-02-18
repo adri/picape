@@ -1,4 +1,5 @@
 import OrderIngredient from "../apps/ingredient/OrderIngredient";
+import BuyIngredient from "../apps/ingredient/BuyIngredient";
 import gql from "graphql-tag";
 import Dropdown from "./Dropdown";
 import Link from "next/link";
@@ -14,10 +15,12 @@ export default class Ingredient extends React.Component {
       name,
       imageUrl,
       bigImage,
+      isBought,
       isPlanned,
       plannedRecipes,
       unitQuantity,
       orderedQuantity,
+      showBuy,
       showEdit,
       showOrder,
       season,
@@ -73,6 +76,7 @@ export default class Ingredient extends React.Component {
               <OrderIngredient id={id} hovered={showOrder && hovered} quantity={orderedQuantity} />
             )}
           </div>
+          {showBuy && <BuyIngredient isBought={isBought} id={id} />}
         </div>
         <style jsx>{`
           .ingredient {
@@ -144,6 +148,7 @@ Ingredient.fragments = {
       id
       name
       imageUrl
+      isBought
       isPlanned(inShoppingList: $inShoppingList)
       unitQuantity
       orderedQuantity(inShoppingList: $inShoppingList)

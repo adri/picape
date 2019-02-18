@@ -20,7 +20,7 @@ function ShoppingList({ data: { loading, error, lastOrder } }) {
               const ingredient = item.ingredient ? item.ingredient : item;
               return (
                 <div key={item.id}>
-                  <Ingredient {...ingredient} showOrder={false} />
+                  <Ingredient {...ingredient} showOrder={false} showBuy={true} />
                 </div>
               );
             })}

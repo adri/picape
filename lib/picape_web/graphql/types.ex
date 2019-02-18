@@ -96,6 +96,12 @@ defmodule PicapeWeb.Graphql.Types do
       end
     end
 
+    field(
+      :is_bought,
+      :boolean,
+      resolve: batched({Resolver.Shopping, :ingredients_bought?})
+    )
+
     field(:season, :season,
       resolve: fn parent, _args, _ctx ->
         {:ok, List.first(Map.values(Resolver.Recipe.seasons_for_ingredients([parent])))}
