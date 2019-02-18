@@ -39,7 +39,7 @@ function OrderList({ data: { loading, error, currentOrder } }) {
 }
 
 const orderQuery = gql`
-  query OrderList {
+  query OrderList($inShoppingList: Boolean!) {
     currentOrder {
       id
       totalCount
@@ -57,4 +57,4 @@ const orderQuery = gql`
   ${Ingredient.fragments.ingredient}
 `;
 
-export default graphql(orderQuery)(OrderList);
+export default graphql(orderQuery, { options: { variables: { inShoppingList: false } } })(OrderList);

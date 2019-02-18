@@ -144,10 +144,10 @@ Ingredient.fragments = {
       id
       name
       imageUrl
-      isPlanned
+      isPlanned(inShoppingList: $inShoppingList)
       unitQuantity
-      orderedQuantity
-      plannedRecipes {
+      orderedQuantity(inShoppingList: $inShoppingList)
+      plannedRecipes(inShoppingList: $inShoppingList) {
         quantity
         recipe {
           id

@@ -35,12 +35,24 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.ingredients_planned?(order_id(), ingredient_ids)
   end
 
+  def ingredients_in_shopping?(_, ingredient_ids) do
+    Order.ingredients_planned?(Order.last_order_id(), ingredient_ids)
+  end
+
   def ingredients_ordered_quantity(_, ingredient_ids) do
     Order.ingredients_ordered_quantity(order_id(), ingredient_ids)
   end
 
+  def ingredients_shopping_quantity(_, ingredient_ids) do
+    Order.ingredients_ordered_quantity(Order.last_order_id(), ingredient_ids)
+  end
+
   def recipes_planned_for_ingredient_ids(_, ingredient_ids) do
     Order.recipes_planned_for_ingredient_ids(order_id(), ingredient_ids)
+  end
+
+  def recipes_shopping_for_ingredient_ids(_, ingredient_ids) do
+    Order.recipes_planned_for_ingredient_ids(Order.last_order_id(), ingredient_ids)
   end
 
   # Mutations

@@ -7,6 +7,6 @@ export default withData(({ data, url: { query: { id } } }) => (
   <Layout title="Shopping list">
     <StartShopping />
     <hr />
-    <ShoppingList  />
+    <ShoppingList />
   </Layout>
 ));

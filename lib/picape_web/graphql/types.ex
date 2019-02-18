@@ -51,23 +51,50 @@ defmodule PicapeWeb.Graphql.Types do
     field(:tags, list_of(:ingredient_tag))
     field(:image_url, :string, resolve: from_object(:image_url))
 
-    field(
-      :is_planned,
-      :boolean,
-      resolve: batched({Resolver.Order, :ingredients_planned?})
-    )
+    field :is_planned, :boolean do
+      arg :in_shopping_list, :boolean, default_value: false
+      resolve fn parent, args, _ctx ->
+        batch_fn = cond do
+          args.in_shopping_list -> {Resolver.Order, :ingredients_in_shopping?}
+          true -> {Resolver.Order, :ingredients_planned?}
+        end
 
-    field(
-      :ordered_quantity,
-      :integer,
-      resolve: batched({Resolver.Order, :ingredients_ordered_quantity})
-    )
+        batch(batch_fn, parent.id, fn results ->
+          {:ok, batch_results} = results
+          {:ok, Map.get(batch_results, parent.id)}
+        end)
+      end
+    end
 
-    field(
-      :planned_recipes,
-      list_of(:recipe_edge),
-      resolve: batched({Resolver.Order, :recipes_planned_for_ingredient_ids})
-    )
+    field :ordered_quantity, :integer do
+      arg :in_shopping_list, :boolean, default_value: false
+      resolve fn parent, args, _ctx ->
+        batch_fn = cond do
+          args.in_shopping_list -> {Resolver.Order, :ingredients_shopping_quantity}
+          true -> {Resolver.Order, :ingredients_ordered_quantity}
+        end
+
+        batch(batch_fn, parent.id, fn results ->
+          {:ok, batch_results} = results
+          {:ok, Map.get(batch_results, parent.id)}
+        end)
+      end
+    end
+
+    field :planned_recipes, list_of(:recipe_edge) do
+      arg :in_shopping_list, :boolean, default_value: false
+      resolve fn parent, args, _ctx ->
+        batch_fn = cond do
+          args.in_shopping_list -> {Resolver.Order, :recipes_shopping_for_ingredient_ids}
+          true -> {Resolver.Order, :recipes_planned_for_ingredient_ids}
+        end
+
+        batch(batch_fn, parent.id, fn results ->
+          {:ok, batch_results} = results
+          {:ok, Map.get(batch_results, parent.id)}
+        end)
+      end
+    end
 
     field(:season, :season,
       resolve: fn parent, _args, _ctx ->
@@ -153,12 +180,12 @@ defmodule PicapeWeb.Graphql.Types do
     end
   end
 
-  defp batched(batch_fun) do
-    fn parent, _args, _ctx ->
+  defp batched(batch_fun, options \\ []) do
+    fn parent, _args, _resolution ->
       batch(batch_fun, parent.id, fn results ->
         {:ok, batch_results} = results
         {:ok, Map.get(batch_results, parent.id)}
-      end)
+      end, options)
     end
   end
 

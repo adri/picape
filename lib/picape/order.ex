@@ -27,6 +27,11 @@ defmodule Picape.Order do
     {:ok, LineFromDb.convert(cart)}
   end
 
+  def by_id(order_id) do
+    {:ok, cart} = cart(order_id)
+    {:ok, LineFromDb.convert(cart)}
+  end
+
   @doc """
   Plans or unplans (unplan = true) a recipe.
   """
@@ -236,8 +241,8 @@ defmodule Picape.Order do
     {:ok, Enum.into(Repo.all(query), %{})}
   end
 
-  defp ordered_item_quantities(_order_id) do
-    {:ok, order} = current()
+  defp ordered_item_quantities(order_id) do
+    {:ok, order} = by_id(order_id)
 
     existing =
       Enum.reduce(order.items, %{}, fn item, acc ->

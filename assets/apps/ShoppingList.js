@@ -16,7 +16,7 @@ function ShoppingList({ data: { loading, error, lastOrder } }) {
       <div className="card">
         <div className="no-gutters">
           {lastOrder &&
-           lastOrder.items.map(item => {
+            lastOrder.items.map(item => {
               const ingredient = item.ingredient ? item.ingredient : item;
               return (
                 <div key={item.id}>
@@ -31,7 +31,7 @@ function ShoppingList({ data: { loading, error, lastOrder } }) {
 }
 
 const shoppingQuery = gql`
-  query ShoppingList {
+  query ShoppingList($inShoppingList: Boolean!) {
     lastOrder {
       id
       totalCount
@@ -49,4 +49,4 @@ const shoppingQuery = gql`
   ${Ingredient.fragments.ingredient}
 `;
 
-export default graphql(shoppingQuery)(ShoppingList);
+export default graphql(shoppingQuery, { options: { variables: { inShoppingList: true } } })(ShoppingList);

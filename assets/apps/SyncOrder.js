@@ -13,7 +13,7 @@ function SyncOrder({ submit, loading }) {
 }
 
 const mutation = gql`
-  mutation SyncOrder($refresh: Boolean) {
+  mutation SyncOrder($refresh: Boolean, $inShoppingList: Boolean!) {
     syncOrder(refresh: $refresh) {
       id
       totalCount
@@ -35,6 +35,7 @@ export default compose(
   graphql(mutation, {
     options: {
       refetchQueries: ["RecipeList"],
+      variables: { inShoppingList: false },
     },
   }),
   mutateable(),
