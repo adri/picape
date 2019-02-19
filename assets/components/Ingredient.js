@@ -30,7 +30,12 @@ export default class Ingredient extends React.Component {
 
     return (
       <div
-        className={"ingredient align-bottom br-1 " + (isPlanned && " highlighted ") + (bigImage && " big-image")}
+        className={
+          "ingredient align-bottom br-1 " +
+          (isPlanned && " highlighted ") +
+          (bigImage && " big-image") +
+          (showBuy && isBought && " is-bought")
+        }
         onMouseEnter={event => this.setState({ hovered: true })}
         onMouseLeave={event => this.setState({ hovered: false })}
       >
@@ -96,6 +101,34 @@ export default class Ingredient extends React.Component {
 
           .ingredient.highlighted {
             box-shadow: inset 0 0 25px #ffcca9, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          }
+
+          .ingredient.is-bought {
+            position: relative;
+          }
+
+          .ingredient.is-bought:before {
+            position: absolute;
+            content: "";
+            left: 0;
+            top: 35%;
+            right: 0;
+            border-top: 1px solid #656565;
+
+            animation: animate 0.3s ease-in;
+          }
+
+          @keyframes animate {
+            0% {
+              right: 100%;
+            }
+            100% {
+              right: 0;
+            }
+          }
+
+          .ingredient.is-bought {
+            box-shadow: inset 0 0 60px #d3d3d3, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient-name {
