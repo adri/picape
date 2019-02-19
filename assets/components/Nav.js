@@ -1,17 +1,30 @@
 import Link from "next/link";
 import LastOrderedRecipes from "../apps/LastOrderdRecipes";
 
-export default () => {
+export default function({ navBarOpen, onNavOpen }) {
   return (
     <nav className="navbar navbar-toggleable-md bg-primary navbar-transparent">
       <div className="container">
         <div className="navbar-translate">
+          <button
+            className={"navbar-toggler float-right " + (navBarOpen ? "toggled" : "")}
+            type="button"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+            onClick={onNavOpen}
+          >
+            <span className="navbar-toggler-bar top-bar" />
+            <span className="navbar-toggler-bar middle-bar" />
+            <span className="navbar-toggler-bar bottom-bar" />
+          </button>
+
           <Link href="/">
             <a className="logo">Picape</a>
           </Link>
         </div>
-        <div className=" nav-container justify-content-end">
-          <ul className="navbar-nav">
+
+        <div className={"navbar-collapse " + (navBarOpen ? "" : "collapse")}>
+          <ul className="navbar-nav ml-auto">
             <li className="nav-item">
               <Link href="/ingredients">
                 <a className="nav-link link">
@@ -78,7 +91,13 @@ export default () => {
           display: flex !important;
           width: 100%;
         }
+
+        @media screen and (max-width: 991px) {
+          .navbar-collapse:before {
+            background: rgba(51, 51, 51, 0.4);
+          }
+        }
       `}</style>
     </nav>
   );
-};
+}

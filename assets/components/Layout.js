@@ -18,6 +18,7 @@ export default class Layout extends React.Component {
     super();
     this.state = {
       mounted: false,
+      navBarOpen: false,
     };
   }
 
@@ -36,8 +37,9 @@ export default class Layout extends React.Component {
 
   render() {
     const { children, title = "Supermarket" } = this.props;
+    const { navBarOpen } = this.state;
     return (
-      <div className="page-wrapper">
+      <div className={"page-wrapper " + (navBarOpen ? "nav-open" : "")}>
         <Head>
           <meta charSet="utf-8" />
           <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -73,8 +75,9 @@ export default class Layout extends React.Component {
               background: no-repeat center center fixed;
               background-image: url("https://res.cloudinary.com/picape/image/upload/f_auto,fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg");
             }
+
             .card {
-              transform: "translateZ(0)"
+              transform: "translateZ(0)";
             }
           `}
         </style>
@@ -120,7 +123,10 @@ export default class Layout extends React.Component {
         `}</style>
 
         <div className="page">
-          <Nav />
+          <Nav
+            navBarOpen={this.state.navBarOpen}
+            onNavOpen={() => this.setState({ navBarOpen: !this.state.navBarOpen })}
+          />
 
           <main role="main">
             <div className={"container animated " + (this.state.mounted ? "mounted" : "")}>{children}</div>

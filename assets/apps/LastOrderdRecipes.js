@@ -10,7 +10,7 @@ function LastOrderedRecipes({ data: { loading, error, recipes } }) {
   if (loading) return <Loading />;
 
   return (
-    <Dropdown link={"Last ordered recipes"}>
+    <Dropdown link={"Last recipes"}>
       {Array.isArray(recipes) &&
         recipes.map(recipe => (
           <Link key={recipe.id} href={`/recipe?id=${recipe.id}`}>
