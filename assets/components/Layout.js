@@ -59,10 +59,12 @@ export default class Layout extends React.Component {
         </Head>
         <style jsx global>
           {`
-            html,
-            body {
-              height: 100%;
+            html {
               background-color: #333;
+            }
+
+            body {
+              background-color: transparent !important;
             }
 
             body > div:first-child,
@@ -71,57 +73,66 @@ export default class Layout extends React.Component {
               height: 100%;
             }
 
+            .background {
+              position: fixed;
+              height: 100vh;
+              width: 100vw;
+              top: 0;
+              left: 0;
+              z-index: -1;
+              background: url("https://res.cloudinary.com/picape/image/upload/f_auto,fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg")
+                no-repeat center center;
+              -webkit-background-size: cover;
+              -moz-background-size: cover;
+              -o-background-size: cover;
+              background-size: cover;
+              background-color: #333;
+            }
+
+            .page-wrapper {
+              background-color: transparent !important;
+            }
+
             .page {
-              background: no-repeat center center fixed;
-              background-image: url("https://res.cloudinary.com/picape/image/upload/f_auto,fl_immutable_cache.progressive/v1503141378/eat-bg_kigvfj.jpg");
+              background-color: transparent !important;
             }
 
             .card {
               transform: "translateZ(0)";
             }
+
+            .page:after {
+              content: "";
+              display: block;
+            }
+            .footer,
+            .page:after {
+              /* .push must be the same height as footer */
+              height: 70px;
+            }
+
+            .footer {
+              background-color: #333;
+              color: white;
+            }
+
+            .page-wrapper {
+              background-color: #333;
+              height: 100%;
+            }
+            .animated {
+              opacity: 0;
+              visibility: hidden;
+              transition: opacity 0.1s ease-in;
+            }
+            .animated.mounted {
+              opacity: 1;
+              visibility: visible;
+            }
           `}
         </style>
-        <style jsx>{`
-          .page {
-            background-color: #333;
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-            background-size: cover;
-            min-height: 100%;
-            /* equal to footer height */
-            margin-bottom: -70px;
-          }
-          .page:after {
-            content: "";
-            display: block;
-          }
-          .footer,
-          .page:after {
-            /* .push must be the same height as footer */
-            height: 70px;
-          }
 
-          .footer {
-            background-color: #333;
-            color: white;
-          }
-
-          .page-wrapper {
-            background-color: #333;
-            height: 100%;
-          }
-          .animated {
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.1s ease-in;
-          }
-          .animated.mounted {
-            opacity: 1;
-            visibility: visible;
-          }
-        `}</style>
-
+        <div className="background" />
         <div className="page">
           <Nav
             navBarOpen={this.state.navBarOpen}
