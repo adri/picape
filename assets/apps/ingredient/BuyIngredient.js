@@ -11,7 +11,7 @@ function BuyIngredient({ id, submit, loading, error, isBought }) {
       className="custom-control custom-checkbox checkbox"
       onClick={event => submit(event, { ingredientId: id, undo: isBought })}
     >
-      <input className="form-check-input" type="checkbox" checked={isBought && "checked"} />
+      <input className="form-check-input" type="checkbox" checked={isBought && "checked"} readOnly={true} />
       <label />
     </div>
   );

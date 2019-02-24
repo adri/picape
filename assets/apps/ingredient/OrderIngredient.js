@@ -21,7 +21,9 @@ function OrderIngredient({ id, quantity, submit, loading, error, hovered }) {
         </a>
       )}
 
-      <div className={"btn-xs" + (quantity ? " btn" : " disabled")}>{quantity || (hovered && quantity)}</div>
+      <div className={"btn-xs" + (quantity ? " btn" : " disabled") + (quantity > 1 ? " highlighted" : "")}>
+        {quantity || (hovered && quantity)}
+      </div>
 
       {hovered && (
         <a
@@ -56,6 +58,10 @@ function OrderIngredient({ id, quantity, submit, loading, error, hovered }) {
 
         .disabled {
           opacity: 0.3;
+        }
+
+        .highlighted {
+          background-color: #ff5c5c;
         }
 
         .btn-xs {

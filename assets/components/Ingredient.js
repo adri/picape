@@ -105,6 +105,7 @@ export default class Ingredient extends React.Component {
 
           .ingredient.is-bought {
             position: relative;
+            opacity: 0.7;
           }
 
           .ingredient.is-bought:before {
@@ -113,7 +114,7 @@ export default class Ingredient extends React.Component {
             left: 0;
             top: 35%;
             right: 0;
-            border-top: 1px solid #656565;
+            border-top: 4px solid #d0d0d0;
 
             animation: animate 0.3s ease-in;
           }
@@ -129,6 +130,12 @@ export default class Ingredient extends React.Component {
 
           .ingredient.is-bought {
             box-shadow: inset 0 0 60px #d3d3d3, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          }
+
+          .ingredient.is-bought img {
+            filter: gray; /* IE6-9 */
+            -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+            filter: grayscale(1); /* Microsoft Edge and Firefox 35+ */
           }
 
           .ingredient-name {
