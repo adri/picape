@@ -32,6 +32,10 @@ export default ({ tags, selectedTags, onChange, allCount }) => (
         </li>
       ))}
     <style jsx>{`
+      .nav {
+        display: inline-block;
+      }
+
       .nav-tabs {
         padding: 10px 0.7rem;
       }
