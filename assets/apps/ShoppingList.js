@@ -4,6 +4,26 @@ import ErrorMessage from "../components/ErrorMessage";
 import Ingredient from "../components/Ingredient";
 import Loading from "../components/Loading";
 
+function groupByTag(items) {
+  return items.reduce((grouped, item) => {
+    let tag = { id: "other", name: "Other" };
+
+    if (item.ingredient.tags.length > 0) {
+      tag = item.ingredient.tags[0];
+    }
+
+    if (!(tag.id in grouped)) {
+      grouped[tag.id] = {
+        tag: tag,
+        ingredients: [],
+      };
+    }
+    grouped[tag.id].ingredients.push(item.ingredient);
+
+    return grouped;
+  }, {});
+}
+
 function ShoppingList({ data: { loading, error, lastOrder } }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <Loading />;
@@ -16,16 +36,25 @@ function ShoppingList({ data: { loading, error, lastOrder } }) {
       <div className="card">
         <div className="no-gutters">
           {lastOrder &&
-            lastOrder.items.map(item => {
-              const ingredient = item.ingredient ? item.ingredient : item;
+            Object.values(groupByTag(lastOrder.items)).map(group => {
               return (
-                <div key={item.id}>
-                  <Ingredient {...ingredient} showOrder={false} showBuy={true} />
+                <div key={group.tag.id}>
+                  <div className="tag">{group.tag.name}</div>
+                  {group.ingredients.map(ingredient => (
+                    <Ingredient {...ingredient} showOrder={false} showBuy={true} key={ingredient.id} />
+                  ))}
                 </div>
               );
             })}
         </div>
       </div>
+      <style jsx>{`
+        .tag {
+          color: #797979;
+          text-transform: uppercase;
+          padding: 10px;
+        }
+      `}</style>
     </div>
   );
 }

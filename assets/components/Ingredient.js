@@ -25,7 +25,6 @@ export default class Ingredient extends React.Component {
       showOrder,
       season,
     } = this.props;
-
     const { hovered } = this.state;
 
     return (
@@ -201,6 +200,10 @@ Ingredient.fragments = {
       }
       season {
         label
+      }
+      tags {
+        id
+        name
       }
     }
   `,

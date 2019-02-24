@@ -55,6 +55,7 @@ defmodule Picape.Recipe do
     result =
       from(
         i in Ingredient,
+        preload: [:tags],
         where: i.supermarket_product_id in ^item_ids,
         select: {i.supermarket_product_id, i}
       )
