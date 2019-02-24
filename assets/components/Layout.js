@@ -43,7 +43,11 @@ export default class Layout extends React.Component {
         <Head>
           <meta charSet="utf-8" />
           <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="apple-mobile-web-app-title" content="Picape" />
+
           <title>{title}</title>
           <link rel="apple-touch-icon" sizes="76x76" href="/images/apple-icon.png" />
           <link rel="icon" type="image/png" href="/images/favicon.png" />
