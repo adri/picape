@@ -120,10 +120,10 @@ export default class Ingredient extends React.Component {
 
           @keyframes animate {
             0% {
-              right: 100%;
+              left: 100%;
             }
             100% {
-              right: 0;
+              left: 0;
             }
           }
 
