@@ -18,5 +18,7 @@ defmodule PicapeWeb.Router do
     interface: :playground
   )
 
+  post "/shortcut/ingredient/add", PicapeWeb.ShortcutController, :add_ingredient
+
   forward("/", ReverseProxy, upstream: ["0.0.0.0:4001"])
 end
