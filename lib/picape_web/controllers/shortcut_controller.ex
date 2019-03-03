@@ -14,4 +14,8 @@ defmodule PicapeWeb.ShortcutController do
             |> json(%{id: 123})
     end
   end
+
+  def remove_ingredient(conn, %{"id" => id} = _params) do
+    Order.order_ingredient("1", id, 0)
+  end
 end
