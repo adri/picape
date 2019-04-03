@@ -11,9 +11,9 @@ defmodule Picape.Order.LineFromDb do
 
   def convert(nil), do: @empty
   def convert(cart) when cart == %{}, do: @empty
-  def convert(cart) do
+  def convert(cart, order_id \\ 1) do
     %Line{
-      id: 1,
+      id: order_id,
       items:
         Enum.map(Map.values(cart), fn item ->
           convert_item(item)

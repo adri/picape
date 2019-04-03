@@ -82,6 +82,10 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.start_shopping(order_id())
   end
 
+  def stop_shopping(attributes, _info) do
+    Order.stop_shopping(order_id())
+  end
+
   def order_ingredient(attributes, _info) do
     {:ok, _} =
       Order.order_ingredient(

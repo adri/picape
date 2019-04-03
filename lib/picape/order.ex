@@ -9,7 +9,7 @@ defmodule Picape.Order do
     Sync
   }
 
-  alias Picape.{Repo, Supermarket, Recipe}
+  alias Picape.{Repo, Supermarket, Recipe, Shopping}
 
   defmodule(Product, do: defstruct([:id, :quantity]))
 
@@ -24,7 +24,7 @@ defmodule Picape.Order do
 
   def last() do
     {:ok, cart} = cart(last_order_id())
-    {:ok, LineFromDb.convert(cart)}
+    {:ok, LineFromDb.convert(cart, last_order_id())}
   end
 
   def by_id(order_id) do
@@ -117,10 +117,25 @@ defmodule Picape.Order do
 
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
-    IO.inspect new_order_id, label: "new_order_id"
     finish_order(order_id, new_order_id)
 
     last()
+  end
+
+  def stop_shopping(order_id) do
+    order_id = last_order_id()
+    {:ok, cart} = cart(order_id)
+    items = Map.values(cart)
+
+    with {:ok, bought} <- Shopping.ingredients_bought?(order_id, Enum.map(items, &(&1.ingredient.id))),
+         not_bought <- Enum.reject(items, &(bought[&1.ingredient.id])),
+         now_bought <- Enum.map(not_bought, &(Shopping.buy_ingredient(order_id, &1.ingredient.id))),
+         ordered <- Enum.map(not_bought, &(order_ingredient("1", &1.ingredient.id, &1.quantity)))
+    do
+      last()
+    else
+      error -> {:error, error}
+    end
   end
 
   @doc """

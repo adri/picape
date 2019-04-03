@@ -121,6 +121,11 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(handle_errors(&Resolver.Order.start_shopping/2))
     end
 
+    @desc "Stops shopping"
+    field :stop_shopping, :order do
+      resolve(handle_errors(&Resolver.Order.stop_shopping/2))
+    end
+
     @desc "Buy ingredient"
     field :buy_ingredient, :ingredient do
       arg(:ingredient_id, non_null(:id))
