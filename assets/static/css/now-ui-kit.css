@@ -3538,7 +3538,7 @@ Created using IcoMoon - icomoon.io
     margin-left: -2px; }
 
   [class*="navbar-toggleable-"] .navbar-collapse {
-    width: 300px; }
+    width: 270px; }
 
   .button-dropdown {
     display: none; }
@@ -3618,11 +3618,11 @@ Created using IcoMoon - icomoon.io
     -ms-transform: translate3d(-150px, 0, 0);
     transform: translate3d(-150px, 0, 0); }
   .nav-open .navbar-translate {
-    -webkit-transform: translate3d(-300px, 0, 0);
-    -moz-transform: translate3d(-300px, 0, 0);
-    -o-transform: translate3d(-300px, 0, 0);
-    -ms-transform: translate3d(-300px, 0, 0);
-    transform: translate3d(-300px, 0, 0); }
+    -webkit-transform: translate3d(-250px, 0, 0);
+    -moz-transform: translate3d(-250px, 0, 0);
+    -o-transform: translate3d(-250px, 0, 0);
+    -ms-transform: translate3d(-250px, 0, 0);
+    transform: translate3d(-250px, 0, 0); }
   .nav-open .menu-on-left .navbar-collapse {
     -webkit-transform: translate3d(0px, 0, 0);
     -moz-transform: translate3d(0px, 0, 0);
