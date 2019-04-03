@@ -7,13 +7,15 @@ import Loading from "../components/Loading";
 
 const enhance = compose(withState("selectedTags", "changeTags", []));
 
-function EssentialList({ data: { loading, error, essentials }, selectedTags, changeTags }) {
+function EssentialList({ data: { loading, error, essentials }, selectedTags, changeTags, id }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading && !essentials) return <Loading />;
 
   return (
     <div>
-      <h5 className="text-white">Essentials</h5>
+      <h5 className="text-white">
+        <a id={id}>Essentials</a>
+      </h5>
       <div className="card">
         <div className="row no-gutters">
           {essentials &&

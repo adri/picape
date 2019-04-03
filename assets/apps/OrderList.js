@@ -6,14 +6,16 @@ import Ingredient from "../components/Ingredient";
 import Money from "../components/Money";
 import Loading from "../components/Loading";
 
-function OrderList({ data: { loading, error, currentOrder } }) {
+function OrderList({ data: { loading, error, currentOrder }, id }) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading) return <Loading />;
 
   return (
     <div>
       <div className="d-flex justify-content-end">
-        <h5 className="mr-auto text-white">Order</h5>
+        <h5 className="mr-auto text-white">
+          <a id={id}>Order</a>
+        </h5>
         <div className="mt-1 mr-2 text-white">
           <Money price={currentOrder.totalPrice} />
         </div>
