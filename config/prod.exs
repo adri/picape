@@ -38,7 +38,7 @@ config :picape, Picape.Repo,
   ssl: true
 
 # Do not print debug messages in production
-config :logger, level: :info
+config :logger, level: :warn
 
 config :picape, Picape.Supermarket,
   base_url: System.get_env("SUPERMARKET_BASE_URL"),
