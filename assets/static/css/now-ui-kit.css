@@ -3926,7 +3926,11 @@ Created using IcoMoon - icomoon.io
 @media screen and (max-width: 576px) {
   .navbar[class*='navbar-toggleable-'] .container {
     margin-left: 0;
-    margin-right: 0; }
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
 
   .footer .copyright {
     text-align: center; }
