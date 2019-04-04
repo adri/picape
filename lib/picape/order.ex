@@ -117,6 +117,7 @@ defmodule Picape.Order do
 
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
+    IO.inspect new_order_id, label: "new_order_id"
     finish_order(order_id, new_order_id)
 
     last()
@@ -191,11 +192,20 @@ defmodule Picape.Order do
   end
 
   def last_order_id() do
-    Repo.one(
-      from(
-        p in PlannedRecipe,
-        where: fragment("? ~ ?", p.line_id, "^([0-9]+[.]?[0-9]*|[.][0-9]+)$"),
-        select: max(p.line_id)
+    max(
+      Repo.one(
+        from(
+          p in PlannedRecipe,
+          where: fragment("? ~ ?", p.line_id, "^([0-9]+[.]?[0-9]*|[.][0-9]+)$"),
+          select: max(p.line_id)
+        )
+      ),
+      Repo.one(
+        from(
+          p in ManualIngredient,
+          where: fragment("? ~ ?", p.line_id, "^([0-9]+[.]?[0-9]*|[.][0-9]+)$"),
+          select: max(p.line_id)
+        )
       )
     )
   end
