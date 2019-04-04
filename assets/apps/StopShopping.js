@@ -22,7 +22,7 @@ const mutation = gql`
 export default compose(
   graphql(mutation, {
     options: {
-      refetchQueries: ["ShoppingList", "OrderList"],
+      refetchQueries: ["ShoppingList", "OrderList", "RecipeList"],
     },
   }),
   mutateable(),
