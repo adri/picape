@@ -37,7 +37,7 @@
     "analyze": "ANALYZE=1 next build"
   },
   "devDependencies": {
-    "prettier": "^1.11.1",
+    "prettier": "^1.17.1",
     "webpack-bundle-analyzer": "^2.11.1"
   }
 }
