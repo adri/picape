@@ -57,4 +57,4 @@ config :mix_docker, image: "adri/picape"
 import_config "#{Mix.env()}.exs"
 
 # Import Timber, structured logging
-import_config "timber.exs"
+#import_config "timber.exs"
