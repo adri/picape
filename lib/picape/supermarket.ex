@@ -93,8 +93,8 @@ defmodule Picape.Supermarket do
 
   defp process_request_headers(headers) do
     headers
-    |> Enum.into(Accept: "*/*")
-    |> Enum.into(config(:headers) || [])
+    |> Keyword.merge(Accept: "*/*")
+    |> Keyword.merge(config(:headers) || [])
   end
 
   defp process_request_body(body) do
@@ -103,7 +103,7 @@ defmodule Picape.Supermarket do
 
   defp process_request_options(options) do
     options
-    |> Enum.into(cookie: [config(:cookie)])
+    |> Keyword.merge(cookie: [config(:cookie)])
   end
 
   defp config(key) do
