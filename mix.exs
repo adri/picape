@@ -44,7 +44,7 @@ defmodule Picape.Mixfile do
       {:excoveralls, "~> 0.8.0", only: :test},
       {:floki, "~> 0.20.0"},
       {:jason, "~> 1.0"},
-      {:phoenix, "~> 1.3.0"},
+      {:phoenix, "~> 1.4.9"},
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_ecto, "~> 3.2"},
       {:postgrex, ">= 0.0.0"},
