@@ -39,6 +39,7 @@ config :sentry,
   included_environments: [:prod],
   environment_name: Mix.env(),
   enable_source_code_context: true,
+  json_library: Jason,
   root_source_code_path: File.cwd!(),
   use_error_logger: true,
   tags: %{
@@ -57,4 +58,4 @@ config :mix_docker, image: "adri/picape"
 import_config "#{Mix.env()}.exs"
 
 # Import Timber, structured logging
-#import_config "timber.exs"
+# import_config "timber.exs"

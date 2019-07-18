@@ -3,6 +3,8 @@ defmodule Picape.Supermarket do
 
   alias Picape.Supermarket.SearchResult
 
+  def search(""), do: []
+
   def search(query) do
     get!("/search?search_term=#{query}").body
     |> SearchResult.from_result()
