@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default class Ingredient extends React.Component {
   state = {
-    hovered: false,
+    hovered: false
   };
 
   render() {
@@ -23,7 +23,8 @@ export default class Ingredient extends React.Component {
       showBuy,
       showEdit,
       showOrder,
-      season,
+      alwaysShowOrder,
+      season
     } = this.props;
     const { hovered } = this.state;
 
@@ -40,7 +41,11 @@ export default class Ingredient extends React.Component {
       >
         <div className="media pl-2 pt-2">
           <div className="d-flex mr-3 mt-0 ingredient-image-wrapper">
-            <img src={imageUrl} className="ingredient-image rounded" alt={name} />
+            <img
+              src={imageUrl}
+              className="ingredient-image rounded"
+              alt={name}
+            />
           </div>
           <div className="media-body mb-2">
             <div className="ingredient-name mt-0 mb-0">
@@ -58,7 +63,10 @@ export default class Ingredient extends React.Component {
                       <h6 className="dropdown-header">Planned recipes</h6>
                       {Array.isArray(plannedRecipes) &&
                         plannedRecipes.map(({ quantity, recipe }) => (
-                          <Link key={recipe.id} href={`/recipe?id=${recipe.id}`}>
+                          <Link
+                            key={recipe.id}
+                            href={`/recipe?id=${recipe.id}`}
+                          >
                             <a className="dropdown-item" href="#">
                               {quantity} {recipe.title}
                             </a>
@@ -77,7 +85,11 @@ export default class Ingredient extends React.Component {
           </div>
           <div className="d-flex mr-3 mt-0 ingredient-quantity-wrapper">
             {typeof orderedQuantity !== "undefined" && (
-              <OrderIngredient id={id} hovered={showOrder && hovered} quantity={orderedQuantity} />
+              <OrderIngredient
+                id={id}
+                hovered={alwaysShowOrder || (showOrder && hovered)}
+                quantity={orderedQuantity}
+              />
             )}
           </div>
           {showBuy && <BuyIngredient isBought={isBought} id={id} />}
@@ -85,7 +97,8 @@ export default class Ingredient extends React.Component {
         <style jsx>{`
           .ingredient {
             height: 100%;
-            box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 0 25px #eff1f1,
+              inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient .media {
@@ -95,11 +108,13 @@ export default class Ingredient extends React.Component {
 
           .ingredient:hover {
             text-decoration: none;
-            box-shadow: inset 0 0 25px #eff1f1, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 0 25px #eff1f1,
+              inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient.highlighted {
-            box-shadow: inset 0 0 25px #ffcca9, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 0 25px #ffcca9,
+              inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient.is-bought {
@@ -128,12 +143,15 @@ export default class Ingredient extends React.Component {
           }
 
           .ingredient.is-bought {
-            box-shadow: inset 0 0 60px #d3d3d3, inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 0 60px #d3d3d3,
+              inset 0 0 0 1px rgba(0, 0, 0, 0.1);
           }
 
           .ingredient.is-bought img {
             filter: gray; /* IE6-9 */
-            -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+            -webkit-filter: grayscale(
+              1
+            ); /* Google Chrome, Safari 6+ & Opera 15+ */
             filter: grayscale(1); /* Microsoft Edge and Firefox 35+ */
           }
 
@@ -178,7 +196,7 @@ export default class Ingredient extends React.Component {
 }
 
 Ingredient.defaultProps = {
-  showOrder: true,
+  showOrder: true
 };
 
 Ingredient.fragments = {
@@ -206,5 +224,5 @@ Ingredient.fragments = {
         name
       }
     }
-  `,
+  `
 };

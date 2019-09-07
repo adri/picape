@@ -30,7 +30,7 @@ function OrderList({ data: { loading, error, currentOrder }, id }) {
               const ingredient = item.ingredient ? item.ingredient : item;
               return (
                 <div key={item.id}>
-                  <Ingredient {...ingredient} />
+                  <Ingredient {...ingredient} alwaysShowOrder={true} />
                 </div>
               );
             })}
@@ -59,4 +59,6 @@ const orderQuery = gql`
   ${Ingredient.fragments.ingredient}
 `;
 
-export default graphql(orderQuery, { options: { variables: { inShoppingList: false } } })(OrderList);
+export default graphql(orderQuery, {
+  options: { variables: { inShoppingList: false } }
+})(OrderList);
