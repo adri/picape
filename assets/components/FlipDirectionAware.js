@@ -18,7 +18,6 @@ const getDirection = (event, object) => {
 
 const flip = ({ direction, changeDirection, backside, children }) => {
   let container;
-  console.log(direction);
   return (
     <div
       onClick={event => changeDirection(direction === "in" ? "out" : "in")}
