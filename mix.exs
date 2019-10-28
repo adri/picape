@@ -57,7 +57,7 @@ defmodule Picape.Mixfile do
       {:reverse_proxy, "~> 0.3.1"},
       {:poison, "~> 3.0"},
       {:httpoison, "~> 0.12"},
-      {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:quantum, ">= 2.2.0"},
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:mix_docker, "~> 0.5.0"}
