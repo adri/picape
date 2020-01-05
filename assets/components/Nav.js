@@ -7,7 +7,9 @@ export default function({ navBarOpen, onNavOpen }) {
       <div className="container">
         <div className="navbar-translate">
           <button
-            className={"navbar-toggler float-right " + (navBarOpen ? "toggled" : "")}
+            className={
+              "navbar-toggler float-right " + (navBarOpen ? "toggled" : "")
+            }
             type="button"
             aria-expanded="false"
             aria-label="Toggle navigation"
@@ -26,18 +28,26 @@ export default function({ navBarOpen, onNavOpen }) {
         <div className={"navbar-collapse " + (navBarOpen ? "" : "collapse")}>
           <ul className="navbar-nav ml-auto">
             <li className="nav-item">
-              <Link href="/ingredients">
+              <Link href="/#essentials">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />
-                  <p>Ingredients</p>
+                  <p>Essentials</p>
                 </a>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/shopping">
+              <Link href="/#order">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />
-                  <p>Shopping</p>
+                  <p>Order</p>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link href="/ingredients">
+                <a className="nav-link link">
+                  <i className="now-ui-icons files_paper" />
+                  <p>All ingredients</p>
                 </a>
               </Link>
             </li>
@@ -45,7 +55,7 @@ export default function({ navBarOpen, onNavOpen }) {
               <Link href="/recipes">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />
-                  <p>Recipes</p>
+                  <p>All recipes</p>
                 </a>
               </Link>
             </li>
@@ -56,6 +66,14 @@ export default function({ navBarOpen, onNavOpen }) {
                   <LastOrderedRecipes />
                 </span>
               </span>
+            </li>
+            <li className="nav-item">
+              <Link href="/shopping">
+                <a className="nav-link link">
+                  <i className="now-ui-icons files_paper" />
+                  <p>In the shop</p>
+                </a>
+              </Link>
             </li>
           </ul>
         </div>
