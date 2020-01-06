@@ -42,7 +42,7 @@ defmodule Picape.Mixfile do
       {:cors_plug, "~> 1.4"},
       {:con_cache, "~> 0.13.0"},
       {:excoveralls, "~> 0.8.0", only: :test},
-      {:floki, "~> 0.20.0"},
+      {:floki, "~> 0.24.0"},
       {:jason, "~> 1.1"},
       {:phoenix, "~> 1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},
