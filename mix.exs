@@ -41,7 +41,7 @@ defmodule Picape.Mixfile do
       #  {:absinthe_ecto, "~> 1.0.0"},
       {:cors_plug, "~> 1.4"},
       {:con_cache, "~> 0.13.0"},
-      {:excoveralls, "~> 0.8.0", only: :test},
+      {:excoveralls, "~> 0.12.2", only: :test},
       {:floki, "~> 0.20.0"},
       {:jason, "~> 1.1"},
       {:phoenix, "~> 1.3.0"},
