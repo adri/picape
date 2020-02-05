@@ -43,8 +43,12 @@ export default class Layout extends React.Component {
         <Head>
           <meta charSet="utf-8" />
           <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+          <meta name="mobile-web-app-capable" content="yes">
           <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="viewport" content="initial-scale=1.0, width=device-width, viewport-fit=cover" />
+          <meta name="viewport" content="initial-scale=1.0, width=device-width, viewport-fit=cover, shrink-to-fit=no" />
+          <meta name="application-name" content="Picape">
+          <meta name="theme-color" content="#B07762">
+
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="apple-mobile-web-app-title" content="Picape" />
 
