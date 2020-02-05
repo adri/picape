@@ -18,7 +18,7 @@ export default class Layout extends React.Component {
     super();
     this.state = {
       mounted: false,
-      navBarOpen: false,
+      navBarOpen: false
     };
   }
 
@@ -43,20 +43,40 @@ export default class Layout extends React.Component {
         <Head>
           <meta charSet="utf-8" />
           <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-          <meta name="mobile-web-app-capable" content="yes">
+          <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="viewport" content="initial-scale=1.0, width=device-width, viewport-fit=cover, shrink-to-fit=no" />
-          <meta name="application-name" content="Picape">
-          <meta name="theme-color" content="#B07762">
+          <meta
+            name="viewport"
+            content="initial-scale=1.0, width=device-width, viewport-fit=cover, shrink-to-fit=no"
+          />
+          <meta name="application-name" content="Picape" />
+          <meta name="theme-color" content="#B07762" />
 
-          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="black-translucent"
+          />
           <meta name="apple-mobile-web-app-title" content="Picape" />
 
           <title>{title}</title>
 
-          <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png" />
-          <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png" />
-          <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png" />
+          <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/static/images/apple-touch-icon.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/static/images/favicon-32x32.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/static/images/favicon-16x16.png"
+          />
           <link
             href="/static/images/iphone5_splash.png"
             media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
@@ -108,7 +128,10 @@ export default class Layout extends React.Component {
             rel="apple-touch-startup-image"
           />
 
-          <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
+          <link
+            href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200"
+            rel="stylesheet"
+          />
           <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
           <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
           <link href="/static/css/now-ui-kit.css" rel="stylesheet" />
@@ -203,11 +226,19 @@ export default class Layout extends React.Component {
         <div className="page">
           <Nav
             navBarOpen={this.state.navBarOpen}
-            onNavOpen={() => this.setState({ navBarOpen: !this.state.navBarOpen })}
+            onNavOpen={() =>
+              this.setState({ navBarOpen: !this.state.navBarOpen })
+            }
           />
 
           <main role="main">
-            <div className={"container animated " + (this.state.mounted ? "mounted" : "")}>{children}</div>
+            <div
+              className={
+                "container animated " + (this.state.mounted ? "mounted" : "")
+              }
+            >
+              {children}
+            </div>
           </main>
         </div>
       </div>
