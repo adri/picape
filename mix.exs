@@ -59,7 +59,7 @@ defmodule Picape.Mixfile do
       {:httpoison, "~> 0.12"},
       {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
       {:quantum, ">= 2.2.0"},
-      {:credo, "~> 0.7", only: [:dev, :test]},
+      {:credo, "~> 1.3", only: [:dev, :test]},
       {:mix_docker, "~> 0.5.0"}
     ]
   end
