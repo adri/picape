@@ -14,7 +14,7 @@ function OrderList({ data: { loading, error, currentOrder }, id }) {
     <div>
       <div className="d-flex justify-content-end">
         <h5 className="mr-auto text-white">
-          <a id={id}>Order</a>
+          <a id={id}>Nu op lijst</a>
         </h5>
         <div className="mt-1 mr-2 text-white">
           <Money price={currentOrder.totalPrice} />

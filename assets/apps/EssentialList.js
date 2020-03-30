@@ -7,14 +7,19 @@ import Loading from "../components/Loading";
 
 const enhance = compose(withState("selectedTags", "changeTags", []));
 
-function EssentialList({ data: { loading, error, essentials }, selectedTags, changeTags, id }) {
+function EssentialList({
+  data: { loading, error, essentials },
+  selectedTags,
+  changeTags,
+  id
+}) {
   if (error) return <ErrorMessage message="Error loading." />;
   if (loading && !essentials) return <Loading />;
 
   return (
     <div>
       <h5 className="text-white">
-        <a id={id}>Essentials</a>
+        <a id={id}>Basics</a>
       </h5>
       <div className="card">
         <div className="row no-gutters">
@@ -71,10 +76,10 @@ const recipesQuery = gql`
 export default enhance(
   graphql(recipesQuery, {
     options: ({ selectedTags }) => ({
-      variables: { tagIds: selectedTags },
+      variables: { tagIds: selectedTags }
     }),
     props: ({ data }) => ({
-      data,
-    }),
-  })(EssentialList),
+      data
+    })
+  })(EssentialList)
 );

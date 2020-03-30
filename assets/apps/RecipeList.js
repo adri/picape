@@ -11,10 +11,13 @@ function RecipeList({ data: { loading, error, recipes }, showEdit, id }) {
   return (
     <div>
       <h5 className="text-white">
-        <a id={id}>Recipes</a>
+        <a id={id}>Recepten</a>
       </h5>
       <div className="card-group no-gutters">
-        {recipes && recipes.map((recipe, index) => <Recipe key={recipe.id} recipe={recipe} showEdit={showEdit} />)}
+        {recipes &&
+          recipes.map((recipe, index) => (
+            <Recipe key={recipe.id} recipe={recipe} showEdit={showEdit} />
+          ))}
       </div>
       <style jsx>{`
         .card-group {

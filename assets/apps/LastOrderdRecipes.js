@@ -10,7 +10,7 @@ function LastOrderedRecipes({ data: { loading, error, recipes } }) {
   if (loading) return <Loading />;
 
   return (
-    <Dropdown link={"Last recipes"}>
+    <Dropdown link={"Gekochte recepten"} className="dropdown">
       {Array.isArray(recipes) &&
         recipes.map(recipe => (
           <Link key={recipe.id} href={`/recipe?id=${recipe.id}`}>
@@ -22,6 +22,9 @@ function LastOrderedRecipes({ data: { loading, error, recipes } }) {
       <style jsx>{`
         .card-group {
           margin-bottom: 15px;
+        }
+        .dropdown {
+          display: inline-block;
         }
       `}</style>
     </Dropdown>

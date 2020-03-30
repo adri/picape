@@ -26,12 +26,18 @@ export default function({ navBarOpen, onNavOpen }) {
         </div>
 
         <div className={"navbar-collapse " + (navBarOpen ? "" : "collapse")}>
+          <div
+            className="navbar-close float-right visible-xs"
+            onClick={onNavOpen}
+          >
+            <i className="now-ui-icons ui-1_simple-remove" />
+          </div>
           <ul className="navbar-nav ml-auto">
             <li className="nav-item">
               <Link href="/#essentials">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />
-                  <p>Essentials</p>
+                  <p>Basics</p>
                 </a>
               </Link>
             </li>
@@ -39,7 +45,15 @@ export default function({ navBarOpen, onNavOpen }) {
               <Link href="/#order">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />
-                  <p>Order</p>
+                  <p>Nu op lijst</p>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link href="/shopping">
+                <a className="nav-link link">
+                  <i className="now-ui-icons files_paper" />
+                  <p>In de winkel</p>
                 </a>
               </Link>
             </li>
@@ -47,7 +61,7 @@ export default function({ navBarOpen, onNavOpen }) {
               <Link href="/ingredients">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />
-                  <p>All ingredients</p>
+                  <p>Alle ingrediënten</p>
                 </a>
               </Link>
             </li>
@@ -55,7 +69,7 @@ export default function({ navBarOpen, onNavOpen }) {
               <Link href="/recipes">
                 <a className="nav-link link">
                   <i className="now-ui-icons files_paper" />
-                  <p>All recipes</p>
+                  <p>Alle recepten</p>
                 </a>
               </Link>
             </li>
@@ -66,14 +80,6 @@ export default function({ navBarOpen, onNavOpen }) {
                   <LastOrderedRecipes />
                 </span>
               </span>
-            </li>
-            <li className="nav-item">
-              <Link href="/shopping">
-                <a className="nav-link link">
-                  <i className="now-ui-icons files_paper" />
-                  <p>In the shop</p>
-                </a>
-              </Link>
             </li>
           </ul>
         </div>
@@ -98,6 +104,7 @@ export default function({ navBarOpen, onNavOpen }) {
         .link,
         .nav-link p {
           font-size: 13px;
+          margin-left: 5px;
         }
 
         .nav-link:hover {
@@ -110,7 +117,20 @@ export default function({ navBarOpen, onNavOpen }) {
           width: 100%;
         }
 
+        .navbar-close {
+          display: none;
+          padding: 20px;
+        }
+
         @media screen and (max-width: 991px) {
+          .navbar-nav {
+            display: block;
+          }
+
+          .navbar-close {
+            display: block;
+          }
+
           .navbar-collapse:before {
             background: rgba(51, 51, 51, 0.4);
           }

@@ -8,13 +8,12 @@ export default enhance(({ opened, toggle, link, children }) => (
       className="dropdown-toggle "
       onClick={() => toggle(opened => !opened)}
       aria-haspopup="true"
+      data-toggle="dropdown"
       aria-expanded={opened}
     >
       {link}
     </a>
-    <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-      {children}
-    </div>
+    <div className="dropdown-menu">{children}</div>
     <style jsx>{`
       aside {
         display: inline-block;

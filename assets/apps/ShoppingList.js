@@ -15,7 +15,7 @@ function groupByTag(items) {
     if (!(tag.id in grouped)) {
       grouped[tag.id] = {
         tag: tag,
-        ingredients: [],
+        ingredients: []
       };
     }
     grouped[tag.id].ingredients.push(item.ingredient);
@@ -41,7 +41,12 @@ function ShoppingList({ data: { loading, error, lastOrder } }) {
                 <div key={group.tag.id}>
                   <div className="tag">{group.tag.name}</div>
                   {group.ingredients.map(ingredient => (
-                    <Ingredient {...ingredient} showOrder={false} showBuy={true} key={ingredient.id} />
+                    <Ingredient
+                      {...ingredient}
+                      showOrder={false}
+                      showBuy={true}
+                      key={ingredient.id}
+                    />
                   ))}
                 </div>
               );
@@ -78,4 +83,6 @@ const shoppingQuery = gql`
   ${Ingredient.fragments.ingredient}
 `;
 
-export default graphql(shoppingQuery, { options: { variables: { inShoppingList: true } } })(ShoppingList);
+export default graphql(shoppingQuery, {
+  options: { variables: { inShoppingList: true } }
+})(ShoppingList);
