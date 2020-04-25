@@ -6,7 +6,10 @@ defmodule PicapeWeb.UserSocket do
   # channel "room:*", PicapeWeb.RoomChannel
 
   ## Transports
-  transport(:websocket, Phoenix.Transports.WebSocket)
+  transport(:websocket, Phoenix.Transports.WebSocket,
+    check_origin: ["//picape.whybug.com", "//web.adri.now.sh", "//localhost"]
+  )
+
   # transport :longpoll, Phoenix.Transports.LongPoll
 
   # Socket params are passed from the client and can
