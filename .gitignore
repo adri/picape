@@ -10,6 +10,17 @@
 .vscode
 .idea
 /config/*.secret.exs
+**/node_modules/**/*
+**/.expo/*
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+web-report/
 
 # Generate on crash by the VM
 erl_crash.dump
