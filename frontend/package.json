@@ -1,0 +1,52 @@
+{
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "eject": "expo eject",
+    "test": "jest --watchAll"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "@absinthe/socket": "0.2.1",
+    "@absinthe/socket-apollo-link": "0.2.1",
+    "@apollo/react-hooks": "3.1.5",
+    "@expo/vector-icons": "~10.0.6",
+    "@react-native-community/masked-view": "0.1.6",
+    "@react-navigation/bottom-tabs": "^5.0.0",
+    "@react-navigation/native": "^5.0.0",
+    "@react-navigation/stack": "^5.0.0",
+    "@react-navigation/web": "~1.0.0-alpha.9",
+    "apollo-cache-inmemory": "1.6.5",
+    "apollo-client": "2.6.8",
+    "apollo-link-error": "1.1.13",
+    "expo": "~37.0.3",
+    "expo-asset": "~8.1.3",
+    "expo-constants": "~9.0.0",
+    "expo-font": "~8.1.0",
+    "expo-web-browser": "~8.1.0",
+    "graphql": "15.0.0",
+    "graphql-tag": "2.10.3",
+    "phoenix": "1.4.16",
+    "react": "~16.9.0",
+    "react-apollo": "3.1.4",
+    "react-dom": "~16.9.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-37.0.1.tar.gz",
+    "react-native-gesture-handler": "~1.6.0",
+    "react-native-safe-area-context": "0.7.3",
+    "react-native-screens": "~2.2.0",
+    "react-native-web": "~0.11.7",
+    "react-native-skeleton-content": "1.0.13",
+    "recompose": "0.30.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.6",
+    "babel-preset-expo": "~8.1.0",
+    "jest-expo": "~37.0.0"
+  },
+  "private": true
+}
