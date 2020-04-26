@@ -7,7 +7,7 @@ defmodule PicapeWeb.UserSocket do
 
   ## Transports
   transport(:websocket, Phoenix.Transports.WebSocket,
-    check_origin: ["//picape.whybug.com", "//web.adri.now.sh", "//localhost"]
+    check_origin: ["//picape.whybug.com", "//web-build.adri.now.sh", "//localhost"]
   )
 
   # transport :longpoll, Phoenix.Transports.LongPoll
