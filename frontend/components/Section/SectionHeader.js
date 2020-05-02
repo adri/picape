@@ -8,12 +8,11 @@ export function SectionHeader(props) {
       style={[
         props.style,
         {
-          flex: 1,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "baseline",
           marginHorizontal: 20,
-          borderTopColor: "#ececec",
+          borderTopColor: Colors.hairLineBackground,
           borderTopWidth: 0.5,
         },
       ]}
@@ -24,6 +23,7 @@ export function SectionHeader(props) {
           fontWeight: "700",
           paddingTop: 20,
           paddingBottom: 15,
+          color: Colors.sectionHeaderText,
         }}
       >
         {props.title}

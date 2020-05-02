@@ -1,9 +1,12 @@
 import * as React from "react";
-import { Platform, StatusBar, StyleSheet, View } from "react-native";
 import { SplashScreen } from "expo";
 import * as Font from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { ApolloClient } from "apollo-client";
 import { ApolloProvider } from "react-apollo";
@@ -13,9 +16,12 @@ import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link";
 import { Socket as PhoenixSocket } from "phoenix";
 import { onError } from "apollo-link-error";
 import { ApolloLink } from "apollo-link";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AppearanceProvider, useColorScheme } from "react-native-appearance";
 
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
 import RecipeDetailScreen from "./screens/RecipeDetailScreen";
+import ShopScreen from "./screens/ShopScreen";
 import useLinking from "./navigation/useLinking";
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
@@ -41,11 +47,20 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+const LightTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: "white",
+  },
+};
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
   const [initialNavigationState, setInitialNavigationState] = React.useState();
   const containerRef = React.useRef();
   const { getInitialState } = useLinking(containerRef);
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === "dark" ? DarkTheme : LightTheme;
 
   // Load any resources or data that we need prior to rendering the app
   React.useEffect(() => {
@@ -77,30 +92,27 @@ export default function App(props) {
     return null;
   } else {
     return (
-      <View style={styles.container}>
-        {Platform.OS === "ios" && <StatusBar barStyle="default" />}
-        <NavigationContainer
-          ref={containerRef}
-          initialState={initialNavigationState}
-        >
+      <AppearanceProvider>
+        <SafeAreaProvider>
+          {/* <StatusBar barStyle="default" /> */}
           <ApolloProvider client={client}>
-            <Stack.Navigator>
-              <Stack.Screen name="Root" component={BottomTabNavigator} />
-              <Stack.Screen
-                name="RecipeDetail"
-                component={RecipeDetailScreen}
-              />
-            </Stack.Navigator>
+            <NavigationContainer
+              ref={containerRef}
+              initialState={initialNavigationState}
+              theme={theme}
+            >
+              <Stack.Navigator headerMode="none">
+                <Stack.Screen name="Root" component={BottomTabNavigator} />
+                <Stack.Screen
+                  name="RecipeDetail"
+                  component={RecipeDetailScreen}
+                />
+                <Stack.Screen name="Shop" component={ShopScreen} />
+              </Stack.Navigator>
+            </NavigationContainer>
           </ApolloProvider>
-        </NavigationContainer>
-      </View>
+        </SafeAreaProvider>
+      </AppearanceProvider>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});

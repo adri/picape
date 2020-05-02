@@ -1,3 +1,6 @@
+import { Appearance } from "react-native-appearance";
+
+const colorScheme = Appearance.getColorScheme();
 const tintColor = "#48BB78";
 
 // Palette 12
@@ -72,11 +75,12 @@ const palette = {
   "yellow-900": "#513C06",
 };
 
-export default {
+const lightTheme = {
   tintColor,
-  tabIconDefault: "#ccc",
+  text: "black",
+  tabIconDefault: palette["grey-400"],
   tabIconSelected: tintColor,
-  tabBar: "#fefefe",
+  tabBar: "transparent", //"#fefefe",
   errorBackground: "red",
   errorText: "#fff",
   warningBackground: "#EAEB5E",
@@ -85,6 +89,12 @@ export default {
   noticeText: "#fff",
   checkboxSelected: tintColor,
   secondaryText: "#aeaeae",
+  skeletonBone: "#E1E9EE",
+  skeletonHighlight: "#F2F8FC",
+  hairLineBackground: "#ececec",
+
+  // Section
+  sectionHeaderText: "black",
 
   // Buttons
   navButtonText: palette["grey-800"], // #22543D?
@@ -98,6 +108,7 @@ export default {
   badgeText: "white",
 
   // Card
+  cardText: "white",
   cardBackground: palette["grey-050"], // "#fafafa"?
   cardHighlightBackground: palette["yellow-050"], // "#fafafa"?
 
@@ -105,3 +116,47 @@ export default {
   iconDefault: "#ccc",
   iconSelected: tintColor,
 };
+const darkTheme = {
+  tintColor,
+  text: "white",
+  tabIconDefault: palette["grey-200"],
+  tabIconSelected: tintColor,
+  tabBar: "transparent", //"#fefefe",
+  errorBackground: "red",
+  errorText: "#fff",
+  warningBackground: "#EAEB5E",
+  warningText: "#666804",
+  noticeBackground: tintColor,
+  noticeText: "#fff",
+  checkboxSelected: tintColor,
+  secondaryText: "#aeaeae",
+  skeletonBone: palette["grey-900"],
+  skeletonHighlight: palette["grey-700"],
+  hairLineBackground: palette["grey-900"],
+
+  // Section
+  sectionHeaderText: "white",
+
+  // Buttons
+  navButtonText: palette["grey-800"], // #22543D?
+  navButtonBackground: "white",
+
+  navButtonSelectedBackground: palette["grey-050"], // palette["green-050"],
+  navButtonSelectedText: palette["green-700"],
+
+  // Badge
+  badgeBackground: tintColor, // palette["green-400"],
+  badgeText: "white",
+
+  // Card
+  cardText: "white",
+  cardBackground: palette["grey-800"], // "#fafafa"?
+  cardHighlightBackground: palette["yellow-900"], // "#fafafa"?
+
+  // Icon
+  iconDefault: palette["grey-600"],
+  iconSelected: tintColor,
+};
+const theme = colorScheme === "dark" ? darkTheme : lightTheme;
+
+export default theme;

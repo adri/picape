@@ -1,14 +1,21 @@
 import * as React from "react";
-import { StyleSheet, Text, View, ImageBackground } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  FlatList,
+  View,
+  ImageBackground,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
-import { ImageCard } from "../components/Card/ImageCard";
-import { PlusIcon, CheckIcon } from "../components/Icon";
+import { CloseIcon, CheckIcon } from "../components/Icon";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
+import SkeletonContent from "react-native-skeleton-content";
+import { useSafeArea } from "react-native-safe-area-context";
 
 const GET_RECIPE = gql`
   query GetRecipe($recipeId: ID!) {
@@ -23,6 +30,8 @@ const GET_RECIPE = gql`
           ingredient {
             id
             name
+            imageUrl
+            orderedQuantity
           }
         }
       }
@@ -31,50 +40,95 @@ const GET_RECIPE = gql`
 `;
 
 export default function RecipeDetailScreen({ route: { params }, navigation }) {
-  const { loading, error, data } = useQuery(GET_RECIPE, {
+  const { loading, error, data = {} } = useQuery(GET_RECIPE, {
     variables: { recipeId: params.id },
     returnPartialData: true,
   });
   if (error) return `Error! ${error}`;
-  if (loading)
-    return (
-      <View>
-        <Text>Loading</Text>
-      </View>
-    );
-  const { recipe } = data;
-  navigation.setOptions({ title: recipe.title });
+  const { recipe = params.recipe } = data;
+  const insets = useSafeArea();
+
+  navigation.setOptions({ title: recipe.title, header: () => null });
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.container}>
-        <ImageBackground
-          source={{ uri: recipe.imageUrl }}
-          imageStyle={{ resizeMode: "cover" }}
-          fadeDuration={0.2}
-          style={{ flex: 1 }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              flexDirection: "row-reverse",
-              width: 250,
-              height: 180,
-            }}
-          ></View>
-        </ImageBackground>
-      </ScrollView>
-    </View>
+    <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
+      <CloseIcon
+        style={{ position: "absolute", top: insets.top, left: insets.left }}
+        onPress={(e) => {
+          e.preventDefault();
+          navigation.goBack();
+        }}
+      />
+      <ImageBackground
+        source={{ uri: recipe.imageUrl }}
+        fadeDuration={0}
+        imageStyle={{ resizeMode: "cover" }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            width: "auto",
+            height: 200,
+          }}
+        ></View>
+      </ImageBackground>
+
+      <SectionHeader title={recipe.title} />
+
+      <SkeletonContent
+        layout={[
+          {
+            width: "auto",
+            height: 100,
+            marginBottom: 10,
+          },
+          ...Array(5).fill({
+            width: "auto",
+            height: 60,
+            marginBottom: 10,
+          }),
+        ]}
+        boneColor={Colors.skeletonBone}
+        highlightColor={Colors.skeletonHighlight}
+        containerStyle={{ paddingHorizontal: 20 }}
+        isLoading={loading}
+      />
+      <Text
+        style={{
+          backgroundColor: Colors.cardBackground,
+          color: Colors.text,
+          marginHorizontal: 20,
+          marginBottom: 20,
+          padding: 10,
+          borderRadius: 5,
+        }}
+      >
+        {recipe.description}
+      </Text>
+
+      <FlatList
+        style={{ paddingHorizontal: 20 }}
+        data={recipe.ingredients}
+        keyExtractor={({ ingredient }) => ingredient.id}
+        renderItem={({ item: { ingredient } }) => {
+          return (
+            <ListItem
+              style={{
+                backgroundColor: ingredient.isPlanned
+                  ? Colors.cardHighlightBackground
+                  : Colors.cardBackground,
+              }}
+              title={ingredient.name}
+              imageUrl={ingredient.imageUrl}
+            >
+              <QuantitySelector
+                id={ingredient.id}
+                orderedQuantity={ingredient.orderedQuantity}
+              />
+            </ListItem>
+          );
+        }}
+      />
+    </ScrollView>
   );
 }
-
-RecipeDetailScreen.navigationOptions = {
-  header: null,
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});

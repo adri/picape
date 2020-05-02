@@ -34,7 +34,7 @@ export function ListItem(props) {
           justifyContent: "center",
         }}
       >
-        <Text>{props.title}</Text>
+        <Text style={{ color: Colors.cardText }}>{props.title}</Text>
       </View>
       {props.children}
     </View>

@@ -1,7 +1,8 @@
 import * as React from "react";
 import gql from "graphql-tag";
+import Colors from "../constants/Colors";
 import { useQuery } from "@apollo/react-hooks";
-import { Text, View, FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ImageCard } from "../components/Card/ImageCard";
@@ -17,7 +18,7 @@ const GET_LAST_RECIPES = gql`
   }
 `;
 
-export default function CookScreen() {
+export default function CookScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_LAST_RECIPES, {
     variables: { inShoppingList: false },
   });
@@ -26,37 +27,46 @@ export default function CookScreen() {
   const { recipes = [] } = data;
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: "white" }}
-      contentContainerStyle={{ paddingTop: 30 }}
-    >
-      <SectionHeader title="Recepten" />
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView>
+        <SectionHeader title="Recepten" />
 
-      <SkeletonContent
-        layout={Array(3).fill({
-          width: 50,
-          height: 60,
-          margin: 5,
-          marginBottom: 10,
-          flexBasis: "50%",
-        })}
-        containerStyle={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          alignContent: "stretch",
-          paddingHorizontal: 15,
-        }}
-        isLoading={loading}
-      >
-        {recipes.map((recipe) => (
-          <ImageCard
-            key={recipe.id}
-            style={{ flexBasis: "50%" }}
-            title={recipe.title}
-            imageUrl={recipe.imageUrl}
-          ></ImageCard>
-        ))}
-      </SkeletonContent>
-    </ScrollView>
+        <SkeletonContent
+          layout={Array(3).fill({
+            width: 50,
+            height: 60,
+            margin: 5,
+            marginBottom: 10,
+            flexBasis: "50%",
+          })}
+          containerStyle={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            alignContent: "stretch",
+            paddingHorizontal: 15,
+            marginBottom: 50,
+          }}
+          boneColor={Colors.skeletonBone}
+          highlightColor={Colors.skeletonHighlight}
+          isLoading={loading}
+        >
+          {recipes.map((recipe) => (
+            <ImageCard
+              key={recipe.id}
+              style={{ flexBasis: "50%" }}
+              title={recipe.title}
+              imageUrl={recipe.imageUrl}
+              onPress={(e) => {
+                e.preventDefault();
+                navigation.navigate("RecipeDetail", {
+                  id: recipe.id,
+                  recipe,
+                });
+              }}
+            ></ImageCard>
+          ))}
+        </SkeletonContent>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

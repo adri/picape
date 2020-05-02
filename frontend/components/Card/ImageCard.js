@@ -1,5 +1,6 @@
 import * as React from "react";
 import { View, ImageBackground, Text, TouchableOpacity } from "react-native";
+import Colors from "../../constants/Colors";
 
 export function ImageCard(props) {
   return (
@@ -16,7 +17,7 @@ export function ImageCard(props) {
             style={{
               flexDirection: "row",
               flexDirection: "row-reverse",
-              width: 250,
+              width: 230,
               height: 180,
             }}
           >
@@ -25,7 +26,9 @@ export function ImageCard(props) {
         </ImageBackground>
       </TouchableOpacity>
       <View style={{ flex: 1, paddingTop: 10 }}>
-        <Text onPress={props.onPress}>{props.title}</Text>
+        <Text style={{ color: Colors.cardText }} onPress={props.onPress}>
+          {props.title}
+        </Text>
       </View>
     </View>
   );
