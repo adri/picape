@@ -11,6 +11,7 @@ import PlanScreen from "../screens/PlanScreen";
 import ListScreen from "../screens/ListScreen";
 import CookScreen from "../screens/CookScreen";
 import { useColorScheme } from "react-native-appearance";
+import { ListCountBadge } from "../components/Badge/ListCountBadge";
 
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = "plan";
@@ -27,7 +28,7 @@ function TabBar(props) {
         right: 0,
       }}
       tint={colorScheme}
-      intensity={70}
+      intensity={50}
     >
       <BottomTabBar {...props} />
     </BlurView>
@@ -71,7 +72,11 @@ export default function BottomTabNavigator({ navigation, route }) {
         options={{
           title: "Lijst",
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} badgeCount={12} name="ios-cart" />
+            <TabBarIcon
+              focused={focused}
+              badge={<ListCountBadge />}
+              name="ios-cart"
+            />
           ),
         }}
       />

@@ -1,7 +1,5 @@
 import * as React from "react";
 import { SplashScreen } from "expo";
-import * as Font from "expo-font";
-import { Ionicons } from "@expo/vector-icons";
 import {
   NavigationContainer,
   DefaultTheme,
@@ -9,7 +7,7 @@ import {
 } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { ApolloClient } from "apollo-client";
-import { ApolloProvider } from "react-apollo";
+import { ApolloProvider } from "@apollo/react-hooks";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import * as AbsintheSocket from "@absinthe/socket";
 import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link";
@@ -18,11 +16,12 @@ import { onError } from "apollo-link-error";
 import { ApolloLink } from "apollo-link";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppearanceProvider, useColorScheme } from "react-native-appearance";
-
+import * as Updates from "expo-updates";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
 import RecipeDetailScreen from "./screens/RecipeDetailScreen";
 import ShopScreen from "./screens/ShopScreen";
 import useLinking from "./navigation/useLinking";
+import { RecipeListScreen } from "./screens/RecipeListScreen";
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -51,7 +50,7 @@ const LightTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "white",
+    background: "white", // by default this is grey
   },
 };
 export default function App(props) {
@@ -70,12 +69,6 @@ export default function App(props) {
 
         // Load our initial navigation state
         setInitialNavigationState(await getInitialState());
-
-        // Load fonts
-        await Font.loadAsync({
-          ...Ionicons.font,
-          "space-mono": require("./assets/fonts/SpaceMono-Regular.ttf"),
-        });
       } catch (e) {
         // We might want to provide this error information to an error reporting service
         console.warn(e);
@@ -94,7 +87,6 @@ export default function App(props) {
     return (
       <AppearanceProvider>
         <SafeAreaProvider>
-          {/* <StatusBar barStyle="default" /> */}
           <ApolloProvider client={client}>
             <NavigationContainer
               ref={containerRef}
@@ -107,6 +99,7 @@ export default function App(props) {
                   name="RecipeDetail"
                   component={RecipeDetailScreen}
                 />
+                <Stack.Screen name="RecipeList" component={RecipeListScreen} />
                 <Stack.Screen name="Shop" component={ShopScreen} />
               </Stack.Navigator>
             </NavigationContainer>

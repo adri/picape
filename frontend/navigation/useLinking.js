@@ -3,10 +3,11 @@ import { Linking } from "expo";
 
 export default function (containerRef) {
   return useLinking(containerRef, {
-    prefixes: [Linking.makeUrl("/")],
+    prefixes: [Linking.makeUrl("#")],
     config: {
       Root: {
-        path: "",
+        initialRouteName: "plan",
+        path: "/",
         screens: {
           plan: "plan",
           shop: "shop",
@@ -18,6 +19,9 @@ export default function (containerRef) {
         parse: {
           id: (id) => decodeURIComponent(id),
         },
+      },
+      RecipeList: {
+        path: "recipes",
       },
     },
   });

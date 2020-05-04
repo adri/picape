@@ -13,25 +13,7 @@ export default function TabBarIcon(props) {
         style={{ marginBottom: -3 }}
         color={props.focused ? Colors.tabIconSelected : Colors.tabIconDefault}
       />
-      {props.badgeCount > 0 && (
-        <View
-          style={{
-            position: "absolute",
-            right: -6,
-            top: 0,
-            backgroundColor: "red",
-            borderRadius: 8,
-            width: 16,
-            height: 16,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 10, fontWeight: "bold" }}>
-            {props.badgeCount}
-          </Text>
-        </View>
-      )}
+      {props.badge}
     </View>
   );
 }

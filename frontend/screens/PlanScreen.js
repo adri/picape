@@ -11,44 +11,10 @@ import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Type from "../constants/Type";
+import { PlanRecipe } from "../components/Recipe/PlanRecipe";
+import { GET_RECIPES } from "../operations/getRecipes";
 
-const PLAN_RECIPE = gql`
-  mutation PlanRecipe($recipeId: ID!) {
-    planRecipe(recipeId: $recipeId) {
-      id
-      isPlanned
-    }
-  }
-`;
-const UNPLAN_RECIPE = gql`
-  mutation UnplanRecipe($recipeId: ID!) {
-    unplanRecipe(recipeId: $recipeId) {
-      id
-      isPlanned
-    }
-  }
-`;
-
-function optimisticResponse(name, id, isPlanned) {
-  return {
-    __typename: "Mutation",
-    [name]: {
-      id: id,
-      __typename: "Recipe",
-      isPlanned: isPlanned,
-    },
-  };
-}
-const GET_RECIPES = gql`
-  query RecipeList {
-    recipes {
-      id
-      title
-      imageUrl
-      isPlanned
-    }
-  }
-`;
 const GET_BASICS = gql`
   query BasicsList {
     basics: ingredients(
@@ -81,12 +47,6 @@ const GET_BASICS = gql`
 
 function RecipeList({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
-  const [planRecipe] = useMutation(PLAN_RECIPE, {
-    refetchQueries: ["BasicsList", "OrderList"],
-  });
-  const [unplanRecipe] = useMutation(UNPLAN_RECIPE, {
-    refetchQueries: ["BasicsList", "OrderList"],
-  });
 
   if (error) return `Error! ${error}`;
 
@@ -95,85 +55,74 @@ function RecipeList({ navigation }) {
     <View>
       <SectionHeader title="Recepten">
         <Text
-          style={{
-            color: Colors.secondaryText,
-            fontSize: 14,
-            paddingBottom: 2,
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.navigate("RecipeList");
           }}
+          style={[
+            Type.sectionLink,
+            {
+              color: Colors.secondaryText,
+              fontSize: 14,
+              paddingBottom: 2,
+            },
+          ]}
         >
           Bekijk alles
         </Text>
       </SectionHeader>
 
-      <ScrollView horizontal={true}>
-        <SkeletonContent
-          layout={[
-            {
-              width: 230,
-              height: 148,
-              marginLeft: 5,
-              marginBottom: 10,
-            },
-            // short line
-            { width: 180, height: 25, marginLeft: 5, marginBottom: 24 },
-          ]}
-          boneColor={Colors.skeletonBone}
-          highlightColor={Colors.skeletonHighlight}
-          containerStyle={{ paddingLeft: 15 }}
-          isLoading={loading}
-        />
+      <SkeletonContent
+        layout={[
+          {
+            width: 230,
+            height: 148,
+            marginLeft: 5,
+            marginBottom: 10,
+          },
+          // short line
+          { width: 180, height: 25, marginLeft: 5, marginBottom: 24 },
+        ]}
+        boneColor={Colors.skeletonBone}
+        highlightColor={Colors.skeletonHighlight}
+        containerStyle={{ paddingLeft: 15 }}
+        isLoading={loading}
+      />
 
-        {recipes.map((recipe) => (
-          <ImageCard
-            onPress={(e) => {
-              e.preventDefault();
-              navigation.navigate("RecipeDetail", {
-                id: recipe.id,
-                recipe,
-              });
-            }}
-            key={recipe.id}
-            title={recipe.title}
-            imageUrl={recipe.imageUrl}
-          >
-            {recipe.isPlanned ? (
-              <CheckIcon
-                onPress={(e) => {
-                  e.preventDefault();
-                  unplanRecipe({
-                    variables: { recipeId: recipe.id },
-                    optimisticResponse: optimisticResponse(
-                      "unplanRecipe",
-                      recipe.id,
-                      false
-                    ),
-                  });
-                }}
-              />
-            ) : (
-              <PlusIcon
-                onPress={(e) => {
-                  e.preventDefault();
-                  planRecipe({
-                    variables: { recipeId: recipe.id },
-                    optimisticResponse: optimisticResponse(
-                      "planRecipe",
-                      recipe.id,
-                      true
-                    ),
-                  });
-                }}
-              />
-            )}
-          </ImageCard>
-        ))}
-      </ScrollView>
+      <FlatList
+        style={{ paddingHorizontal: 20 }}
+        horizontal={true}
+        initialNumToRender={3}
+        windowSize={3}
+        data={recipes}
+        keyExtractor={(recipe) => recipe.id}
+        renderItem={({ item: recipe }) => {
+          return (
+            <ImageCard
+              onPress={(e) => {
+                e.preventDefault();
+                navigation.navigate("RecipeDetail", {
+                  id: recipe.id,
+                  recipe,
+                });
+              }}
+              key={recipe.id}
+              title={recipe.title}
+              imageUrl={recipe.imageUrl}
+            >
+              <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
+            </ImageCard>
+          );
+        }}
+      />
     </View>
   );
 }
 
 function BasicsList() {
-  const { loading, error, data = {} } = useQuery(GET_BASICS);
+  const { loading, error, data = {} } = useQuery(GET_BASICS, {
+    fetchPolicy: "cache-and-network",
+  });
 
   if (error) return `Error! ${error}`;
 
@@ -192,32 +141,40 @@ function BasicsList() {
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ flex: 1 }}
         isLoading={loading}
-      >
-        <FlatList
-          style={{ paddingHorizontal: 20 }}
-          data={edges}
-          keyExtractor={({ ingredient }) => ingredient.id}
-          renderItem={({ item: { ingredient } }) => {
-            return (
-              <ListItem
-                style={{
-                  backgroundColor: ingredient.isPlanned
-                    ? Colors.cardHighlightBackground
-                    : Colors.cardBackground,
-                }}
-                title={ingredient.name}
-                imageUrl={ingredient.imageUrl}
-              >
-                <QuantitySelector
-                  id={ingredient.id}
-                  orderedQuantity={ingredient.orderedQuantity}
-                  isPlanned={ingredient.isPlanned}
-                />
-              </ListItem>
-            );
-          }}
-        />
-      </SkeletonContent>
+      ></SkeletonContent>
+      <FlatList
+        style={{ paddingHorizontal: 20 }}
+        data={edges}
+        windowSize={6}
+        removeClippedSubviews
+        keyExtractor={({ ingredient }) => ingredient.id}
+        renderItem={({ item: { ingredient } }) => {
+          const plannedRecipes = ingredient.plannedRecipes || [];
+          return (
+            <ListItem
+              style={{
+                backgroundColor: ingredient.isPlanned
+                  ? Colors.cardHighlightBackground
+                  : Colors.cardBackground,
+              }}
+              title={ingredient.name}
+              imageUrl={ingredient.imageUrl}
+              subtitle={plannedRecipes
+                .map(
+                  (planned) =>
+                    `${planned.quantity}×\u00A0${planned.recipe.title}`
+                )
+                .join(", ")}
+            >
+              <QuantitySelector
+                id={ingredient.id}
+                orderedQuantity={ingredient.orderedQuantity}
+                isPlanned={ingredient.isPlanned}
+              />
+            </ListItem>
+          );
+        }}
+      />
     </View>
   );
 }
@@ -291,7 +248,3 @@ export default function PlanScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
-PlanScreen.navigationOptions = {
-  header: null,
-};

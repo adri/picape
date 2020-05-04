@@ -1,6 +1,7 @@
 import * as React from "react";
 import { View, Text } from "react-native";
 import Colors from "../../constants/Colors";
+import Type from "../../constants/Type";
 
 export function SectionHeader(props) {
   return (
@@ -18,13 +19,14 @@ export function SectionHeader(props) {
       ]}
     >
       <Text
-        style={{
-          fontSize: 24,
-          fontWeight: "700",
-          paddingTop: 20,
-          paddingBottom: 15,
-          color: Colors.sectionHeaderText,
-        }}
+        style={[
+          Type.sectionHeader,
+          {
+            paddingTop: 20,
+            paddingBottom: 15,
+            color: Colors.sectionHeaderText,
+          },
+        ]}
       >
         {props.title}
       </Text>

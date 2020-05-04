@@ -13,6 +13,8 @@
       "backgroundColor": "#000000"
     },
     "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": ["**/*"],

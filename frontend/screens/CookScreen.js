@@ -20,7 +20,7 @@ const GET_LAST_RECIPES = gql`
 
 export default function CookScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_LAST_RECIPES, {
-    variables: { inShoppingList: false },
+    fetchPolicy: "cache-and-network",
   });
   if (error) return `Error! ${error}`;
 

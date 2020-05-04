@@ -108,7 +108,8 @@ const lightTheme = {
   badgeText: "white",
 
   // Card
-  cardText: "white",
+  cardText: "black",
+  cardSubtitleText: palette["yellow-700"],
   cardBackground: palette["grey-050"], // "#fafafa"?
   cardHighlightBackground: palette["yellow-050"], // "#fafafa"?
 
@@ -150,6 +151,7 @@ const darkTheme = {
 
   // Card
   cardText: "white",
+  cardSubtitleText: palette["yellow-300"],
   cardBackground: palette["grey-800"], // "#fafafa"?
   cardHighlightBackground: palette["yellow-900"], // "#fafafa"?
 

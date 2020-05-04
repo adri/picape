@@ -9,6 +9,7 @@ import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
+import Type from "../constants/Type";
 
 const GET_ORDER = gql`
   query OrderList {
@@ -38,7 +39,9 @@ const GET_ORDER = gql`
 `;
 
 export default function ListScreen({ navigation }) {
-  const { loading, error, data = {} } = useQuery(GET_ORDER);
+  const { loading, error, data = {} } = useQuery(GET_ORDER, {
+    fetchPolicy: "cache-and-network",
+  });
   if (error) return `Error! ${error}`;
 
   const { currentOrder = {} } = data;
@@ -48,11 +51,14 @@ export default function ListScreen({ navigation }) {
       <ScrollView>
         <SectionHeader title="Lijst">
           <Text
-            style={{
-              color: Colors.secondaryText,
-              fontSize: 14,
-              paddingBottom: 2,
-            }}
+            style={[
+              Type.sectionLink,
+              {
+                color: Colors.secondaryText,
+                fontSize: 14,
+                paddingBottom: 2,
+              },
+            ]}
             onPress={(e) => {
               e.preventDefault();
               navigation.navigate("Shop");
@@ -80,10 +86,22 @@ export default function ListScreen({ navigation }) {
             data={currentOrder.items}
             keyExtractor={(item) => item.id}
             renderItem={({ item: { ingredient } }) => {
+              const plannedRecipes = ingredient.plannedRecipes || [];
               return (
                 <ListItem
+                  style={{
+                    backgroundColor: ingredient.isPlanned
+                      ? Colors.cardHighlightBackground
+                      : Colors.cardBackground,
+                  }}
                   title={ingredient.name}
                   imageUrl={ingredient.imageUrl}
+                  subtitle={plannedRecipes
+                    .map(
+                      (planned) =>
+                        `${planned.quantity}×\u00A0${planned.recipe.title}`
+                    )
+                    .join(", ")}
                 >
                   <QuantitySelector
                     id={ingredient.id}

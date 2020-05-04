@@ -5,7 +5,10 @@ import { View, TouchableOpacity } from "react-native";
 
 export function CloseIcon(props) {
   return (
-    <TouchableOpacity onPress={props.onPress}>
+    <TouchableOpacity
+      style={[{ width: 50, height: 50 }, props.style]}
+      onPress={props.onPress}
+    >
       <View
         style={[
           {

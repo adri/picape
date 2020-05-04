@@ -10,12 +10,13 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
-import { CloseIcon, CheckIcon } from "../components/Icon";
+import { CloseIcon } from "../components/Icon";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import { useSafeArea } from "react-native-safe-area-context";
+import Layout from "../constants/Layout";
 
 const GET_RECIPE = gql`
   query GetRecipe($recipeId: ID!) {
@@ -53,12 +54,13 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
   return (
     <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
       <CloseIcon
-        style={{ position: "absolute", top: insets.top, left: insets.left }}
+        style={{ position: "absolute", top: insets.top, right: insets.left }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();
         }}
       />
+
       <ImageBackground
         source={{ uri: recipe.imageUrl }}
         fadeDuration={0}
@@ -100,7 +102,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
           marginHorizontal: 20,
           marginBottom: 20,
           padding: 10,
-          borderRadius: 5,
+          borderRadius: Layout.borderRadius,
         }}
       >
         {recipe.description}

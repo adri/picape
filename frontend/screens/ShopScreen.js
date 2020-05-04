@@ -4,6 +4,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
+import Layout from "../constants/Layout";
 import { CloseIcon, CheckIcon } from "../components/Icon";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
@@ -11,6 +12,8 @@ import SkeletonContent from "react-native-skeleton-content";
 import { useSafeArea } from "react-native-safe-area-context";
 import { BuyIngredient } from "../components/Ingredient/BuyIngredient";
 import { Badge } from "../components/Badge/Badge";
+import { BlurView } from "expo-blur";
+import { useColorScheme } from "react-native-appearance";
 
 const GET_SHOPPING_LIST = gql`
   query ShoppingList {
@@ -99,60 +102,105 @@ export default function ShopScreen({ navigation }) {
   const insets = useSafeArea();
 
   return (
-    <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
-      <CloseIcon
-        style={{ position: "absolute", top: insets.top, right: insets.right }}
-        onPress={(e) => {
-          e.preventDefault();
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1, paddingBottom: 70 }}
+        stickyHeaderIndices={[0]}
+      >
+        <CloseIcon
+          style={{ position: "absolute", top: insets.top, right: insets.right }}
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.goBack();
+          }}
+        />
 
-          startShopping();
-        }}
-      />
+        <SectionHeader title={"Afvinken"} />
 
-      <SectionHeader title={"Afvinken"} />
+        <SkeletonContent
+          layout={[
+            ...Array(5).fill({
+              width: "auto",
+              height: 60,
+              marginBottom: 10,
+            }),
+          ]}
+          boneColor={Colors.skeletonBone}
+          highlightColor={Colors.skeletonHighlight}
+          containerStyle={{ paddingHorizontal: 20 }}
+          isLoading={loading}
+        />
 
-      <SkeletonContent
-        layout={[
-          ...Array(5).fill({
-            width: "auto",
-            height: 60,
-            marginBottom: 10,
-          }),
-        ]}
-        boneColor={Colors.skeletonBone}
-        highlightColor={Colors.skeletonHighlight}
-        containerStyle={{ paddingHorizontal: 20 }}
-        isLoading={loading}
-      />
-
-      <FlatList
-        style={{ paddingHorizontal: 20 }}
-        data={Object.values(groupByTag(lastOrder.items))}
-        keyExtractor={({ tag }) => tag.id}
-        renderItem={({ item: { tag, ingredients } }) => {
-          return (
-            <View>
-              <Text style={{ paddingBottom: 5, color: Colors.text }}>
-                {tag.name}
-              </Text>
-              {ingredients.map((ingredient) => (
-                <ListItem
-                  style={{ opacity: ingredient.isBought ? 0.5 : 1.0 }}
-                  key={ingredient.id}
-                  title={ingredient.name}
-                  imageUrl={ingredient.imageUrl}
+        <FlatList
+          style={{ paddingHorizontal: 20 }}
+          data={Object.values(groupByTag(lastOrder.items))}
+          keyExtractor={({ tag }) => tag.id}
+          renderItem={({ item: { tag, ingredients } }) => {
+            return (
+              <View>
+                <Text
+                  style={{
+                    paddingBottom: 7,
+                    paddingTop: 10,
+                    color: Colors.text,
+                  }}
                 >
-                  <Badge amount={ingredient.orderedQuantity} />
-                  <BuyIngredient
-                    id={ingredient.id}
-                    isBought={ingredient.isBought}
-                  />
-                </ListItem>
-              ))}
-            </View>
-          );
+                  {tag.name}
+                </Text>
+                {ingredients.map((ingredient) => (
+                  <ListItem
+                    style={{ opacity: ingredient.isBought ? 0.5 : 1.0 }}
+                    textStyle={{
+                      textDecorationLine: ingredient.isBought
+                        ? "line-through"
+                        : null,
+                    }}
+                    key={ingredient.id}
+                    title={ingredient.name}
+                    imageUrl={ingredient.imageUrl}
+                  >
+                    <Badge amount={ingredient.orderedQuantity} />
+                    <BuyIngredient
+                      id={ingredient.id}
+                      isBought={ingredient.isBought}
+                    />
+                  </ListItem>
+                ))}
+              </View>
+            );
+          }}
+        />
+      </ScrollView>
+
+      <BlurView
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
         }}
-      />
-    </ScrollView>
+        tint={useColorScheme()}
+        intensity={50}
+      >
+        <Text
+          onPress={(e) => {
+            e.preventDefault();
+            startShopping();
+          }}
+          style={{
+            color: Colors.text,
+            alignSelf: "center",
+            padding: 10,
+            paddingHorizontal: 20,
+            marginTop: 10,
+            marginBottom: insets.bottom + 20,
+            backgroundColor: Colors.iconDefault,
+            borderRadius: Layout.borderRadius,
+          }}
+        >
+          Lijst leegmaken
+        </Text>
+      </BlurView>
+    </View>
   );
 }

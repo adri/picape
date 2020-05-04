@@ -43,6 +43,7 @@ export function BuyIngredient({ id, isBought }) {
 
   return (
     <Badge
+      outline
       onPress={(e) => {
         e.preventDefault();
         buyIngredient({

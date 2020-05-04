@@ -2,30 +2,40 @@ import * as React from "react";
 import Colors from "../../constants/Colors";
 import { View, Text, TouchableOpacity } from "react-native";
 
-export function Badge(props) {
-  return (
-    <TouchableOpacity onPress={props.onPress}>
-      <View
+export function Badge({ amount, onPress, outline = false }) {
+  const badge = (
+    <View
+      style={{
+        width: 30,
+        height: 30,
+        margin: 10,
+        backgroundColor: outline
+          ? "transparent"
+          : onPress
+          ? Colors.badgeBackground
+          : Colors.iconDefault,
+        borderWidth: outline ? 1 : 0,
+        borderColor: outline ? Colors.tintColor : "transparent",
+        borderRadius: 15,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Text
         style={{
-          width: 30,
-          height: 30,
-          margin: 10,
-          backgroundColor: Colors.tintColor,
-          borderRadius: 15,
-          justifyContent: "center",
-          alignItems: "center",
+          fontWeight: "700",
+          fontSize: 15,
+          color: "white",
         }}
       >
-        <Text
-          style={{
-            fontWeight: "700",
-            fontSize: 15,
-            color: "white",
-          }}
-        >
-          {props.amount}
-        </Text>
-      </View>
-    </TouchableOpacity>
+        {amount}
+      </Text>
+    </View>
   );
+
+  if (!onPress) {
+    return badge;
+  }
+
+  return <TouchableOpacity onPress={onPress}>{badge}</TouchableOpacity>;
 }
