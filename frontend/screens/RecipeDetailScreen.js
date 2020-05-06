@@ -1,19 +1,13 @@
 import * as React from "react";
-import {
-  StyleSheet,
-  Text,
-  FlatList,
-  View,
-  ImageBackground,
-} from "react-native";
+import { Text, FlatList, View, ImageBackground } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
 import { CloseIcon, CheckIcon } from "../components/Icon";
+import Hyperlink from "react-native-hyperlink";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
-import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import { useSafeArea } from "react-native-safe-area-context";
 import Layout from "../constants/Layout";
@@ -127,9 +121,24 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
               flexDirection: "row",
             }}
           >
-            <Text style={{ flex: 1, alignSelf: "stretch", color: Colors.text }}>
-              {step}
-            </Text>
+            <Hyperlink
+              style={{ flex: 1, alignSelf: "stretch" }}
+              linkDefault={!stepChecked[index]}
+              linkStyle={{ color: Colors.link }}
+              linkText={(url) =>
+                url.includes("youtube.com") ? "Youtube" : url
+              }
+            >
+              <Text
+                style={{
+                  color: stepChecked[index]
+                    ? Colors.secondaryText
+                    : Colors.text,
+                }}
+              >
+                {step}
+              </Text>
+            </Hyperlink>
 
             {stepChecked[index] ? (
               <CheckIcon

@@ -78,6 +78,7 @@ const palette = {
 const lightTheme = {
   tintColor,
   text: "black",
+  link: tintColor,
   tabIconDefault: palette["grey-400"],
   tabIconSelected: tintColor,
   tabBar: "transparent", //"#fefefe",
@@ -111,7 +112,7 @@ const lightTheme = {
   cardText: "black",
   cardSubtitleText: palette["yellow-700"],
   cardBackground: palette["grey-050"], // "#fafafa"?
-  cardHighlightBackground: palette["yellow-050"], // "#fafafa"?
+  cardHighlightBackground: palette["yellow-050"],
 
   // Icon
   iconDefault: "#ccc",
@@ -120,6 +121,7 @@ const lightTheme = {
 const darkTheme = {
   tintColor,
   text: "white",
+  link: tintColor,
   tabIconDefault: palette["grey-200"],
   tabIconSelected: tintColor,
   tabBar: "transparent", //"#fefefe",
