@@ -120,9 +120,7 @@ function RecipeList({ navigation }) {
 }
 
 function BasicsList() {
-  const { loading, error, data = {} } = useQuery(GET_BASICS, {
-    fetchPolicy: "cache-and-network",
-  });
+  const { loading, error, data = {} } = useQuery(GET_BASICS);
 
   if (error) return `Error! ${error}`;
 
@@ -141,40 +139,41 @@ function BasicsList() {
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ flex: 1 }}
         isLoading={loading}
-      ></SkeletonContent>
-      <FlatList
-        style={{ paddingHorizontal: 20 }}
-        data={edges}
-        windowSize={6}
-        removeClippedSubviews
-        keyExtractor={({ ingredient }) => ingredient.id}
-        renderItem={({ item: { ingredient } }) => {
-          const plannedRecipes = ingredient.plannedRecipes || [];
-          return (
-            <ListItem
-              style={{
-                backgroundColor: ingredient.isPlanned
-                  ? Colors.cardHighlightBackground
-                  : Colors.cardBackground,
-              }}
-              title={ingredient.name}
-              imageUrl={ingredient.imageUrl}
-              subtitle={plannedRecipes
-                .map(
-                  (planned) =>
-                    `${planned.quantity}×\u00A0${planned.recipe.title}`
-                )
-                .join(", ")}
-            >
-              <QuantitySelector
-                id={ingredient.id}
-                orderedQuantity={ingredient.orderedQuantity}
-                isPlanned={ingredient.isPlanned}
-              />
-            </ListItem>
-          );
-        }}
-      />
+      >
+        <FlatList
+          style={{ paddingHorizontal: 20 }}
+          data={edges}
+          windowSize={6}
+          removeClippedSubviews
+          keyExtractor={({ ingredient }) => ingredient.id}
+          renderItem={({ item: { ingredient } }) => {
+            const plannedRecipes = ingredient.plannedRecipes || [];
+            return (
+              <ListItem
+                style={{
+                  backgroundColor: ingredient.isPlanned
+                    ? Colors.cardHighlightBackground
+                    : Colors.cardBackground,
+                }}
+                title={ingredient.name}
+                imageUrl={ingredient.imageUrl}
+                subtitle={plannedRecipes
+                  .map(
+                    (planned) =>
+                      `${planned.quantity}×\u00A0${planned.recipe.title}`
+                  )
+                  .join(", ")}
+              >
+                <QuantitySelector
+                  id={ingredient.id}
+                  orderedQuantity={ingredient.orderedQuantity}
+                  isPlanned={ingredient.isPlanned}
+                />
+              </ListItem>
+            );
+          }}
+        />
+      </SkeletonContent>
     </View>
   );
 }

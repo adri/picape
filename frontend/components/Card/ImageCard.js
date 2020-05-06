@@ -12,7 +12,7 @@ export function ImageCard(props) {
       <TouchableOpacity
         onPress={props.onPress}
         style={{ flex: 3 }}
-        delayPressIn={300}
+        delayPressIn={100}
       >
         <ImageBackground
           source={{ uri: props.imageUrl }}
@@ -25,7 +25,6 @@ export function ImageCard(props) {
           <View
             style={[
               {
-                flexDirection: "row",
                 flexDirection: "row-reverse",
                 width: 230,
                 height: 180,

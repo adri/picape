@@ -8,6 +8,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
+import { useFocusEffect } from "@react-navigation/native";
 import SkeletonContent from "react-native-skeleton-content";
 import Type from "../constants/Type";
 
@@ -39,10 +40,18 @@ const GET_ORDER = gql`
 `;
 
 export default function ListScreen({ navigation }) {
-  const { loading, error, data = {} } = useQuery(GET_ORDER, {
+  const { loading, error, data = {}, refetch } = useQuery(GET_ORDER, {
     fetchPolicy: "cache-and-network",
   });
   if (error) return `Error! ${error}`;
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     console.log("hier", networkStatus);
+  //     if (networkStatus === 1 || networkStatus === 4) return;
+  //     refetch();
+  //   }, [refetch])
+  // );
 
   const { currentOrder = {} } = data;
 

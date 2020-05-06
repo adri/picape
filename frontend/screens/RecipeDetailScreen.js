@@ -10,13 +10,14 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
-import { CloseIcon } from "../components/Icon";
+import { CloseIcon, CheckIcon } from "../components/Icon";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import { useSafeArea } from "react-native-safe-area-context";
 import Layout from "../constants/Layout";
+import { Badge } from "../components/Badge/Badge";
 
 const GET_RECIPE = gql`
   query GetRecipe($recipeId: ID!) {
@@ -48,8 +49,8 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
   if (error) return `Error! ${error}`;
   const { recipe = params.recipe } = data;
   const insets = useSafeArea();
-
-  navigation.setOptions({ title: recipe.title, header: () => null });
+  const steps = (recipe.description || "").split("\n\n");
+  const [stepChecked, setStepsChecked] = React.useState([]);
 
   return (
     <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
@@ -95,42 +96,66 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         containerStyle={{ paddingHorizontal: 20 }}
         isLoading={loading}
       />
-      <Text
-        style={{
-          backgroundColor: Colors.cardBackground,
-          color: Colors.text,
-          marginHorizontal: 20,
-          marginBottom: 20,
-          padding: 10,
-          borderRadius: Layout.borderRadius,
-        }}
-      >
-        {recipe.description}
-      </Text>
 
       <FlatList
+        horizontal={true}
         style={{ paddingHorizontal: 20 }}
         data={recipe.ingredients}
         keyExtractor={({ ingredient }) => ingredient.id}
-        renderItem={({ item: { ingredient } }) => {
+        renderItem={({ item: { ingredient }, index }) => {
           return (
             <ListItem
-              style={{
-                backgroundColor: ingredient.isPlanned
-                  ? Colors.cardHighlightBackground
-                  : Colors.cardBackground,
-              }}
+              style={{ marginRight: 10 }}
               title={ingredient.name}
               imageUrl={ingredient.imageUrl}
-            >
-              <QuantitySelector
-                id={ingredient.id}
-                orderedQuantity={ingredient.orderedQuantity}
-              />
-            </ListItem>
+            ></ListItem>
           );
         }}
       />
+
+      {steps.map((step, index) => {
+        return (
+          <View
+            key={`step-${index}`}
+            style={{
+              marginHorizontal: 20,
+              marginBottom: 20,
+              padding: 10,
+              borderRadius: Layout.borderRadius,
+              opacity: stepChecked[index] ? 0.7 : 1,
+              backgroundColor: Colors.cardBackground,
+              flexDirection: "row",
+            }}
+          >
+            <Text style={{ flex: 1, alignSelf: "stretch", color: Colors.text }}>
+              {step}
+            </Text>
+
+            {stepChecked[index] ? (
+              <CheckIcon
+                style={{ justifyContent: "center" }}
+                onPress={(e) => {
+                  e.preventDefault();
+                  let newChecked = [...stepChecked];
+                  newChecked[index] = false;
+                  setStepsChecked(newChecked);
+                }}
+              />
+            ) : (
+              <Badge
+                outline
+                style={{ justifyContent: "center" }}
+                onPress={(e) => {
+                  e.preventDefault();
+                  let newChecked = [...stepChecked];
+                  newChecked[index] = true;
+                  setStepsChecked(newChecked);
+                }}
+              />
+            )}
+          </View>
+        );
+      })}
     </ScrollView>
   );
 }

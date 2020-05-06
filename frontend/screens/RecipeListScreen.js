@@ -58,7 +58,7 @@ export function RecipeListScreen({ navigation }) {
             return (
               <ImageCard
                 style={{ flexBasis: "50%" }}
-                imageStyle={{ width: 135 }}
+                imageStyle={{ width: "100%" }}
                 key={recipe.id}
                 title={recipe.title}
                 imageUrl={recipe.imageUrl}

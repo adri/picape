@@ -2,14 +2,15 @@
   "expo": {
     "name": "Picape",
     "slug": "picape",
-    "platforms": ["ios", "android", "web"],
+    "platforms": ["web"],
+    "privacy": "unlisted",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#000000"
     },
     "updates": {
