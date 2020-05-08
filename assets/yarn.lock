@@ -406,9 +406,9 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
-autosize@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/autosize/-/autosize-4.0.0.tgz#7a0599b1ba84d73bd7589b0d9da3870152c69237"
+autosize@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/autosize/-/autosize-4.0.2.tgz#073cfd07c8bf45da4b9fd153437f5bafbba1e4c9"
 
 aws-sign2@~0.6.0:
   version "0.6.0"
@@ -3517,11 +3517,11 @@ react-autocomplete@^1.8.1:
     dom-scroll-into-view "1.0.1"
     prop-types "^15.5.10"
 
-react-autosize-textarea@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/react-autosize-textarea/-/react-autosize-textarea-3.0.2.tgz#2b6840a69f7138719abcea5a429ecf7301768c07"
+react-autosize-textarea@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/react-autosize-textarea/-/react-autosize-textarea-7.0.0.tgz#4f633e4238de7ba73c1da8fdc307353c50f1c5ab"
   dependencies:
-    autosize "^4.0.0"
+    autosize "^4.0.2"
     line-height "^0.3.1"
     prop-types "^15.5.6"
 
