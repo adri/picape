@@ -178,6 +178,17 @@ defmodule PicapeWeb.Graphql.Schema do
   end
 
   subscription do
+    field :order_changed, :order do
+      config(fn _args, _info ->
+        {:ok, topic: "*"}
+      end)
+
+      trigger(:order_ingredient, topic: fn _ingredient -> "*" end)
+      trigger(:plan_recipe, topic: fn _recipe -> "*" end)
+      trigger(:unplan_recipe, topic: fn _recipe -> "*" end)
+      resolve(&Resolver.Order.current/3)
+    end
+
     field :recipe_planned, :recipe do
       config(fn _args, _info ->
         {:ok, topic: "*"}

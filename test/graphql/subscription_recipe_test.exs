@@ -3,14 +3,13 @@ defmodule Picape.Graphql.SubscriptionRecipeTest do
   import Picape.Factory
   alias Absinthe.Relay.Node
 
-  @tag :skip
   test "planned recipes can be subscribed to", %{socket: socket} do
     recipe =
       insert!(
         :recipe,
         title: "Pizza",
         ingredients: [
-          insert!(:ingredient, name: "Flour")
+          insert!(:ingredient, name: "Flour", supermarket_product_id: 12)
         ]
       )
 
@@ -45,14 +44,13 @@ defmodule Picape.Graphql.SubscriptionRecipeTest do
     assert push == expected
   end
 
-  @tag :skip
   test "unplanned recipes can be subscribed to", %{socket: socket} do
     recipe =
       insert!(
         :recipe,
         title: "Pizza",
         ingredients: [
-          insert!(:ingredient, name: "Flour")
+          insert!(:ingredient, name: "Flour", supermarket_product_id: 12)
         ]
       )
 

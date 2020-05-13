@@ -8,12 +8,17 @@ defmodule PicapeWeb.ShortcutController do
       [ingredient] ->
         Order.order_ingredient("1", ingredient.id, 1)
 
+        Absinthe.Subscription.publish(PicapeWeb.Endpoint, ingredient, ingredient_ordered: ingredient)
+
         render(conn, "add_ingredient.json", %{ingredient: ingredient})
+
       ingredients when is_list(ingredients) and length(ingredients) > 0 ->
         render(conn, "choose_ingredient.json", %{ingredients: ingredients})
-      [] -> conn
-            |> put_status(404)
-            |> json(%{})
+
+      [] ->
+        conn
+        |> put_status(404)
+        |> json(%{})
     end
   end
 
