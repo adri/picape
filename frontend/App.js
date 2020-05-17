@@ -31,7 +31,7 @@ const onErrorLink = onError(({ graphQLErrors, networkError }) => {
       )
     );
 
-  if (networkError) console.log(`[Network error]: ${networkError}`);
+  if (networkError) console.log(`[Network error]:`, networkError);
 });
 
 const Stack = createStackNavigator();
@@ -43,7 +43,8 @@ const link = ApolloLink.from([
 ]);
 const client = new ApolloClient({
   link: link,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({ freezeResults: true }),
+  assumeImmutableResults: true,
 });
 
 const LightTheme = {
