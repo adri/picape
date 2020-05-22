@@ -31,15 +31,9 @@ function optimisticResponse(name, id, isPlanned) {
   };
 }
 
-export function PlanRecipe({ id, isPlanned }) {
-  const [planRecipe] = useMutation(PLAN_RECIPE, {
-    refetchQueries: ["BasicsList", "OrderList"],
-    ignoreResults: true,
-  });
-  const [unplanRecipe] = useMutation(UNPLAN_RECIPE, {
-    refetchQueries: ["BasicsList", "OrderList"],
-    ignoreResults: true,
-  });
+export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
+  const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });
+  const [unplanRecipe] = useMutation(UNPLAN_RECIPE, { ignoreResults: true });
 
   if (isPlanned) {
     return (
@@ -66,4 +60,4 @@ export function PlanRecipe({ id, isPlanned }) {
       }}
     />
   );
-}
+});

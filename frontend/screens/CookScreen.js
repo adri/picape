@@ -33,11 +33,11 @@ export default function CookScreen({ navigation }) {
 
         <SkeletonContent
           layout={Array(3).fill({
-            width: 50,
-            height: 60,
+            width: 200,
+            height: 100,
             margin: 5,
             marginBottom: 10,
-            flexBasis: "50%",
+            flexBasis: "45%",
           })}
           containerStyle={{
             flexDirection: "row",
@@ -50,10 +50,22 @@ export default function CookScreen({ navigation }) {
           highlightColor={Colors.skeletonHighlight}
           isLoading={loading}
         >
-          {recipes.map((recipe) => (
+          {recipes.map((recipe, index) => (
             <ImageCard
               key={recipe.id}
-              style={{ flexBasis: "50%" }}
+              style={{
+                animationDuration: `${200 + 100 * index}ms`,
+                animationPlayState: "running",
+                animationKeyframes: {
+                  from: { opacity: 0 },
+                  to: { opacity: 1 },
+                },
+                transitionProperty: ["background-color", "opacity"],
+                transitionDuration: "200ms",
+                transitionTimingFunction: "ease-in",
+                flexBasis: "50%",
+                width: "100%",
+              }}
               title={recipe.title}
               imageUrl={recipe.imageUrl}
               onPress={(e) => {

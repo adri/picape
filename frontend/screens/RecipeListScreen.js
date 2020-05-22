@@ -54,10 +54,21 @@ export function RecipeListScreen({ navigation }) {
           windowSize={3}
           data={recipes}
           keyExtractor={(recipe) => recipe.id}
-          renderItem={({ item: recipe }) => {
+          renderItem={({ item: recipe }, index) => {
             return (
               <ImageCard
-                style={{ flexBasis: "50%" }}
+                style={{
+                  animationDuration: `${100 + 10 * index}ms`,
+                  animationPlayState: "running",
+                  animationKeyframes: {
+                    from: { opacity: 0 },
+                    to: { opacity: 1 },
+                  },
+                  transitionProperty: ["opacity"],
+                  transitionDuration: "200ms",
+                  transitionTimingFunction: "ease-in",
+                  flexBasis: "50%",
+                }}
                 imageStyle={{ width: "100%" }}
                 key={recipe.id}
                 title={recipe.title}

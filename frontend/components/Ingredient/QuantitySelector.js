@@ -16,10 +16,20 @@ const ORDER_INGREDIENT = gql`
   }
 `;
 
-export function QuantitySelector({ id, orderedQuantity }) {
+function optimisticResponse(id, orderedQuantity) {
+  return {
+    __typename: "Mutation",
+    orderIngredient: {
+      id: id,
+      __typename: "Ingredient",
+      orderedQuantity: orderedQuantity,
+    },
+  };
+}
+
+export const QuantitySelector = React.memo(function ({ id, orderedQuantity }) {
   const [opened, setOpened] = useState(false);
   const [orderIngredient] = useMutation(ORDER_INGREDIENT, {
-    refetchQueries: ["OrderList"],
     onCompleted: ({ orderIngredient }) => {
       if (orderIngredient.orderedQuantity === 0) {
         setOpened(false);
@@ -42,7 +52,10 @@ export function QuantitySelector({ id, orderedQuantity }) {
       <PlusIcon
         onPress={(e) => {
           e.preventDefault();
-          orderIngredient({ variables: { ingredientId: id, quantity: 1 } });
+          orderIngredient({
+            variables: { ingredientId: id, quantity: 1 },
+            optimisticResponse: optimisticResponse(id, 1),
+          });
         }}
       />
     );
@@ -61,6 +74,7 @@ export function QuantitySelector({ id, orderedQuantity }) {
             e.preventDefault();
             orderIngredient({
               variables: { ingredientId: id, quantity: orderedQuantity - 1 },
+              optimisticResponse: optimisticResponse(id, orderedQuantity - 1),
             });
           }}
         />
@@ -74,6 +88,7 @@ export function QuantitySelector({ id, orderedQuantity }) {
             e.preventDefault();
             orderIngredient({
               variables: { ingredientId: id, quantity: orderedQuantity + 1 },
+              optimisticResponse: optimisticResponse(id, orderedQuantity + 1),
             });
           }}
         />
@@ -90,4 +105,4 @@ export function QuantitySelector({ id, orderedQuantity }) {
       }}
     />
   );
-}
+});

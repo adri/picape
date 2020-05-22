@@ -1,11 +1,10 @@
 import * as React from "react";
 import { Text, View, FlatList } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useQuery, useSubscription } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
 import { ImageCard } from "../components/Card/ImageCard";
-import { PlusIcon, CheckIcon } from "../components/Icon";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
@@ -38,6 +37,40 @@ const GET_BASICS = gql`
           }
           season {
             label
+          }
+        }
+      }
+    }
+  }
+`;
+
+const SUBSCRIBE_UNPLANNED_RECIPES = gql`
+  subscription RecipeUnplanned {
+    recipeUnplanned {
+      ingredients {
+        ingredient {
+          id
+          isPlanned
+          orderedQuantity
+          plannedRecipes {
+            quantity
+          }
+        }
+      }
+    }
+  }
+`;
+
+const SUBSCRIBE_PLANNED_RECIPES = gql`
+  subscription RecipePlanned {
+    recipePlanned {
+      ingredients {
+        ingredient {
+          id
+          isPlanned
+          orderedQuantity
+          plannedRecipes {
+            quantity
           }
         }
       }
@@ -92,13 +125,23 @@ function RecipeList({ navigation }) {
       <FlatList
         style={{ paddingHorizontal: 20 }}
         horizontal={true}
-        initialNumToRender={3}
-        windowSize={3}
+        removeClippedSubviews
         data={recipes}
         keyExtractor={(recipe) => recipe.id}
-        renderItem={({ item: recipe }) => {
+        renderItem={({ item: recipe, index }) => {
           return (
             <ImageCard
+              style={{
+                animationDuration: `${200}ms`,
+                animationPlayState: "running",
+                animationKeyframes: {
+                  from: { opacity: 0 },
+                  to: { opacity: 1 },
+                },
+                transitionProperty: ["opacity"],
+                transitionDuration: "200ms",
+                transitionTimingFunction: "ease-in",
+              }}
               onPress={(e) => {
                 e.preventDefault();
                 navigation.navigate("RecipeDetail", {
@@ -121,6 +164,8 @@ function RecipeList({ navigation }) {
 
 function BasicsList() {
   const { loading, error, data = {} } = useQuery(GET_BASICS);
+  useSubscription(SUBSCRIBE_PLANNED_RECIPES);
+  useSubscription(SUBSCRIBE_UNPLANNED_RECIPES);
 
   if (error) return `Error! ${error}`;
 
@@ -146,11 +191,20 @@ function BasicsList() {
           windowSize={6}
           removeClippedSubviews
           keyExtractor={({ ingredient }) => ingredient.id}
-          renderItem={({ item: { ingredient } }) => {
+          renderItem={({ item: { ingredient }, index }) => {
             const plannedRecipes = ingredient.plannedRecipes || [];
             return (
               <ListItem
                 style={{
+                  animationDuration: `${200 + 100 * index}ms`,
+                  animationPlayState: "running",
+                  animationKeyframes: {
+                    from: { opacity: 0 },
+                    to: { opacity: 1 },
+                  },
+                  transitionProperty: ["background-color", "opacity"],
+                  transitionDuration: "200ms",
+                  transitionTimingFunction: "ease-in",
                   backgroundColor: ingredient.isPlanned
                     ? Colors.cardHighlightBackground
                     : Colors.cardBackground,
