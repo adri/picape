@@ -21,6 +21,7 @@ import RecipeDetailScreen from "./screens/RecipeDetailScreen";
 import ShopScreen from "./screens/ShopScreen";
 import useLinking from "./navigation/useLinking";
 import { RecipeListScreen } from "./screens/RecipeListScreen";
+import Sentry from "./Sentry";
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -75,7 +76,7 @@ export default function App(props) {
   React.useEffect(() => {
     async function loadResourcesAndDataAsync() {
       try {
-        SplashScreen.preventAutoHideAsync();
+        SplashScreen.preventAutoHide();
 
         // Load our initial navigation state
         setInitialNavigationState(await getInitialState());
@@ -84,7 +85,7 @@ export default function App(props) {
         console.warn(e);
       } finally {
         setLoadingComplete(true);
-        SplashScreen.hideAsync();
+        SplashScreen.hide();
       }
     }
 

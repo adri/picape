@@ -18,6 +18,18 @@
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
     },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "adrian-cp",
+            "project": "picape-mobile",
+            "authToken": "56f87e47a8004b559e72468fdeb950a810adae68d1eb4dfe83e0e3f646a9582a"
+          }
+        }
+      ]
+    },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.adri.picape"
