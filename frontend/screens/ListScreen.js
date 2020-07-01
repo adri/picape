@@ -2,7 +2,7 @@ import * as React from "react";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import { useQuery, useSubscription } from "@apollo/react-hooks";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, Text, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";
@@ -56,7 +56,7 @@ export default function ListScreen({ navigation }) {
 
         <SkeletonContent
           layout={Array(countData?.currentOrder?.totalCount || 5).fill({
-            width: "auto",
+            width: Dimensions.get("window").width - 40,
             height: 60,
             marginHorizontal: 20,
             marginBottom: 10,

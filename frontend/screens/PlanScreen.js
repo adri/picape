@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Text, View, FlatList } from "react-native";
+import { Text, View, FlatList, Dimensions } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery, useSubscription } from "@apollo/react-hooks";
 import gql from "graphql-tag";
@@ -175,7 +175,7 @@ function BasicsList() {
       <SectionHeader title="Basics" />
       <SkeletonContent
         layout={Array(5).fill({
-          width: "auto",
+          width: Dimensions.get("window").width - 40,
           height: 60,
           marginHorizontal: 20,
           marginBottom: 10,

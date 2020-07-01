@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Linking, Text, FlatList, View } from "react-native";
+import { Linking, Text, FlatList, View, Dimensions } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
@@ -123,7 +123,7 @@ export default function ShopScreen({ navigation }) {
         <SkeletonContent
           layout={[
             ...Array(5).fill({
-              width: "auto",
+              width: Dimensions.get("window").width - 40,
               height: 60,
               marginBottom: 10,
             }),
