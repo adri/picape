@@ -2,12 +2,12 @@
   "expo": {
     "name": "Picape",
     "slug": "picape",
-    "platforms": ["web"],
+    "platforms": ["web", "ios"],
     "privacy": "unlisted",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "picape",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "cover",
@@ -20,7 +20,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.adri.picape"
     }
   }
 }

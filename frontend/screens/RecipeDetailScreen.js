@@ -1,5 +1,11 @@
 import * as React from "react";
-import { Text, FlatList, View, ImageBackground } from "react-native";
+import {
+  Text,
+  FlatList,
+  View,
+  ImageBackground,
+  Dimensions,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
@@ -60,11 +66,15 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         source={{ uri: recipe.imageUrl }}
         fadeDuration={0}
         imageStyle={{ resizeMode: "cover" }}
+        style={{
+          width: Dimensions.get("window").width,
+          height: 200,
+        }}
       >
         <View
           style={{
             flexDirection: "row",
-            width: "auto",
+            width: Dimensions.get("window").width,
             height: 200,
           }}
         ></View>
@@ -75,12 +85,12 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
       <SkeletonContent
         layout={[
           {
-            width: "auto",
+            width: Dimensions.get("window").width - 40,
             height: 100,
             marginBottom: 10,
           },
           ...Array(5).fill({
-            width: "auto",
+            width: Dimensions.get("window").width - 40,
             height: 60,
             marginBottom: 10,
           }),

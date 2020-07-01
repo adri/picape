@@ -1,11 +1,10 @@
 import * as React from "react";
 import { SplashScreen } from "expo";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import {
-  NavigationContainer,
-  DefaultTheme,
-  DarkTheme,
-} from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
 import { ApolloClient } from "apollo-client";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { InMemoryCache } from "apollo-cache-inmemory";
@@ -54,6 +53,16 @@ const LightTheme = {
     background: "white", // by default this is grey
   },
 };
+
+const DarkTheme = {
+  ...DefaultTheme,
+  dark: true,
+  colors: {
+    ...DefaultTheme.colors,
+    background: "black", // by default this is grey
+    border: "#404040",
+  },
+};
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
   const [initialNavigationState, setInitialNavigationState] = React.useState();
@@ -66,7 +75,7 @@ export default function App(props) {
   React.useEffect(() => {
     async function loadResourcesAndDataAsync() {
       try {
-        SplashScreen.preventAutoHide();
+        SplashScreen.preventAutoHideAsync();
 
         // Load our initial navigation state
         setInitialNavigationState(await getInitialState());
@@ -75,7 +84,7 @@ export default function App(props) {
         console.warn(e);
       } finally {
         setLoadingComplete(true);
-        SplashScreen.hide();
+        SplashScreen.hideAsync();
       }
     }
 
@@ -86,27 +95,32 @@ export default function App(props) {
     return null;
   } else {
     return (
-      <AppearanceProvider>
-        <SafeAreaProvider>
-          <ApolloProvider client={client}>
-            <NavigationContainer
-              ref={containerRef}
-              initialState={initialNavigationState}
-              theme={theme}
+      <SafeAreaProvider>
+        <ApolloProvider client={client}>
+          <NavigationContainer
+            ref={containerRef}
+            initialState={initialNavigationState}
+            theme={theme}
+          >
+            <Stack.Navigator
+              headerMode="none"
+              mode="modal"
+              screenOptions={() => ({
+                cardOverlayEnabled: true,
+                ...TransitionPresets.ModalPresentationIOS,
+              })}
             >
-              <Stack.Navigator headerMode="none">
-                <Stack.Screen name="Root" component={BottomTabNavigator} />
-                <Stack.Screen
-                  name="RecipeDetail"
-                  component={RecipeDetailScreen}
-                />
-                <Stack.Screen name="RecipeList" component={RecipeListScreen} />
-                <Stack.Screen name="Shop" component={ShopScreen} />
-              </Stack.Navigator>
-            </NavigationContainer>
-          </ApolloProvider>
-        </SafeAreaProvider>
-      </AppearanceProvider>
+              <Stack.Screen name="Root" component={BottomTabNavigator} />
+              <Stack.Screen
+                name="RecipeDetail"
+                component={RecipeDetailScreen}
+              />
+              <Stack.Screen name="RecipeList" component={RecipeListScreen} />
+              <Stack.Screen name="Shop" component={ShopScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ApolloProvider>
+      </SafeAreaProvider>
     );
   }
 }

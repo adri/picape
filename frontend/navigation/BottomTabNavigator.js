@@ -28,7 +28,7 @@ function TabBar(props) {
         right: 0,
       }}
       tint={colorScheme}
-      intensity={50}
+      intensity={100}
     >
       <BottomTabBar {...props} />
     </BlurView>

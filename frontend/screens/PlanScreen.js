@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Type from "../constants/Type";
 import { PlanRecipe } from "../components/Recipe/PlanRecipe";
 import { GET_RECIPES } from "../operations/getRecipes";
+import { Separator } from "../components/Section/Separator";
 
 const GET_BASICS = gql`
   query BasicsList {
@@ -111,7 +112,7 @@ function RecipeList({ navigation }) {
             width: 230,
             height: 148,
             marginLeft: 5,
-            marginBottom: 10,
+            marginBottom: 11,
           },
           // short line
           { width: 180, height: 25, marginLeft: 5, marginBottom: 24 },
@@ -236,66 +237,8 @@ export default function PlanScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={{ paddingBottom: 50 }}>
-        {/* <View style={{ flex: 1, flexDirection: "row", marginHorizontal: 20 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              backgroundColor: Colors.navButtonSelectedBackground,
-              padding: 5,
-              paddingHorizontal: 10,
-              borderRadius: 5,
-            }}
-          >
-            <Text
-              style={{
-                alignSelf: "center",
-                color: Colors.navButtonSelectedText,
-              }}
-            >
-              Recepten
-            </Text>
-            <View
-              style={{
-                alignSelf: "center",
-                backgroundColor: Colors.badgeBackground,
-                borderRadius: 10,
-                width: 20,
-                height: 20,
-                alignItems: "center",
-                justifyContent: "center",
-                marginLeft: 10,
-              }}
-            >
-              <Text
-                style={{
-                  paddingHorizontal: 4,
-                  fontSize: 12,
-                  fontWeight: "700",
-                  color: Colors.badgeText,
-                }}
-              >
-                2
-              </Text>
-            </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              padding: 5,
-              paddingHorizontal: 10,
-              borderRadius: 5,
-              backgroundColor: Colors.navButtonBackground,
-            }}
-          >
-            <Text style={{ alignSelf: "center", color: Colors.navButtonText }}>
-              Basics
-            </Text>
-          </View>
-        </View>
-        */}
-
         <RecipeList navigation={navigation} />
+        <Separator />
         <BasicsList />
       </ScrollView>
     </SafeAreaView>

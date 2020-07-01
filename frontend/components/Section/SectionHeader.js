@@ -13,8 +13,6 @@ export function SectionHeader(props) {
           justifyContent: "space-between",
           alignItems: "baseline",
           marginHorizontal: 20,
-          borderTopColor: Colors.hairLineBackground,
-          borderTopWidth: 0.5,
         },
       ]}
     >
