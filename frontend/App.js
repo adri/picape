@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SplashScreen } from "expo";
+import * as SplashScreen from "expo-splash-screen";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import {
   createStackNavigator,
@@ -76,7 +76,7 @@ export default function App(props) {
   React.useEffect(() => {
     async function loadResourcesAndDataAsync() {
       try {
-        SplashScreen.preventAutoHide();
+        SplashScreen.preventAutoHideAsync();
 
         // Load our initial navigation state
         setInitialNavigationState(await getInitialState());
@@ -85,7 +85,7 @@ export default function App(props) {
         console.warn(e);
       } finally {
         setLoadingComplete(true);
-        SplashScreen.hide();
+        SplashScreen.hideAsync();
       }
     }
 
