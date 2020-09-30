@@ -7,19 +7,22 @@ export function MinusIcon(props) {
   return (
     <TouchableOpacity onPress={props.onPress}>
       <View
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: 15,
-          backgroundColor: Colors.iconDefault,
-          margin: 10,
-        }}
+        style={[
+          {
+            width: 30,
+            height: 30,
+            borderRadius: 15,
+            backgroundColor: Colors.iconDefault,
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          props.style,
+        ]}
       >
         <Ionicons
           name={"md-remove"}
           size={25}
           style={{
-            alignSelf: "center",
             marginTop: 2,
           }}
           color={"white"}

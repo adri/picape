@@ -152,7 +152,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
 
             {stepChecked[index] ? (
               <CheckIcon
-                style={{ justifyContent: "center" }}
+                style={{ margin: 10 }}
                 onPress={(e) => {
                   e.preventDefault();
                   let newChecked = [...stepChecked];
@@ -163,7 +163,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
             ) : (
               <Badge
                 outline
-                style={{ justifyContent: "center" }}
+                style={{ margin: 10 }}
                 onPress={(e) => {
                   e.preventDefault();
                   let newChecked = [...stepChecked];

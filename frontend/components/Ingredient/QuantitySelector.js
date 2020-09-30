@@ -50,6 +50,7 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity }) {
   if (orderedQuantity === 0) {
     return (
       <PlusIcon
+        style={{ margin: 10 }}
         onPress={(e) => {
           e.preventDefault();
           orderIngredient({
@@ -70,6 +71,7 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity }) {
         }}
       >
         <MinusIcon
+          style={{ margin: 10 }}
           onPress={(e) => {
             e.preventDefault();
             orderIngredient({
@@ -84,6 +86,7 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity }) {
         </View>
 
         <PlusIcon
+          style={{ margin: 10 }}
           onPress={(e) => {
             e.preventDefault();
             orderIngredient({

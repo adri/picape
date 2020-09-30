@@ -2,7 +2,7 @@ import * as React from "react";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import { useQuery, useSubscription } from "@apollo/react-hooks";
-import { FlatList, Text, Dimensions } from "react-native";
+import { FlatList, Text, Dimensions, Platform, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";
@@ -74,20 +74,15 @@ export default function ListScreen({ navigation }) {
               const plannedRecipes = ingredient.plannedRecipes || [];
               return (
                 <ListItem
-                  style={{
-                    animationDuration: `${200 + 100 * index}ms`,
-                    animationPlayState: "running",
-                    animationKeyframes: {
-                      from: { opacity: 0 },
-                      to: { opacity: 1 },
+                  style={[
+                    styles.fadeIn,
+                    {
+                      animationDuration: `${200 + 100 * index}ms`,
+                      backgroundColor: ingredient.isPlanned
+                        ? Colors.cardHighlightBackground
+                        : Colors.cardBackground,
                     },
-                    transitionProperty: ["background-color", "opacity"],
-                    transitionDuration: "200ms",
-                    transitionTimingFunction: "ease-in",
-                    backgroundColor: ingredient.isPlanned
-                      ? Colors.cardHighlightBackground
-                      : Colors.cardBackground,
-                  }}
+                  ]}
                   title={ingredient.name}
                   imageUrl={ingredient.imageUrl}
                   subtitle={plannedRecipes
@@ -110,3 +105,20 @@ export default function ListScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  fadeIn: {
+    ...Platform.select({
+      web: {
+        animationPlayState: "running",
+        animationKeyframes: {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
+        transitionProperty: ["background-color", "opacity"],
+        transitionDuration: "200ms",
+        transitionTimingFunction: "ease-in",
+      },
+    }),
+  },
+});

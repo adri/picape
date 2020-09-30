@@ -30,6 +30,7 @@ export function BuyIngredient({ id, isBought }) {
   if (isBought) {
     return (
       <CheckIcon
+        style={{ margin: 10 }}
         onPress={(e) => {
           e.preventDefault();
           buyIngredient({

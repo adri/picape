@@ -1,10 +1,16 @@
 import * as React from "react";
-import { Linking, Text, FlatList, View, Dimensions } from "react-native";
+import {
+  Linking,
+  Text,
+  FlatList,
+  View,
+  Dimensions,
+  Platform,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
-import Hyperlink from "react-native-hyperlink";
 import Layout from "../constants/Layout";
 import { CloseIcon, CheckIcon } from "../components/Icon";
 import { SectionHeader } from "../components/Section/SectionHeader";
@@ -16,7 +22,6 @@ import { Badge } from "../components/Badge/Badge";
 import { BlurView } from "expo-blur";
 import { useColorScheme } from "react-native-appearance";
 import Svg, { Path } from "react-native-svg";
-import * as WebBrowser from "expo-web-browser";
 
 const GET_SHOPPING_LIST = gql`
   query ShoppingList {
@@ -173,35 +178,44 @@ export default function ShopScreen({ navigation }) {
             );
           }}
         />
-        <View style={{ padding: 20, paddingBottom: 40 }}>
-          <Svg
-            onPress={async (e) => {
-              e.preventDefault();
-              await Linking.openURL("https://randombonuskaart.nl");
-            }}
-            viewBox="0 0 24 24"
-            style={{
-              alignSelf: "center",
-              width: 50,
-              height: 50,
-              marginBottom: 5,
-            }}
-            width="100%"
-            height="100%"
-          >
-            <Path
-              d="M22.55 11.09L17.67 2A2.61 2.61 0 0 0 16 .6a2.47 2.47 0 0 0-.7-.1 2.78 2.78 0 0 0-1.3.4L5 5.88a3 3 0 0 0-1.38 1.78l-2.41 8.39A2.55 2.55 0 0 0 3 19.33l14.25 4.05a2.41 2.41 0 0 0 3.16-1.76l2.35-8.26a3.07 3.07 0 0 0-.21-2.27z"
-              fill="#fff"
-            ></Path>
-            <Path
-              d="M21.63 11.57l-4.77-8.9a1.88 1.88 0 0 0-2.58-.76L5.54 6.78A2 2 0 0 0 4.61 8l-2.34 8.1a1.83 1.83 0 0 0 1.23 2.28l13.77 3.92a1.8 1.8 0 0 0 2.25-1.25l2.28-8a2.07 2.07 0 0 0-.17-1.48z"
-              fill="#00ade6"
-            ></Path>
-            <Path
-              d="M12.87 10.81c.77-1.11 1.48-2.22 2.79-2.22a2.25 2.25 0 0 1 2.25 2.24v6.55h-1.64v-6.2c0-.85-.69-.85-.69-.85-.56 0-1.57 1.38-2.7 2.92v4.13h-1.66v-1.91s-1.09 1.92-2.73 1.92C6.64 17.39 6 16.11 6 13.06S6.42 8.6 8.4 8.6c1.51 0 2.81 2.2 2.81 2.2V9.4l1.66-2.23s-.01 3.65 0 3.64zm-1.95 2.47s-1.51-2.95-2.49-2.95c-.76 0-.83.8-.83 2.73s.11 2.69.82 2.69c.97-.01 2.5-2.47 2.5-2.47z"
-              fill="#fff"
-            ></Path>
-          </Svg>
+
+        <View
+          style={{
+            padding: 20,
+            paddingBottom: 40,
+            alignSelf: "center",
+          }}
+        >
+          {Platform.OS === "web" && (
+            <Svg
+              onPress={async (e) => {
+                e.preventDefault();
+                await Linking.openURL("https://randombonuskaart.nl");
+              }}
+              viewBox="0 0 24 24"
+              style={{
+                alignSelf: "center",
+                width: 50,
+                height: 50,
+                marginBottom: 5,
+              }}
+              width="100%"
+              height="100%"
+            >
+              <Path
+                d="M22.55 11.09L17.67 2A2.61 2.61 0 0 0 16 .6a2.47 2.47 0 0 0-.7-.1 2.78 2.78 0 0 0-1.3.4L5 5.88a3 3 0 0 0-1.38 1.78l-2.41 8.39A2.55 2.55 0 0 0 3 19.33l14.25 4.05a2.41 2.41 0 0 0 3.16-1.76l2.35-8.26a3.07 3.07 0 0 0-.21-2.27z"
+                fill="#fff"
+              ></Path>
+              <Path
+                d="M21.63 11.57l-4.77-8.9a1.88 1.88 0 0 0-2.58-.76L5.54 6.78A2 2 0 0 0 4.61 8l-2.34 8.1a1.83 1.83 0 0 0 1.23 2.28l13.77 3.92a1.8 1.8 0 0 0 2.25-1.25l2.28-8a2.07 2.07 0 0 0-.17-1.48z"
+                fill="#00ade6"
+              ></Path>
+              <Path
+                d="M12.87 10.81c.77-1.11 1.48-2.22 2.79-2.22a2.25 2.25 0 0 1 2.25 2.24v6.55h-1.64v-6.2c0-.85-.69-.85-.69-.85-.56 0-1.57 1.38-2.7 2.92v4.13h-1.66v-1.91s-1.09 1.92-2.73 1.92C6.64 17.39 6 16.11 6 13.06S6.42 8.6 8.4 8.6c1.51 0 2.81 2.2 2.81 2.2V9.4l1.66-2.23s-.01 3.65 0 3.64zm-1.95 2.47s-1.51-2.95-2.49-2.95c-.76 0-.83.8-.83 2.73s.11 2.69.82 2.69c.97-.01 2.5-2.47 2.5-2.47z"
+                fill="#fff"
+              ></Path>
+            </Svg>
+          )}
           <Text
             onPress={async (e) => {
               e.preventDefault();
@@ -222,7 +236,7 @@ export default function ShopScreen({ navigation }) {
           right: 0,
         }}
         tint={useColorScheme()}
-        intensity={50}
+        intensity={100}
       >
         <Text
           onPress={(e) => {

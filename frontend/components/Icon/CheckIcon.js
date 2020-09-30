@@ -7,21 +7,28 @@ export function CheckIcon(props) {
   return (
     <TouchableOpacity onPress={props.onPress}>
       <View
-        style={{
-          width: 30,
-          height: 30,
-          margin: 10,
-          borderRadius: 15,
-          backgroundColor: Colors.iconSelected,
-        }}
+        style={[
+          {
+            width: 30,
+            height: 30,
+            borderRadius: 15,
+            backgroundColor: Colors.iconSelected,
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          props.style,
+        ]}
       >
         <Ionicons
           name={"ios-checkmark"}
-          size={38}
+          size={40}
           style={{
-            marginTop: -5,
-            alignSelf: "center",
-            justifyContent: "center",
+            lineHeight: 35,
+            // borderColor: "red",
+            // borderWidth: 1,
+            // height: 30,
+            // alignSelf: "center",
+            // justifyContent: "center",
           }}
           color={"white"}
         />
