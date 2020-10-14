@@ -28,7 +28,7 @@ function PlannedRecipes({ navigation }) {
 
   if (error) return `Error! ${error}`;
 
-  const { allRecipes = [] } = data;
+  const { recipes: allRecipes = [] } = data;
   const recipes = allRecipes.filter((recipe) => recipe.isPlanned);
 
   if (recipes.length == 0) {
