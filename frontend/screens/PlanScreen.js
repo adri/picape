@@ -188,6 +188,15 @@ function RecipeList({ navigation }) {
       <FilteredRecipeList
         loading={loading}
         navigation={navigation}
+        title="Met wraps"
+        recipes={filterByIngredient(recipes, (i) =>
+          i.name.toLowerCase().includes("wrap")
+        )}
+      />
+      <Separator />
+      <FilteredRecipeList
+        loading={loading}
+        navigation={navigation}
         title="Soep"
         recipes={filterByRecipe(recipes, (r) =>
           r.title.toLowerCase().includes("soep")
