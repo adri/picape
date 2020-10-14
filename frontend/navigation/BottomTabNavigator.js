@@ -9,7 +9,7 @@ import Colors from "../constants/Colors";
 import TabBarIcon from "../components/TabBarIcon";
 import PlanScreen from "../screens/PlanScreen";
 import ListScreen from "../screens/ListScreen";
-import CookScreen from "../screens/CookScreen";
+import BasicsScreen from "../screens/BasicsScreen";
 import { useColorScheme } from "react-native-appearance";
 import { ListCountBadge } from "../components/Badge/ListCountBadge";
 
@@ -74,10 +74,10 @@ export default function BottomTabNavigator({ navigation, route }) {
         }}
       />
       <BottomTab.Screen
-        name="cook"
-        component={CookScreen}
+        name="basics"
+        component={BasicsScreen}
         options={{
-          title: "Koken",
+          title: "Basics",
           tabBarIcon: ({ focused }) => (
             <TabBarIcon focused={focused} name="ios-restaurant" />
           ),

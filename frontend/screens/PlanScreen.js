@@ -77,7 +77,7 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
   return (
     <View>
       <SectionHeader title={title}>
-        {plannedCount && <Badge outline amount={plannedCount} />}
+        {plannedCount && <Badge amount={plannedCount} />}
       </SectionHeader>
 
       <SkeletonContent

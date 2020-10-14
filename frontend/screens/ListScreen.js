@@ -2,7 +2,14 @@ import * as React from "react";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import { useQuery, useSubscription } from "@apollo/react-hooks";
-import { FlatList, Text, Dimensions, Platform, StyleSheet } from "react-native";
+import {
+  View,
+  FlatList,
+  Text,
+  Dimensions,
+  Platform,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";
@@ -11,8 +18,66 @@ import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import Type from "../constants/Type";
 import { SearchIngredients } from "../components/Search/SearchIngredients";
+import { ImageCard } from "../components/Card/ImageCard";
 import { SUBSCRIBE_ORDER, GET_ORDER } from "../operations/getOrder";
 import { GET_ORDER_COUNT } from "../operations/getOrderCount";
+import { GET_RECIPES } from "../operations/getRecipes";
+
+function PlannedRecipes({ navigation }) {
+  const { loading, error, data = {} } = useQuery(GET_RECIPES, {
+    fetchPolicy: "cache-only",
+  });
+
+  if (error) return `Error! ${error}`;
+
+  const { recipes = [] } = data;
+  return (
+    <View>
+      <SkeletonContent
+        layout={[
+          {
+            width: 100,
+            height: 90,
+            marginLeft: 25,
+            marginBottom: 11,
+          },
+          // short line
+          { width: 180, height: 25, marginLeft: 25, marginBottom: 24 },
+        ]}
+        boneColor={Colors.skeletonBone}
+        highlightColor={Colors.skeletonHighlight}
+        containerStyle={{ paddingLeft: 0 }}
+        isLoading={loading}
+      >
+        <FlatList
+          style={{ paddingHorizontal: 20, height: 150 }}
+          containerStyle={{ paddingLeft: 20 }}
+          horizontal={true}
+          removeClippedSubviews
+          data={recipes.filter((recipe) => recipe.isPlanned)}
+          keyExtractor={(recipe) => recipe.id}
+          renderItem={({ item: recipe, index }) => {
+            return (
+              <ImageCard
+                onPress={(e) => {
+                  e.preventDefault();
+                  navigation.navigate("RecipeDetail", {
+                    id: recipe.id,
+                    recipe,
+                  });
+                }}
+                key={recipe.id}
+                width={100}
+                title={recipe.title}
+                imageUrl={recipe.imageUrl}
+              />
+            );
+          }}
+        />
+      </SkeletonContent>
+    </View>
+  );
+}
 
 export default function ListScreen({ navigation }) {
   // idea: use the count of order items to know how many skeletons to render
@@ -53,6 +118,8 @@ export default function ListScreen({ navigation }) {
         </SectionHeader>
 
         <SearchIngredients />
+
+        <PlannedRecipes navigation={navigation} />
 
         <SkeletonContent
           layout={Array(countData?.currentOrder?.totalCount || 5).fill({

@@ -79,90 +79,6 @@ const SUBSCRIBE_PLANNED_RECIPES = gql`
   }
 `;
 
-function RecipeList({ navigation }) {
-  const { loading, error, data = {} } = useQuery(GET_RECIPES);
-
-  if (error) return `Error! ${error}`;
-
-  const { recipes = [] } = data;
-  return (
-    <View>
-      <SectionHeader title="Recepten">
-        <Text
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.navigate("RecipeList");
-          }}
-          style={[
-            Type.sectionLink,
-            {
-              color: Colors.secondaryText,
-              fontSize: 14,
-              paddingBottom: 2,
-            },
-          ]}
-        >
-          Bekijk alles
-        </Text>
-      </SectionHeader>
-
-      <SkeletonContent
-        layout={[
-          {
-            width: 230,
-            height: 148,
-            marginLeft: 5,
-            marginBottom: 11,
-          },
-          // short line
-          { width: 180, height: 25, marginLeft: 5, marginBottom: 24 },
-        ]}
-        boneColor={Colors.skeletonBone}
-        highlightColor={Colors.skeletonHighlight}
-        containerStyle={{ paddingLeft: 15 }}
-        isLoading={loading}
-      />
-
-      <FlatList
-        style={{ paddingHorizontal: 20 }}
-        horizontal={true}
-        removeClippedSubviews
-        data={recipes}
-        keyExtractor={(recipe) => recipe.id}
-        renderItem={({ item: recipe, index }) => {
-          return (
-            <ImageCard
-              style={{
-                animationDuration: `${200}ms`,
-                animationPlayState: "running",
-                animationKeyframes: {
-                  from: { opacity: 0 },
-                  to: { opacity: 1 },
-                },
-                transitionProperty: ["opacity"],
-                transitionDuration: "200ms",
-                transitionTimingFunction: "ease-in",
-              }}
-              onPress={(e) => {
-                e.preventDefault();
-                navigation.navigate("RecipeDetail", {
-                  id: recipe.id,
-                  recipe,
-                });
-              }}
-              key={recipe.id}
-              title={recipe.title}
-              imageUrl={recipe.imageUrl}
-            >
-              <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
-            </ImageCard>
-          );
-        }}
-      />
-    </View>
-  );
-}
-
 function BasicsList() {
   const { loading, error, data = {} } = useQuery(GET_BASICS);
   useSubscription(SUBSCRIBE_PLANNED_RECIPES);
@@ -237,8 +153,6 @@ export default function PlanScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={{ paddingBottom: 50 }}>
-        <RecipeList navigation={navigation} />
-        <Separator />
         <BasicsList />
       </ScrollView>
     </SafeAreaView>
