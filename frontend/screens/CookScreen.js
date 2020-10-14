@@ -1,5 +1,4 @@
 import * as React from "react";
-import gql from "graphql-tag";
 import Colors from "../constants/Colors";
 import { useQuery } from "@apollo/react-hooks";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,16 +6,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ImageCard } from "../components/Card/ImageCard";
 import SkeletonContent from "react-native-skeleton-content";
-
-const GET_LAST_RECIPES = gql`
-  query LastOrderedRecipes {
-    recipes: lastOrderedRecipes {
-      id
-      title
-      imageUrl
-    }
-  }
-`;
+import { GET_LAST_RECIPES } from "../operations/getLastRecipes";
 
 export default function CookScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_LAST_RECIPES, {

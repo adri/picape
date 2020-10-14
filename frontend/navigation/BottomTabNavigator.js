@@ -53,7 +53,7 @@ export default function BottomTabNavigator({ navigation, route }) {
         name="plan"
         component={PlanScreen}
         options={{
-          title: "Plannen",
+          title: "Recepten",
           tabBarIcon: ({ focused }) => (
             <TabBarIcon focused={focused} name="ios-calendar" />
           ),
@@ -63,7 +63,7 @@ export default function BottomTabNavigator({ navigation, route }) {
         name="shop"
         component={ListScreen}
         options={{
-          title: "Lijst",
+          title: "Mandje",
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               focused={focused}

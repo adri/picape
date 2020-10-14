@@ -26,7 +26,7 @@ export function ImageCard(props) {
             style={[
               {
                 flexDirection: "row-reverse",
-                width: 230,
+                width: props.width || 230,
                 height: 180,
               },
               props.imageStyle,

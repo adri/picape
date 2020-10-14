@@ -33,7 +33,7 @@ export default function ListScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView>
-        <SectionHeader title="Lijst">
+        <SectionHeader title="Je mandje">
           <Text
             style={[
               Type.sectionLink,

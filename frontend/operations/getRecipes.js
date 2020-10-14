@@ -6,6 +6,12 @@ export const GET_RECIPES = gql`
       title
       imageUrl
       isPlanned
+      ingredients {
+        ingredient {
+          id
+          name
+        }
+      }
     }
   }
 `;
