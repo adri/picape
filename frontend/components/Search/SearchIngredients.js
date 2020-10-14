@@ -42,6 +42,7 @@ export function SearchIngredients() {
           return searchIngredients({ variables: { query } });
         }}
         value={query}
+        autoFocus
       />
 
       <FlatList

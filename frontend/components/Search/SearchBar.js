@@ -33,7 +33,7 @@ class SearchBar extends Component {
     const { value } = props;
 
     this.state = {
-      hasFocus: false,
+      hasFocus: props.autoFocus ? true : false,
       isEmpty: value ? value === "" : true,
       cancelButtonWidth: null,
     };
