@@ -28,7 +28,13 @@ function PlannedRecipes({ navigation }) {
 
   if (error) return `Error! ${error}`;
 
-  const { recipes = [] } = data;
+  const { allRecipes = [] } = data;
+  const recipes = allRecipes.filter((recipe) => recipe.isPlanned);
+
+  if (recipes.length == 0) {
+    return null;
+  }
+
   return (
     <View>
       <SkeletonContent
@@ -52,7 +58,7 @@ function PlannedRecipes({ navigation }) {
           containerStyle={{ paddingLeft: 20 }}
           horizontal={true}
           removeClippedSubviews
-          data={recipes.filter((recipe) => recipe.isPlanned)}
+          data={recipes}
           keyExtractor={(recipe) => recipe.id}
           renderItem={({ item: recipe, index }) => {
             return (
