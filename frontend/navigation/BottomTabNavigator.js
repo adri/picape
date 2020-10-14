@@ -9,6 +9,7 @@ import Colors from "../constants/Colors";
 import TabBarIcon from "../components/TabBarIcon";
 import PlanScreen from "../screens/PlanScreen";
 import ListScreen from "../screens/ListScreen";
+import SearchScreen from "../screens/SearchScreen";
 import BasicsScreen from "../screens/BasicsScreen";
 import { useColorScheme } from "react-native-appearance";
 import { ListCountBadge } from "../components/Badge/ListCountBadge";
@@ -42,6 +43,7 @@ export default function BottomTabNavigator({ navigation, route }) {
       tabBar={(props) => <TabBar {...props} />}
       headerTransparent={true}
       tabBarOptions={{
+        showLabel: false,
         activeTintColor: Colors.tintColor,
         inactiveTintColor: Colors.tabIconDefault,
         style: {
@@ -55,7 +57,17 @@ export default function BottomTabNavigator({ navigation, route }) {
         options={{
           title: "Recepten",
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="ios-calendar" />
+            <TabBarIcon focused={focused} name="ios-restaurant" />
+          ),
+        }}
+      />
+      <BottomTab.Screen
+        name="search"
+        component={SearchScreen}
+        options={{
+          title: "Zoeken",
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon focused={focused} name="ios-search" />
           ),
         }}
       />
@@ -79,7 +91,7 @@ export default function BottomTabNavigator({ navigation, route }) {
         options={{
           title: "Basics",
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="ios-restaurant" />
+            <TabBarIcon focused={focused} name="ios-home" />
           ),
         }}
       />

@@ -1,6 +1,5 @@
 import * as React from "react";
 import Colors from "../constants/Colors";
-import Layout from "../constants/Layout";
 import { useQuery, useSubscription } from "@apollo/react-hooks";
 import {
   View,
@@ -17,7 +16,6 @@ import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import Type from "../constants/Type";
-import { SearchIngredients } from "../components/Search/SearchIngredients";
 import { ImageCard } from "../components/Card/ImageCard";
 import { SUBSCRIBE_ORDER, GET_ORDER } from "../operations/getOrder";
 import { GET_ORDER_COUNT } from "../operations/getOrderCount";
@@ -116,8 +114,6 @@ export default function ListScreen({ navigation }) {
             Afvinken
           </Text>
         </SectionHeader>
-
-        <SearchIngredients />
 
         <PlannedRecipes navigation={navigation} />
 

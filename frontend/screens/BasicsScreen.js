@@ -1,19 +1,14 @@
 import * as React from "react";
-import { Text, View, FlatList, Dimensions } from "react-native";
+import { View, FlatList, Dimensions } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery, useSubscription } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
-import { ImageCard } from "../components/Card/ImageCard";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Type from "../constants/Type";
-import { PlanRecipe } from "../components/Recipe/PlanRecipe";
-import { GET_RECIPES } from "../operations/getRecipes";
-import { Separator } from "../components/Section/Separator";
 
 const GET_BASICS = gql`
   query BasicsList {
@@ -89,7 +84,7 @@ function BasicsList() {
   const { basics: { edges = [] } = {} } = data;
   return (
     <View>
-      <SectionHeader title="Basics" />
+      <SectionHeader title="Altijd in huis" />
       <SkeletonContent
         layout={Array(5).fill({
           width: Dimensions.get("window").width - 40,

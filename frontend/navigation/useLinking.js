@@ -10,8 +10,9 @@ export default function (containerRef) {
         path: "/",
         screens: {
           plan: "plan",
+          search: "search",
           shop: "shop",
-          cook: "cook",
+          basics: "basics",
         },
       },
       RecipeDetail: {
