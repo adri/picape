@@ -24,6 +24,9 @@ export default function (containerRef) {
       RecipeList: {
         path: "recipes",
       },
+      WeekPlanner: {
+        path: "recipes",
+      },
     },
   });
 }

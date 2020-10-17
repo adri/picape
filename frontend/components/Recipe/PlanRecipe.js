@@ -1,35 +1,11 @@
 import * as React from "react";
-import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { PlusIcon, CheckIcon } from "../Icon";
-
-const PLAN_RECIPE = gql`
-  mutation PlanRecipe($recipeId: ID!) {
-    planRecipe(recipeId: $recipeId) {
-      id
-      isPlanned
-    }
-  }
-`;
-const UNPLAN_RECIPE = gql`
-  mutation UnplanRecipe($recipeId: ID!) {
-    unplanRecipe(recipeId: $recipeId) {
-      id
-      isPlanned
-    }
-  }
-`;
-
-function optimisticResponse(name, id, isPlanned) {
-  return {
-    __typename: "Mutation",
-    [name]: {
-      id: id,
-      __typename: "Recipe",
-      isPlanned: isPlanned,
-    },
-  };
-}
+import {
+  PLAN_RECIPE,
+  UNPLAN_RECIPE,
+  optimisticResponse,
+} from "../../operations/planRecipe";
 
 export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
   const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });

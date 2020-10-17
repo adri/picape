@@ -18,6 +18,7 @@ import { AppearanceProvider, useColorScheme } from "react-native-appearance";
 import * as Updates from "expo-updates";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
 import RecipeDetailScreen from "./screens/RecipeDetailScreen";
+import WeekPlannerScreen from "./screens/WeekPlannerScreen";
 import ShopScreen from "./screens/ShopScreen";
 import useLinking from "./navigation/useLinking";
 import { RecipeListScreen } from "./screens/RecipeListScreen";
@@ -112,6 +113,7 @@ export default function App(props) {
               })}
             >
               <Stack.Screen name="Root" component={BottomTabNavigator} />
+              <Stack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
               <Stack.Screen
                 name="RecipeDetail"
                 component={RecipeDetailScreen}

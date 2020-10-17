@@ -214,6 +214,22 @@ export default function PlanScreen({ navigation }) {
           <Text
             onPress={(e) => {
               e.preventDefault();
+              navigation.navigate("WeekPlanner");
+            }}
+            style={[
+              Type.sectionLink,
+              {
+                color: Colors.secondaryText,
+                fontSize: 14,
+                paddingBottom: 2,
+              },
+            ]}
+          >
+            Planner
+          </Text>
+          <Text
+            onPress={(e) => {
+              e.preventDefault();
               navigation.navigate("RecipeList");
             }}
             style={[
@@ -229,7 +245,9 @@ export default function PlanScreen({ navigation }) {
           </Text>
         </SectionHeader>
         <Separator />
-        <LastRecipesList navigation={navigation} />
+        <View style={{ backgroundColor: Colors.skeletonBone }}>
+          <LastRecipesList navigation={navigation} />
+        </View>
         <Separator />
         <RecipeList navigation={navigation} />
         <Separator />
