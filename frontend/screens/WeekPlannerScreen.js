@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     alignContent: "stretch",
     paddingHorizontal: 15,
-    marginBottom: 50,
+    marginBottom: 100,
   },
   refreshIcon: {
     marginTop: 10,
