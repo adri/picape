@@ -125,7 +125,7 @@ export default function WeekPlannerScreen({ navigation }) {
             style={{ flexBasis: "100%", marginTop: 10 }}
             cardStyle={styles.cardStyle}
             width={"auto"}
-            height={80}
+            height={60}
             key="new-recipe"
           >
             <PlusIcon
