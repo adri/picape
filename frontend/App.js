@@ -109,6 +109,7 @@ export default function App(props) {
               mode="modal"
               screenOptions={() => ({
                 cardOverlayEnabled: true,
+                animationEnabled: true,
                 ...TransitionPresets.ModalPresentationIOS,
               })}
             >
