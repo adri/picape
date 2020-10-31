@@ -19,6 +19,9 @@ import { useSafeArea } from "react-native-safe-area-context";
 import Layout from "../constants/Layout";
 import { Badge } from "../components/Badge/Badge";
 
+var linkify = require("linkify-it")();
+linkify.add("shortcuts:", "http:");
+
 const GET_RECIPE = gql`
   query GetRecipe($recipeId: ID!) {
     recipe: node(id: $recipeId) {
@@ -40,6 +43,18 @@ const GET_RECIPE = gql`
     }
   }
 `;
+
+let timerRegex = /((?<time>\d{1,3}\s*-?\s*\d*)\s*(?:min|minuut|minuten)\b)/i;
+
+function stepWithTimerLinks(step) {
+  return step.replace(
+    timerRegex,
+    (text, text1, time) =>
+      `shortcuts://run-shortcut?name=Timer&input=${encodeURI(
+        time.trim()
+      )}&text=${encodeURI(text)}`
+  );
+}
 
 export default function RecipeDetailScreen({ route: { params }, navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPE, {
@@ -132,12 +147,21 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
             }}
           >
             <Hyperlink
+              linkify={linkify}
               style={{ flex: 1, alignSelf: "stretch" }}
               linkDefault={!stepChecked[index]}
               linkStyle={{ color: Colors.link }}
-              linkText={(url) =>
-                url.includes("youtube.com") ? "Youtube" : url
-              }
+              linkText={(url) => {
+                if (url.includes("shortcuts://run-shortcut?name=Timer")) {
+                  return new URLSearchParams(url).get("text");
+                }
+
+                if (url.includes("youtube.com")) {
+                  return "Youtube";
+                }
+
+                return url;
+              }}
             >
               <Text
                 style={{
@@ -146,7 +170,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                     : Colors.text,
                 }}
               >
-                {step}
+                {stepWithTimerLinks(step)}
               </Text>
             </Hyperlink>
 
