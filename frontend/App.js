@@ -65,6 +65,7 @@ const DarkTheme = {
     border: "#404040",
   },
 };
+
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
   const [initialNavigationState, setInitialNavigationState] = React.useState();
@@ -108,7 +109,7 @@ export default function App(props) {
               headerMode="none"
               mode="modal"
               screenOptions={() => ({
-                cardOverlayEnabled: true,
+                cardOverlayEnabled: false,
                 animationEnabled: true,
                 ...TransitionPresets.ModalPresentationIOS,
               })}

@@ -10,7 +10,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
-import { CloseIcon, CheckIcon } from "../components/Icon";
+import { BackIcon, CheckIcon } from "../components/Icon";
 import Hyperlink from "react-native-hyperlink";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
@@ -69,8 +69,8 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
 
   return (
     <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
-      <CloseIcon
-        style={{ position: "absolute", top: insets.top, right: insets.left }}
+      <BackIcon
+        style={{ position: "absolute", top: insets.top, left: insets.left + 5 }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();

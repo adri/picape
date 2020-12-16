@@ -4,7 +4,10 @@ import {
 } from "@react-navigation/bottom-tabs";
 import * as React from "react";
 import { BlurView } from "expo-blur";
-
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
 import Colors from "../constants/Colors";
 import TabBarIcon from "../components/TabBarIcon";
 import PlanScreen from "../screens/PlanScreen";
@@ -13,6 +16,9 @@ import SearchScreen from "../screens/SearchScreen";
 import BasicsScreen from "../screens/BasicsScreen";
 import { useColorScheme } from "react-native-appearance";
 import { ListCountBadge } from "../components/Badge/ListCountBadge";
+import RecipeDetailScreen from "../screens/RecipeDetailScreen";
+import WeekPlannerScreen from "../screens/WeekPlannerScreen";
+import { RecipeListScreen } from "../screens/RecipeListScreen";
 
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = "plan";
@@ -36,6 +42,25 @@ function TabBar(props) {
   );
 }
 
+const PlanStack = createStackNavigator();
+
+function PlanStackScreen() {
+  return (
+    <PlanStack.Navigator
+      headerMode="none"
+      screenOptions={() => ({
+        animationEnabled: true,
+        ...TransitionPresets.SlideFromRightIOS,
+      })}
+    >
+      <PlanStack.Screen name="PlanScreen" component={PlanScreen} />
+      <PlanStack.Screen name="RecipeList" component={RecipeListScreen} />
+      <PlanStack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
+      <PlanStack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
+    </PlanStack.Navigator>
+  );
+}
+
 export default function BottomTabNavigator({ navigation, route }) {
   return (
     <BottomTab.Navigator
@@ -53,7 +78,7 @@ export default function BottomTabNavigator({ navigation, route }) {
     >
       <BottomTab.Screen
         name="plan"
-        component={PlanScreen}
+        component={PlanStackScreen}
         options={{
           title: "Recepten",
           tabBarIcon: ({ focused }) => (
