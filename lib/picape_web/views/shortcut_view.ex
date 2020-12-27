@@ -16,16 +16,17 @@ defmodule PicapeWeb.ShortcutView do
     %{
       type: "choice",
       success: "true",
-      ingredients: Enum.map(ingredients, fn ingredient ->
-        {ingredient.name,
-          %{
-           id: ingredient.id,
-           name: ingredient.name,
-           image_url: ingredient[:image_url],
-           unit_quantity: ingredient[:unit_quantity]
-          }
-        }
-      end) |> Enum.into(%{}),
+      ingredients:
+        Enum.map(ingredients, fn ingredient ->
+          {ingredient.name,
+           %{
+             id: ingredient.id,
+             name: ingredient.name,
+             image_url: ingredient[:image_url],
+             unit_quantity: ingredient[:unit_quantity]
+           }}
+        end)
+        |> Enum.into(%{})
     }
   end
 end
