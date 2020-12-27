@@ -19,6 +19,7 @@ import { ListCountBadge } from "../components/Badge/ListCountBadge";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 import WeekPlannerScreen from "../screens/WeekPlannerScreen";
 import { RecipeListScreen } from "../screens/RecipeListScreen";
+import { NewRecipeScreen } from "../screens/NewRecipeScreen";
 
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = "plan";
@@ -57,6 +58,14 @@ function PlanStackScreen() {
       <PlanStack.Screen name="RecipeList" component={RecipeListScreen} />
       <PlanStack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
       <PlanStack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
+      <PlanStack.Screen
+        name="NewRecipe"
+        component={NewRecipeScreen}
+        options={() => ({
+          animationEnabled: true,
+          ...TransitionPresets.ModalPresentationIOS,
+        })}
+      />
     </PlanStack.Navigator>
   );
 }
