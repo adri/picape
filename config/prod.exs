@@ -44,13 +44,13 @@ config :picape, Picape.Supermarket,
   base_url: System.get_env("SUPERMARKET_BASE_URL"),
   static_url: System.get_env("SUPERMARKET_STATIC_URL"),
   headers: [
-    "Accept-Language": "nl-NL",
-    "x-#{System.get_env("SUPERMARKET_HEADER")}-agent": System.get_env("SUPERMARKET_AGENT"),
-    "x-#{System.get_env("SUPERMARKET_HEADER")}-did": System.get_env("SUPERMARKET_DID"),
-    "x-#{System.get_env("SUPERMARKET_HEADER")}-auth": System.get_env("SUPERMARKET_AUTH"),
+    "Accept-Language": "en-NL;q=1.0, de-NL;q=0.9, nl-NL;q=0.8",
+    "Accept-Encoding": "br;q=1.0, gzip;q=0.9, deflate;q=0.8",
+    "X-Correlation-Id": System.get_env("SUPERMARKET_CORRELATION_ID"),
+    "X-ClientVersion": System.get_env("SUPERMARKET_CLIENT_VERSION"),
+    "X-Clientname": System.get_env("SUPERMARKET_CLIENT_NAME"),
     "User-Agent": System.get_env("SUPERMARKET_USER_AGENT")
-  ],
-  cookie: System.get_env("SUPERMARKET_COOKIE")
+  ]
 
 # config :picape, Picape.Mailer,
 #   adapter: Swoosh.Adapters.Sendgrid,
