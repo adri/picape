@@ -2,11 +2,10 @@ defmodule Picape.Shopping.BoughtIngredient do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   schema "shopping_bought_ingredient" do
-    field :line_id, :string
-    field :undone, :boolean, default: false
-    field :ingredient_id, :id
+    field(:line_id, :string)
+    field(:undone, :boolean, default: false)
+    field(:ingredient_id, :id)
 
     timestamps()
   end

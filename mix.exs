@@ -56,7 +56,7 @@ defmodule Picape.Mixfile do
       {:cowboy, "~> 1.0"},
       {:reverse_proxy, "~> 0.3.1"},
       {:poison, "~> 3.0"},
-      {:httpoison, "~> 0.12"},
+      {:httpoison, "~> 0.13"},
       {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
       {:quantum, ">= 2.2.0"},
       {:credo, "~> 0.7", only: [:dev, :test]},

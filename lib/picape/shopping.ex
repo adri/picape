@@ -25,8 +25,8 @@ defmodule Picape.Shopping do
       undone: undone
     })
     |> Repo.insert(
-       on_conflict: [set: [undone: undone]],
-       conflict_target: [:line_id, :ingredient_id]
-     )
+      on_conflict: [set: [undone: undone]],
+      conflict_target: [:line_id, :ingredient_id]
+    )
   end
 end

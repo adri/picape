@@ -22,15 +22,15 @@ defmodule Picape.Recipe.Ingredient do
   end
 
   def fetch(ingredient, :image_url) do
-    {:ok, Supermarket.image_url(ingredient.supermarket_product_raw["product_details"]["image_id"])}
+    {:ok, Supermarket.image_url(ingredient.supermarket_product_raw["productCard"])}
   end
 
   def fetch(ingredient, :unit_quantity) do
-    {:ok, ingredient.supermarket_product_raw["product_details"]["unit_quantity"]}
+    {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "salesUnitSize"]) || ""}
   end
 
   def fetch(ingredient, :additional_info) do
-    {:ok, ingredient.supermarket_product_raw["product_details"]["additional_info"] || ""}
+    {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "additional_info"]) || ""}
   end
 
   @doc false
@@ -61,7 +61,7 @@ defmodule Picape.Recipe.Ingredient do
 
   def raw_changeset(%Ingredient{} = ingredient, attrs) do
     ingredient
-    |> cast(attrs, [:supermarket_product_raw])
-    |> validate_required([:supermarket_product_raw])
+    |> cast(attrs, [:supermarket_product_raw, :supermarket_product_id])
+    |> validate_required([:supermarket_product_raw, :supermarket_product_id])
   end
 end

@@ -6,11 +6,12 @@ defmodule Picape.Order.LineFromDb do
     id: 1,
     items: [],
     total_count: 0,
-    total_price: 0,
+    total_price: 0
   }
 
   def convert(nil), do: @empty
   def convert(cart) when cart == %{}, do: @empty
+
   def convert(cart, order_id \\ 1) do
     %Line{
       id: order_id,
@@ -19,7 +20,7 @@ defmodule Picape.Order.LineFromDb do
           convert_item(item)
         end),
       total_count: map_size(cart),
-      total_price: 0,
+      total_price: 0
     }
   end
 
@@ -27,8 +28,8 @@ defmodule Picape.Order.LineFromDb do
     %Item{
       id: item.id,
       name: item.ingredient.name,
-      image_url: Supermarket.image_url(item.ingredient.supermarket_product_raw["product_details"]["image_id"]),
-      quantity: item.quantity,
+      image_url: Supermarket.image_url(item.ingredient.supermarket_product_raw),
+      quantity: item.quantity
     }
   end
 end

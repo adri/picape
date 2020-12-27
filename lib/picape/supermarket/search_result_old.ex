@@ -1,4 +1,4 @@
-defmodule Picape.Supermarket.SearchResult do
+defmodule Picape.Supermarket.SearchResultOld do
   use Ecto.Schema
   alias Picape.Supermarket.SearchResult
   alias Picape.Supermarket
@@ -11,18 +11,18 @@ defmodule Picape.Supermarket.SearchResult do
   end
 
   def from_result(search_result) do
-    search_result["products"]
-    |> Enum.filter(&(&1["availableOnline"] == true))
+    List.first(search_result)["items"]
+    |> Enum.filter(&(&1["id"] !== "item_suggestion_dialog"))
     |> Enum.map(&convert(&1))
   end
 
   def convert(item = %{}) do
     %SearchResult{
-      id: item["webshopId"],
-      name: item["title"],
-      price: item["priceBeforeBonus"],
-      image_url: Supermarket.image_url(item),
-      unit_quantity: item["salesUnitSize"]
+      id: item["id"],
+      name: item["name"],
+      price: item["price"],
+      image_url: Supermarket.image_url(item["image_id"]),
+      unit_quantity: item["unit_quantity"]
     }
   end
 end

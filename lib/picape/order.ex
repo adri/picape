@@ -17,9 +17,9 @@ defmodule Picape.Order do
   Returns the currently active cart.
   """
   def current() do
-#    {:ok, LineFromSupermarket.convert(Supermarket.cart())}
-    {:ok, cart} = cart("1")
-    {:ok, LineFromDb.convert(cart)}
+    {:ok, LineFromSupermarket.convert(Supermarket.cart())}
+    # {:ok, cart} = cart("1")
+    # {:ok, LineFromDb.convert(cart)}
   end
 
   def last() do
@@ -60,19 +60,23 @@ defmodule Picape.Order do
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
          {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
          {:ok, manual} <- manual_ingredients(order_id) do
-      merged = Map.merge(planned, manual, fn _id, _quantity1, quantity2 -> quantity2 end)
-               |> Enum.reject(fn {_, v} -> v == 0 end)
-               |> Map.new
+      merged =
+        Map.merge(planned, manual, fn _id, _quantity1, quantity2 -> quantity2 end)
+        |> Enum.reject(fn {_, v} -> v == 0 end)
+        |> Map.new()
+
       {:ok, ingredients} = Recipe.ingredients_by_item_ids(Map.keys(merged))
 
-      cart = Enum.map(merged, fn {id, quantity} ->
-        {id, %{
-          id: id,
-          ingredient: ingredients[id],
-          quantity: quantity
-        }}
-      end)
-      |> Enum.into(%{})
+      cart =
+        Enum.map(merged, fn {id, quantity} ->
+          {id,
+           %{
+             id: id,
+             ingredient: ingredients[id],
+             quantity: quantity
+           }}
+        end)
+        |> Enum.into(%{})
 
       {:ok, cart}
     end
@@ -109,15 +113,18 @@ defmodule Picape.Order do
       IO.inspect(existing, label: "existing")
       IO.inspect(changes, label: "changes")
 
-      # Supermarket.apply_changes(changes)
+      Supermarket.apply_changes(changes)
 
       current()
+    else
+      e ->
+        current()
     end
   end
 
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
-    IO.inspect new_order_id, label: "new_order_id"
+    IO.inspect(new_order_id, label: "new_order_id")
     finish_order(order_id, new_order_id)
 
     last()
@@ -128,11 +135,10 @@ defmodule Picape.Order do
     {:ok, cart} = cart(order_id)
     items = Map.values(cart)
 
-    with {:ok, bought} <- Shopping.ingredients_bought?(order_id, Enum.map(items, &(&1.ingredient.id))),
-         not_bought <- Enum.reject(items, &(bought[&1.ingredient.id])),
-         now_bought <- Enum.map(not_bought, &(Shopping.buy_ingredient(order_id, &1.ingredient.id))),
-         ordered <- Enum.map(not_bought, &(order_ingredient("1", &1.ingredient.id, &1.quantity)))
-    do
+    with {:ok, bought} <- Shopping.ingredients_bought?(order_id, Enum.map(items, & &1.ingredient.id)),
+         not_bought <- Enum.reject(items, &bought[&1.ingredient.id]),
+         now_bought <- Enum.map(not_bought, &Shopping.buy_ingredient(order_id, &1.ingredient.id)),
+         ordered <- Enum.map(not_bought, &order_ingredient("1", &1.ingredient.id, &1.quantity)) do
       last()
     else
       error -> {:error, error}
@@ -167,7 +173,7 @@ defmodule Picape.Order do
       conflict_target: [:line_id, :ingredient_id]
     )
     |> case do
-      {:ok, _planned_recipe} -> current()
+      {:ok, _planned_recipe} -> sync_supermarket(order_id)
       err -> err
     end
   end
@@ -267,7 +273,8 @@ defmodule Picape.Order do
   end
 
   defp ordered_item_quantities(order_id) do
-    {:ok, order} = by_id(order_id)
+    # todo: figure how to get this from the supermarket
+    {:ok, order} = current()
 
     existing =
       Enum.reduce(order.items, %{}, fn item, acc ->
