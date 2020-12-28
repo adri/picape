@@ -107,6 +107,7 @@ defmodule Picape.Supermarket do
     headers =
       headers
       |> Keyword.merge(Accept: "*/*")
+      |> Keyword.merge("X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
       |> Keyword.merge(config(:headers) || [])
 
     if Keyword.has_key?(headers, :"X-Refresh-Token") do
