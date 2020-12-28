@@ -7,6 +7,9 @@ export const orderFields = gql`
     totalPrice
     items {
       id
+      name
+      quantity
+      imageUrl
       ingredient {
         id
         name

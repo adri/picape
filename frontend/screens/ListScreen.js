@@ -139,21 +139,22 @@ export default function ListScreen({ navigation }) {
             style={{ paddingHorizontal: 20, marginBottom: 50 }}
             data={currentOrder.items}
             keyExtractor={(item) => item.id}
-            renderItem={({ item: { ingredient }, index }) => {
-              const plannedRecipes = ingredient.plannedRecipes || [];
+            renderItem={({ item, index }) => {
+              const ingredient = item.ingredient;
+              const plannedRecipes = ingredient?.plannedRecipes || [];
               return (
                 <ListItem
                   style={[
                     styles.fadeIn,
                     {
                       animationDuration: `${200 + 100 * index}ms`,
-                      backgroundColor: ingredient.isPlanned
+                      backgroundColor: ingredient?.isPlanned
                         ? Colors.cardHighlightBackground
                         : Colors.cardBackground,
                     },
                   ]}
-                  title={ingredient.name}
-                  imageUrl={ingredient.imageUrl}
+                  title={ingredient?.name || item.name}
+                  imageUrl={ingredient?.imageUrl || item.imageUrl}
                   subtitle={plannedRecipes
                     .map(
                       (planned) =>
@@ -162,8 +163,10 @@ export default function ListScreen({ navigation }) {
                     .join(", ")}
                 >
                   <QuantitySelector
-                    id={ingredient.id}
-                    orderedQuantity={ingredient.orderedQuantity}
+                    id={ingredient?.id}
+                    orderedQuantity={
+                      ingredient?.orderedQuantity || item.quantity
+                    }
                   />
                 </ListItem>
               );
