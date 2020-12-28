@@ -1,6 +1,6 @@
 import * as React from "react";
 import Colors from "../../constants/Colors";
-import { View, Image, Text } from "react-native";
+import { StyleSheet, View, Image, Text } from "react-native";
 import Type from "../../constants/Type";
 import Layout from "../../constants/Layout";
 import { Subtitle } from "./Subtitle";
@@ -14,36 +14,16 @@ export function ListItem({
   textStyle,
 }) {
   return (
-    <View
-      style={[
-        {
-          flex: 1,
-          marginBottom: 10,
-          flexDirection: "row",
-          backgroundColor: Colors.cardBackground,
-          paddingHorizontal: 10,
-          paddingVertical: 5,
-          borderRadius: Layout.borderRadius,
-        },
-        style,
-      ]}
-    >
+    <View style={[styles.container, style]}>
       <View style={{ justifyContent: "center" }}>
         <Image
           source={{ uri: imageUrl }}
           fadeDuration={0.2}
           resizeMode="contain"
-          style={{ width: 35, height: 35 }}
+          style={styles.image}
         />
       </View>
-      <View
-        style={{
-          flex: 1,
-          marginLeft: 10,
-          alignSelf: "stretch",
-          justifyContent: "center",
-        }}
-      >
+      <View style={styles.titleContainer}>
         <Text style={[Type.body, { color: Colors.cardText }, textStyle]}>
           {title}
         </Text>
@@ -53,3 +33,26 @@ export function ListItem({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginBottom: 10,
+    flexDirection: "row",
+    backgroundColor: Colors.cardBackground,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: Layout.borderRadius,
+  },
+  image: {
+    borderRadius: 8,
+    width: 35,
+    height: 35,
+  },
+  titleContainer: {
+    flex: 1,
+    marginLeft: 10,
+    alignSelf: "stretch",
+    justifyContent: "center",
+  },
+});
