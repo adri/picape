@@ -8,10 +8,15 @@ defmodule Picape.Supermarket.AutoMatchIngredients do
   alias Picape.Repo
   alias Picape.Recipe.Ingredient
 
+  import Ecto.Query
+
   @search_suffix " bio"
 
   def match_all() do
-    for ingredient <- Ingredients.list([]),
+    today = ~N(2020-12-27 00:00:00)
+    ingredients = from(i in Picape.Recipe.Ingredient, where: i.updated_at < ^today) |> Repo.all()
+
+    for ingredient <- ingredients,
         details = match_ingredient(ingredient),
         details != false do
       ingredient
@@ -24,24 +29,34 @@ defmodule Picape.Supermarket.AutoMatchIngredients do
   end
 
   defp match_ingredient(ingredient) do
-    with {:ok, id} <- search_supermarket_id(ingredient.name),
-         details when not is_nil(details) <- Supermarket.products_by_id(id) do
-      details
-    else
-      _ -> false
+    try do
+      with {:ok, id} <- search_supermarket_id(ingredient.name),
+           details when not is_nil(details) <- Supermarket.products_by_id(id) do
+        details
+        |> IO.inspect(label: "details")
+      else
+        _ -> false
+      end
+    rescue
+      _e in Poison.SyntaxError -> match_ingredient(ingredient)
     end
   end
 
   defp search_supermarket_id(query) do
     case Supermarket.search(query <> @search_suffix) do
       [] ->
-        case Supermarket.search(query) do
-          [] -> {:error, :no_match}
-          list -> {:ok, List.first(list).id}
+        try do
+          case Supermarket.search(query) do
+            [] -> {:error, :no_match}
+            list -> {:ok, List.first(list).id}
+          end
+        rescue
+          _e in Poison.SyntaxError -> {:error, :no_match}
         end
 
       list ->
         {:ok, List.first(list).id}
+        |> IO.inspect(label: "list")
     end
   end
 end
