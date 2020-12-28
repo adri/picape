@@ -15,8 +15,8 @@ defmodule Picape.Order.LineFromSupermarket do
     %Line{
       id: 1,
       items: Enum.map(cart["items"], fn item -> convert_item(item) end),
+      total_count: Enum.count(cart["items"]),
       # get from total calculation endpoint
-      total_count: 0,
       total_price: 0
     }
   end

@@ -273,7 +273,6 @@ defmodule Picape.Order do
   end
 
   defp ordered_item_quantities(order_id) do
-    # todo: figure how to get this from the supermarket
     {:ok, order} = current()
 
     existing =
