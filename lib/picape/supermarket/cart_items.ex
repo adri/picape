@@ -9,9 +9,9 @@ defmodule Picape.Supermarket.CartItems do
     |> Enum.map(&convert_supermarket_cart_item(&1["product"]["webshopId"], &1["quantity"], &1["product"]["title"]))
   end
 
-  def apply_changes(items, changes, get_product) do
+  def apply_changes(items, changes, get_product_description) do
     items
-    |> add_items(changes.add, get_product)
+    |> add_items(changes.add, get_product_description)
     |> modify_items(changes.modify)
     |> remove_items(changes.remove)
     |> renumber()
@@ -28,11 +28,10 @@ defmodule Picape.Supermarket.CartItems do
     }
   end
 
-  defp add_items(items, changes, get_product) do
+  defp add_items(items, changes, get_product_description) do
     changes
     |> Enum.map(fn change ->
-      product = get_product.(change.id)
-      convert_supermarket_cart_item(change.id, change.quantity, product["productCard"]["title"])
+      convert_supermarket_cart_item(change.id, change.quantity, get_product_description.(change.id))
     end)
     |> Enum.concat(items)
   end

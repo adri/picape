@@ -1,6 +1,7 @@
 defmodule Picape.Supermarket do
   use HTTPoison.Base
 
+  alias Picape.Ingredients
   alias Picape.Supermarket.KeepLogin
   alias Picape.Supermarket.SearchResult
   alias Picape.Supermarket.CartItems
@@ -21,7 +22,7 @@ defmodule Picape.Supermarket do
   def apply_changes(changes) do
     with cart <- cart(),
          items <- CartItems.from_supermarket_cart(cart),
-         items <- CartItems.apply_changes(items, changes, &products_by_id/1) do
+         items <- CartItems.apply_changes(items, changes, &product_title_by_id/1) do
       post!(
         "/mobile-services/shoppinglist/v2/shoppinglist",
         %{
@@ -93,6 +94,10 @@ defmodule Picape.Supermarket do
   end
 
   # ---
+
+  def product_title_by_id(supermarket_id) do
+    Ingredients.by_supermarket_id(supermarket_id)[:original_title]
+  end
 
   defp process_url(url) do
     config(:base_url) <> url

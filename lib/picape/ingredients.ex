@@ -100,6 +100,10 @@ defmodule Picape.Ingredients do
     |> Repo.insert()
   end
 
+  def by_supermarket_id(supermarket_id) do
+    Repo.one(from(i in Ingredient, where: i.supermarket_product_id == ^supermarket_id))
+  end
+
   def edit_ingredient(params) do
     tags = Repo.all(from(t in IngredientTag, where: t.id in ^params[:tag_ids]))
 
