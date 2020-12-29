@@ -21,7 +21,7 @@ export function CheckIcon(props) {
       >
         <Ionicons
           name={"ios-checkmark"}
-          size={25}
+          size={22}
           style={{
             lineHeight: 35,
             // borderColor: "red",

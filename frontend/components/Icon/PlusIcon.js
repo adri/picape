@@ -29,10 +29,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     lineHeight: 30,
-    ...Platform.select({
-      ios: {
-        marginLeft: 1,
-      },
-    }),
+    marginLeft: 2,
   },
 });
