@@ -19,7 +19,7 @@ defmodule Picape.Supermarket do
     end)
   end
 
-  def apply_changes(changes) do
+  def apply_changes(changes, attempt \\ 1) do
     with cart <- cart(),
          items <- CartItems.from_supermarket_cart(cart),
          items <- CartItems.apply_changes(items, changes, &product_title_by_id/1) do
@@ -41,6 +41,13 @@ defmodule Picape.Supermarket do
         %{status_code: 409} ->
           invalidate_cart()
           apply_changes(changes)
+
+        %{status_code: 400} ->
+          if attempt >= 3 do
+            {:error, :sync_failed}
+          else
+            apply_changes(changes, attempt + 1)
+          end
 
         _ ->
           {:error, :sync_failed}
