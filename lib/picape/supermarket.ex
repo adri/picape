@@ -42,6 +42,7 @@ defmodule Picape.Supermarket do
           invalidate_cart()
           apply_changes(changes)
 
+        # "Random" error, try again 3x times
         %{status_code: 400} ->
           if attempt >= 3 do
             {:error, :sync_failed}
