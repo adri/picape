@@ -14,10 +14,10 @@ defmodule Picape.Order.LineFromSupermarket do
   def convert(cart = %{}) do
     %Line{
       id: 1,
-      items: Enum.map(cart["items"], fn item -> convert_item(item) end),
-      total_count: Enum.count(cart["items"]),
+      items: Enum.map(cart["orderedProducts"], fn item -> convert_item(item) end),
+      total_count: Enum.count(cart["orderedProducts"]),
       # get from total calculation endpoint
-      total_price: 0
+      total_price: cart["price"]["priceAfterDiscount"]
     }
   end
 

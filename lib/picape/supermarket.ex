@@ -58,7 +58,7 @@ defmodule Picape.Supermarket do
 
   def cart() do
     ConCache.get_or_store(:supermarket, :cart, fn ->
-      get!("/mobile-services/shoppinglist/v2/shoppinglist").body
+      get!("/mobile-services/v7/order/summaries/active").body
     end)
   end
 
