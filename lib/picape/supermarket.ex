@@ -96,7 +96,9 @@ defmodule Picape.Supermarket do
   # ---
 
   def product_title_by_id(supermarket_id) do
-    Ingredients.by_supermarket_id(supermarket_id)[:original_title]
+    Ingredients.by_supermarket_id(supermarket_id)[:original_title] ||
+      get_in(products_by_id(supermarket_id), ["productCard", "title"]) ||
+      ""
   end
 
   defp process_url(url) do

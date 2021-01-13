@@ -1,5 +1,4 @@
 defmodule Picape.Supermarket.CartItems do
-  @spec from_supermarket_cart(nil | maybe_improper_list | map) :: [any]
   @doc """
   Converts cart items structure to a structure that can be
   posted.
