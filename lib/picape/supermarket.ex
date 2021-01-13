@@ -114,8 +114,18 @@ defmodule Picape.Supermarket do
   end
 
   def process_response_body(body) do
-    # IO.inspect(body)
-    Poison.decode!(body)
+    case Poison.decode(body) do
+      {:ok, value} ->
+        value
+
+      {:error, :invalid, pos} ->
+        IO.inspect(body)
+        raise Poison.SyntaxError, pos: pos
+
+      {:error, {:invalid, token, pos}} ->
+        IO.inspect(body)
+        raise Poison.SyntaxError, token: token, pos: pos
+    end
   end
 
   defp process_request_headers(headers) do
