@@ -74,7 +74,6 @@ defmodule Picape.Supermarket do
     ConCache.delete(:supermarket, :orders)
   end
 
-  @spec latest_order_id(any) :: any
   def latest_order_id(orders) do
     try do
       # before delivering, the latest order is in "current_orders"
@@ -141,19 +140,19 @@ defmodule Picape.Supermarket do
     Poison.encode!(body)
   end
 
-  defp process_request_options(options) do
-    options
-    |> Keyword.merge(
-      hackney: [
-        {:proxy, {"localhost", 8888}},
-        {:ssl_options,
-         [
-           {:versions, [:"tlsv1.2"]},
-           {:cacertfile, "/Users/adrimbp/workspace/proxyman-ca.pem"}
-         ]}
-      ]
-    )
-  end
+  # defp process_request_options(options) do
+  #   options
+  #   |> Keyword.merge(
+  #     hackney: [
+  #       {:proxy, {"localhost", 8888}},
+  #       {:ssl_options,
+  #        [
+  #          {:versions, [:"tlsv1.2"]},
+  #          {:cacertfile, "/Users/adrimbp/workspace/proxyman-ca.pem"}
+  #        ]}
+  #     ]
+  #   )
+  # end
 
   defp config(key) do
     Application.get_env(:picape, __MODULE__)[key]
