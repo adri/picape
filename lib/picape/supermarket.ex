@@ -5,6 +5,7 @@ defmodule Picape.Supermarket do
   alias Picape.Supermarket.KeepLogin
   alias Picape.Supermarket.SearchResult
   alias Picape.Supermarket.CartItems
+  alias Picape.Order.LineFromSupermarket
 
   def search(""), do: []
 
@@ -20,11 +21,13 @@ defmodule Picape.Supermarket do
   end
 
   def apply_changes(changes, attempt \\ 1) do
-    with items <- CartItems.apply_changes(changes, &product_title_by_id/1) do
+    with cart <- cart(),
+         items <- CartItems.apply_changes(changes, &product_title_by_id/1) do
       post!(
         "/mobile-services/v7/order/items",
         %{"items" => items},
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Appie-Current-Order-Id": cart["id"]
       )
       |> case do
         %{status_code: 200, body: cart} ->
@@ -51,7 +54,17 @@ defmodule Picape.Supermarket do
 
   def cart() do
     ConCache.get_or_store(:supermarket, :cart, fn ->
-      get!("/mobile-services/v7/order/summaries/active").body
+      case get!("/mobile-services/shoppinglist/v2/shoppinglist") do
+        %{status_code: 200, body: cart} ->
+          cart
+
+        # When an order has a delivery slot, the endpoint changes
+        %{status_code: 412, body: cart} ->
+          get!("/mobile-services/v7/order/summaries/active").body
+
+        _ ->
+          raise RuntimeError
+      end
     end)
   end
 
@@ -69,7 +82,6 @@ defmodule Picape.Supermarket do
     post!("/refresh-token?client=appie&refresh_token=#{refresh_token}", nil, "X-Refresh-Token": true).body
   end
 
-  @spec invalidate_orders :: :ok
   def invalidate_orders() do
     ConCache.delete(:supermarket, :orders)
   end
@@ -122,18 +134,19 @@ defmodule Picape.Supermarket do
   end
 
   defp process_request_headers(headers) do
-    headers =
-      headers
-      |> Keyword.merge(Accept: "*/*")
-      |> Keyword.merge(config(:headers) || [])
-      |> Keyword.merge("X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
+    headers
+    |> Keyword.merge(Accept: "*/*")
+    |> Keyword.merge(config(:headers) || [])
+    |> Keyword.merge("X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
+    |> maybe_add_authorization_bearer(Keyword.has_key?(headers, :"X-Refresh-Token"))
+    |> IO.inspect(label: "160")
+  end
 
-    if Keyword.has_key?(headers, :"X-Refresh-Token") do
-      headers
-    else
-      headers
-      |> Keyword.merge(Authorization: "Bearer #{KeepLogin.get_access_token()}")
-    end
+  defp maybe_add_authorization_bearer(headers, true), do: headers
+
+  defp maybe_add_authorization_bearer(headers, false) do
+    headers
+    |> Keyword.merge(Authorization: "Bearer #{KeepLogin.get_access_token()}")
   end
 
   defp process_request_body(body) do

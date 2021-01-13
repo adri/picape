@@ -1,7 +1,7 @@
 defmodule Picape.Order.Sync do
   alias Picape.Order.{Product}
 
-  defmodule(Changes, do: defstruct(add: [], modify: [], remove: []))
+  defmodule(Changes, do: defstruct(add: [], remove: []))
 
   def changes(planned, manual, existing) do
     with {:ok} <- validate(planned),
@@ -35,10 +35,7 @@ defmodule Picape.Order.Sync do
         |> changes_for_id(id, new[id], existing[id])
       end)
 
-    case changes do
-      %Changes{add: [], modify: [], remove: []} -> {:error, :no_changes}
-      changes -> {:ok, changes}
-    end
+    {:ok, changes}
   end
 
   defp changes_for_id(changes, id, new_count, existing_count) do
@@ -57,11 +54,11 @@ defmodule Picape.Order.Sync do
       new_count == existing_count ->
         changes
 
-      new_count == 0 && existing_count != nil ->
-        remove_change(changes, id)
+      new_count > existing_count ->
+        add_change(changes, id, new_count - existing_count)
 
-      new_count != existing_count ->
-        modify_change(changes, id, new_count)
+      new_count < existing_count ->
+        remove_change(changes, id, existing_count - new_count)
     end
   end
 
@@ -69,11 +66,7 @@ defmodule Picape.Order.Sync do
     %{changes | add: [%Product{id: id, quantity: quantity} | changes.add]}
   end
 
-  defp modify_change(changes, id, quantity) do
-    %{changes | modify: [%Product{id: id, quantity: quantity} | changes.modify]}
-  end
-
-  defp remove_change(changes, id) do
-    %{changes | remove: [%Product{id: id, quantity: 0} | changes.remove]}
+  defp remove_change(changes, id, quantity) do
+    %{changes | remove: [%Product{id: id, quantity: quantity} | changes.remove]}
   end
 end
