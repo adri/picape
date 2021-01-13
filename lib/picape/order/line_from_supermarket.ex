@@ -26,7 +26,7 @@ defmodule Picape.Order.LineFromSupermarket do
       id: item["product"]["webshopId"],
       name: item["product"]["title"],
       image_url: Supermarket.image_url(item["product"]),
-      quantity: item["quantity"]
+      quantity: item["amount"]
     }
   end
 end
