@@ -20,16 +20,10 @@ defmodule Picape.Supermarket do
   end
 
   def apply_changes(changes, attempt \\ 1) do
-    with cart <- cart(),
-         items <- CartItems.from_supermarket_cart(cart),
-         items <- CartItems.apply_changes(items, changes, &product_title_by_id/1) do
+    with items <- CartItems.apply_changes(changes, &product_title_by_id/1) do
       post!(
-        "/mobile-services/shoppinglist/v2/shoppinglist",
-        %{
-          "activeSorting" => cart["activeSorting"],
-          "dateLastSyncedMillis" => cart["dateLastSyncedMillis"],
-          "items" => items
-        },
+        "/mobile-services/v7/order/items",
+        %{"items" => items},
         "Content-Type": "application/json"
       )
       |> case do
@@ -39,7 +33,6 @@ defmodule Picape.Supermarket do
 
         # Conflict, try again
         %{status_code: 409} ->
-          invalidate_cart()
           apply_changes(changes)
 
         # "Random" error, try again 3x times
@@ -81,6 +74,7 @@ defmodule Picape.Supermarket do
     ConCache.delete(:supermarket, :orders)
   end
 
+  @spec latest_order_id(any) :: any
   def latest_order_id(orders) do
     try do
       # before delivering, the latest order is in "current_orders"
@@ -147,19 +141,19 @@ defmodule Picape.Supermarket do
     Poison.encode!(body)
   end
 
-  # defp process_request_options(options) do
-  #   options
-  #   |> Keyword.merge(
-  #     hackney: [
-  #       {:proxy, {"localhost", 8888}},
-  #       {:ssl_options,
-  #        [
-  #          {:versions, [:"tlsv1.2"]},
-  #          {:cacertfile, "/Users/adrimbp/workspace/proxyman-ca.pem"}
-  #        ]}
-  #     ]
-  #   )
-  # end
+  defp process_request_options(options) do
+    options
+    |> Keyword.merge(
+      hackney: [
+        {:proxy, {"localhost", 8888}},
+        {:ssl_options,
+         [
+           {:versions, [:"tlsv1.2"]},
+           {:cacertfile, "/Users/adrimbp/workspace/proxyman-ca.pem"}
+         ]}
+      ]
+    )
+  end
 
   defp config(key) do
     Application.get_env(:picape, __MODULE__)[key]
