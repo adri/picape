@@ -5,7 +5,6 @@ defmodule Picape.Supermarket do
   alias Picape.Supermarket.KeepLogin
   alias Picape.Supermarket.SearchResult
   alias Picape.Supermarket.CartItems
-  alias Picape.Order.LineFromSupermarket
 
   def search(""), do: []
 
@@ -59,7 +58,7 @@ defmodule Picape.Supermarket do
           cart
 
         # When an order has a delivery slot, the endpoint changes
-        %{status_code: 412, body: cart} ->
+        %{status_code: 412, body: _cart} ->
           get!("/mobile-services/v7/order/summaries/active").body
 
         _ ->
@@ -148,6 +147,8 @@ defmodule Picape.Supermarket do
     headers
     |> Keyword.merge(Authorization: "Bearer #{KeepLogin.get_access_token()}")
   end
+
+  defp process_request_body(""), do: ""
 
   defp process_request_body(body) do
     Poison.encode!(body)
