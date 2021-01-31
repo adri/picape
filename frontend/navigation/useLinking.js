@@ -1,10 +1,9 @@
-import { useLinking } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 
-export default function (containerRef) {
-  return useLinking(containerRef, {
-    prefixes: [Linking.makeUrl("#")],
-    config: {
+const config = {
+  prefixes: [Linking.makeUrl("#")],
+  config: {
+    screens: {
       Root: {
         initialRouteName: "plan",
         path: "/",
@@ -28,5 +27,7 @@ export default function (containerRef) {
         path: "recipes",
       },
     },
-  });
-}
+  },
+};
+
+export default config;

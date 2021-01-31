@@ -43,22 +43,22 @@ function TabBar(props) {
   );
 }
 
-const PlanStack = createStackNavigator();
+const Stack = createStackNavigator();
 
-function PlanStackScreen() {
+export default function PlanStackScreen() {
   return (
-    <PlanStack.Navigator
+    <Stack.Navigator
       headerMode="none"
       screenOptions={() => ({
         animationEnabled: true,
         ...TransitionPresets.SlideFromRightIOS,
       })}
     >
-      <PlanStack.Screen name="PlanScreen" component={PlanScreen} />
-      <PlanStack.Screen name="RecipeList" component={RecipeListScreen} />
-      <PlanStack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
-      <PlanStack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
-      <PlanStack.Screen
+      <Stack.Screen name="PlanScreen" component={BottomTabNavigator} />
+      <Stack.Screen name="RecipeList" component={RecipeListScreen} />
+      <Stack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
+      <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
+      <Stack.Screen
         name="NewRecipe"
         component={NewRecipeScreen}
         options={() => ({
@@ -66,11 +66,11 @@ function PlanStackScreen() {
           ...TransitionPresets.ModalPresentationIOS,
         })}
       />
-    </PlanStack.Navigator>
+    </Stack.Navigator>
   );
 }
 
-export default function BottomTabNavigator({ navigation, route }) {
+function BottomTabNavigator() {
   return (
     <BottomTab.Navigator
       initialRouteName={INITIAL_ROUTE_NAME}
@@ -87,7 +87,7 @@ export default function BottomTabNavigator({ navigation, route }) {
     >
       <BottomTab.Screen
         name="plan"
-        component={PlanStackScreen}
+        component={PlanScreen}
         options={{
           title: "Recepten",
           tabBarIcon: ({ focused }) => (

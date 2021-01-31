@@ -77,7 +77,7 @@ function groupByTag(items) {
   return items.reduce((grouped, item) => {
     let tag = { id: "other", name: "Other" };
 
-    if (item.ingredient.tags.length > 0) {
+    if (item.ingredient && item.ingredient.tags.length > 0) {
       tag = item.ingredient.tags[0];
     }
 
