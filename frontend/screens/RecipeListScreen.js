@@ -28,7 +28,25 @@ export function RecipeListScreen({ navigation }) {
         }}
       />
 
-      <SectionHeader title="Alle Recepten" style={{ marginTop: 30 }} />
+      <SectionHeader title={""}>
+        <Text
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.navigate("NewRecipe");
+          }}
+          style={[
+            Type.sectionLink,
+            {
+              color: Colors.secondaryText,
+              fontSize: 14,
+              paddingBottom: 2,
+            },
+          ]}
+        >
+          Nieuw Recept
+        </Text>
+      </SectionHeader>
+      <SectionHeader title="Alle Recepten" />
 
       <SkeletonContent
         layout={Array(3).fill({

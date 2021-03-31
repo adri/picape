@@ -15,7 +15,7 @@ export const orderFields = gql`
         name
         imageUrl
         isPlanned(inShoppingList: false)
-        orderedQuantity(inShoppingList: false)
+        orderedQuantity
         plannedRecipes(inShoppingList: false) {
           quantity
           recipe {

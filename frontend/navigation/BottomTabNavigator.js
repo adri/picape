@@ -21,7 +21,6 @@ import WeekPlannerScreen from "../screens/WeekPlannerScreen";
 import { RecipeListScreen } from "../screens/RecipeListScreen";
 import { NewRecipeScreen } from "../screens/NewRecipeScreen";
 
-const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = "plan";
 
 function TabBar(props) {
@@ -69,6 +68,8 @@ export default function PlanStackScreen() {
     </Stack.Navigator>
   );
 }
+
+const BottomTab = createBottomTabNavigator();
 
 function BottomTabNavigator() {
   return (

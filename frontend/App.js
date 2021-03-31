@@ -10,7 +10,7 @@ import { Socket as PhoenixSocket } from "phoenix";
 import { onError } from "apollo-link-error";
 import { ApolloLink } from "apollo-link";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AppearanceProvider, useColorScheme } from "react-native-appearance";
+import { useColorScheme } from "react-native-appearance";
 import * as Updates from "expo-updates";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
 import linking from "./navigation/useLinking";

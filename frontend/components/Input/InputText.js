@@ -13,7 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 const Icon = Ionicons;
 
-class Input extends React.Component {
+class InputText extends React.Component {
   shakeAnimationValue = new Animated.Value(0);
 
   focus() {
@@ -150,24 +150,24 @@ class Input extends React.Component {
   }
 }
 
-Input.propTypes = {
+InputText.propTypes = {
   containerStyle: PropTypes.object,
   disabled: PropTypes.bool,
   disabledInputStyle: PropTypes.object,
-  inputContainerStyle: PropTypes.object,
+  // inputContainerStyle: PropTypes.object,
   leftIconContainerStyle: PropTypes.object,
   rightIconContainerStyle: PropTypes.object,
-  inputStyle: PropTypes.object,
+  // inputStyle: PropTypes.object,
   errorProps: PropTypes.object,
   errorStyle: PropTypes.object,
   errorMessage: PropTypes.string,
   label: PropTypes.node,
-  labelStyle: PropTypes.object,
+  // labelStyle: PropTypes.object,
   labelProps: PropTypes.object,
   renderErrorMessage: PropTypes.bool,
 };
 
-Input.defaultProps = {
+InputText.defaultProps = {
   InputComponent: TextInput,
   renderErrorMessage: true,
 };
@@ -215,4 +215,4 @@ const styles = {
   },
 };
 
-export { Input };
+export { InputText };

@@ -1,17 +1,13 @@
-import gql from "graphql-tag";
 import Colors from "../../constants/Colors";
-import Layout from "../../constants/Layout";
-import { Input } from "./Input";
+import { InputText } from "../Input/InputText";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import {
-  TouchableOpacity,
   LayoutAnimation,
   UIManager,
   StyleSheet,
   View,
   ActivityIndicator,
-  Text,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const Icon = Ionicons;
@@ -125,7 +121,7 @@ class SearchBar extends Component {
 
     return (
       <View style={StyleSheet.flatten([styles.container, containerStyle])}>
-        <Input
+        <InputText
           testID="searchInput"
           renderErrorMessage={false}
           {...attributes}
@@ -175,41 +171,6 @@ class SearchBar extends Component {
             rightIconContainerStyle,
           ])}
         />
-
-        {/* <View
-          style={StyleSheet.flatten([
-            styles.cancelButtonContainer,
-            {
-              opacity: this.state.cancelButtonWidth === null ? 0 : 1,
-              right: hasFocus ? 0 : -this.state.cancelButtonWidth,
-            },
-          ])}
-          onLayout={(event) =>
-            this.setState({ cancelButtonWidth: event.nativeEvent.layout.width })
-          }
-        >
-          <TouchableOpacity
-            accessibilityRole="button"
-            onPress={this.cancel}
-            disabled={buttonDisabled}
-            {...otherCancelButtonProps}
-          >
-            <View style={[buttonStyle, buttonDisabled && buttonDisabledStyle]}>
-              <Text
-                style={[
-                  styles.buttonTextStyle,
-                  buttonColor && { color: buttonColor },
-                  buttonTextStyle,
-                  buttonDisabled &&
-                    (buttonDisabledTextStyle || styles.buttonTextDisabled),
-                ]}
-                disabled={buttonDisabled}
-              >
-                {cancelButtonTitle}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View> */}
       </View>
     );
   }
