@@ -1,0 +1,38 @@
+version: 2
+updates:
+- package-ecosystem: mix
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: "02:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: floki
+    versions:
+    - 0.29.0
+    - 0.30.0
+  - dependency-name: excoveralls
+    versions:
+    - 0.13.4
+  - dependency-name: cors_plug
+    versions:
+    - 2.0.2
+  - dependency-name: con_cache
+    versions:
+    - 0.14.0
+- package-ecosystem: npm
+  directory: "/assets"
+  schedule:
+    interval: daily
+    time: "02:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: lodash-es
+    versions:
+    - 4.17.20
+  - dependency-name: phoenix
+    versions:
+    - 1.5.7
+  - dependency-name: elliptic
+    versions:
+    - 6.5.3
