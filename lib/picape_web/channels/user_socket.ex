@@ -10,7 +10,7 @@ defmodule PicapeWeb.UserSocket do
     check_origin: [
       "//picape.whybug.com",
       "//web-build.adri.now.sh",
-      "//web-build.adri.vercel.app",
+      "//web-build-adri.vercel.app",
       "//localhost"
     ]
   )
