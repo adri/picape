@@ -52,10 +52,6 @@ export default class Layout extends React.Component {
           <meta name="application-name" content="Picape" />
           <meta name="theme-color" content="#B07762" />
 
-          <meta
-            name="apple-mobile-web-app-status-bar-style"
-            content="black-translucent"
-          />
           <meta name="apple-mobile-web-app-title" content="Picape" />
 
           <title>{title}</title>
