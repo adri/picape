@@ -9,7 +9,9 @@ defmodule Picape.Supermarket do
   def search(""), do: []
 
   def search(query) do
-    get!("/mobile-services/product/search/v2?page=0&query=#{Plug.Conn.Query.encode(query)}&sortOn=RELEVANCE").body
+    get!(
+      "/mobile-services/product/search/v2?page=0&query=#{Plug.Conn.Query.encode(query)}&sortOn=RELEVANCE"
+    ).body
     |> SearchResult.from_result()
   end
 
@@ -78,7 +80,10 @@ defmodule Picape.Supermarket do
   end
 
   def access_token_from_refresh_token(refresh_token) do
-    post!("/refresh-token?client=appie&refresh_token=#{refresh_token}", nil, "X-Refresh-Token": true).body
+    post!("/mobile-auth/v1/auth/token/refresh", %{
+      "refreshToken" => refresh_token,
+      "clientId" => "appie"
+    }).body
   end
 
   def invalidate_orders() do
@@ -136,7 +141,9 @@ defmodule Picape.Supermarket do
     headers
     |> Keyword.merge(Accept: "*/*")
     |> Keyword.merge(config(:headers) || [])
-    |> Keyword.merge("X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
+    |> Keyword.merge(
+      "X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}"
+    )
     |> maybe_add_authorization_bearer(Keyword.has_key?(headers, :"X-Refresh-Token"))
     |> IO.inspect(label: "160")
   end
