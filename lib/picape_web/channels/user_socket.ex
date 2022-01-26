@@ -5,18 +5,6 @@ defmodule PicapeWeb.UserSocket do
   ## Channels
   # channel "room:*", PicapeWeb.RoomChannel
 
-  ## Transports
-  transport(:websocket, Phoenix.Transports.WebSocket,
-    check_origin: [
-      "//picape.whybug.com",
-      "//web-build.adri.now.sh",
-      "//web-build-adri.vercel.app",
-      "//localhost"
-    ]
-  )
-
-  # transport :longpoll, Phoenix.Transports.LongPoll
-
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
   # verification, you can put default assigns into

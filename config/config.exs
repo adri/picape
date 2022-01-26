@@ -13,7 +13,7 @@ config :picape, PicapeWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "/XS66yr6BbUsl0+u0pjJIxa0lK5whxGGWGZLuWuBSCbnmNcsRLz+gvyRathkiAM8",
   render_errors: [view: PicapeWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Picape.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub_server: Picape.PubSub
 
 config :picape, Picape.Scheduler,
   jobs: [
@@ -30,7 +30,7 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-config :reverse_proxy, upstreams: %{:_ => ["http://0.0.0.0:4001"]}
+config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.HTTPoison
 
 config :absinthe, schema: PicapeWeb.Graphql.Schema
 
@@ -50,6 +50,7 @@ config :picape, :supermarket, Picape.Supermarket
 
 config :picape, Picape.Seasonal, base_url: "https://groentefruit.milieucentraal.nl/"
 
+config :phoenix, :json_library, Jason
 config :phoenix, :format_encoders, json: Jason
 config :mix_docker, image: "adri/picape"
 

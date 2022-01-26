@@ -2,7 +2,14 @@ defmodule PicapeWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :picape
   use Absinthe.Phoenix.Endpoint
 
-  socket("/socket", PicapeWeb.UserSocket)
+  socket("/socket", PicapeWeb.UserSocket,
+    check_origin: [
+      "//picape.whybug.com",
+      "//web-build.adri.now.sh",
+      "//web-build-adri.vercel.app",
+      "//localhost"
+    ]
+  )
 
   # Serve at "/" the static files from "priv/static" directory.
   #
