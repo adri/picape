@@ -9,9 +9,7 @@ defmodule Picape.Supermarket do
   def search(""), do: []
 
   def search(query) do
-    get!(
-      "/mobile-services/product/search/v2?page=0&query=#{Plug.Conn.Query.encode(query)}&sortOn=RELEVANCE"
-    ).body
+    get!("/mobile-services/product/search/v2?page=0&query=#{Plug.Conn.Query.encode(query)}&sortOn=RELEVANCE").body
     |> SearchResult.from_result()
   end
 
@@ -80,10 +78,15 @@ defmodule Picape.Supermarket do
   end
 
   def access_token_from_refresh_token(refresh_token) do
-    post!("/mobile-auth/v1/auth/token/refresh", %{
-      "refreshToken" => refresh_token,
-      "clientId" => "appie"
-    }).body
+    post!(
+      "/mobile-auth/v1/auth/token/refresh",
+      %{
+        "refreshToken" => refresh_token,
+        "clientId" => "appie"
+      },
+      "Content-Type": "application/json",
+      "X-Refresh-Token": true
+    ).body
   end
 
   def invalidate_orders() do
