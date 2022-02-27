@@ -18,12 +18,14 @@ config :picape, PicapeWeb.Endpoint,
 config :picape, Picape.Scheduler,
   jobs: [
     # Runs every midnight
-    {"@daily",
-     fn ->
-       Picape.Supermarket.invalidate_orders()
-       Picape.Order.sync_supermarket("1")
-     end}
+    {"@daily", {Picape.Supermarket, :invalidate_orders, []}},
+    {"@daily", {Picape.Order, :sync_supermarket, ["1"]}}
   ]
+
+config :new_relic_agent,
+  app_name: "picape",
+  license_key: System.get_env("NEW_RELIC_LICENSE_KEY"),
+  logs_in_context: :direct
 
 # Configures Elixir's Logger
 config :logger, :console,

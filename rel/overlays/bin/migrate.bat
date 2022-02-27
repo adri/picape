@@ -1,0 +1,1 @@
+call "%~dp0\picape" eval Picape.Release.migrate
