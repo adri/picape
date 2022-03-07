@@ -130,7 +130,7 @@ defmodule Picape.Supermarket do
   end
 
   def process_request_url(url) do
-    url |> IO.inspect(label: "133")
+    url |> IO.inspect(label: "13311")
   end
 
   def process_response_body(body) do
