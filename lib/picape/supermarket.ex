@@ -125,6 +125,14 @@ defmodule Picape.Supermarket do
     config(:base_url) <> url
   end
 
+  def process_response_status_code(status_code) do
+    status_code |> IO.inspect(label: "129")
+  end
+
+  def process_request_url(url) do
+    url |> IO.inspect(label: "133")
+  end
+
   def process_response_body(body) do
     case Poison.decode(body) do
       {:ok, value} ->
@@ -144,9 +152,7 @@ defmodule Picape.Supermarket do
     headers
     |> Keyword.merge(Accept: "*/*")
     |> Keyword.merge(config(:headers) || [])
-    |> Keyword.merge(
-      "X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}"
-    )
+    |> Keyword.merge("X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
     |> maybe_add_authorization_bearer(Keyword.has_key?(headers, :"X-Refresh-Token"))
     |> IO.inspect(label: "160")
   end
