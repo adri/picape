@@ -16,7 +16,7 @@
 #
 ARG BUILDER_IMAGE="hexpm/elixir:1.13.2-erlang-24.2.1-debian-bullseye-20210902-slim"
 ARG RUNNER_IMAGE="debian:bullseye-20210902-slim"
-ARG NODE_VERSION="7.5"
+ARG NODE_VERSION="8.11.3"
 
 FROM ${BUILDER_IMAGE} as builder
 
@@ -43,6 +43,7 @@ WORKDIR /app
 # set build ENV
 ENV MIX_ENV="prod"
 ENV NODE_ENV="production"
+ENV HOST="picape.whybug.com"
 
 COPY mix.exs mix.lock ./
 
@@ -73,9 +74,10 @@ COPY assets assets
 RUN --mount=type=cache,target=~/.npm,sharing=locked \
   --mount=type=cache,target=/app/assets/node_modules,sharing=locked \
   --mount=type=cache,target=.next,sharing=locked \
-  cd assets && npm install --prefer-offline --no-audit --loglevel=error \
-  && HOST="picape.fly.dev" node_modules/.bin/next build \
-  && cp -R node_modules /node_modules_build
+  cd assets && npm install --lockfile-only --prefer-offline --no-audit --loglevel=error \
+  && node_modules/.bin/next build \
+  && cp -R node_modules /node_modules_build \
+  && cp -R .next /.next
 
 # compile assets
 RUN mix phx.digest
@@ -130,6 +132,7 @@ COPY --from=builder --chown=nobody:root /app/_build/prod/rel/picape ./
 COPY --from=builder --chown=nobody:root /app/bin ./bin
 COPY --from=builder --chown=nobody:root /app/assets ./assets
 COPY --from=builder --chown=nobody:root /node_modules_build ./assets/node_modules
+COPY --from=builder --chown=nobody:root /.next ./assets/.next
 
 USER nobody
 
