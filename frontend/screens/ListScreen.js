@@ -1,6 +1,6 @@
 import * as React from "react";
 import Colors from "../constants/Colors";
-import { useQuery, useSubscription } from "@apollo/react-hooks";
+import { useMutation, useQuery, useSubscription } from "@apollo/react-hooks";
 import {
   View,
   FlatList,
@@ -20,10 +20,19 @@ import { ImageCard } from "../components/Card/ImageCard";
 import { SUBSCRIBE_ORDER, GET_ORDER } from "../operations/getOrder";
 import { GET_ORDER_COUNT } from "../operations/getOrderCount";
 import { GET_RECIPES } from "../operations/getRecipes";
+import { START_SHOPPING } from "../operations/startShopping";
 
 function PlannedRecipes({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES, {
     fetchPolicy: "cache-only",
+  });
+  const [startShopping] = useMutation(START_SHOPPING, {
+    refetchQueries: [
+      "BasicsList",
+      "OrderList",
+      "RecipeList",
+      "LastOrderedRecipes",
+    ],
   });
 
   if (error) return `Error! ${error}`;
@@ -102,24 +111,7 @@ export default function ListScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView>
-        <SectionHeader title="Je mandje">
-          <Text
-            style={[
-              Type.sectionLink,
-              {
-                color: Colors.secondaryText,
-                fontSize: 14,
-                paddingBottom: 2,
-              },
-            ]}
-            onPress={(e) => {
-              e.preventDefault();
-              navigation.navigate("Shop");
-            }}
-          >
-            Afvinken
-          </Text>
-        </SectionHeader>
+        <SectionHeader title="Je mandje" />
 
         <PlannedRecipes navigation={navigation} />
 
@@ -173,6 +165,24 @@ export default function ListScreen({ navigation }) {
             }}
           />
         </SkeletonContent>
+        {currentOrder.items && currentOrder.items.length > 0 && (
+          <Text
+            style={[
+              Type.sectionLink,
+              {
+                color: Colors.secondaryText,
+                fontSize: 14,
+                alignSelf: "center",
+              },
+            ]}
+            onPress={(e) => {
+              e.preventDefault();
+              startShopping();
+            }}
+          >
+            Bestelling ontvangen
+          </Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
