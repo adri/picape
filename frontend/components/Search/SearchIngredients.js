@@ -2,9 +2,9 @@ import * as React from "react";
 import gql from "graphql-tag";
 import Colors from "../../constants/Colors";
 import { useLazyQuery } from "@apollo/react-hooks";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, View } from "react-native";
 import { ListItem } from "../ListItem/ListItem";
-import { QuantitySelector } from "../Ingredient/QuantitySelector";
+import { OrderQuantity } from "../Ingredient/OrderQuantity";
 import SearchBar from "../Search/SearchBar";
 import { orderFields } from "../../operations/getOrder";
 
@@ -54,7 +54,7 @@ export function SearchIngredients() {
         renderItem={({ item: ingredient }) => {
           return (
             <ListItem title={ingredient.name} imageUrl={ingredient.imageUrl}>
-              <QuantitySelector
+              <OrderQuantity
                 id={ingredient.id}
                 orderedQuantity={ingredient.orderedQuantity}
               />

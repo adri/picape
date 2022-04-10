@@ -6,7 +6,7 @@ import gql from "graphql-tag";
 import Colors from "../constants/Colors";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
-import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
+import { OrderQuantity } from "../components/Ingredient/OrderQuantity";
 import SkeletonContent from "react-native-skeleton-content";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -130,7 +130,7 @@ function BasicsList() {
                   )
                   .join(", ")}
               >
-                <QuantitySelector
+                <OrderQuantity
                   id={ingredient.id}
                   orderedQuantity={ingredient.orderedQuantity}
                   isPlanned={ingredient.isPlanned}

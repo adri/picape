@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
-import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
+import { OrderQuantity } from "../components/Ingredient/OrderQuantity";
 import SkeletonContent from "react-native-skeleton-content";
 import Type from "../constants/Type";
 import { ImageCard } from "../components/Card/ImageCard";
@@ -154,7 +154,7 @@ export default function ListScreen({ navigation }) {
                     )
                     .join(", ")}
                 >
-                  <QuantitySelector
+                  <OrderQuantity
                     id={ingredient?.id}
                     orderedQuantity={
                       ingredient?.orderedQuantity || item.quantity
