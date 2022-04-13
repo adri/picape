@@ -17,56 +17,45 @@
     />
     <title>%WEB_TITLE%</title>
     <style>
-      html,
-      body {
-        height: calc(100% + env(safe-area-inset-bottom));
-      }
-      body {
-        -ms-overflow-style: scrollbar;
-        overflow-y: scroll;
-        overscroll-behavior-y: none;
-      }
-
       /**
        * Extend the react-native-web reset:
        * https://github.com/necolas/react-native-web/blob/master/packages/react-native-web/src/exports/StyleSheet/initialRules.js
        */
       html,
       body,
-      #rootWrapper,
       #root {
+        width: 100%;
+        /* To smooth any scrolling behavior */
+        -webkit-overflow-scrolling: touch;
         margin: 0px;
         padding: 0px;
         /* Allows content to fill the viewport and go beyond the bottom */
+        min-height: 100%;
+      }
+      #root {
+        flex-shrink: 0;
+        flex-basis: auto;
+        flex-grow: 1;
+        display: flex;
+        flex: 1;
       }
 
       html {
+        scroll-behavior: smooth;
         /* Prevent text size change on orientation change https://gist.github.com/tfausak/2222823#file-ios-8-web-app-html-L138 */
-        overflow: hidden;
+        -webkit-text-size-adjust: 100%;
+        height: calc(100% + env(safe-area-inset-top));
       }
 
       body {
-        /* To smooth any scrolling behavior */
-        -webkit-overflow-scrolling: auto;
-
+        display: flex;
         /* Allows you to scroll below the viewport; default value is visible */
+        overflow-y: auto;
+        overscroll-behavior-y: none;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        background-color: white;
-      }
-
-      #rootWrapper {
-        height: calc(100% + env(safe-area-inset-bottom));
-      }
-
-      #root {
-        display: flex;
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        bottom: calc(-1 * env(safe-area-inset-top));
-        left: 0px;
+        -ms-overflow-style: scrollbar;
       }
 
       /* Enable for apps that support dark-theme */
@@ -132,8 +121,6 @@
       </form>
     </noscript>
     <!-- The root element for your Expo app. -->
-    <div id="rootWrapper">
-      <div id="root"></div>
-    </div>
+    <div id="root"></div>
   </body>
 </html>
