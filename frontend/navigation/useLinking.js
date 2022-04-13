@@ -24,7 +24,10 @@ const config = {
         path: "recipes",
       },
       WeekPlanner: {
-        path: "recipes",
+        path: "planner",
+      },
+      EditRecipe: {
+        path: "edit-recipe",
       },
     },
   },

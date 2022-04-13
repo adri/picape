@@ -18,6 +18,7 @@ import { useColorScheme } from "react-native-appearance";
 import { ListCountBadge } from "../components/Badge/ListCountBadge";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 import WeekPlannerScreen from "../screens/WeekPlannerScreen";
+import {EditRecipeScreen} from "../screens/EditRecipeScreen";
 import { RecipeListScreen } from "../screens/RecipeListScreen";
 import { NewRecipeScreen } from "../screens/NewRecipeScreen";
 
@@ -57,6 +58,10 @@ export default function PlanStackScreen() {
       <Stack.Screen name="RecipeList" component={RecipeListScreen} />
       <Stack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
       <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
+      <Stack.Screen name="EditRecipe" component={EditRecipeScreen} options={() => ({
+          animationEnabled: true,
+          ...TransitionPresets.ModalPresentationIOS,
+        })} />
       <Stack.Screen
         name="NewRecipe"
         component={NewRecipeScreen}
