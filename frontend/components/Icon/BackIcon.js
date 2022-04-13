@@ -10,16 +10,13 @@ export function BackIcon(props) {
       onPress={props.onPress}
     >
       <View
-        style={[
-          {
-            width: 30,
-            height: 30,
-            borderRadius: 15,
-            backgroundColor: Colors.iconDefault,
-            margin: 10,
-          },
-          props.style,
-        ]}
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 15,
+          backgroundColor: Colors.iconDefault,
+          margin: 10,
+        }}
       >
         <Ionicons
           name={"ios-chevron-back"}
