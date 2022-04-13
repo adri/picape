@@ -26,14 +26,6 @@ function PlannedRecipes({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES, {
     fetchPolicy: "cache-only",
   });
-  const [startShopping] = useMutation(START_SHOPPING, {
-    refetchQueries: [
-      "BasicsList",
-      "OrderList",
-      "RecipeList",
-      "LastOrderedRecipes",
-    ],
-  });
 
   if (error) return `Error! ${error}`;
 
@@ -101,6 +93,14 @@ export default function ListScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_ORDER, {
     fetchPolicy: "cache-and-network",
   });
+  const [startShopping] = useMutation(START_SHOPPING, {
+    refetchQueries: [
+      "BasicsList",
+      "OrderList",
+      "RecipeList",
+      "LastOrderedRecipes",
+    ],
+  });
 
   if (error) return `Error! ${error}`;
 
@@ -165,7 +165,7 @@ export default function ListScreen({ navigation }) {
             }}
           />
         </SkeletonContent>
-        {currentOrder.items && currentOrder.items.length > 0 && (
+        {currentOrder.items && (
           <Text
             style={[
               Type.sectionLink,
