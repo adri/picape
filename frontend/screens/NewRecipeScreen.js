@@ -11,7 +11,7 @@ import Type from "../constants/Type";
 
 export function NewRecipeScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
-  const { recipes = [] } = data;
+  const { recipe = {} } = data;
   const insets = useSafeArea();
 
   if (error) return `Error! ${error}`;

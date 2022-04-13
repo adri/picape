@@ -15,9 +15,11 @@ import Hyperlink from "react-native-hyperlink";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
 import SkeletonContent from "react-native-skeleton-content";
-import { useSafeArea } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Layout from "../constants/Layout";
 import { Badge } from "../components/Badge/Badge";
+import Type from "../constants/Type";
+import { EditIcon } from "../components/Icon/EditIcon";
 
 var linkify = require("linkify-it")();
 linkify.add("shortcuts:", "http:");
@@ -63,10 +65,11 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
   });
   if (error) return `Error! ${error}`;
   const { recipe = params.recipe } = data;
-  const insets = useSafeArea();
+  const insets = useSafeAreaInsets();
   const steps = (recipe.description || "").split("\n\n");
   const [stepChecked, setStepsChecked] = React.useState([]);
 
+  console.log({ insets })
   return (
     <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
       <BackIcon
@@ -95,7 +98,12 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         ></View>
       </ImageBackground>
 
-      <SectionHeader title={recipe.title} />
+      <SectionHeader title={recipe.title}>
+        <EditIcon onPress={(e) => {
+              e.preventDefault();
+              navigation.navigate("EditRecipe", { recipeId: recipe.id });
+         }} />
+      </SectionHeader>
 
       <SkeletonContent
         layout={[

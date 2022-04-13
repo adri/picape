@@ -1,13 +1,11 @@
 import * as React from "react";
-import { Text, View, FlatList, Dimensions } from "react-native";
+import { Text, View, FlatList } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { useQuery, useSubscription } from "@apollo/react-hooks";
+import { useQuery  } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Colors from "../constants/Colors";
 import { ImageCard } from "../components/Card/ImageCard";
 import { SectionHeader } from "../components/Section/SectionHeader";
-import { ListItem } from "../components/ListItem/ListItem";
-import { QuantitySelector } from "../components/Ingredient/QuantitySelector";
 import SkeletonContent from "react-native-skeleton-content";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Type from "../constants/Type";
