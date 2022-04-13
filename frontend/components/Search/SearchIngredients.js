@@ -20,7 +20,16 @@ const SEARCH_INGREDIENTS = gql`
   ${orderFields}
 `;
 
-export function SearchIngredients() {
+const renderItem = ({ item: ingredient }) => (
+  <ListItem title={ingredient.name} imageUrl={ingredient.imageUrl}>
+    <OrderQuantity
+      id={ingredient.id}
+      orderedQuantity={ingredient.orderedQuantity}
+    />
+  </ListItem>
+);
+
+export function SearchIngredients({autoFocus = true, customRenderItem = null}) {
   const [
     searchIngredients,
     {
@@ -42,7 +51,7 @@ export function SearchIngredients() {
           return searchIngredients({ variables: { query } });
         }}
         value={query}
-        autoFocus
+        autoFocus={autoFocus}
       />
 
       <FlatList
@@ -51,16 +60,7 @@ export function SearchIngredients() {
         }}
         data={query === "" ? [] : foundIngredients}
         keyExtractor={(item) => item.id}
-        renderItem={({ item: ingredient }) => {
-          return (
-            <ListItem title={ingredient.name} imageUrl={ingredient.imageUrl}>
-              <OrderQuantity
-                id={ingredient.id}
-                orderedQuantity={ingredient.orderedQuantity}
-              />
-            </ListItem>
-          );
-        }}
+        renderItem={customRenderItem || renderItem}
       />
     </View>
   );
