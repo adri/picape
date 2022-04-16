@@ -7,7 +7,7 @@ import {
   SUBSCRIBE_ORDER_COUNT,
 } from "../../operations/getOrderCount";
 
-export function ListCountBadge() {
+export function ListCountBadge({ focused = false }) {
   const { loading, error, data = {} } = useQuery(GET_ORDER_COUNT);
   const { data: subscription = {} } = useSubscription(SUBSCRIBE_ORDER_COUNT);
   const { currentOrder: { totalCount: countQuery } = {} } = data;
@@ -19,7 +19,9 @@ export function ListCountBadge() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      { backgroundColor: focused ? Colors.badgeBackground : Colors.badgeBackgroundInactive }]}>
       <Text
         style={{ color: Colors.badgeText, fontSize: 10, fontWeight: "bold" }}
       >
@@ -34,9 +36,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: -6,
     top: 2,
-    backgroundColor: Colors.badgeBackground,
-    borderWidth: 1,
-    borderColor: Colors.tabIconDefault,
     borderRadius: 8,
     width: 16,
     height: 16,

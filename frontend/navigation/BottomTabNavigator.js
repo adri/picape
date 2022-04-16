@@ -119,7 +119,7 @@ function BottomTabNavigator() {
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               focused={focused}
-              badge={<ListCountBadge />}
+              badge={<ListCountBadge focused={focused} />}
               name="ios-cart"
             />
           ),

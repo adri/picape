@@ -81,6 +81,7 @@ const lightTheme = {
   link: tintColor,
   tabIconDefault: palette["grey-400"],
   tabIconSelected: tintColor,
+  tabIconInactive: palette["grey-200"],
   tabBar: "transparent", //"#fefefe",
   errorBackground: "red",
   errorText: "#fff",
@@ -106,6 +107,7 @@ const lightTheme = {
 
   // Badge
   badgeBackground: tintColor, // palette["green-400"],
+  badgeBackgroundInactive: palette["grey-300"],
   badgeText: "white",
 
   // Card
@@ -123,6 +125,7 @@ const darkTheme = {
   text: "white",
   link: tintColor,
   tabIconDefault: palette["grey-200"],
+  tabIconInactive: palette["grey-600"],
   tabIconSelected: tintColor,
   tabBar: "transparent", //"#fefefe",
   errorBackground: "red",
@@ -149,6 +152,7 @@ const darkTheme = {
 
   // Badge
   badgeBackground: tintColor, // palette["green-400"],
+  badgeBackgroundInactive: palette["grey-800"],
   badgeText: "white",
 
   // Card
