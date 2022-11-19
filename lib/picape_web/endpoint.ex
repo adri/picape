@@ -6,7 +6,7 @@ defmodule PicapeWeb.Endpoint do
     check_origin: [
       "//picape.whybug.com",
       "//web-build.adri.now.sh",
-      "//web-build-adri.vercel.app",
+      "https://web-build-adri.vercel.app",
       "//localhost"
     ]
   )
