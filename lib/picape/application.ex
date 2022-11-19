@@ -10,21 +10,22 @@ defmodule Picape.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
+      {Phoenix.PubSub, name: Picape.PubSub},
       # Start the Ecto repository
-      supervisor(Picape.Repo, []),
+      Picape.Repo,
       # Start the endpoint when the application starts
-      supervisor(PicapeWeb.Endpoint, []),
-      supervisor(Absinthe.Subscription, [PicapeWeb.Endpoint]),
+      PicapeWeb.Endpoint,
+      {Absinthe.Subscription, PicapeWeb.Endpoint},
       # Start your own worker by calling: Picape.Worker.start_link(arg1, arg2, arg3)
       # worker(Picape.Worker, [arg1, arg2, arg3]),
-      worker(Picape.Scheduler, []),
+      Picape.Scheduler,
       {ConCache,
        [
          name: :supermarket,
          global_ttl: :timer.hours(5),
          ttl_check_interval: :timer.seconds(60)
        ]},
-      supervisor(Picape.Seasonal, [])
+      Picape.Seasonal
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

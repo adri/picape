@@ -20,6 +20,12 @@ config :picape, PicapeWeb.Endpoint,
   #  force_ssl: [rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/cache_manifest.json",
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
+  check_origin: [
+    "//picape.whybug.com",
+    "//web-build.adri.now.sh",
+    "https://web-build-adri.vercel.app",
+    "//localhost"
+  ],
   watchers: [
     bash: [
       "../bin/spawn_execute.sh",
@@ -31,26 +37,8 @@ config :picape, PicapeWeb.Endpoint,
     ]
   ]
 
-config :picape, Picape.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  url: System.get_env("DATABASE_URL"),
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-  ssl: true
-
 # Do not print debug messages in production
 config :logger, level: :warn
-
-config :picape, Picape.Supermarket,
-  base_url: System.get_env("SUPERMARKET_BASE_URL"),
-  static_url: System.get_env("SUPERMARKET_STATIC_URL"),
-  headers: [
-    "Accept-Language": "en-NL;q=1.0, de-NL;q=0.9, nl-NL;q=0.8",
-    "Accept-Encoding": "br;q=1.0, gzip;q=0.9, deflate;q=0.8",
-    "X-Correlation-Id": System.get_env("SUPERMARKET_CORRELATION_ID"),
-    "X-ClientVersion": System.get_env("SUPERMARKET_CLIENT_VERSION"),
-    "X-Clientname": System.get_env("SUPERMARKET_CLIENT_NAME"),
-    "User-Agent": System.get_env("SUPERMARKET_USER_AGENT")
-  ]
 
 # config :picape, Picape.Mailer,
 #   adapter: Swoosh.Adapters.Sendgrid,

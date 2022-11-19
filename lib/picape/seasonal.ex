@@ -6,7 +6,7 @@ defmodule Picape.Seasonal do
 
   alias Picape.Seasonal.Parser
 
-  def start_link() do
+  def start_link(state) do
     Agent.start_link(fn -> product_infos() end, name: __MODULE__)
   end
 
