@@ -18,6 +18,7 @@ if config_env() == :prod do
     headers: [
       "Accept-Language": "en-NL;q=1.0, de-NL;q=0.9, nl-NL;q=0.8",
       "Accept-Encoding": "br;q=1.0, gzip;q=0.9, deflate;q=0.8",
+      "X-Application": System.get_env("SUPERMARKET_APPLICATION_NAME"),
       "X-Correlation-Id": System.get_env("SUPERMARKET_CORRELATION_ID"),
       "X-ClientVersion": System.get_env("SUPERMARKET_CLIENT_VERSION"),
       "X-Clientname": System.get_env("SUPERMARKET_CLIENT_NAME"),
