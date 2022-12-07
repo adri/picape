@@ -20,6 +20,7 @@ config :picape, Picape.Scheduler,
     # Runs every midnight
     {"@daily", {Picape.Supermarket, :invalidate_orders, []}},
     {"@daily", {Picape.Order, :sync_supermarket, ["1"]}}
+    {"@daily", {Picape.Supermarket.KeepLogin, :get_access_token, []}}
   ]
 
 config :new_relic_agent,
