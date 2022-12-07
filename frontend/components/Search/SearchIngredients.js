@@ -6,7 +6,6 @@ import { FlatList, View } from "react-native";
 import { ListItem } from "../ListItem/ListItem";
 import { OrderQuantity } from "../Ingredient/OrderQuantity";
 import SearchBar from "../Search/SearchBar";
-import { orderFields } from "../../operations/getOrder";
 
 const SEARCH_INGREDIENTS = gql`
   query SearchIngredient($query: String!) {
@@ -17,7 +16,6 @@ const SEARCH_INGREDIENTS = gql`
       orderedQuantity
     }
   }
-  ${orderFields}
 `;
 
 const renderItem = ({ item: ingredient }) => (
