@@ -121,16 +121,12 @@ defmodule Picape.Supermarket do
       ""
   end
 
-  defp process_url(url) do
-    config(:base_url) <> url
-  end
-
   def process_response_status_code(status_code) do
     status_code |> IO.inspect(label: "129")
   end
 
   def process_request_url(url) do
-    url |> IO.inspect(label: "13311")
+    config(:base_url) <> url
   end
 
   def process_response_body(body) do
