@@ -172,6 +172,7 @@ export default function ListScreen({ navigation }) {
               {
                 color: Colors.secondaryText,
                 fontSize: 14,
+                marginBottom: 100,
                 alignSelf: "center",
               },
             ]}
