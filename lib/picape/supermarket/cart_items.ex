@@ -39,7 +39,7 @@ defmodule Picape.Supermarket.CartItems do
   defp remove_changes(items, changes, get_product_description) do
     changes
     |> Enum.map(fn change ->
-      convert_supermarket_cart_item(change.id, -change.quantity, get_product_description.(change.id))
+      convert_supermarket_cart_item(change.id, 0, get_product_description.(change.id))
     end)
     |> Enum.concat(items)
   end

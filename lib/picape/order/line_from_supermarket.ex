@@ -26,7 +26,7 @@ defmodule Picape.Order.LineFromSupermarket do
       id: cart["id"],
       items: Enum.map(cart["orderedProducts"], fn item -> convert_item(item) end),
       total_count: Enum.count(cart["orderedProducts"]),
-      total_price: trunc(cart["price"]["priceAfterDiscount"])
+      total_price: trunc(cart["totalPrice"]["priceAfterDiscount"])
     }
   end
 

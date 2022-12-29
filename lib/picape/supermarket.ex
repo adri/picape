@@ -22,8 +22,8 @@ defmodule Picape.Supermarket do
   def apply_changes(changes, attempt \\ 1) do
     with cart <- cart(),
          items <- CartItems.apply_changes(changes, &product_title_by_id/1) do
-      post!(
-        "/mobile-services/v7/order/items",
+      put!(
+        "/mobile-services/order/v1/items?sortBy=DEFAULT",
         %{"items" => items},
         "Content-Type": "application/json",
         "Appie-Current-Order-Id": cart["id"]
@@ -59,7 +59,7 @@ defmodule Picape.Supermarket do
 
         # When an order has a delivery slot, the endpoint changes
         %{status_code: 412, body: _cart} ->
-          get!("/mobile-services/v7/order/summaries/active").body
+          get!("/mobile-services/order/v1/summaries/active?sortBy=DEFAULT").body
 
         _ ->
           raise RuntimeError
