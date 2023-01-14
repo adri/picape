@@ -10,7 +10,7 @@ import { InputText } from "../components/Input/InputText";
 import { FixedFooter } from "../components/Section/FixedFooter";
 
 const ADD_INGREDIENT = gql`
-  mutation AddIngredient($name: String!, $isEssential: Boolean!, $supermarketProductId: Int!) {
+  mutation AddIngredient($name: String!, $isEssential: Boolean!, $supermarketProductId: String!) {
     addIngredient(name: $name, isEssential: $isEssential, supermarketProductId: $supermarketProductId) {
       id
       name
@@ -66,7 +66,8 @@ export function AddIngredientScreen({ navigation, route: { params: { ingredient 
         />
       </View>
 
-      <View style={[styles.container, styles.switch]}>
+     <View style={[styles.switch]}>
+      <View style={[styles.container]}>
         <Text style={{ color: Colors.text, flexGrow: 1 }}>
           Altijd in huis
         </Text>
@@ -74,10 +75,10 @@ export function AddIngredientScreen({ navigation, route: { params: { ingredient 
           onValueChange={() => changeForm({...form, isEssential: !form.isEssential})}
           value={form.isEssential}
         />
-      </View>
-      <View>
-        <Text style={{ color: Colors.secondaryText, paddingHorizontal: 30, paddingTop: 10 }}>
-          Als dit aan staat, zal het ingrediënt niet automatisch aan de bestelling worden toegevoegd. Het wordt alleen gemarkeerd in de "altijd in huis" sectie.
+
+        </View>
+        <Text style={{ color: Colors.secondaryText, paddingHorizontal: 20, paddingTop: 10 }}>
+            Als dit aan staat, zal het ingrediënt niet automatisch aan de bestelling worden toegevoegd. Het wordt alleen gemarkeerd in de "altijd in huis" sectie.
         </Text>
       </View>
 
@@ -88,7 +89,6 @@ export function AddIngredientScreen({ navigation, route: { params: { ingredient 
             e.preventDefault();
             addIngredient({
               variables: {
-                recipeId,
                 name: form.name,
                 supermarketProductId: form.supermarketProductId,
                 isEssential: form.isEssential,

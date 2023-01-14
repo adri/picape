@@ -93,6 +93,7 @@ class SearchBar extends Component {
       cancelButtonProps,
       cancelButtonTitle,
       clearIcon,
+      rightIcon,
       containerStyle,
       leftIconContainerStyle,
       rightIconContainerStyle,
@@ -147,7 +148,7 @@ class SearchBar extends Component {
           ])}
           placeholderTextColor={placeholderTextColor}
           rightIcon={
-            <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: "row", gap: 5}}>
               {showLoading && (
                 <ActivityIndicator
                   key="loading"
@@ -155,6 +156,7 @@ class SearchBar extends Component {
                   {...otherLoadingProps}
                 />
               )}
+              {rightIcon && rightIcon}
               {!isEmpty && (
                 <Icon
                   {...{

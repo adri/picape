@@ -21,6 +21,7 @@ import WeekPlannerScreen from "../screens/WeekPlannerScreen";
 import {EditRecipeScreen} from "../screens/EditRecipeScreen";
 import { RecipeListScreen } from "../screens/RecipeListScreen";
 import { NewRecipeScreen } from "../screens/NewRecipeScreen";
+import { AddIngredientScreen } from "../screens/AddIngredientScreen";
 
 const INITIAL_ROUTE_NAME = "plan";
 
@@ -45,6 +46,11 @@ function TabBar(props) {
 
 const Stack = createStackNavigator();
 
+const modal = () => ({
+  animationEnabled: true,
+  ...TransitionPresets.ModalPresentationIOS,
+})
+
 export default function PlanStackScreen() {
   return (
     <Stack.Navigator
@@ -58,18 +64,9 @@ export default function PlanStackScreen() {
       <Stack.Screen name="RecipeList" component={RecipeListScreen} />
       <Stack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
       <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
-      <Stack.Screen name="EditRecipe" component={EditRecipeScreen} options={() => ({
-          animationEnabled: true,
-          ...TransitionPresets.ModalPresentationIOS,
-        })} />
-      <Stack.Screen
-        name="NewRecipe"
-        component={NewRecipeScreen}
-        options={() => ({
-          animationEnabled: true,
-          ...TransitionPresets.ModalPresentationIOS,
-        })}
-      />
+      <Stack.Screen name="EditRecipe" component={EditRecipeScreen} options={modal} />
+      <Stack.Screen name="NewRecipe" component={NewRecipeScreen} options={modal} />
+      <Stack.Screen name="AddIngredient" component={AddIngredientScreen} options={modal} />
     </Stack.Navigator>
   );
 }
@@ -112,6 +109,16 @@ function BottomTabNavigator() {
         }}
       />
       <BottomTab.Screen
+        name="basics"
+        component={BasicsScreen}
+        options={{
+          title: "Basics",
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon focused={focused} name="ios-home" />
+          ),
+        }}
+      />
+      <BottomTab.Screen
         name="shop"
         component={ListScreen}
         options={{
@@ -122,16 +129,6 @@ function BottomTabNavigator() {
               badge={<ListCountBadge focused={focused} />}
               name="ios-cart"
             />
-          ),
-        }}
-      />
-      <BottomTab.Screen
-        name="basics"
-        component={BasicsScreen}
-        options={{
-          title: "Basics",
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="ios-home" />
           ),
         }}
       />

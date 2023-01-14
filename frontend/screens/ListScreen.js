@@ -178,7 +178,7 @@ export default function ListScreen({ navigation }) {
             ]}
             onPress={(e) => {
               e.preventDefault();
-              startShopping();
+              startShopping({});
             }}
           >
             Bestelling ontvangen

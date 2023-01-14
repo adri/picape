@@ -1,43 +1,63 @@
 import * as React from "react";
 import gql from "graphql-tag";
 import Colors from "../../constants/Colors";
+import { useState } from "react";
 import { useLazyQuery } from "@apollo/react-hooks";
-import { FlatList, View } from "react-native";
+import { FlatList, View, Text } from "react-native";
 import { ListItem } from "../ListItem/ListItem";
 import { OrderQuantity } from "../Ingredient/OrderQuantity";
 import SearchBar from "../Search/SearchBar";
+import { PlusIcon } from "../Icon";
+import { useNavigation } from "@react-navigation/native";
+import { Badge } from "../Badge/Badge";
 
 const SEARCH_INGREDIENTS = gql`
-  query SearchIngredient($query: String!) {
-    searchIngredient(query: $query) {
+  query SearchIngredient($query: String!, $supermarket: Boolean!) {
+    ingredients: searchIngredient(query: $query) @skip(if: $supermarket) {
       id
       name
       imageUrl
       orderedQuantity
     }
+    ingredients: searchSupermarket(query: $query) @include(if: $supermarket) {
+      id
+      name
+      imageUrl
+      unitQuantity
+    }
   }
 `;
 
-const renderItem = ({ item: ingredient }) => (
+const renderItem = ({ navigator, item: ingredient, supermarket }) => (
   <ListItem title={ingredient.name} imageUrl={ingredient.imageUrl}>
-    <OrderQuantity
-      id={ingredient.id}
-      orderedQuantity={ingredient.orderedQuantity}
-    />
+    {supermarket ?
+      <PlusIcon
+        style={{ margin: 10 }}
+        onPress={(e) => {
+          e.preventDefault();
+          navigator.navigate("AddIngredient", { ingredient });
+        }}
+      />
+      :
+      <OrderQuantity
+        id={ingredient.id}
+        orderedQuantity={ingredient.orderedQuantity}
+      />
+    }
   </ListItem>
 );
 
 export function SearchIngredients({autoFocus = true, customRenderItem = null}) {
+  const [supermarket, setSupermarket] = useState(false);
+  const navigator = useNavigation();
   const [
     searchIngredients,
     {
       loading: searchLoading,
-      data: { searchIngredient: foundIngredients = [] } = {},
-      variables: { query } = {},
+      data: { ingredients: foundIngredients = [] } = {},
+      variables: { query = "" } = {},
     },
-  ] = useLazyQuery(SEARCH_INGREDIENTS, {
-    fetchPolicy: "cache-and-network",
-  });
+  ] = useLazyQuery(SEARCH_INGREDIENTS, { fetchPolicy: "cache-and-network", });
 
   return (
     <View>
@@ -45,10 +65,19 @@ export function SearchIngredients({autoFocus = true, customRenderItem = null}) {
         placeholder={"Zoek ingredienten..."}
         showLoading={searchLoading}
         loadingProps={{ color: Colors.tintColor }}
-        onChangeText={(query) => {
-          return searchIngredients({ variables: { query } });
-        }}
+        onChangeText={(query) => searchIngredients({ variables: { query, supermarket } })}
         value={query}
+        rightIcon={
+          <Text
+            onPress={() => {
+              setSupermarket(!supermarket);
+              return searchIngredients({ variables: { query, supermarket: !supermarket } });
+            }}
+            style={{ color: Colors.text, fontSize: 10, borderColor: Colors.iconDefault, borderWidth: 1, borderRadius: 7, padding: 5}}
+          >
+            {supermarket ? "AH" : "Picape"}
+          </Text>
+        }
         autoFocus={autoFocus}
       />
 
@@ -58,7 +87,12 @@ export function SearchIngredients({autoFocus = true, customRenderItem = null}) {
         }}
         data={query === "" ? [] : foundIngredients}
         keyExtractor={(item) => item.id}
-        renderItem={customRenderItem || renderItem}
+        renderItem={(item) => {
+          if (customRenderItem) {
+            return customRenderItem({ ...item, navigator, supermarket })
+          }
+          return renderItem({ ...item, navigator, supermarket })
+        }}
       />
     </View>
   );
