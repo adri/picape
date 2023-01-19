@@ -117,7 +117,7 @@ export function EditRecipeScreen({ navigation, route: { params: { recipeId }} })
           scrollEnabled={true}
           onChangeText={(description) => changeForm({...form, description, changed: true})}
           defaultValue={form.description}
-          numberOfLines={form.description.split('\n').length}
+          numberOfLines={(form.description || "").split('\n').length}
           testID="description"
           labelStyle={styles.label}
           inputStyle={[styles.input, styles.descriptionInput]}
