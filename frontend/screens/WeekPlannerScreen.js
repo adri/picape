@@ -15,7 +15,7 @@ import {
 } from "../components/Icon";
 import { GET_RECIPES } from "../operations/getRecipes";
 import { BlurView } from "expo-blur";
-import { useColorScheme } from "react-native-appearance";
+import { useColorScheme } from "react-native";
 import Layout from "../constants/Layout";
 import { PLAN_RECIPE, optimisticResponse } from "../operations/planRecipe";
 

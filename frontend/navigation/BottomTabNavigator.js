@@ -14,7 +14,7 @@ import PlanScreen from "../screens/PlanScreen";
 import ListScreen from "../screens/ListScreen";
 import SearchScreen from "../screens/SearchScreen";
 import BasicsScreen from "../screens/BasicsScreen";
-import { useColorScheme } from "react-native-appearance";
+import { useColorScheme } from "react-native";
 import { ListCountBadge } from "../components/Badge/ListCountBadge";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 import WeekPlannerScreen from "../screens/WeekPlannerScreen";

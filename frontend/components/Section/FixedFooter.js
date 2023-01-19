@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Text } from "react-native";
 import Colors from "../../constants/Colors";
-import { useColorScheme } from "react-native-appearance";
+import { useColorScheme } from "react-native";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Layout from "../../constants/Layout";

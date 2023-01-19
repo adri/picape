@@ -10,11 +10,12 @@ import { Socket as PhoenixSocket } from "phoenix";
 import { onError } from "apollo-link-error";
 import { ApolloLink } from "apollo-link";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useColorScheme } from "react-native-appearance";
+import { useColorScheme } from "react-native";
 import * as Updates from "expo-updates";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
 import linking from "./navigation/useLinking";
 import Sentry from "./Sentry";
+import * as serviceWorkerRegistration from "./src/serviceWorkerRegistration";
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -103,3 +104,8 @@ export default function App(props) {
     );
   }
 }
+
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://cra.link/PWA
+serviceWorkerRegistration.register();

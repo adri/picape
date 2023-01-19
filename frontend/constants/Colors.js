@@ -1,4 +1,4 @@
-import { Appearance } from "react-native-appearance";
+import { Appearance } from "react-native";
 
 const colorScheme = Appearance.getColorScheme();
 const tintColor = "#48BB78";

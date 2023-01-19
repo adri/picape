@@ -20,7 +20,7 @@ import { useSafeArea } from "react-native-safe-area-context";
 import { BuyIngredient } from "../components/Ingredient/BuyIngredient";
 import { Badge } from "../components/Badge/Badge";
 import { BlurView } from "expo-blur";
-import { useColorScheme } from "react-native-appearance";
+import { useColorScheme } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 const GET_SHOPPING_LIST = gql`
