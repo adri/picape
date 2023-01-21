@@ -15,7 +15,7 @@ export function ListItem({
 }) {
   return (
     <View style={[styles.container, style]}>
-      <View style={{ justifyContent: "center" }}>
+      <View style={styles.imageContainer}>
         <Image
           source={{ uri: imageUrl }}
           fadeDuration={0.2}
@@ -41,13 +41,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: Colors.cardBackground,
     paddingHorizontal: 10,
+    paddingLeft: 5,
     paddingVertical: 5,
     borderRadius: Layout.borderRadius,
   },
-  image: {
+  imageContainer: {
+    justifyContent: "center",
+    padding: 4,
+    backgroundColor: 'white',
     borderRadius: 8,
-    width: 35,
-    height: 35,
+  },
+  image: {
+    width: 40,
+    height: 40,
   },
   titleContainer: {
     flex: 1,
