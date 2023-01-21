@@ -14,7 +14,7 @@ import PlanScreen from "../screens/PlanScreen";
 import ListScreen from "../screens/ListScreen";
 import SearchScreen from "../screens/SearchScreen";
 import BasicsScreen from "../screens/BasicsScreen";
-import { useColorScheme } from "react-native";
+import { StyleSheet, useColorScheme } from "react-native";
 import { ListCountBadge } from "../components/Badge/ListCountBadge";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 import WeekPlannerScreen from "../screens/WeekPlannerScreen";
@@ -30,14 +30,9 @@ function TabBar(props) {
 
   return (
     <BlurView
-      style={{
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-      }}
+      style={styles.blurContainer}
       tint={colorScheme}
-      intensity={100}
+      intensity={50}
     >
       <BottomTabBar {...props} />
     </BlurView>
@@ -135,3 +130,14 @@ function BottomTabNavigator() {
     </BottomTab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  blurContainer: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backdropFilter: `blur(${100 * 0.2}px)`,
+      WebkitBackdropFilter: `saturate(180%) blur(${100 * 0.2}px)`
+  }
+ });
