@@ -107,7 +107,7 @@ defmodule Picape.Supermarket do
   end
 
   def image_url(item) do
-    case Enum.at(item["images"] || [], 2) do
+    case Enum.find(item["images"] || [], fn %{"width" => width} -> width >= 80 and width <= 150 end) do
       nil -> "http://placekitten.com/64/64"
       image -> image["url"]
     end
