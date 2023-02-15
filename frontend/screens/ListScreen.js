@@ -147,6 +147,14 @@ export default function ListScreen({ navigation }) {
                   ]}
                   title={ingredient?.name || item.name}
                   imageUrl={ingredient?.imageUrl || item.imageUrl}
+                  onImagePress={(e) => {
+                    e.preventDefault();
+                    if (ingredient) {
+                      navigation.navigate("EditIngredient", { ingredientId: ingredient.id });
+                    } else {
+                      navigation.navigate("AddIngredient", { ingredient: item });
+                    }
+                  }}
                   subtitle={plannedRecipes
                     .map(
                       (planned) =>

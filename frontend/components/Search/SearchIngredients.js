@@ -1,15 +1,15 @@
-import * as React from "react";
-import gql from "graphql-tag";
-import Colors from "../../constants/Colors";
-import { useState } from "react";
-import { useLazyQuery } from "@apollo/react-hooks";
-import { FlatList, View, Text } from "react-native";
-import { ListItem } from "../ListItem/ListItem";
-import { OrderQuantity } from "../Ingredient/OrderQuantity";
-import SearchBar from "../Search/SearchBar";
-import { PlusIcon } from "../Icon";
-import { useNavigation } from "@react-navigation/native";
-import { Badge } from "../Badge/Badge";
+import * as React from 'react';
+import gql from 'graphql-tag';
+import Colors from '../../constants/Colors';
+import { useState } from 'react';
+import { useLazyQuery } from '@apollo/react-hooks';
+import { FlatList, View, Text } from 'react-native';
+import { ListItem } from '../ListItem/ListItem';
+import { OrderQuantity } from '../Ingredient/OrderQuantity';
+import SearchBar from '../Search/SearchBar';
+import { PlusIcon } from '../Icon';
+import { useNavigation } from '@react-navigation/native';
+import { Badge } from '../Badge/Badge';
 
 const SEARCH_INGREDIENTS = gql`
   query SearchIngredient($query: String!, $supermarket: Boolean!) {
@@ -29,69 +29,86 @@ const SEARCH_INGREDIENTS = gql`
 `;
 
 const renderItem = ({ navigator, item: ingredient, supermarket }) => (
-  <ListItem title={ingredient.name} imageUrl={ingredient.imageUrl}>
-    {supermarket ?
+  <ListItem
+    title={ingredient.name}
+    imageUrl={ingredient.imageUrl}
+    supermarketonImagePress={(e) => {
+      e.preventDefault();
+      if (supermarket) return;
+      navigator.navigate('EditIngredient', { ingredientId: ingredient.id });
+    }}>
+    {supermarket ? (
       <PlusIcon
         style={{ margin: 10 }}
         onPress={(e) => {
           e.preventDefault();
-          navigator.navigate("AddIngredient", { ingredient });
+          navigator.navigate('AddIngredient', { ingredientId: ingredient });
         }}
       />
-      :
-      <OrderQuantity
-        id={ingredient.id}
-        orderedQuantity={ingredient.orderedQuantity}
-      />
-    }
+    ) : (
+      <OrderQuantity id={ingredient.id} orderedQuantity={ingredient.orderedQuantity} />
+    )}
   </ListItem>
 );
 
-export function SearchIngredients({autoFocus = true, customRenderItem = null}) {
-  const [supermarket, setSupermarket] = useState(false);
+export function SearchIngredients({
+  autoFocus = true,
+  customRenderItem = null,
+  supermarketOnly = false,
+  placeholder = 'Zoek ingredienten...',
+}) {
+  const ref = React.createRef();
+  const [supermarket, setSupermarket] = useState(supermarketOnly);
   const navigator = useNavigation();
   const [
     searchIngredients,
     {
       loading: searchLoading,
       data: { ingredients: foundIngredients = [] } = {},
-      variables: { query = "" } = {},
+      variables: { query = '' } = {},
     },
-  ] = useLazyQuery(SEARCH_INGREDIENTS, { fetchPolicy: "cache-and-network", });
+  ] = useLazyQuery(SEARCH_INGREDIENTS, { fetchPolicy: 'cache-and-network' });
 
   return (
     <View>
       <SearchBar
-        placeholder={"Zoek ingredienten..."}
+        ref={ref}
+        placeholder={placeholder}
         showLoading={searchLoading}
         loadingProps={{ color: Colors.tintColor }}
         onChangeText={(query) => searchIngredients({ variables: { query, supermarket } })}
         value={query}
         rightIcon={
-          <Text
-            onPress={() => {
-              setSupermarket(!supermarket);
-              return searchIngredients({ variables: { query, supermarket: !supermarket } });
-            }}
-            style={{ color: Colors.text, fontSize: 10, borderColor: Colors.iconDefault, borderWidth: 1, borderRadius: 7, padding: 5}}
-          >
-            {supermarket ? "AH" : "Picape"}
-          </Text>
+          supermarketOnly ? null : (
+            <Text
+              onPress={() => {
+                setSupermarket(!supermarket);
+                return searchIngredients({ variables: { query, supermarket: !supermarket } });
+              }}
+              style={{
+                color: Colors.text,
+                fontSize: 10,
+                borderColor: Colors.iconDefault,
+                borderWidth: 1,
+                borderRadius: 7,
+                padding: 5,
+              }}>
+              {supermarket ? 'AH' : 'Picape'}
+            </Text>
+          )
         }
         autoFocus={autoFocus}
       />
 
       <FlatList
-        style={{
-          padding: 20,
-        }}
-        data={query === "" ? [] : foundIngredients}
+        style={{ paddingTop: 20 }}
+        data={query === '' ? [] : foundIngredients}
         keyExtractor={(item) => item.id}
         renderItem={(item) => {
           if (customRenderItem) {
-            return customRenderItem({ ...item, navigator, supermarket })
+            return customRenderItem({ ...item, navigator, supermarket, searchRef: ref });
           }
-          return renderItem({ ...item, navigator, supermarket })
+          return renderItem({ ...item, navigator, supermarket });
         }}
       />
     </View>

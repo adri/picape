@@ -1,23 +1,17 @@
-import Colors from "../../constants/Colors";
-import { InputText } from "../Input/InputText";
-import PropTypes from "prop-types";
-import React, { Component } from "react";
-import {
-  LayoutAnimation,
-  UIManager,
-  StyleSheet,
-  View,
-  ActivityIndicator,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Colors from '../../constants/Colors';
+import { InputText } from '../Input/InputText';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { LayoutAnimation, UIManager, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 const Icon = Ionicons;
 const defaultSearchIcon = {
   size: 20,
-  name: "ios-search",
+  name: 'ios-search',
   color: Colors.iconDefault,
 };
 const defaultClearIcon = {
-  name: "ios-close-circle",
+  name: 'ios-close-circle',
   size: 20,
   color: Colors.iconDefault,
 };
@@ -30,7 +24,7 @@ class SearchBar extends Component {
 
     this.state = {
       hasFocus: props.autoFocus ? true : false,
-      isEmpty: value ? value === "" : true,
+      isEmpty: value ? value === '' : true,
       cancelButtonWidth: null,
     };
   }
@@ -45,11 +39,11 @@ class SearchBar extends Component {
 
   clear = () => {
     this.input.clear();
-    this.onChangeText("");
+    this.onChangeText('');
   };
 
   cancel = () => {
-    this.onChangeText("");
+    this.onChangeText('');
 
     if (this.props.showCancel) {
       UIManager.configureNextLayoutAnimation && LayoutAnimation.easeInEaseOut();
@@ -68,7 +62,7 @@ class SearchBar extends Component {
 
     this.setState({
       hasFocus: true,
-      isEmpty: this.props.value === "",
+      isEmpty: this.props.value === '',
     });
   };
 
@@ -85,7 +79,7 @@ class SearchBar extends Component {
 
   onChangeText = (text) => {
     this.props.onChangeText(text);
-    this.setState({ isEmpty: text === "" });
+    this.setState({ isEmpty: text === '' });
   };
 
   render() {
@@ -148,7 +142,7 @@ class SearchBar extends Component {
           ])}
           placeholderTextColor={placeholderTextColor}
           rightIcon={
-            <View style={{ flexDirection: "row", gap: 5}}>
+            <View style={{ flexDirection: 'row', gap: 5 }}>
               {showLoading && (
                 <ActivityIndicator
                   key="loading"
@@ -161,7 +155,7 @@ class SearchBar extends Component {
                 <Icon
                   {...{
                     ...defaultClearIcon,
-                    key: "cancel",
+                    key: 'cancel',
                     onPress: this.clear,
                   }}
                 />
@@ -198,8 +192,8 @@ SearchBar.propTypes = {
 };
 
 SearchBar.defaultProps = {
-  value: "",
-  cancelButtonTitle: "Cancel",
+  value: '',
+  cancelButtonTitle: 'Cancel',
   loadingProps: {},
   cancelButtonProps: {},
   showLoading: false,
@@ -215,14 +209,13 @@ SearchBar.defaultProps = {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    overflow: "hidden",
-    alignItems: "center",
+    flexDirection: 'row',
+    overflow: 'hidden',
+    alignItems: 'center',
   },
   input: {
     marginLeft: 6,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   inputContainer: {
     borderBottomWidth: 0,
@@ -237,16 +230,16 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   buttonTextStyle: {
-    color: "#007aff",
-    textAlign: "center",
+    color: '#007aff',
+    textAlign: 'center',
     padding: 8,
     fontSize: 18,
   },
   buttonTextDisabled: {
-    color: "#cdcdcd",
+    color: '#cdcdcd',
   },
   cancelButtonContainer: {
-    position: "absolute",
+    position: 'absolute',
   },
 });
 

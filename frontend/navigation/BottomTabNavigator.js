@@ -22,6 +22,7 @@ import {EditRecipeScreen} from "../screens/EditRecipeScreen";
 import { RecipeListScreen } from "../screens/RecipeListScreen";
 import { NewRecipeScreen } from "../screens/NewRecipeScreen";
 import { AddIngredientScreen } from "../screens/AddIngredientScreen";
+import { EditIngredientScreen } from "../screens/EditIngredientScreen";
 
 const INITIAL_ROUTE_NAME = "plan";
 
@@ -62,6 +63,7 @@ export default function PlanStackScreen() {
       <Stack.Screen name="EditRecipe" component={EditRecipeScreen} options={modal} />
       <Stack.Screen name="NewRecipe" component={NewRecipeScreen} options={modal} />
       <Stack.Screen name="AddIngredient" component={AddIngredientScreen} options={modal} />
+      <Stack.Screen name="EditIngredient" component={EditIngredientScreen} options={modal} />
     </Stack.Navigator>
   );
 }

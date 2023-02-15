@@ -74,7 +74,7 @@ const SUBSCRIBE_PLANNED_RECIPES = gql`
   }
 `;
 
-function BasicsList() {
+function BasicsList({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_BASICS);
   useSubscription(SUBSCRIBE_PLANNED_RECIPES);
   useSubscription(SUBSCRIBE_UNPLANNED_RECIPES);
@@ -123,6 +123,10 @@ function BasicsList() {
                 }}
                 title={ingredient.name}
                 imageUrl={ingredient.imageUrl}
+                onImagePress={(e) => {
+                  e.preventDefault();
+                  navigation.navigate("EditIngredient", { ingredientId: ingredient.id })
+                }}
                 subtitle={plannedRecipes
                   .map(
                     (planned) =>
@@ -148,7 +152,7 @@ export default function PlanScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={{ paddingBottom: 50 }}>
-        <BasicsList />
+        <BasicsList navigation={navigation} />
       </ScrollView>
     </SafeAreaView>
   );

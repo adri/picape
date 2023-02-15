@@ -1,6 +1,6 @@
 import * as React from "react";
 import Colors from "../../constants/Colors";
-import { StyleSheet, View, Image, Text } from "react-native";
+import { StyleSheet, View, Image, Text, TouchableOpacity } from "react-native";
 import Type from "../../constants/Type";
 import Layout from "../../constants/Layout";
 import { Subtitle } from "./Subtitle";
@@ -12,17 +12,25 @@ export function ListItem({
   children,
   imageUrl,
   textStyle,
+  onImagePress
 }) {
+  let image = (
+    <View style={styles.imageContainer}>
+    <Image
+      source={{ uri: imageUrl }}
+      fadeDuration={0.2}
+      resizeMode="contain"
+      style={styles.image}
+      />
+    </View>)
+
+  if (onImagePress) {
+    image = (<TouchableOpacity onPress={onImagePress}>{image}</TouchableOpacity>);
+  }
+
   return (
     <View style={[styles.container, style]}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: imageUrl }}
-          fadeDuration={0.2}
-          resizeMode="contain"
-          style={styles.image}
-        />
-      </View>
+      {image}
       <View style={styles.titleContainer}>
         <Text style={[Type.body, { color: Colors.cardText }, textStyle]}>
           {title}

@@ -2,20 +2,19 @@ import * as React from 'react';
 import gql from 'graphql-tag';
 import { View, Switch, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import Colors from '../constants/Colors';
 import { SectionHeader } from '../components/Section/SectionHeader';
-import { CloseIcon } from '../components/Icon';
+import { CloseIcon, PlusIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
 import { FixedFooter } from '../components/Section/FixedFooter';
+import { SearchIngredients } from '../components/Search/SearchIngredients';
+import { ListItem } from '../components/ListItem/ListItem';
+import { useRef } from 'react';
 
-const ADD_INGREDIENT = gql`
-  mutation AddIngredient($name: String!, $isEssential: Boolean!, $supermarketProductId: String!) {
-    addIngredient(
-      name: $name
-      isEssential: $isEssential
-      supermarketProductId: $supermarketProductId
-    ) {
+const EDIT_INGREDIENT = gql`
+  mutation EditIngredient($input: EditIngredientInput!) {
+    editIngredient(input: $input) {
       id
       name
       imageUrl
@@ -26,18 +25,40 @@ const ADD_INGREDIENT = gql`
   }
 `;
 
-export function AddIngredientScreen({
+const GET_INGREDIENT = gql`
+  query GetIngredient($ingredientId: ID!) {
+    node(id: $ingredientId) {
+      ... on Ingredient {
+        id
+        name
+        imageUrl
+        isEssential
+        supermarketProductId
+        supermarketName
+        tags {
+          id
+          name
+          count
+        }
+      }
+    }
+    ingredients(first: 1000) {
+      tags {
+        id
+        name
+        count
+      }
+    }
+  }
+`;
+
+export function EditIngredientScreen({
   navigation,
   route: {
-    params: { ingredient },
+    params: { ingredientId },
   },
 }) {
-  const [form, changeForm] = useState({
-    name: ingredient.name,
-    isEssential: false,
-    supermarketProductId: ingredient.id,
-  });
-  const [addIngredient] = useMutation(ADD_INGREDIENT, {
+  const [editIngredient] = useMutation(EDIT_INGREDIENT, {
     onCompleted: () => {
       navigation.goBack();
     },
@@ -45,6 +66,29 @@ export function AddIngredientScreen({
       alert(error.message);
     },
   });
+
+  const [form, changeForm] = useState({
+    name: '',
+    isEssential: false,
+    supermarketProductId: '',
+  });
+
+  const { data: { node: ingredient } = {}, loading } = useQuery(GET_INGREDIENT, {
+    variables: { ingredientId },
+    onCompleted: (data) => {
+      changeForm({
+        name: data.node.name,
+        isEssential: data.node.isEssential,
+        supermarketProductId: data.node.supermarketProductId,
+      });
+    },
+  });
+
+  if (loading) return null;
+  if (!loading && !ingredient) {
+    navigation.goBack();
+    return;
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -60,7 +104,7 @@ export function AddIngredientScreen({
         />
 
         <SectionHeader title="" />
-        <SectionHeader title="Ingredient toevogen" />
+        <SectionHeader title="Bewerk ingrediënt" />
 
         <View style={styles.container}>
           <InputText
@@ -87,16 +131,46 @@ export function AddIngredientScreen({
             toegevoegd. Het wordt alleen gemarkeerd in de "altijd in huis" sectie.
           </Text>
         </View>
+
+        <View style={[styles.searchContainer]}>
+          <Text style={styles.label}>Supermarket</Text>
+          <SearchIngredients
+            autoFocus={false}
+            supermarketOnly={true}
+            placeholder={form.supermarketName || ingredient.supermarketName}
+            customRenderItem={({ item: ingredient, searchRef }) => (
+              <ListItem autoFocus={false} title={ingredient.name} imageUrl={ingredient.imageUrl}>
+                <PlusIcon
+                  style={{ margin: 10 }}
+                  onPress={(e) => {
+                    e.preventDefault();
+                    searchRef.current.clear();
+                    console.log(ingredient);
+                    return changeForm({
+                      ...form,
+                      supermarketProductId: ingredient.id,
+                      supermarketName: ingredient.name,
+                    });
+                  }}
+                />
+              </ListItem>
+            )}
+          />
+        </View>
       </ScrollView>
       <FixedFooter
-        buttonText={'Toevoegen'}
+        buttonText={'Bewerken'}
         onPress={(e) => {
           e.preventDefault();
-          addIngredient({
+          editIngredient({
             variables: {
-              name: form.name,
-              supermarketProductId: form.supermarketProductId,
-              isEssential: form.isEssential,
+              input: {
+                ingredientId: ingredientId,
+                name: form.name,
+                supermarketProductId: form.supermarketProductId,
+                isEssential: form.isEssential,
+                tagIds: ingredient.tags.map((tag) => tag.id),
+              },
             },
           });
         }}
@@ -116,6 +190,10 @@ const styles = StyleSheet.create({
   input: {
     marginLeft: 10,
     overflow: 'hidden',
+  },
+  searchContainer: {
+    marginVertical: 20,
+    paddingHorizontal: 20,
   },
   descriptionInput: {
     marginTop: 10,
