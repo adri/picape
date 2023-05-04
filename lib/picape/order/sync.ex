@@ -55,10 +55,10 @@ defmodule Picape.Order.Sync do
         changes
 
       new_count > existing_count ->
-        add_change(changes, id, new_count - existing_count)
+        add_change(changes, id, new_count)
 
       new_count < existing_count ->
-        remove_change(changes, id, existing_count - new_count)
+        remove_change(changes, id, new_count)
     end
   end
 
