@@ -51,6 +51,7 @@ defmodule PicapeWeb.Graphql.Types do
     field(:tags, list_of(:ingredient_tag))
     field(:image_url, :string, resolve: from_object(:image_url))
     field(:supermarket_name, :string, resolve: from_object(:original_title))
+    field(:nutriscore, :string, resolve: from_object(:nutriscore))
 
     field :is_planned, :boolean do
       arg(:in_shopping_list, :boolean, default_value: false)

@@ -17,6 +17,7 @@ const SEARCH_INGREDIENTS = gql`
       id
       name
       imageUrl
+      nutriscore
       orderedQuantity
     }
     ingredients: searchSupermarket(query: $query) @include(if: $supermarket) {
@@ -31,8 +32,9 @@ const SEARCH_INGREDIENTS = gql`
 const renderItem = ({ navigator, item: ingredient, supermarket }) => (
   <ListItem
     title={ingredient.name}
+    subtitle={ingredient.nutriscore}
     imageUrl={ingredient.imageUrl}
-    supermarketonImagePress={(e) => {
+    onImagePress={(e) => {
       e.preventDefault();
       if (supermarket) return;
       navigator.navigate('EditIngredient', { ingredientId: ingredient.id });
@@ -42,7 +44,7 @@ const renderItem = ({ navigator, item: ingredient, supermarket }) => (
         style={{ margin: 10 }}
         onPress={(e) => {
           e.preventDefault();
-          navigator.navigate('AddIngredient', { ingredientId: ingredient });
+          navigator.navigate('AddIngredient', { ingredient: ingredient });
         }}
       />
     ) : (
