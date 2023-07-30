@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 export const orderFields = gql`
   fragment OrderFields on Order {
@@ -14,6 +14,7 @@ export const orderFields = gql`
         id
         name
         imageUrl
+        nutriscore
         isPlanned(inShoppingList: false)
         orderedQuantity
         plannedRecipes(inShoppingList: false) {

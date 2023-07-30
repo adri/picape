@@ -38,7 +38,7 @@ defmodule Picape.Recipe.Ingredient do
   end
 
   def fetch(ingredient, :nutriscore) do
-    {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "properties", "nutriscore", 0]) || ""}
+    {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "properties", "nutriscore", Access.at(0)]) || ""}
   end
 
   @doc false

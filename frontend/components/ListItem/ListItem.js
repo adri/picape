@@ -1,31 +1,34 @@
-import * as React from "react";
-import Colors from "../../constants/Colors";
-import { StyleSheet, View, Image, Text, TouchableOpacity } from "react-native";
-import Type from "../../constants/Type";
-import Layout from "../../constants/Layout";
-import { Subtitle } from "./Subtitle";
+import * as React from 'react';
+import Colors from '../../constants/Colors';
+import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native';
+import Type from '../../constants/Type';
+import Layout from '../../constants/Layout';
+import { Subtitle } from './Subtitle';
+import { Badge } from '../Badge/Badge';
 
 export function ListItem({
   style,
   title,
+  badges,
   subtitle,
   children,
   imageUrl,
   textStyle,
-  onImagePress
+  onImagePress,
 }) {
   let image = (
     <View style={styles.imageContainer}>
-    <Image
-      source={{ uri: imageUrl }}
-      fadeDuration={0.2}
-      resizeMode="contain"
-      style={styles.image}
+      <Image
+        source={{ uri: imageUrl }}
+        fadeDuration={0.2}
+        resizeMode="contain"
+        style={styles.image}
       />
-    </View>)
+    </View>
+  );
 
   if (onImagePress) {
-    image = (<TouchableOpacity onPress={onImagePress}>{image}</TouchableOpacity>);
+    image = <TouchableOpacity onPress={onImagePress}>{image}</TouchableOpacity>;
   }
 
   return (
@@ -34,6 +37,7 @@ export function ListItem({
       <View style={styles.titleContainer}>
         <Text style={[Type.body, { color: Colors.cardText }, textStyle]}>
           {title}
+          {!!badges && <View style={{ marginLeft: 3 }}>{badges}</View>}
         </Text>
         {!!subtitle && <Subtitle subtitle={subtitle} textStyle={textStyle} />}
       </View>
@@ -46,7 +50,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginBottom: 10,
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: Colors.cardBackground,
     paddingHorizontal: 10,
     paddingLeft: 5,
@@ -54,7 +58,7 @@ const styles = StyleSheet.create({
     borderRadius: Layout.borderRadius,
   },
   imageContainer: {
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: 4,
     backgroundColor: 'white',
     borderRadius: 8,
@@ -66,7 +70,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flex: 1,
     marginLeft: 10,
-    alignSelf: "stretch",
-    justifyContent: "center",
+    alignSelf: 'stretch',
+    justifyContent: 'center',
   },
 });
