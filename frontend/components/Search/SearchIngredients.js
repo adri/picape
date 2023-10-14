@@ -9,7 +9,7 @@ import { OrderQuantity } from '../Ingredient/OrderQuantity';
 import SearchBar from '../Search/SearchBar';
 import { PlusIcon } from '../Icon';
 import { useNavigation } from '@react-navigation/native';
-import { Badge } from '../Badge/Badge';
+import { Nutriscore } from '../Ingredient/Nutriscore';
 
 const SEARCH_INGREDIENTS = gql`
   query SearchIngredient($query: String!, $supermarket: Boolean!) {
@@ -32,7 +32,7 @@ const SEARCH_INGREDIENTS = gql`
 const renderItem = ({ navigator, item: ingredient, supermarket }) => (
   <ListItem
     title={ingredient.name}
-    subtitle={ingredient.nutriscore}
+    badges={ingredient?.nutriscore ? <Nutriscore nutriscore={ingredient.nutriscore} /> : null}
     imageUrl={ingredient.imageUrl}
     onImagePress={(e) => {
       e.preventDefault();

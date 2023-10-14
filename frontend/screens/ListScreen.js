@@ -15,6 +15,7 @@ import { GET_ORDER_COUNT } from '../operations/getOrderCount';
 import { GET_RECIPES } from '../operations/getRecipes';
 import { START_SHOPPING } from '../operations/startShopping';
 import { Badge } from '../components/Badge/Badge';
+import { Nutriscore, nutriscore } from '../components/Ingredient/Nutriscore';
 
 function PlannedRecipes({ navigation }) {
   const {
@@ -142,9 +143,11 @@ export default function ListScreen({ navigation }) {
                   ]}
                   title={ingredient?.name || item.name}
                   imageUrl={ingredient?.imageUrl || item.imageUrl}
-                  badges={[
-                    ingredient?.nutriscore ? <Badge small amount={ingredient.nutriscore} /> : null,
-                  ]}
+                  badges={
+                    ingredient?.nutriscore ? (
+                      <Nutriscore nutriscore={ingredient.nutriscore} />
+                    ) : null
+                  }
                   onImagePress={(e) => {
                     e.preventDefault();
                     if (ingredient) {
