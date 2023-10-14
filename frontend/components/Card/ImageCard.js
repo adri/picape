@@ -1,49 +1,51 @@
-import * as React from "react";
-import { View, ImageBackground, Text, TouchableOpacity } from "react-native";
-import Colors from "../../constants/Colors";
-import Type from "../../constants/Type";
-import Layout from "../../constants/Layout";
+import * as React from 'react';
+import { View, ImageBackground, Text, TouchableOpacity } from 'react-native';
+import Colors from '../../constants/Colors';
+import Type from '../../constants/Type';
+import Layout from '../../constants/Layout';
+import { StyleSheet } from 'react-native';
 
-export function ImageCard(props) {
+export function ImageCard({ imageUrl, width, children, onPress, title, style, imageStyle, muted }) {
   return (
-    <View
-      style={[{ borderColor: "#cdcdcd", paddingHorizontal: 5 }, props.style]}
-    >
-      <TouchableOpacity
-        onPress={props.onPress}
-        style={{ flex: 3 }}
-        delayPressIn={100}
-      >
+    <View style={[{ borderColor: '#cdcdcd', paddingHorizontal: 5 }, style]}>
+      <TouchableOpacity onPress={onPress} style={{ flex: 3 }} delayPressIn={100}>
         <ImageBackground
-          source={{ uri: props.imageUrl }}
-          imageStyle={{
-            borderRadius: Layout.borderRadius,
-            resizeMode: "cover",
-          }}
-          style={{ flex: 1 }}
-        >
+          source={{ uri: imageUrl }}
+          imageStyle={[styles.imageBackground, muted && styles.mutedImage]}
+          style={{ flex: 1 }}>
           <View
             style={[
               {
-                flexDirection: "row-reverse",
-                width: props.width || 230,
+                flexDirection: 'row-reverse',
+                width: width || 230,
                 height: 180,
               },
-              props.imageStyle,
-            ]}
-          >
-            {props.children}
+              imageStyle,
+            ]}>
+            {children}
           </View>
         </ImageBackground>
       </TouchableOpacity>
       <View style={{ flex: 1, paddingTop: 10 }}>
         <Text
-          style={[Type.body, { color: Colors.cardText }]}
-          onPress={props.onPress}
-        >
-          {props.title}
+          style={[Type.body, { color: Colors.cardText }, muted && styles.mutedText]}
+          onPress={onPress}>
+          {title}
         </Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  imageBackground: {
+    borderRadius: Layout.borderRadius,
+    resizeMode: 'cover',
+  },
+  mutedImage: {
+    opacity: 0.2,
+  },
+  mutedText: {
+    opacity: 0.5,
+  },
+});

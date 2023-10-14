@@ -52,6 +52,22 @@ defmodule Picape.Order do
     end
   end
 
+  @doc """
+  Marks a recipe as cooked or uncooked (cooked = false).
+  """
+  def mark_recipe_as_cooked(order_id, recipe_id, cooked) do
+    %PlannedRecipe{}
+    |> PlannedRecipe.changeset(%{
+      line_id: order_id,
+      recipe_id: recipe_id,
+      cooked: cooked
+    })
+    |> Repo.insert(
+      on_conflict: [set: [cooked: cooked]],
+      conflict_target: [:line_id, :recipe_id]
+    )
+  end
+
   def planned_recipes(nil) do
     {:ok, []}
   end
@@ -90,6 +106,24 @@ defmodule Picape.Order do
       from(
         p in PlannedRecipe,
         where: p.line_id == ^order_id and p.unplanned == false,
+        select: p.recipe_id
+      )
+
+    {:ok, Repo.all(query)}
+  end
+
+  def cooked_recipes(nil) do
+    {:ok, []}
+  end
+
+  @doc """
+  Returns a list of cooked recipe IDs.
+  """
+  def cooked_recipes(order_id) do
+    query =
+      from(
+        p in PlannedRecipe,
+        where: p.line_id == ^order_id and p.cooked == true,
         select: p.recipe_id
       )
 

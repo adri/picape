@@ -31,6 +31,12 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     {:ok, Map.new(recipe_ids, fn id -> {id, Enum.member?(planned_ids, id)} end)}
   end
 
+  def recipes_cooked?(_, recipe_ids) do
+    {:ok, cooked_ids} = Order.cooked_recipes(Order.last_order_id())
+
+    {:ok, Map.new(recipe_ids, fn id -> {id, Enum.member?(cooked_ids, id)} end)}
+  end
+
   def ingredients_planned?(_, ingredient_ids) do
     Order.ingredients_planned?(order_id(), ingredient_ids)
   end
@@ -59,6 +65,12 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
 
   def plan_recipe(attributes, _info) do
     Order.plan_recipe(order_id(), attributes[:recipe_id], false)
+
+    Resolver.Recipe.recipe_by_id(String.to_integer(attributes[:recipe_id]))
+  end
+
+  def mark_recipe_as_cooked(attributes, _info) do
+    Order.mark_recipe_as_cooked(Order.last_order_id(), attributes[:recipe_id], attributes[:cooked])
 
     Resolver.Recipe.recipe_by_id(String.to_integer(attributes[:recipe_id]))
   end

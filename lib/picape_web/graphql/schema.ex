@@ -99,6 +99,13 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(handle_errors(&Resolver.Order.plan_recipe/2))
     end
 
+    @desc "Mark a recipe as cooked."
+    field :mark_recipe_as_cooked, :recipe do
+      arg(:recipe_id, non_null(:id))
+      arg(:cooked, :boolean, default_value: false)
+      resolve(handle_errors(&Resolver.Order.mark_recipe_as_cooked/2))
+    end
+
     @desc "Remove a planned recipe."
     field :unplan_recipe, :recipe do
       arg(:recipe_id, non_null(:id))

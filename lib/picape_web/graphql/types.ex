@@ -41,6 +41,12 @@ defmodule PicapeWeb.Graphql.Types do
       list_of(:recipe_ingredient_edge),
       resolve: batched({Resolver.Recipe, :ingredients_by_recipe_ids})
     )
+
+    field(
+      :is_cooked,
+      :boolean,
+      resolve: batched({Resolver.Order, :recipes_cooked?})
+    )
   end
 
   node object(:ingredient) do

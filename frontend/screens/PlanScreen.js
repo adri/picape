@@ -1,19 +1,18 @@
-import * as React from "react";
-import { Text, View, FlatList } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import { useQuery  } from "@apollo/react-hooks";
-import gql from "graphql-tag";
-import Colors from "../constants/Colors";
-import { ImageCard } from "../components/Card/ImageCard";
-import { SectionHeader } from "../components/Section/SectionHeader";
-import SkeletonContent from "react-native-skeleton-content";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Type from "../constants/Type";
-import { PlanRecipe } from "../components/Recipe/PlanRecipe";
-import { GET_RECIPES } from "../operations/getRecipes";
-import { GET_LAST_RECIPES } from "../operations/getLastRecipes";
-import { Separator } from "../components/Section/Separator";
-import { Badge } from "../components/Badge/Badge";
+import * as React from 'react';
+import { Text, View, FlatList } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import { useQuery } from '@apollo/react-hooks';
+import Colors from '../constants/Colors';
+import { ImageCard } from '../components/Card/ImageCard';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from 'react-native-skeleton-content';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Type from '../constants/Type';
+import { PlanRecipe } from '../components/Recipe/PlanRecipe';
+import { GET_RECIPES } from '../operations/getRecipes';
+import { GET_LAST_RECIPES } from '../operations/getLastRecipes';
+import { Separator } from '../components/Section/Separator';
+import { Badge } from '../components/Badge/Badge';
 
 function LastRecipesList({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_LAST_RECIPES);
@@ -38,8 +37,7 @@ function LastRecipesList({ navigation }) {
         boneColor={Colors.skeletonBone}
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ paddingLeft: 0 }}
-        isLoading={loading}
-      >
+        isLoading={loading}>
         <FlatList
           style={{ paddingHorizontal: 20, height: 150 }}
           containerStyle={{ paddingLeft: 20 }}
@@ -52,7 +50,7 @@ function LastRecipesList({ navigation }) {
               <ImageCard
                 onPress={(e) => {
                   e.preventDefault();
-                  navigation.navigate("RecipeDetail", {
+                  navigation.navigate('RecipeDetail', {
                     id: recipe.id,
                     recipe,
                   });
@@ -61,6 +59,7 @@ function LastRecipesList({ navigation }) {
                 width={100}
                 title={recipe.title}
                 imageUrl={recipe.imageUrl}
+                muted={recipe.isCooked}
               />
             );
           }}
@@ -74,9 +73,7 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
   const plannedCount = filterByRecipe(recipes, (r) => r.isPlanned).length;
   return (
     <View>
-      <SectionHeader title={title}>
-        {plannedCount && <Badge amount={plannedCount} />}
-      </SectionHeader>
+      <SectionHeader title={title}>{plannedCount && <Badge amount={plannedCount} />}</SectionHeader>
 
       <SkeletonContent
         layout={[
@@ -106,26 +103,25 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
             <ImageCard
               style={{
                 animationDuration: `${200}ms`,
-                animationPlayState: "running",
+                animationPlayState: 'running',
                 animationKeyframes: {
                   from: { opacity: 0 },
                   to: { opacity: 1 },
                 },
-                transitionProperty: ["opacity"],
-                transitionDuration: "200ms",
-                transitionTimingFunction: "ease-in",
+                transitionProperty: ['opacity'],
+                transitionDuration: '200ms',
+                transitionTimingFunction: 'ease-in',
               }}
               onPress={(e) => {
                 e.preventDefault();
-                navigation.navigate("RecipeDetail", {
+                navigation.navigate('RecipeDetail', {
                   id: recipe.id,
                   recipe,
                 });
               }}
               key={recipe.id}
               title={recipe.title}
-              imageUrl={recipe.imageUrl}
-            >
+              imageUrl={recipe.imageUrl}>
               <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
             </ImageCard>
           );
@@ -137,8 +133,7 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
 
 function filterByIngredient(recipes, match) {
   return recipes.filter(
-    (recipe) =>
-      recipe.ingredients.find((e) => match(e.ingredient)) !== undefined
+    (recipe) => recipe.ingredients.find((e) => match(e.ingredient)) !== undefined
   );
 }
 
@@ -159,16 +154,14 @@ function RecipeList({ navigation }) {
         loading={loading}
         navigation={navigation}
         title="Met aardappelen"
-        recipes={filterByIngredient(recipes, (i) => i.name == "Aardappelen")}
+        recipes={filterByIngredient(recipes, (i) => i.name == 'Aardappelen')}
       />
       <Separator />
       <FilteredRecipeList
         loading={loading}
         navigation={navigation}
         title="Met rijst"
-        recipes={filterByIngredient(recipes, (i) =>
-          i.name.toLowerCase().includes("rijst")
-        )}
+        recipes={filterByIngredient(recipes, (i) => i.name.toLowerCase().includes('rijst'))}
       />
       <Separator />
       <FilteredRecipeList
@@ -177,9 +170,7 @@ function RecipeList({ navigation }) {
         title="Met pasta"
         recipes={filterByIngredient(
           recipes,
-          (i) =>
-            i.name.toLowerCase().includes("pasta") ||
-            i.name.toLowerCase().includes("noodles")
+          (i) => i.name.toLowerCase().includes('pasta') || i.name.toLowerCase().includes('noodles')
         )}
       />
       <Separator />
@@ -187,18 +178,14 @@ function RecipeList({ navigation }) {
         loading={loading}
         navigation={navigation}
         title="Met wraps"
-        recipes={filterByIngredient(recipes, (i) =>
-          i.name.toLowerCase().includes("wrap")
-        )}
+        recipes={filterByIngredient(recipes, (i) => i.name.toLowerCase().includes('wrap'))}
       />
       <Separator />
       <FilteredRecipeList
         loading={loading}
         navigation={navigation}
         title="Soep"
-        recipes={filterByRecipe(recipes, (r) =>
-          r.title.toLowerCase().includes("soep")
-        )}
+        recipes={filterByRecipe(recipes, (r) => r.title.toLowerCase().includes('soep'))}
       />
     </View>
   );
@@ -208,11 +195,11 @@ export default function PlanScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={{ paddingBottom: 50 }}>
-        <SectionHeader title={"Recepten"}>
+        <SectionHeader title={'Recepten'}>
           <Text
             onPress={(e) => {
               e.preventDefault();
-              navigation.navigate("WeekPlanner");
+              navigation.navigate('WeekPlanner');
             }}
             style={[
               Type.sectionLink,
@@ -221,14 +208,13 @@ export default function PlanScreen({ navigation }) {
                 fontSize: 14,
                 paddingBottom: 2,
               },
-            ]}
-          >
+            ]}>
             Planner
           </Text>
           <Text
             onPress={(e) => {
               e.preventDefault();
-              navigation.navigate("RecipeList");
+              navigation.navigate('RecipeList');
             }}
             style={[
               Type.sectionLink,
@@ -237,8 +223,7 @@ export default function PlanScreen({ navigation }) {
                 fontSize: 14,
                 paddingBottom: 2,
               },
-            ]}
-          >
+            ]}>
             Bekijk alles
           </Text>
         </SectionHeader>

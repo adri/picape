@@ -4,7 +4,7 @@ defmodule Picape.Repo.Migrations.CreateShoppingBoughtIngredient do
   def change do
     create table(:shopping_bought_ingredient) do
       add :line_id, :string
-      add :undone, :boolean, default: false, null: false
+      add :undone, :boolean, default: false
       add :ingredient_id, references(:recipe_ingredient, on_delete: :nothing)
 
       timestamps()

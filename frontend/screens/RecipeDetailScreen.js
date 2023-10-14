@@ -1,28 +1,23 @@
-import * as React from "react";
-import {
-  Text,
-  FlatList,
-  View,
-  ImageBackground,
-  Dimensions,
-} from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import { useQuery } from "@apollo/react-hooks";
-import gql from "graphql-tag";
-import Colors from "../constants/Colors";
-import { BackIcon, CheckIcon } from "../components/Icon";
-import Hyperlink from "react-native-hyperlink";
-import { SectionHeader } from "../components/Section/SectionHeader";
-import { ListItem } from "../components/ListItem/ListItem";
-import SkeletonContent from "react-native-skeleton-content";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Layout from "../constants/Layout";
-import { Badge } from "../components/Badge/Badge";
-import Type from "../constants/Type";
-import { EditIcon } from "../components/Icon/EditIcon";
+import * as React from 'react';
+import { Text, FlatList, View, ImageBackground, Dimensions } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import { useMutation, useQuery } from '@apollo/react-hooks';
+import gql from 'graphql-tag';
+import Colors from '../constants/Colors';
+import { BackIcon, CheckIcon } from '../components/Icon';
+import Hyperlink from 'react-native-hyperlink';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import { ListItem } from '../components/ListItem/ListItem';
+import SkeletonContent from 'react-native-skeleton-content';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Layout from '../constants/Layout';
+import { Badge } from '../components/Badge/Badge';
+import { EditIcon } from '../components/Icon/EditIcon';
+import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
+import { FixedFooter } from '../components/Section/FixedFooter';
 
-var linkify = require("linkify-it")();
-linkify.add("shortcuts:", "http:");
+var linkify = require('linkify-it')();
+linkify.add('shortcuts:', 'http:');
 
 const GET_RECIPE = gql`
   query GetRecipe($recipeId: ID!) {
@@ -41,6 +36,7 @@ const GET_RECIPE = gql`
             orderedQuantity
           }
         }
+        isCooked
       }
     }
   }
@@ -52,28 +48,38 @@ function stepWithTimerLinks(step) {
   return step.replace(
     timerRegex,
     (text, text1, time) =>
-      `shortcuts://run-shortcut?name=Timer&input=${encodeURI(
-        time.trim()
-      )}&text=${encodeURI(text)}`
+      `shortcuts://run-shortcut?name=Timer&input=${encodeURI(time.trim())}&text=${encodeURI(text)}`
   );
 }
 
 export default function RecipeDetailScreen({ route: { params }, navigation }) {
-  const { loading, error, data = {} } = useQuery(GET_RECIPE, {
+  const {
+    loading,
+    error,
+    data = {},
+  } = useQuery(GET_RECIPE, {
     variables: { recipeId: params.id },
     returnPartialData: true,
   });
   if (error) return `Error! ${error}`;
   const { recipe = params.recipe } = data;
   const insets = useSafeAreaInsets();
-  const steps = (recipe.description || "").split("\n\n");
+  const steps = (recipe.description || '').split('\n\n');
   const [stepChecked, setStepsChecked] = React.useState([]);
+  const [markRecipeAsCooked] = useMutation(MARK_RECIPE_AS_COOKED, {
+    onCompleted: () => {
+      navigation.goBack();
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
 
-  console.log({ insets })
+  console.log({ insets });
   return (
     <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
       <BackIcon
-        style={{ position: "absolute", top: insets.top, left: insets.left + 5 }}
+        style={{ position: 'absolute', top: insets.top, left: insets.left + 5 }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();
@@ -83,37 +89,37 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
       <ImageBackground
         source={{ uri: recipe.imageUrl }}
         fadeDuration={0}
-        imageStyle={{ resizeMode: "cover" }}
+        imageStyle={{ resizeMode: 'cover' }}
         style={{
-          width: Dimensions.get("window").width,
+          width: Dimensions.get('window').width,
           height: 200,
-        }}
-      >
+        }}>
         <View
           style={{
-            flexDirection: "row",
-            width: Dimensions.get("window").width,
+            flexDirection: 'row',
+            width: Dimensions.get('window').width,
             height: 200,
-          }}
-        ></View>
+          }}></View>
       </ImageBackground>
 
       <SectionHeader title={recipe.title}>
-        <EditIcon onPress={(e) => {
-              e.preventDefault();
-              navigation.navigate("EditRecipe", { recipeId: recipe.id });
-         }} />
+        <EditIcon
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.navigate('EditRecipe', { recipeId: recipe.id });
+          }}
+        />
       </SectionHeader>
 
       <SkeletonContent
         layout={[
           {
-            width: Dimensions.get("window").width - 40,
+            width: Dimensions.get('window').width - 40,
             height: 100,
             marginBottom: 10,
           },
           ...Array(5).fill({
-            width: Dimensions.get("window").width - 40,
+            width: Dimensions.get('window').width - 40,
             height: 60,
             marginBottom: 10,
           }),
@@ -134,8 +140,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
             <ListItem
               style={{ marginRight: 10 }}
               title={ingredient.name}
-              imageUrl={ingredient.imageUrl}
-            ></ListItem>
+              imageUrl={ingredient.imageUrl}></ListItem>
           );
         }}
       />
@@ -151,33 +156,28 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
               borderRadius: Layout.borderRadius,
               opacity: stepChecked[index] ? 0.7 : 1,
               backgroundColor: Colors.cardBackground,
-              flexDirection: "row",
-            }}
-          >
+              flexDirection: 'row',
+            }}>
             <Hyperlink
               linkify={linkify}
-              style={{ flex: 1, alignSelf: "stretch" }}
+              style={{ flex: 1, alignSelf: 'stretch' }}
               linkDefault={!stepChecked[index]}
               linkStyle={{ color: Colors.link }}
               linkText={(url) => {
-                if (url.includes("shortcuts://run-shortcut?name=Timer")) {
-                  return new URLSearchParams(url).get("text");
+                if (url.includes('shortcuts://run-shortcut?name=Timer')) {
+                  return new URLSearchParams(url).get('text');
                 }
 
-                if (url.includes("youtube.com")) {
-                  return "Youtube";
+                if (url.includes('youtube.com')) {
+                  return 'Youtube';
                 }
 
                 return url;
-              }}
-            >
+              }}>
               <Text
                 style={{
-                  color: stepChecked[index]
-                    ? Colors.secondaryText
-                    : Colors.text,
-                }}
-              >
+                  color: stepChecked[index] ? Colors.secondaryText : Colors.text,
+                }}>
                 {stepWithTimerLinks(step)}
               </Text>
             </Hyperlink>
@@ -207,6 +207,19 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
           </View>
         );
       })}
+      <View style={{ height: 60 }} />
+      <FixedFooter
+        buttonText={recipe.isCooked ? 'Toch niet gekookt' : 'Gekookt'}
+        onPress={(e) => {
+          e.preventDefault();
+          markRecipeAsCooked({
+            variables: {
+              recipeId: recipe.id,
+              cooked: !recipe.isCooked,
+            },
+          });
+        }}
+      />
     </ScrollView>
   );
 }
