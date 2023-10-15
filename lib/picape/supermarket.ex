@@ -19,6 +19,10 @@ defmodule Picape.Supermarket do
     end)
   end
 
+  def invalidate_product(product_id) do
+    ConCache.delete(:supermarket, "product-#{product_id}")
+  end
+
   def apply_changes(changes, attempt \\ 1) do
     with cart <- cart(),
          items <- CartItems.apply_changes(changes, &product_title_by_id/1) do

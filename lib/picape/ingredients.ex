@@ -42,7 +42,7 @@ defmodule Picape.Ingredients do
         from(q in query, where: q.is_essential == ^essential)
 
       {:excluded, ids}, query ->
-        from(q in query, where: not (q.id in ^ids))
+        from(q in query, where: q.id not in ^ids)
 
       {:tag_ids, []}, query ->
         query
@@ -129,6 +129,8 @@ defmodule Picape.Ingredients do
     Ingredient
     |> Repo.all()
     |> Enum.map(fn ingredient ->
+      Supermarket.invalidate_product(ingredient.supermarket_product_id)
+
       ingredient
       |> Ingredient.raw_changeset(%{
         supermarket_product_raw: Supermarket.products_by_id(ingredient.supermarket_product_id)

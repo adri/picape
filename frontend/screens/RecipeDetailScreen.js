@@ -123,7 +123,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
             backgroundColor: Colors.cardBackground,
             borderRadius: Layout.borderRadius,
           }}>
-          <Text>⚠️ {recipe.warning}</Text>
+          <Text style={{ color: Colors.text }}>⚠️ {recipe.warning}</Text>
         </View>
       )}
 
