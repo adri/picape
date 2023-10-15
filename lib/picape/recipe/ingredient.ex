@@ -37,6 +37,33 @@ defmodule Picape.Recipe.Ingredient do
     {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "title"]) || ""}
   end
 
+  def fetch(ingredient, :warning) do
+    status = get_in(ingredient.supermarket_product_raw, ["productCard", "orderAvailabilityStatus"]) || ""
+    out_of_stock = status == "OUT_OF_STOCK"
+    out_of_assortment = Enum.member?(["NOT_IN_ASSORTMENT", "NO_LONGER_IN_ASSORTMENT"], status)
+
+    case {out_of_stock, out_of_assortment} do
+      {true, _} ->
+        {:ok,
+         %{
+           description: "Ingredient is out of stock",
+           out_of_stock: true,
+           out_of_assortment: false
+         }}
+
+      {_, true} ->
+        {:ok,
+         %{
+           description: "Ingredient is out of assortment",
+           out_of_stock: false,
+           out_of_assortment: true
+         }}
+
+      _ ->
+        :error
+    end
+  end
+
   def fetch(ingredient, :nutriscore) do
     {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "properties", "nutriscore", Access.at(0)]) || ""}
   end

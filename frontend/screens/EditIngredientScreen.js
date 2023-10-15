@@ -11,6 +11,7 @@ import { FixedFooter } from '../components/Section/FixedFooter';
 import { SearchIngredients } from '../components/Search/SearchIngredients';
 import { ListItem } from '../components/ListItem/ListItem';
 import { useRef } from 'react';
+import Layout from '../constants/Layout';
 
 const EDIT_INGREDIENT = gql`
   mutation EditIngredient($input: EditIngredientInput!) {
@@ -21,6 +22,9 @@ const EDIT_INGREDIENT = gql`
       isPlanned
       unitQuantity
       orderedQuantity
+      warning {
+        description
+      }
     }
   }
 `;
@@ -39,6 +43,9 @@ const GET_INGREDIENT = gql`
           id
           name
           count
+        }
+        warning {
+          description
         }
       }
     }
@@ -59,6 +66,7 @@ export function EditIngredientScreen({
   },
 }) {
   const [editIngredient] = useMutation(EDIT_INGREDIENT, {
+    refetchQueries: ['GetRecipe', 'RecipeList'],
     onCompleted: () => {
       navigation.goBack();
     },
@@ -106,6 +114,18 @@ export function EditIngredientScreen({
         <SectionHeader title="" />
         <SectionHeader title="Bewerk ingrediënt" />
 
+        {ingredient.warning && (
+          <View
+            style={{
+              marginHorizontal: 20,
+              padding: 10,
+              marginBottom: 20,
+              backgroundColor: Colors.cardBackground,
+              borderRadius: Layout.borderRadius,
+            }}>
+            <Text style={{ color: Colors.text }}>⚠️ {ingredient.warning.description}</Text>
+          </View>
+        )}
         <View style={styles.container}>
           <InputText
             testID="name"
@@ -193,6 +213,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     marginVertical: 20,
+    marginBottom: 80,
     paddingHorizontal: 20,
   },
   descriptionInput: {

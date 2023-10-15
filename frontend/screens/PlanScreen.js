@@ -121,7 +121,8 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
               }}
               key={recipe.id}
               title={recipe.title}
-              imageUrl={recipe.imageUrl}>
+              imageUrl={recipe.imageUrl}
+              badges={recipe.warning && <Text>⚠️</Text>}>
               <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
             </ImageCard>
           );

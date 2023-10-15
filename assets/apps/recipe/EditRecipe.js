@@ -265,6 +265,9 @@ const EditQuery = gql`
           name
         }
       }
+      warning {
+        description
+      }
     }
   }
 `;

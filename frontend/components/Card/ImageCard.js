@@ -5,7 +5,17 @@ import Type from '../../constants/Type';
 import Layout from '../../constants/Layout';
 import { StyleSheet } from 'react-native';
 
-export function ImageCard({ imageUrl, width, children, onPress, title, style, imageStyle, muted }) {
+export function ImageCard({
+  imageUrl,
+  width,
+  children,
+  onPress,
+  title,
+  style,
+  imageStyle,
+  muted,
+  badges,
+}) {
   return (
     <View style={[{ borderColor: '#cdcdcd', paddingHorizontal: 5 }, style]}>
       <TouchableOpacity onPress={onPress} style={{ flex: 3 }} delayPressIn={100}>
@@ -26,12 +36,13 @@ export function ImageCard({ imageUrl, width, children, onPress, title, style, im
           </View>
         </ImageBackground>
       </TouchableOpacity>
-      <View style={{ flex: 1, paddingTop: 10 }}>
+      <View style={{ flex: 1, flexDirection: 'row', gap: 5, paddingTop: 10 }}>
         <Text
           style={[Type.body, { color: Colors.cardText }, muted && styles.mutedText]}
           onPress={onPress}>
           {title}
         </Text>
+        {badges && badges}
       </View>
     </View>
   );

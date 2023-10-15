@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 export const GET_RECIPES = gql`
   query RecipeList {
     recipes {
@@ -12,6 +12,7 @@ export const GET_RECIPES = gql`
           name
         }
       }
+      warning
     }
   }
 `;

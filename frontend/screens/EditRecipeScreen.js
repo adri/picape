@@ -135,7 +135,11 @@ export function EditRecipeScreen({
             <ListItem
               key={row.ingredient.id}
               title={row.ingredient.name}
-              imageUrl={row.ingredient.imageUrl}>
+              imageUrl={row.ingredient.imageUrl}
+              onImagePress={(e) => {
+                e.preventDefault();
+                navigation.navigate('EditIngredient', { ingredientId: row.ingredient.id });
+              }}>
               <QuantitySelector
                 id={row.ingredient.id}
                 orderedQuantity={row.quantity}
@@ -154,12 +158,15 @@ export function EditRecipeScreen({
           <SearchIngredients
             autoFocus={false}
             placeholder={'Igrediënt toevoegen...'}
-            customRenderItem={({ item: ingredient, searchRef }) => (
+            customRenderItem={({ item: ingredient, supermarket, searchRef }) => (
               <ListItem title={ingredient.name} imageUrl={ingredient.imageUrl}>
                 <QuantitySelector
                   id={ingredient.id}
                   orderedQuantity={0}
                   onChange={() => {
+                    if (supermarket) {
+                      // TODO: open "add integdient" screen
+                    }
                     var existing = form.ingredients.find(
                       (ref) => ref.ingredient.id === ingredient.id
                     );

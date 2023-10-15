@@ -30,23 +30,26 @@ defmodule PicapeWeb.Graphql.Types do
     field(:description, :string)
     field(:image_url, :string, resolve: from_object(:image_url))
 
-    field(
-      :is_planned,
-      :boolean,
-      resolve: batched({Resolver.Order, :recipes_planned?})
-    )
+    field :warning, :string do
+      resolve(fn parent, _args, _ctx ->
+        batch({Resolver.Recipe, :ingredients_by_recipe_ids}, parent.id, fn results ->
+          {:ok, batch_results} = results
 
-    field(
-      :ingredients,
-      list_of(:recipe_ingredient_edge),
+          case Enum.find(batch_results[parent.id], &(&1.ingredient[:warning] != nil)) do
+            nil -> {:ok, nil}
+            ref -> {:ok, ref.ingredient[:warning].description}
+          end
+        end)
+      end)
+    end
+
+    field(:is_planned, :boolean, resolve: batched({Resolver.Order, :recipes_planned?}))
+
+    field(:ingredients, list_of(:recipe_ingredient_edge),
       resolve: batched({Resolver.Recipe, :ingredients_by_recipe_ids})
     )
 
-    field(
-      :is_cooked,
-      :boolean,
-      resolve: batched({Resolver.Order, :recipes_cooked?})
-    )
+    field(:is_cooked, :boolean, resolve: batched({Resolver.Order, :recipes_cooked?}))
   end
 
   node object(:ingredient) do
@@ -58,6 +61,7 @@ defmodule PicapeWeb.Graphql.Types do
     field(:image_url, :string, resolve: from_object(:image_url))
     field(:supermarket_name, :string, resolve: from_object(:original_title))
     field(:nutriscore, :string, resolve: from_object(:nutriscore))
+    field(:warning, :ingredient_warning, resolve: from_object(:warning))
 
     field :is_planned, :boolean do
       arg(:in_shopping_list, :boolean, default_value: false)
@@ -174,6 +178,18 @@ defmodule PicapeWeb.Graphql.Types do
   object :recipe_ingredient_edge do
     field(:quantity, :integer)
     field(:ingredient, :ingredient)
+  end
+
+  object :recipe_warning do
+    field(:out_of_stock, :boolean)
+    field(:out_of_assortment, :boolean)
+    field(:description, :string)
+  end
+
+  object :ingredient_warning do
+    field(:out_of_stock, :boolean)
+    field(:out_of_assortment, :boolean)
+    field(:description, :string)
   end
 
   object :recipe_edge do

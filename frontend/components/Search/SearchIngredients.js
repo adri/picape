@@ -19,6 +19,9 @@ const SEARCH_INGREDIENTS = gql`
       imageUrl
       nutriscore
       orderedQuantity
+      warning {
+        description
+      }
     }
     ingredients: searchSupermarket(query: $query) @include(if: $supermarket) {
       id
@@ -31,7 +34,7 @@ const SEARCH_INGREDIENTS = gql`
 
 const renderItem = ({ navigator, item: ingredient, supermarket }) => (
   <ListItem
-    title={ingredient.name}
+    title={`${ingredient.name}${ingredient.warning ? ' ⚠️' : ''}`}
     badges={ingredient?.nutriscore ? <Nutriscore nutriscore={ingredient.nutriscore} /> : null}
     imageUrl={ingredient.imageUrl}
     onImagePress={(e) => {

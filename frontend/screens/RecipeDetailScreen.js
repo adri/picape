@@ -34,8 +34,12 @@ const GET_RECIPE = gql`
             name
             imageUrl
             orderedQuantity
+            warning {
+              description
+            }
           }
         }
+        warning
         isCooked
       }
     }
@@ -75,7 +79,6 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
     },
   });
 
-  console.log({ insets });
   return (
     <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
       <BackIcon
@@ -111,6 +114,19 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         />
       </SectionHeader>
 
+      {recipe.warning && (
+        <View
+          style={{
+            marginHorizontal: 20,
+            padding: 10,
+            marginBottom: 20,
+            backgroundColor: Colors.cardBackground,
+            borderRadius: Layout.borderRadius,
+          }}>
+          <Text>⚠️ {recipe.warning}</Text>
+        </View>
+      )}
+
       <SkeletonContent
         layout={[
           {
@@ -136,10 +152,15 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         data={recipe.ingredients}
         keyExtractor={({ ingredient }) => ingredient.id}
         renderItem={({ item: { ingredient }, index }) => {
+          const warning = ingredient.warning ? ' ⚠️' : '';
           return (
             <ListItem
               style={{ marginRight: 10 }}
-              title={ingredient.name}
+              onImagePress={(e) => {
+                e.preventDefault();
+                navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
+              }}
+              title={`${ingredient.name}${warning}`}
               imageUrl={ingredient.imageUrl}></ListItem>
           );
         }}
