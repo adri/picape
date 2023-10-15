@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 export const EDIT_RECIPE = gql`
   mutation EditRecipe(
     $recipeId: ID!
@@ -18,11 +18,15 @@ export const EDIT_RECIPE = gql`
       title
       imageUrl
       description
+      warning
       ingredients {
         quantity
         ingredient {
           id
           name
+          warning {
+            description
+          }
         }
       }
     }

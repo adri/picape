@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 export const GET_RECIPE = gql`
   query GetRecipe($recipeId: ID!) {
     node(id: $recipeId) {
@@ -13,6 +13,9 @@ export const GET_RECIPE = gql`
             id
             name
             imageUrl
+            warning {
+              description
+            }
           }
         }
       }

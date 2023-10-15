@@ -1,23 +1,18 @@
-import * as React from "react";
-import { View, Text, ScrollView, FlatList, StyleSheet } from "react-native";
-import { useQuery, useMutation } from "@apollo/react-hooks";
-import Colors from "../constants/Colors";
-import { ImageCard } from "../components/Card/ImageCard";
-import { Card } from "../components/Card/Card";
-import { SectionHeader } from "../components/Section/SectionHeader";
-import SkeletonContent from "react-native-skeleton-content";
-import { useSafeArea } from "react-native-safe-area-context";
-import {
-  RefreshIcon,
-  CloseIcon,
-  MinusIcon,
-  PlusIcon,
-} from "../components/Icon";
-import { GET_RECIPES } from "../operations/getRecipes";
-import { BlurView } from "expo-blur";
-import { useColorScheme } from "react-native";
-import Layout from "../constants/Layout";
-import { PLAN_RECIPE, optimisticResponse } from "../operations/planRecipe";
+import * as React from 'react';
+import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
+import { useQuery, useMutation } from '@apollo/react-hooks';
+import Colors from '../constants/Colors';
+import { ImageCard } from '../components/Card/ImageCard';
+import { Card } from '../components/Card/Card';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from 'react-native-skeleton-content';
+import { useSafeArea } from 'react-native-safe-area-context';
+import { RefreshIcon, CloseIcon, MinusIcon, PlusIcon } from '../components/Icon';
+import { GET_RECIPES } from '../operations/getRecipes';
+import { BlurView } from 'expo-blur';
+import { useColorScheme } from 'react-native';
+import Layout from '../constants/Layout';
+import { PLAN_RECIPE, optimisticResponse } from '../operations/planRecipe';
 
 function getRandom(recipes, amount) {
   return Object.values(recipes)
@@ -44,9 +39,7 @@ export default function WeekPlannerScreen({ navigation }) {
   const [amount, setAmount] = React.useState(4);
   const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });
 
-  const [chosenRecipes, setRecipes] = React.useState(
-    getRandom(recipes, amount)
-  );
+  const [chosenRecipes, setRecipes] = React.useState(getRandom(recipes, amount));
 
   if (error) return `Error! ${error}`;
 
@@ -54,7 +47,7 @@ export default function WeekPlannerScreen({ navigation }) {
     <View style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
         <CloseIcon
-          style={{ position: "absolute", top: insets.top, right: insets.left }}
+          style={{ position: 'absolute', top: insets.top, right: insets.left }}
           onPress={(e) => {
             e.preventDefault();
             navigation.goBack();
@@ -68,13 +61,12 @@ export default function WeekPlannerScreen({ navigation }) {
             height: 60,
             margin: 5,
             marginBottom: 10,
-            flexBasis: "50%",
+            flexBasis: '50%',
           })}
           containerStyle={styles.skeletonContainerStyle}
           boneColor={Colors.skeletonBone}
           highlightColor={Colors.skeletonHighlight}
-          isLoading={loading}
-        >
+          isLoading={loading}>
           <FlatList
             initialNumToRender={3}
             numColumns={2}
@@ -89,25 +81,19 @@ export default function WeekPlannerScreen({ navigation }) {
                   key={recipe.id}
                   title={recipe.title}
                   imageUrl={recipe.imageUrl}
+                  badges={recipe.warning && <Text>⚠️</Text>}
                   onPress={(e) => {
                     e.preventDefault();
-                    navigation.navigate("RecipeDetail", {
+                    navigation.navigate('RecipeDetail', {
                       id: recipe.id,
                       recipe,
                     });
-                  }}
-                >
+                  }}>
                   <RefreshIcon
                     style={styles.refreshIcon}
                     onPress={(e) => {
                       e.preventDefault();
-                      setRecipes(
-                        replaceRecipe(
-                          chosenRecipes,
-                          index,
-                          getRandom(recipes, 1)[0]
-                        )
-                      );
+                      setRecipes(replaceRecipe(chosenRecipes, index, getRandom(recipes, 1)[0]));
                     }}
                   />
                   <MinusIcon
@@ -122,22 +108,17 @@ export default function WeekPlannerScreen({ navigation }) {
             }}
           />
           <Card
-            style={{ flexBasis: "100%", marginTop: 10 }}
+            style={{ flexBasis: '100%', marginTop: 10 }}
             cardStyle={styles.cardStyle}
-            width={"auto"}
+            width={'auto'}
             height={60}
-            key="new-recipe"
-          >
+            key="new-recipe">
             <PlusIcon
-              style={{ alignSelf: "center" }}
+              style={{ alignSelf: 'center' }}
               onPress={(e) => {
                 e.preventDefault();
                 setRecipes(
-                  replaceRecipe(
-                    chosenRecipes,
-                    chosenRecipes.length,
-                    getRandom(recipes, 1)[0]
-                  )
+                  replaceRecipe(chosenRecipes, chosenRecipes.length, getRandom(recipes, 1)[0])
                 );
               }}
             />
@@ -146,36 +127,34 @@ export default function WeekPlannerScreen({ navigation }) {
       </ScrollView>
       <BlurView
         style={{
-          position: "absolute",
+          position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
         }}
         tint={useColorScheme()}
-        intensity={100}
-      >
+        intensity={100}>
         <Text
           onPress={(e) => {
             e.preventDefault();
             chosenRecipes.map(({ id }) =>
               planRecipe({
                 variables: { recipeId: id },
-                optimisticResponse: optimisticResponse("planRecipe", id, true),
+                optimisticResponse: optimisticResponse('planRecipe', id, true),
               })
             );
             navigation.goBack();
           }}
           style={{
             color: Colors.text,
-            alignSelf: "center",
+            alignSelf: 'center',
             padding: 10,
             paddingHorizontal: 20,
             marginTop: 20,
             marginBottom: insets.bottom + 20,
             backgroundColor: Colors.iconDefault,
             borderRadius: Layout.borderRadius,
-          }}
-        >
+          }}>
           Recepten plannen
         </Text>
       </BlurView>
@@ -185,20 +164,20 @@ export default function WeekPlannerScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   imageCard: {
-    flexBasis: "50%",
+    flexBasis: '50%',
   },
   imageCardStyle: {
-    width: "100%",
-    justifyContent: "space-between",
+    width: '100%',
+    justifyContent: 'space-between',
   },
   cardStyle: {
-    alignContent: "center",
-    justifyContent: "center",
+    alignContent: 'center',
+    justifyContent: 'center',
   },
   skeletonContainerStyle: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignContent: "stretch",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignContent: 'stretch',
     paddingHorizontal: 15,
     marginBottom: 100,
   },

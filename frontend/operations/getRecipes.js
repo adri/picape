@@ -5,6 +5,7 @@ export const GET_RECIPES = gql`
       id
       title
       imageUrl
+      warning
       isPlanned
       ingredients {
         ingredient {

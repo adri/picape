@@ -134,7 +134,7 @@ export function EditRecipeScreen({
           {form.ingredients.map((row) => (
             <ListItem
               key={row.ingredient.id}
-              title={row.ingredient.name}
+              title={`${row.ingredient.name}${row.ingredient.warning ? ' ⚠️' : ''}`}
               imageUrl={row.ingredient.imageUrl}
               onImagePress={(e) => {
                 e.preventDefault();
@@ -159,7 +159,9 @@ export function EditRecipeScreen({
             autoFocus={false}
             placeholder={'Igrediënt toevoegen...'}
             customRenderItem={({ item: ingredient, supermarket, searchRef }) => (
-              <ListItem title={ingredient.name} imageUrl={ingredient.imageUrl}>
+              <ListItem
+                title={`${ingredient.name}${ingredient.warning ? ' ⚠️' : ''}`}
+                imageUrl={ingredient.imageUrl}>
                 <QuantitySelector
                   id={ingredient.id}
                   orderedQuantity={0}
