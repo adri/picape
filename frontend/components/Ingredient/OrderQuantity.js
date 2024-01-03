@@ -1,6 +1,5 @@
 import * as React from 'react';
-import gql from 'graphql-tag';
-import { useMutation } from '@apollo/client';
+import { gql, useMutation } from '@apollo/client';
 import { QuantitySelector } from './QuantitySelector';
 
 const ORDER_INGREDIENT = gql`

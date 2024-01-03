@@ -55,7 +55,6 @@ defmodule Picape.Mixfile do
       {:sentry, "~> 7.0"},
       {:gettext, "~> 0.11"},
       # {:cowboy, "~> 2.7.0"},
-      {:reverse_proxy_plug, "~> 2.1"},
       {:new_relic_agent, "~> 1.0"},
       {:poison, "~> 3.0"},
       {:httpoison, "~> 1.8.0"},

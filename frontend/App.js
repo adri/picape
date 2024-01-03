@@ -1,31 +1,29 @@
-import * as React from "react";
-import * as SplashScreen from "expo-splash-screen";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
-import { ApolloClient, ApolloProvider, InMemoryCache, ApolloLink } from "@apollo/client";
-import * as AbsintheSocket from "@absinthe/socket";
-import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link";
-import { Socket as PhoenixSocket } from "phoenix";
-import { onError } from "@apollo/client/link/error";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useColorScheme } from "react-native";
-import * as Updates from "expo-updates";
-import BottomTabNavigator from "./navigation/BottomTabNavigator";
-import linking from "./navigation/useLinking";
-import Sentry from "./Sentry";
-import * as serviceWorkerRegistration from "./src/serviceWorkerRegistration";
+import * as React from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { ApolloClient, ApolloProvider, InMemoryCache, ApolloLink } from '@apollo/client';
+import * as AbsintheSocket from '@absinthe/socket';
+import { createAbsintheSocketLink } from '@absinthe/socket-apollo-link';
+import { Socket as PhoenixSocket } from 'phoenix';
+import { onError } from '@apollo/client/link/error';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useColorScheme } from 'react-native';
+import * as Updates from 'expo-updates';
+import BottomTabNavigator from './navigation/BottomTabNavigator';
+import linking from './navigation/useLinking';
+import Sentry from './Sentry';
+import * as serviceWorkerRegistration from './src/serviceWorkerRegistration';
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
     graphQLErrors.map(({ message, locations, path }) =>
-      console.log(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
+      console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
     );
 
   if (networkError) console.log(`[Network error]:`, networkError);
 });
 
-const host = "wss://picape.whybug.com/socket";
+const host = 'wss://picape.whybug.com/socket';
 // const host = "ws://localhost:4000/socket";
 const link = ApolloLink.from([
   onErrorLink,
@@ -41,7 +39,7 @@ const LightTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "white", // by default this is grey
+    background: 'white', // by default this is grey
   },
 };
 
@@ -50,8 +48,8 @@ const DarkTheme = {
   dark: true,
   colors: {
     ...DefaultTheme.colors,
-    background: "black", // by default this is grey
-    border: "#404040",
+    background: 'black', // by default this is grey
+    border: '#404040',
   },
 };
 
@@ -60,7 +58,7 @@ export default function App(props) {
   const [initialNavigationState, setInitialNavigationState] = React.useState();
   const containerRef = React.useRef();
   const colorScheme = useColorScheme();
-  const theme = colorScheme === "dark" ? DarkTheme : LightTheme;
+  const theme = colorScheme === 'dark' ? DarkTheme : LightTheme;
 
   // Load any resources or data that we need prior to rendering the app
   React.useEffect(() => {
@@ -69,7 +67,7 @@ export default function App(props) {
         SplashScreen.preventAutoHideAsync();
 
         // Load our initial navigation state
-        setInitialNavigationState(await getInitialState());
+        // setInitialNavigationState(await getInitialState());
       } catch (e) {
         // We might want to provide this error information to an error reporting service
         console.warn(e);
@@ -92,8 +90,7 @@ export default function App(props) {
             ref={containerRef}
             linking={linking}
             initialState={initialNavigationState}
-            theme={theme}
-          >
+            theme={theme}>
             <BottomTabNavigator />
           </NavigationContainer>
         </ApolloProvider>

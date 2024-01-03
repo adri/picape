@@ -15,10 +15,11 @@ tmp
 *.ez
 assets/node_modules
 releases
-frontend
 
 # Generate on crash by the VM
 erl_crash.dump
 
 # Static artifacts
 node_modules
+frontend/node_modules
+frontend/web-build

@@ -25,16 +25,6 @@ config :picape, PicapeWeb.Endpoint,
     "//web-build.adri.now.sh",
     "https://web-build-adri.vercel.app",
     "//localhost"
-  ],
-  watchers: [
-    bash: [
-      "../bin/spawn_execute.sh",
-      "node",
-      "node_modules/next/dist/bin/next-start",
-      "-p",
-      "4001",
-      cd: Path.expand("../assets", __DIR__)
-    ]
   ]
 
 # Do not print debug messages in production

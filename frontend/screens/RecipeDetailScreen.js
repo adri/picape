@@ -1,4 +1,4 @@
-import { useMutation, useQuery, gql } from "@apollo/client";
+import { useMutation, useQuery, gql } from '@apollo/client';
 import * as React from 'react';
 import { Text, FlatList, View, ImageBackground, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';

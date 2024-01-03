@@ -16,7 +16,7 @@
 #
 ARG BUILDER_IMAGE="hexpm/elixir:1.13.2-erlang-24.2.1-debian-bullseye-20210902-slim"
 ARG RUNNER_IMAGE="debian:bullseye-20210902-slim"
-ARG NODE_VERSION="8.11.3"
+ARG NODE_VERSION="20.8.0"
 
 FROM ${BUILDER_IMAGE} as builder
 
@@ -70,24 +70,23 @@ COPY priv priv
 # step down so that `lib` is available.
 COPY assets assets
 
-# Build nextjs
-RUN --mount=type=cache,target=~/.npm,sharing=locked \
-  --mount=type=cache,target=/app/assets/node_modules,sharing=locked \
-  --mount=type=cache,target=.next,sharing=locked \
-  cd assets && npm install --lockfile-only --prefer-offline --no-audit --loglevel=error \
-  && node_modules/.bin/next build \
-  && cp -R node_modules /node_modules_build \
-  && cp -R .next /.next
+COPY frontend frontend
 
-# compile assets
-RUN mix phx.digest
+# Build expo from frontend directory
+RUN --mount=type=cache,target=~/.npm,sharing=locked \
+  --mount=type=cache,target=/app/frontend/node_modules,sharing=locked \
+  --mount=type=cache,target=/app/frontend/web-build,sharing=locked \
+  cd frontend && npm install --lockfile-only --prefer-offline --no-audit --loglevel=error \
+  && npm run build:web \
+  && mkdir /app/expo && cp -R web-build/* /app/priv/static
 
 # Compile the release
 COPY lib lib
 
 RUN --mount=type=cache,target=~/.hex/packages/hexpm,sharing=locked \
   --mount=type=cache,target=~/.cache/rebar3,sharing=locked \
-  mix compile
+  mix do compile \
+  && mix phx.digest
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
@@ -130,9 +129,7 @@ RUN chown nobody /app
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/prod/rel/picape ./
 COPY --from=builder --chown=nobody:root /app/bin ./bin
-COPY --from=builder --chown=nobody:root /app/assets ./assets
-COPY --from=builder --chown=nobody:root /node_modules_build ./assets/node_modules
-COPY --from=builder --chown=nobody:root /.next ./assets/.next
+# COPY --from=builder --chown=nobody:root /app/assets ./assets
 
 USER nobody
 

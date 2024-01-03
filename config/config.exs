@@ -34,8 +34,6 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.HTTPoison
-
 config :absinthe, schema: PicapeWeb.Graphql.Schema
 
 config :sentry,
