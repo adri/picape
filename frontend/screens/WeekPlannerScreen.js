@@ -1,6 +1,6 @@
+import { useQuery, useMutation } from "@apollo/client";
 import * as React from 'react';
 import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
-import { useQuery, useMutation } from '@apollo/react-hooks';
 import Colors from '../constants/Colors';
 import { ImageCard } from '../components/Card/ImageCard';
 import { Card } from '../components/Card/Card';

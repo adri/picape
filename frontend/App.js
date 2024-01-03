@@ -1,14 +1,11 @@
 import * as React from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
-import { ApolloClient } from "apollo-client";
-import { ApolloProvider } from "@apollo/react-hooks";
-import { InMemoryCache } from "apollo-cache-inmemory";
+import { ApolloClient, ApolloProvider, InMemoryCache, ApolloLink } from "@apollo/client";
 import * as AbsintheSocket from "@absinthe/socket";
 import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link";
 import { Socket as PhoenixSocket } from "phoenix";
-import { onError } from "apollo-link-error";
-import { ApolloLink } from "apollo-link";
+import { onError } from "@apollo/client/link/error";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useColorScheme } from "react-native";
 import * as Updates from "expo-updates";

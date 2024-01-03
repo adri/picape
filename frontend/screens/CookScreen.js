@@ -1,6 +1,6 @@
+import { useQuery } from "@apollo/client";
 import * as React from "react";
 import Colors from "../constants/Colors";
-import { useQuery } from "@apollo/react-hooks";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { SectionHeader } from "../components/Section/SectionHeader";

@@ -1,8 +1,7 @@
+import { useMutation, useQuery, gql } from "@apollo/client";
 import * as React from 'react';
 import { Text, FlatList, View, ImageBackground, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useMutation, useQuery } from '@apollo/react-hooks';
-import gql from 'graphql-tag';
 import Colors from '../constants/Colors';
 import { BackIcon, CheckIcon } from '../components/Icon';
 import Hyperlink from 'react-native-hyperlink';

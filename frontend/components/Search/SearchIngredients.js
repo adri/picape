@@ -2,7 +2,7 @@ import * as React from 'react';
 import gql from 'graphql-tag';
 import Colors from '../../constants/Colors';
 import { useState } from 'react';
-import { useLazyQuery } from '@apollo/react-hooks';
+import { useLazyQuery } from '@apollo/client';
 import { FlatList, View, Text } from 'react-native';
 import { ListItem } from '../ListItem/ListItem';
 import { OrderQuantity } from '../Ingredient/OrderQuantity';

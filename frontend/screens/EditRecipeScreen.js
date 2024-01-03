@@ -1,7 +1,7 @@
+import { useQuery, useMutation } from "@apollo/client";
 import * as React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/react-hooks';
 import Colors from '../constants/Colors';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { QuantitySelector } from '../components/Ingredient/QuantitySelector';

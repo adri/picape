@@ -1,6 +1,6 @@
+import { useQuery, useSubscription } from "@apollo/client";
 import * as React from "react";
 import Colors from "../../constants/Colors";
-import { useQuery, useSubscription } from "@apollo/react-hooks";
 import { View, Text, StyleSheet } from "react-native";
 import {
   GET_ORDER_COUNT,

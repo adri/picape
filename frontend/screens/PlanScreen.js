@@ -1,7 +1,7 @@
+import { useQuery } from "@apollo/client";
 import * as React from 'react';
 import { Text, View, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useQuery } from '@apollo/react-hooks';
 import Colors from '../constants/Colors';
 import { ImageCard } from '../components/Card/ImageCard';
 import { SectionHeader } from '../components/Section/SectionHeader';

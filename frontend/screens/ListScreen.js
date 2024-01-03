@@ -1,6 +1,6 @@
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import * as React from 'react';
 import Colors from '../constants/Colors';
-import { useMutation, useQuery, useSubscription } from '@apollo/react-hooks';
 import { View, FlatList, Text, Dimensions, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';

@@ -1,8 +1,7 @@
+import { useMutation, useQuery, gql } from "@apollo/client";
 import * as React from 'react';
-import gql from 'graphql-tag';
 import { View, Switch, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/react-hooks';
 import Colors from '../constants/Colors';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { CloseIcon, PlusIcon } from '../components/Icon';

@@ -1,11 +1,7 @@
-import * as React from "react";
-import { useMutation } from "@apollo/react-hooks";
-import { PlusIcon, CheckIcon } from "../Icon";
-import {
-  PLAN_RECIPE,
-  UNPLAN_RECIPE,
-  optimisticResponse,
-} from "../../operations/planRecipe";
+import * as React from 'react';
+import { useMutation } from '@apollo/client';
+import { PlusIcon, CheckIcon } from '../Icon';
+import { PLAN_RECIPE, UNPLAN_RECIPE, optimisticResponse } from '../../operations/planRecipe';
 
 export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
   const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });
@@ -19,7 +15,7 @@ export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
           e.preventDefault();
           unplanRecipe({
             variables: { recipeId: id },
-            optimisticResponse: optimisticResponse("unplanRecipe", id, false),
+            optimisticResponse: optimisticResponse('unplanRecipe', id, false),
           });
         }}
       />
@@ -33,7 +29,7 @@ export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
         e.preventDefault();
         planRecipe({
           variables: { recipeId: id },
-          optimisticResponse: optimisticResponse("planRecipe", id, true),
+          optimisticResponse: optimisticResponse('planRecipe', id, true),
         });
       }}
     />

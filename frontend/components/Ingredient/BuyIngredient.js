@@ -1,8 +1,7 @@
+import { useMutation, gql } from "@apollo/client";
 import * as React from "react";
 import { Badge } from "../Badge/Badge";
-import gql from "graphql-tag";
 import { CheckIcon } from "../Icon";
-import { useMutation } from "@apollo/react-hooks";
 
 const BUY_INGREDIENT = gql`
   mutation buyIngredient($ingredientId: ID!, $undo: Boolean!) {

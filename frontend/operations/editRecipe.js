@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from "@apollo/client";
 export const EDIT_RECIPE = gql`
   mutation EditRecipe(
     $recipeId: ID!

@@ -1,8 +1,7 @@
+import { useQuery, useSubscription, gql } from "@apollo/client";
 import * as React from "react";
 import { View, FlatList, Dimensions } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { useQuery, useSubscription } from "@apollo/react-hooks";
-import gql from "graphql-tag";
 import Colors from "../constants/Colors";
 import { SectionHeader } from "../components/Section/SectionHeader";
 import { ListItem } from "../components/ListItem/ListItem";
