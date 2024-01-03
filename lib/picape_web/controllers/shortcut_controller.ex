@@ -3,6 +3,10 @@ defmodule PicapeWeb.ShortcutController do
 
   alias Picape.{Ingredients, Order}
 
+  def search_ingredient(conn, %{"query" => query} = _params) do
+    render(conn, "search_ingredient.json", %{ingredients: Ingredients.list(filter: [name: query])})
+  end
+
   def add_ingredient(conn, %{"query" => query} = _params) do
     case Ingredients.list(filter: [name: query]) do
       [ingredient] ->
