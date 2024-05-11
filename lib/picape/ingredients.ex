@@ -131,11 +131,15 @@ defmodule Picape.Ingredients do
     |> Enum.map(fn ingredient ->
       Supermarket.invalidate_product(ingredient.supermarket_product_id)
 
-      ingredient
-      |> Ingredient.raw_changeset(%{
-        supermarket_product_raw: Supermarket.products_by_id(ingredient.supermarket_product_id)
-      })
+      try do
+        ingredient
+        |> Ingredient.raw_changeset(%{
+          supermarket_product_raw: Supermarket.products_by_id(ingredient.supermarket_product_id)
+        })
+        |> Repo.update!
+      rescue
+        _ -> nil
+      end
     end)
-    |> Enum.map(&Repo.update!/1)
   end
 end
