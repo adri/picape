@@ -3,7 +3,7 @@ defmodule PicapeWeb.Router do
   use Plug.ErrorHandler
   use Sentry.Plug
 
-  post("/", PicapeWeb.PageController, :index)
+  get("/", PicapeWeb.PageController, :index)
 
   forward(
     "/graphql",
