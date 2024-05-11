@@ -35,7 +35,7 @@ defmodule PicapeWeb.Graphql.Types do
         batch({Resolver.Recipe, :ingredients_by_recipe_ids}, parent.id, fn results ->
           {:ok, batch_results} = results
 
-          case Enum.find(batch_results[parent.id], &(&1.ingredient[:warning] != nil)) do
+          case Enum.find(batch_results[parent.id] || [], &(&1.ingredient[:warning] != nil)) do
             nil -> {:ok, nil}
             ref -> {:ok, ref.ingredient[:warning].description}
           end
