@@ -86,7 +86,7 @@ defmodule Picape.Supermarket do
       "/mobile-auth/v1/auth/token/refresh",
       %{
         "refreshToken" => refresh_token,
-        "clientId" => "appie"
+        "clientId" => "appie-ios"
       },
       "Content-Type": "application/json",
       "X-Refresh-Token": true
@@ -154,7 +154,6 @@ defmodule Picape.Supermarket do
     |> Keyword.merge(config(:headers) || [])
     |> Keyword.merge("X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
     |> maybe_add_authorization_bearer(Keyword.has_key?(headers, :"X-Refresh-Token"))
-    |> IO.inspect(label: "160")
   end
 
   defp maybe_add_authorization_bearer(headers, true), do: headers
