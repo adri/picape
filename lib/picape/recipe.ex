@@ -73,6 +73,8 @@ defmodule Picape.Recipe do
   end
 
   def ingredients_by_recipe_ids(recipe_ids) do
+    defaults = Map.new(recipe_ids, fn id -> {id, []} end)
+
     result =
       Repo.all(
         from(
@@ -84,6 +86,7 @@ defmodule Picape.Recipe do
         )
       )
       |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
+      |> Map.merge(defaults, fn _k, v, v2 -> v end)
 
     {:ok, result}
   end
