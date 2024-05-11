@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
@@ -106,7 +106,7 @@ export function EditRecipeScreen({
           <InputText
             testID="imageUrl"
             label="Image"
-            onChangeText={(title) => changeForm({ ...form, imageUrl, changed: true })}
+            onChangeText={(imageUrl) => changeForm({ ...form, imageUrl, changed: true })}
             defaultValue={form.imageUrl}
             labelStyle={styles.label}
             inputStyle={styles.input}
