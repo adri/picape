@@ -21,17 +21,7 @@ defmodule Picape.Seasonal do
         ingredients,
         month \\ DateTime.utc_now().month
       ) do
-    ingredients
-    |> Enum.reduce(%{}, fn ingredient, ingredient_season ->
-      Map.merge(ingredient_season, %{
-        ingredient.id =>
-          find_season(
-            ingredient[:additional_info],
-            ingredient.seasonal_name,
-            month
-          )
-      })
-    end)
+        %{}
   end
 
   defp find_season(country_info, seasonal_name, month) do

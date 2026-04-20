@@ -57,7 +57,7 @@ defmodule Picape.Supermarket do
 
   def cart() do
     ConCache.get_or_store(:supermarket, :cart, fn ->
-      case get!("/mobile-services/shoppinglist/v2/shoppinglist") do
+      case get!("/mobile-services/shoppinglist/v2/items") do
         %{status_code: 200, body: cart} ->
           cart
 
@@ -130,7 +130,7 @@ defmodule Picape.Supermarket do
   end
 
   def process_request_url(url) do
-    config(:base_url) <> url
+    config(:base_url) <> url |> IO.inspect(label: "133")
   end
 
   def process_response_body(body) do
