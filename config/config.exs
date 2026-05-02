@@ -20,7 +20,7 @@ config :picape, Picape.Scheduler,
     # Runs every midnight
     {"@daily", {Picape.Supermarket, :invalidate_orders, []}},
     {"@daily", {Picape.Order, :sync_supermarket, ["1"]}},
-    {"31 */1 * * *", {Picape.Supermarket.KeepLogin, :get_access_token, []}},
+    #{"31 */1 * * *", {Picape.Supermarket.KeepLogin, :get_access_token, []}},
     {"@daily", {Picape.Ingredients, :match_supermarket_products, []}}
   ]
 

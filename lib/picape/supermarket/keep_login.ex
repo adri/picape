@@ -10,13 +10,13 @@ defmodule Picape.Supermarket.KeepLogin do
   def get_access_token() do
     login = Repo.one(Login)
 
-    case Login.is_expired(login) do
-      true ->
-        renew_login(login).access_token
-
-      false ->
-        login.access_token
-    end
+#    case Login.is_expired(login) do
+#      true ->
+#        renew_login(login).access_token
+#
+#      false ->
+#        login.access_token
+#    end
   end
 
   defp renew_login(login) do
