@@ -13,11 +13,10 @@ $ bin/setup
 - `bin/setup`: Install all dependencies and run tests. Use this on your CI server.
 - `bin/update`: Update all dependencies, after pulling or merging.
 - `bin/ci`: Run this locally to run all commands run by CI.
-- `bin/heroku_compile_assets`: Compile assets on Heroku for production.
 - `mix phx.server`: Start Phoenix server.
 - `mix ecto.reset`: Drop and reseed the database.
 - `mix test`: Run the Elixir tests.
-- `cd assets/ && yarn run test`: Run Javascript tests.
+- `cd frontend/ && yarn test`: Run Javascript tests.
 
 ## Development
 - Web: http://localhost:4001
@@ -25,8 +24,9 @@ $ bin/setup
 - GraphiQL: http://localhost:4000/graphiql
 
 ## Deploy
+Hosted on [Fly.io](https://fly.io/) — config in [fly.toml](fly.toml), image built from the [Dockerfile](Dockerfile).
 ```
-mix release --env=prod
+fly deploy
 ```
 
 ## Screenshots
