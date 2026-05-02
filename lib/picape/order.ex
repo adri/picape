@@ -17,9 +17,7 @@ defmodule Picape.Order do
   Returns the currently active cart.
   """
   def current() do
-    # {:ok, LineFromSupermarket.convert(Supermarket.cart())}
-    {:ok, cart} = cart("1")
-    {:ok, LineFromDb.convert(cart)}
+    {:ok, LineFromSupermarket.convert(Supermarket.cart())}
   end
 
   def last() do
@@ -141,18 +139,11 @@ defmodule Picape.Order do
          {:ok, manual} <- manual_ingredients(order_id),
          {:ok, existing} <- ordered_item_quantities(order_id),
          {:ok, changes} <- Sync.changes(planned, manual, existing) do
-      IO.inspect(recipe_quantities, label: "recipe_quantities")
-      IO.inspect(planned, label: "planned")
-      IO.inspect(manual, label: "manual")
-      IO.inspect(existing, label: "existing")
-      IO.inspect(changes, label: "changes")
-
-      # Supermarket.apply_changes(changes)
+      Supermarket.apply_changes(changes)
 
       current()
     else
-      e ->
-        current()
+      _ -> current()
     end
   end
 
