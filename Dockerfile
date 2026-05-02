@@ -12,10 +12,11 @@
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
 #   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20210902-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.13.2-erlang-24.2.1-debian-bullseye-20210902-slim
+#   - Ex: hexpm/elixir:1.18.3-erlang-27.3.3-debian-bookworm-20260421-slim
 #
-ARG BUILDER_IMAGE="hexpm/elixir:1.13.2-erlang-24.2.1-debian-bullseye-20210902-slim"
-ARG RUNNER_IMAGE="debian:bullseye-20210902-slim"
+# Versions match .tool-versions (asdf) — keep in sync with that file.
+ARG BUILDER_IMAGE="hexpm/elixir:1.18.3-erlang-27.3.3-debian-bookworm-20260421-slim"
+ARG RUNNER_IMAGE="debian:bookworm-20260421-slim"
 ARG NODE_VERSION="20.8.0"
 
 FROM ${BUILDER_IMAGE} as builder
@@ -104,7 +105,7 @@ ARG NODE_VERSION
 RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
   --mount=type=cache,id=debconf,target=/var/cache/debconf,sharing=locked \
-  apt-get update -y && apt-get install -y libstdc++6 openssl curl libncurses5 locales \
+  apt-get update -y && apt-get install -y libstdc++6 openssl curl libncurses6 locales \
   && apt-get clean && rm -f /var/lib/apt/lists/*_* \
   # Install using n
   && curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o /usr/local/bin/n \
