@@ -11,39 +11,37 @@ defmodule Picape.Order.LineFromSupermarket do
     }
   end
 
-  def convert(cart = %{"items" => _list}) do
+  def convert(cart = %{"items" => _list, "basket" => basket}) when is_map(basket) do
+    items = Enum.map(cart["items"], &convert_item/1)
+    summary = basket["summary"] || %{}
+    price = get_in(summary, ["price", "priceAfterDiscount", "amount"]) || 0
+
     %Line{
       id: 1,
-      items: Enum.map(cart["items"], fn item -> convert_item(item) end),
-      total_count: Enum.count(cart["items"]),
-      # get from total calculation endpoint
+      items: items,
+      total_count: summary["quantity"] || Enum.count(items),
+      total_price: trunc(price)
+    }
+  end
+
+  def convert(cart = %{"items" => _list}) do
+    items = Enum.map(cart["items"], &convert_item/1)
+
+    %Line{
+      id: 1,
+      items: items,
+      total_count: Enum.count(items),
       total_price: 0
     }
   end
 
-  def convert(cart = %{"orderedProducts" => _list}) do
-    %Line{
-      id: cart["id"],
-      items: Enum.map(cart["orderedProducts"], fn item -> convert_item(item) end),
-      total_count: Enum.count(cart["orderedProducts"]),
-      total_price: trunc(cart["totalPrice"]["priceAfterDiscount"])
-    }
-  end
+  def convert_item(item = %{"product" => %{"id" => _}}) do
+    product = item["product"]
 
-  def convert_item(item = %{"amount" => _amount}) do
     %Item{
-      id: item["product"]["webshopId"],
-      name: item["product"]["title"],
-      image_url: Supermarket.image_url(item["product"]),
-      quantity: item["amount"]
-    }
-  end
-
-  def convert_item(item = %{"quantity" => _quantity}) do
-    %Item{
-      id: item["product"]["webshopId"],
-      name: item["product"]["title"],
-      image_url: Supermarket.image_url(item["product"]),
+      id: product["id"],
+      name: product["title"],
+      image_url: Supermarket.image_url(product),
       quantity: item["quantity"]
     }
   end
