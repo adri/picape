@@ -6,6 +6,17 @@ defmodule Picape.Supermarket do
   alias Picape.Supermarket.SearchResult
   alias Picape.Supermarket.CartItems
 
+  @graphql_path "/graphql"
+  @apollo_extensions %{"clientLibrary" => %{"name" => "apollo-ios", "version" => "1.22.0"}}
+
+  @fetch_my_list_basket File.read!(Path.join([:code.priv_dir(:picape), "ah_graphql", "FetchMyListBasket.graphql"]))
+  @fetch_my_list_basket_variables %{
+    "input" => %{"sortType" => "TAXONOMY"},
+    "states" => ["ACTIVATED", "ASSIGNED", "NONE", "REDEEMABLE"]
+  }
+
+  @update_my_list_basket "mutation UpdateMyListBasket($items: [BasketMutation!]!, $input: BasketInput) { basketItemsUpdate(items: $items, input: $input) { __typename status } }"
+
   def search(""), do: []
 
   def search(query) do
@@ -23,52 +34,51 @@ defmodule Picape.Supermarket do
     ConCache.delete(:supermarket, "product-#{product_id}")
   end
 
-  def apply_changes(changes, attempt \\ 1) do
-    with cart <- cart(),
-         items <- CartItems.apply_changes(changes, &product_title_by_id/1) do
-      put!(
-        "/mobile-services/order/v1/items?sortBy=DEFAULT",
-        %{"items" => items},
-        "Content-Type": "application/json",
-        "Appie-Current-Order-Id": cart["id"]
-      )
-      |> case do
-        %{status_code: 200, body: cart} ->
-          ConCache.put(:supermarket, :cart, cart)
-          {:ok, cart}
+  def apply_changes(changes) do
+    cart = cart()
+    items = CartItems.apply_changes(changes, cart)
 
-        # Conflict, try again
-        %{status_code: 409} ->
-          apply_changes(changes)
+    case graphql!("UpdateMyListBasket", @update_my_list_basket, %{"input" => nil, "items" => items}) do
+      %{
+        status_code: 200,
+        body: %{"data" => %{"basketItemsUpdate" => %{"status" => "SUCCESS"}}}
+      } ->
+        invalidate_cart()
+        {:ok, :synced}
 
-        # "Random" error, try again 3x times
-        %{status_code: 400} ->
-          if attempt >= 3 do
-            {:error, :sync_failed}
-          else
-            apply_changes(changes, attempt + 1)
-          end
-
-        _ ->
-          {:error, :sync_failed}
-      end
+      other ->
+        {:error, other}
     end
   end
 
   def cart() do
     ConCache.get_or_store(:supermarket, :cart, fn ->
-      case get!("/mobile-services/shoppinglist/v2/items") do
-        %{status_code: 200, body: cart} ->
-          cart
+      %{status_code: 200, body: %{"data" => %{"basket" => basket}}} =
+        graphql!("FetchMyListBasket", @fetch_my_list_basket, @fetch_my_list_basket_variables)
 
-        # When an order has a delivery slot, the endpoint changes
-        %{status_code: 412, body: _cart} ->
-          get!("/mobile-services/order/v1/summaries/active?sortBy=DEFAULT").body
+      items =
+        (basket["itemsInOrder"] || []) ++
+          (basket["itemsInList"] || []) ++
+          (basket["externalItems"] || [])
 
-        _ ->
-          raise RuntimeError
-      end
+      %{"items" => items, "basket" => basket}
     end)
+  end
+
+  defp graphql!(operation_name, query, variables) do
+    body = %{
+      "operationName" => operation_name,
+      "query" => query,
+      "variables" => variables,
+      "extensions" => @apollo_extensions
+    }
+
+    post!(@graphql_path, body,
+      "Content-Type": "application/json",
+      Accept: "multipart/mixed;deferSpec=20220824,application/graphql-response+json,application/json",
+      "X-Accept-Language": "nl-NL",
+      "X-GraphQL": "true"
+    )
   end
 
   def invalidate_cart() do
@@ -110,6 +120,15 @@ defmodule Picape.Supermarket do
     end
   end
 
+  def image_url(%{"imagePack" => [_ | _] = pack}) do
+    pack
+    |> Enum.find_value(fn entry -> get_in(entry, ["medium", "url"]) end)
+    |> case do
+      nil -> "http://placekitten.com/64/64"
+      url -> url
+    end
+  end
+
   def image_url(item) do
     case Enum.find(item["images"] || [], fn %{"width" => width} -> width >= 80 and width <= 150 end) do
       nil -> "http://placekitten.com/64/64"
@@ -148,19 +167,35 @@ defmodule Picape.Supermarket do
     end
   end
 
+  @user_agent_graphql "Appie/9.35 (iPhone17,1; iPhone; CPU OS 26_4_2 like Mac OS X)"
+  @user_agent_auth "Appie/9.35 (nl.ah.Appie; build:260415110803; iOS 26.4.2) Alamofire/5.11.0"
+
   defp process_request_headers(headers) do
+    is_refresh = Keyword.has_key?(headers, :"X-Refresh-Token")
+    is_graphql = Keyword.has_key?(headers, :"X-GraphQL")
+
     headers
-    |> Keyword.merge(Accept: "*/*")
-    |> Keyword.merge(config(:headers) || [])
-    |> Keyword.merge("X-Correlation-Id": "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
-    |> maybe_add_authorization_bearer(Keyword.has_key?(headers, :"X-Refresh-Token"))
+    |> Keyword.delete(:"X-Refresh-Token")
+    |> Keyword.delete(:"X-GraphQL")
+    |> add_defaults(config(:headers) || [])
+    |> Keyword.put(:"User-Agent", default_user_agent(is_refresh, is_graphql))
+    |> Keyword.put_new(:Accept, "*/*")
+    |> Keyword.put_new(:"X-Correlation-Id", "/zoeken/producten-#{Ecto.UUID.generate() |> String.upcase()}")
+    |> maybe_add_authorization_bearer(is_refresh)
   end
+
+  defp add_defaults(headers, defaults) do
+    Enum.reduce(defaults, headers, fn {k, v}, acc -> Keyword.put_new(acc, k, v) end)
+  end
+
+  defp default_user_agent(true, _graphql?), do: @user_agent_auth
+  defp default_user_agent(false, true), do: @user_agent_graphql
+  defp default_user_agent(false, false), do: @user_agent_graphql
 
   defp maybe_add_authorization_bearer(headers, true), do: headers
 
   defp maybe_add_authorization_bearer(headers, false) do
-    headers
-    |> Keyword.merge(Authorization: "Bearer #{KeepLogin.get_access_token()}")
+    Keyword.put(headers, :Authorization, "Bearer #{KeepLogin.get_access_token()}")
   end
 
   defp process_request_body(""), do: ""

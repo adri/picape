@@ -1,46 +1,54 @@
 defmodule Picape.Supermarket.CartItems do
-  @doc """
-  Converts cart items structure to a structure that can be
-  posted.
+  @moduledoc """
+  Translates an `Order.Sync.Changes` struct into the `BasketMutation`
+  variables that AH's `UpdateMyListBasket` GraphQL mutation expects.
+
+  Each emitted item is a map with `id`, `quantity`, `isStrikethrough`,
+  `newPosition` — sent verbatim like the iOS app does. `quantity: 0`
+  removes; `quantity >= 1` adds (when id is new) or updates.
   """
-  def from_supermarket_items(cart) do
-    cart.items
-    |> Enum.map(&convert_supermarket_cart_item(&1.id, &1.quantity, &1.name))
+
+  def apply_changes(changes, cart) do
+    positions = positions_by_id(cart)
+    next_position = (positions |> Map.values() |> Enum.max(fn -> 0 end)) + 1
+
+    {removes, _} =
+      changes.remove
+      |> Enum.map_reduce(next_position, fn change, pos ->
+        position = Map.get(positions, change.id, pos)
+        {to_basket_mutation(change.id, 0, position), pos}
+      end)
+
+    {adds, _} =
+      changes.add
+      |> Enum.map_reduce(next_position, fn change, pos ->
+        case Map.get(positions, change.id) do
+          nil -> {to_basket_mutation(change.id, change.quantity, pos), pos + 1}
+          existing -> {to_basket_mutation(change.id, change.quantity, existing), pos}
+        end
+      end)
+
+    removes ++ adds
   end
 
-  def apply_changes(changes, get_product_description) do
-    []
-    |> add_changes(changes.add, get_product_description)
-    |> remove_changes(changes.remove, get_product_description)
-  end
-
-  defp convert_supermarket_cart_item(id, quantity, title) do
+  defp to_basket_mutation(id, quantity, position) do
     %{
-      "productId" => id,
+      "id" => id,
       "quantity" => quantity,
-      "strikedthrough" => false,
-      "originCode" => "PRD",
-      "description" => title
+      "isStrikethrough" => false,
+      "newPosition" => position
     }
   end
 
-  defp add_changes(items, [], _get_product_description), do: items
-
-  defp add_changes(items, changes, get_product_description) do
-    changes
-    |> Enum.map(fn change ->
-      convert_supermarket_cart_item(change.id, change.quantity, get_product_description.(change.id))
-    end)
-    |> Enum.concat(items)
+  defp positions_by_id(%{"basket" => basket}) when is_map(basket) do
+    [
+      basket["itemsInOrder"] || [],
+      basket["itemsInList"] || [],
+      basket["externalItems"] || []
+    ]
+    |> List.flatten()
+    |> Enum.into(%{}, fn item -> {item["product"]["id"], item["position"]} end)
   end
 
-  defp remove_changes(items, [], _get_product_description), do: items
-
-  defp remove_changes(items, changes, get_product_description) do
-    changes
-    |> Enum.map(fn change ->
-      convert_supermarket_cart_item(change.id, change.quantity, get_product_description.(change.id))
-    end)
-    |> Enum.concat(items)
-  end
+  defp positions_by_id(_), do: %{}
 end
