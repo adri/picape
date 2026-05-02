@@ -23,8 +23,7 @@ const onErrorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.log(`[Network error]:`, networkError);
 });
 
-const host = 'wss://picape.whybug.com/socket';
-// const host = "ws://localhost:4000/socket";
+const host = __DEV__ ? 'ws://localhost:4000/socket' : 'wss://picape.whybug.com/socket';
 const link = ApolloLink.from([
   onErrorLink,
   createAbsintheSocketLink(AbsintheSocket.create(new PhoenixSocket(host))),

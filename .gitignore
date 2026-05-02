@@ -25,6 +25,9 @@ web-report/
 # Generate on crash by the VM
 erl_crash.dump
 
+# Runtime logs (e.g. tmp/new_relic.log written by the New Relic agent)
+/tmp/
+
 # Static artifacts
 /assets/node_modules
 /assets/.next
