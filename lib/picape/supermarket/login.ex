@@ -5,9 +5,12 @@ defmodule Picape.Supermarket.Login do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @safety_margin_seconds 5 * 60
+
   schema "supermarket_login" do
     field(:access_token, :string)
     field(:refresh_token, :string)
+    field(:expires_in, :integer, default: 0)
 
     timestamps()
   end
@@ -15,14 +18,17 @@ defmodule Picape.Supermarket.Login do
   @doc false
   def edit_changeset(%__MODULE__{} = login, attrs) do
     login
-    |> cast(attrs, [:access_token, :refresh_token])
+    |> cast(attrs, [:access_token, :refresh_token, :expires_in])
     |> validate_required([:access_token, :refresh_token])
   end
 
   def is_expired(%__MODULE__{} = login) do
-    :gt ==
-      NaiveDateTime.utc_now()
-      |> NaiveDateTime.add(-90 * 60, :second)
-      |> NaiveDateTime.compare(login.updated_at)
+    expires_in = login.expires_in || 0
+
+    expires_at =
+      login.updated_at
+      |> NaiveDateTime.add(expires_in - @safety_margin_seconds, :second)
+
+    NaiveDateTime.compare(NaiveDateTime.utc_now(), expires_at) == :gt
   end
 end
