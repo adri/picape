@@ -8,15 +8,17 @@ defmodule Picape.Supermarket.KeepLogin do
   alias Picape.Supermarket.Login
 
   def get_access_token() do
-    login = Repo.one(Login)
+    case Repo.one(Login) do
+      nil ->
+        nil
 
-#    case Login.is_expired(login) do
-#      true ->
-#        renew_login(login).access_token
-#
-#      false ->
-#        login.access_token
-#    end
+      login ->
+        if Login.is_expired(login) do
+          renew_login(login).access_token
+        else
+          login.access_token
+        end
+    end
   end
 
   defp renew_login(login) do
@@ -25,7 +27,8 @@ defmodule Picape.Supermarket.KeepLogin do
     login
     |> Login.edit_changeset(%{
       access_token: tokens["access_token"],
-      refresh_token: tokens["refresh_token"]
+      refresh_token: tokens["refresh_token"],
+      expires_in: tokens["expires_in"]
     })
     |> Repo.update!()
   end
