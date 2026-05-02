@@ -43,7 +43,7 @@ defmodule Picape.Mixfile do
       {:con_cache, "~> 0.13.0"},
       {:ecto_sql, "~> 3.0"},
       {:excoveralls, "~> 0.8.0", only: :test},
-      {:floki, "~> 0.20.0"},
+      {:floki, "~> 0.36"},
       {:jason, "~> 1.1"},
       {:phoenix, "~> 1.6.5"},
       {:phoenix_pubsub, "~> 2.0"},

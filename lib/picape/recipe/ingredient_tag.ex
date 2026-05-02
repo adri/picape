@@ -5,7 +5,7 @@ defmodule Picape.Recipe.IngredientTag do
 
   schema "recipe_ingredient_tag" do
     field(:description)
-    field(:name, :string, null: false)
+    field(:name, :string)
 
     many_to_many(
       :ingredients,
