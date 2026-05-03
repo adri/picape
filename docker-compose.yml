@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - picape_pg:/var/lib/postgresql/data
 
