@@ -7,7 +7,7 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :picape, PicapeWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: 4010],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
@@ -62,6 +62,7 @@ config :picape, Picape.Repo,
   username: "postgres",
   database: "picape_dev",
   hostname: "localhost",
+  port: 5433,
   pool_size: 10
 
 import_config "#{Mix.env()}.secret.exs"

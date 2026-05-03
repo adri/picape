@@ -20,8 +20,8 @@ $ bin/setup
 
 ## Development
 - Web: http://localhost:4001
-- API: http://localhost:4000/graphql
-- GraphiQL: http://localhost:4000/graphiql
+- API: http://localhost:4010/graphql
+- GraphiQL: http://localhost:4010/graphiql
 
 ## Deploy
 Hosted on [Fly.io](https://fly.io/) — config in [fly.toml](fly.toml), image built from the [Dockerfile](Dockerfile).
