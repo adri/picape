@@ -198,7 +198,7 @@ defmodule Picape.Order do
       conflict_target: [:line_id, :ingredient_id]
     )
     |> case do
-      {:ok, _planned_recipe} -> current()
+      {:ok, _planned_recipe} -> sync_supermarket(order_id)
       err -> err
     end
   end
