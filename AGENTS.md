@@ -4,11 +4,11 @@ Guidance for coding agents working in this repository. Everything project specif
 
 ## Commands
 
-Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.8.0) and read by asdf and CI; the Dockerfile hardcodes the same versions in its `ARG` lines, keep them in sync. A Homebrew `node` or `elixir` earlier in `PATH` wins over the asdf shim; check `node --version` prints 20.8.0 and `elixir --version` prints 1.20.4 before you trust a result. The `bin/` scripts source [bin/_toolchain](bin/_toolchain), which puts the asdf shims first for you, so prefer them over a bare `mix` when your own `PATH` is wrong. `bin/deploy`, `bin/setup` and `bin/update` do not source it yet.
+Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.20.2) and read by asdf and CI; the Dockerfile hardcodes the same versions in its `ARG` lines, keep them in sync. A Homebrew `node` or `elixir` earlier in `PATH` wins over the asdf shim; check `node --version` prints 20.20.2 and `elixir --version` prints 1.20.4 before you trust a result. The `bin/` scripts source [bin/_toolchain](bin/_toolchain), which puts the asdf shims first for you, so prefer them over a bare `mix` when your own `PATH` is wrong. `bin/deploy`, `bin/setup` and `bin/update` do not source it yet. `bin/db-restore` and `bin/status` do not either, but they run neither node nor mix.
 
 Checks (run all three before you report a change as done):
 - `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `compile --force --warnings-as-errors`, `mix test --warnings-as-errors`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.
-- `cd frontend && npm run check` — ESLint (`universe/native`), Prettier check, `npm run graphql:check` (validates every `gql` document against `priv/graphql/schema.graphql`), Jest. `npm run format` fixes formatting. Use npm, not yarn: `package-lock.json` is the lockfile the Dockerfile and CI use. Never run `npm ci --dry-run`; with npm 8 it deletes `node_modules` without reinstalling.
+- `cd frontend && npm run check` — ESLint (`universe/native`), Prettier check, `npm run graphql:check` (validates every `gql` document against `priv/graphql/schema.graphql`), Jest. `npm run format` fixes formatting. Use npm, not yarn: `package-lock.json` is the lockfile the Dockerfile and CI use. Never run `npm ci --dry-run`; with npm 8 it deletes `node_modules` without reinstalling. If you ever regenerate the lockfile, delete it first and rebuild it with `npm install --package-lock-only --lockfile-version=3`, then check that `node_modules/lightningcss-linux-x64-gnu` has an entry. A plain `npm install` prunes the native binaries for every platform but your own, and Metro needs lightningcss to transform CSS, so a Mac-pruned lockfile passes the frontend check and then fails the screen tests on CI with `Cannot find module '../lightningcss.linux-x64-gnu.node'`.
 - `bin/e2e` — Playwright screen tests in WebKit with the iPhone 14 profile against the fake stack. Compares against `e2e/tests/__screenshots__/*.png`. `bin/e2e --update` accepts the current screenshots as the new baseline; look at the diff in `tmp/e2e/` before you do. Refuses to run while Phoenix on :4010 is in live mode. Baselines are macOS WebKit renders and only compare on a Mac; `E2E_SKIP_SCREENSHOTS=1` (what CI sets) keeps the functional checks and saves screenshots to `tmp/e2e/` instead of comparing. CI also sets `E2E_BROWSER=chromium` because installing WebKit's system libraries on the runner hangs; locally the suite runs in WebKit.
 - `bin/ci` — what GitHub Actions runs locally: `mix check` plus the frontend check.
 
@@ -51,7 +51,7 @@ Inspecting production with `fly`: only read commands, `fly status`, `fly release
 
 ## Architecture
 
-Phoenix 1.6 app split the conventional way:
+Phoenix 1.8 app split the conventional way:
 
 - `lib/picape/` — domain contexts (no web concerns)
 - `lib/picape_web/` — Phoenix endpoint, router, controllers, and the Absinthe GraphQL layer
@@ -84,7 +84,19 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 
 ### Frontend
 
-`frontend/` is the active client (Expo SDK 47, React Navigation 5, Apollo Client 3, Absinthe socket link for subscriptions). All GraphQL traffic goes over the Phoenix socket, so look at websocket frames, not HTTP, when debugging queries. It is deployed as a PWA and opened on an iPhone, so follow iOS design language.
+`frontend/` is the active client (Expo SDK 57, React 19, React Navigation 6, Apollo Client 3). All GraphQL traffic goes over the Phoenix socket, so look at websocket frames, not HTTP, when debugging queries. It is deployed as a PWA and opened on an iPhone, so follow iOS design language.
+
+The bundler is Metro, for both dev and the web export. Webpack is gone, and with it `webpack.config.js` and `web/index.html`. What replaced each piece:
+
+- `frontend/index.js` is the entry point, set as `main` in `package.json`. It imports `@expo/metro-runtime` before `registerRootComponent`. Without that import the export builds but the page stays blank.
+- `frontend/public/` holds everything webpack used to template: `index.html`, `manifest.json`, the favicons, `pwa/`, `serve.json` and `robots.txt`. Expo copies the directory into the export as is, so the placeholders webpack substituted (`%PUBLIC_URL%` and friends) are resolved in the committed file. `PUBLIC_URL` no longer exists in the bundle; [src/serviceWorkerRegistration.js](frontend/src/serviceWorkerRegistration.js) hardcodes the empty string for it.
+- `npm run build:web` runs `expo export --platform web` into `frontend/dist`, then `node scripts/build-service-worker.js`. That script calls workbox-build's `generateSW` in place of the old `workbox-webpack-plugin` `InjectManifest`, which only worked inside webpack. It must emit one self-contained classic worker (`inlineWorkboxRuntime: true`); the default split runtime needs `{type: 'module'}` registration, which the app does not use.
+- [the endpoint](lib/picape_web/endpoint.ex) serves the export, so `Plug.Static`'s `only` list has to name every top-level file and directory the export produces. Add a file to `frontend/public/` and it 404s in production until that list names it too.
+- Jest uses the `jest-expo/web` preset with `jest-environment-jsdom`. The native preset breaks on react-native-web 0.20. Component tests render with `react-dom`, not `react-test-renderer`, whose `toJSON` returns null for react-native-web output.
+- [src/absintheSocketLink.js](frontend/src/absintheSocketLink.js) is the Apollo link, written to replace the abandoned `@absinthe/socket-apollo-link`. Two things about it are easy to break. Subscription payloads arrive on `socket.onMessage`, not on a `channel.on` handler, because absinthe_phoenix pushes `subscription:data` to the socket rather than the control topic; and that listener has to be registered once per link, because phoenix invokes every listener it holds. Absinthe also drops a subscription when its channel process exits, so the link re-pushes every active document on `socket.onOpen`. Without that, subscriptions go quiet for good after any reconnect and nothing reports an error. To check it, drop the socket for real by restarting Phoenix; `BrowserContext.setOffline` does not close an open websocket, so a test built on it passes either way.
+- [components/Skeleton/SkeletonContent.js](frontend/components/Skeleton/SkeletonContent.js) replaces `react-native-skeleton-content`, which pulls react-native-reanimated 2.1.0 and calls the `findNodeHandle` that react-native-web 0.20 removed.
+
+Expo inlines `process.env.EXPO_PUBLIC_*` from dotenv files only, not from the shell environment; passing one on the command line to `expo export` leaves the reference `undefined`. So the socket host in [App.js](frontend/App.js) is a plain `__DEV__` conditional. To exercise a production bundle against the local backend, edit that line, build, and revert it.
 
 ### Test data
 
@@ -104,6 +116,9 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 - ESLint runs `react-hooks/rules-of-hooks` as a warning because seven screens call hooks after an early return. Fix those before you turn it back into an error.
 - The GraphQL check skips `OverlappingFieldsCanBeMergedRule` because `SearchIngredients` aliases `searchIngredient` and `searchSupermarket` to the same name behind `@skip`/`@include`. Give them different aliases, then enable the rule.
 - Screenshot comparison runs only on macOS. CI runs the screen tests without comparison.
+- `expo-doctor` reports one failure: `sentry-expo` nests its own react 18 next to the project's react 19. It only matters for native builds, and this app ships web, where [Sentry.web.js](frontend/Sentry.web.js) uses `@sentry/browser` and the `sentry-expo` path is never bundled. Clearing it means migrating [Sentry.native.js](frontend/Sentry.native.js) to `@sentry/react-native`, which nothing here can test.
+- `npm audit` reports 22 moderate advisories, all in build-time dependency trees. High and critical are at zero; keep it that way.
+- The recipe detail screenshot contains a hero image from `githubusercontent.com`. The e2e `beforeEach` aborts every non-localhost request so the baseline stays deterministic, and the baseline is therefore the blank-hero render. A service worker bypasses Playwright's request interception, so add `serviceWorkers: 'block'` when pointing the suite at a production export, or the image loads and the screenshot fails.
 
 ## Troubleshooting
 
@@ -112,3 +127,6 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 - `bin/e2e` fails every test on the cart badge: Phoenix or the fake is not the one you think. `bin/status` shows what is up; kill stale processes on :4010 and :4020 and rerun so Playwright starts fresh ones.
 - `bin/supermarket-snapshot` returns 401 on the token refresh: the local refresh token is dead. Get a new one with the `proxyman-capture` skill. Use one token in one place only; refresh tokens rotate on use, so sharing one between production and your machine logs one of them out.
 - Expo prints "Waiting on http://localhost:<port>" for the Metro port, but the web app is always on :19006.
+- `Timed out joining __absinthe__:control` in a page you built yourself: the bundle is pointing at production. `__DEV__` is false in an export, so the socket host in [App.js](frontend/App.js) resolves to `wss://picape.whybug.com/socket`. Grep the bundle in `frontend/dist/_expo/static/js/web/` for the URL before you debug the link.
+- `The database for Picape.Repo couldn't be dropped ... is being accessed by other users` from `bin/phx --fake`: a stale Phoenix from an earlier session still holds connections to `picape_e2e`. `pgrep -fl beam.smp` shows them with their start time; kill the old one. The script then boots, but until you do, port 4010 is served by whatever was already there, which is a good way to test the wrong code for an hour.
+- Service worker registration fails in the built-in browser pane with "An unknown error occurred when fetching the script", including for a trivial one-line worker. It is the pane, not the build. Playwright's Chromium registers and activates the same worker and precaches all 33 files, so verify the PWA there.
