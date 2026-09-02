@@ -28,7 +28,7 @@ const screenshot = path.join(__dirname, '..', 'tmp', 'probe.png');
   await page.waitForTimeout(3000);
   const root = await page
     .locator('#root')
-    .innerHTML()
+    .innerHTML({ timeout: 1000 })
     .catch(() => '');
   await page.screenshot({ path: screenshot });
   console.log(
