@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Linking, Text, FlatList, View, Dimensions, Platform, useColorScheme } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useSafeArea } from 'react-native-safe-area-context';
-import SkeletonContent from 'react-native-skeleton-content';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Svg, { Path } from 'react-native-svg';
 
 import { Badge } from '../components/Badge/Badge';

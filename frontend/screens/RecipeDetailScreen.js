@@ -4,7 +4,7 @@ import { Text, FlatList, View, ImageBackground, Dimensions } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler';
 import Hyperlink from 'react-native-hyperlink';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SkeletonContent from 'react-native-skeleton-content';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { Badge } from '../components/Badge/Badge';
 import { BackIcon, CheckIcon } from '../components/Icon';

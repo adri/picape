@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client';
 import * as React from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SkeletonContent from 'react-native-skeleton-content';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { ImageCard } from '../components/Card/ImageCard';
 import { SectionHeader } from '../components/Section/SectionHeader';

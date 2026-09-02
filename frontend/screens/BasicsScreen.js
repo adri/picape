@@ -3,7 +3,7 @@ import * as React from 'react';
 import { View, FlatList, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SkeletonContent from 'react-native-skeleton-content';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { ListItem } from '../components/ListItem/ListItem';

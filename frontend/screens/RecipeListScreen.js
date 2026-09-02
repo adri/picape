@@ -2,7 +2,7 @@ import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
 import { Text, ScrollView, FlatList } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
-import SkeletonContent from 'react-native-skeleton-content';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { ImageCard } from '../components/Card/ImageCard';
 import { BackIcon, PlusIcon } from '../components/Icon';
