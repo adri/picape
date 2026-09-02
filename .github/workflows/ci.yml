@@ -35,7 +35,8 @@ jobs:
           path: |
             deps
             _build
-          key: mix-test-${{ runner.os }}-${{ hashFiles('mix.lock', '.tool-versions') }}
+          key: mix-test-${{ runner.os }}-${{ hashFiles('.tool-versions') }}-${{ hashFiles('mix.lock') }}
+          restore-keys: mix-test-${{ runner.os }}-${{ hashFiles('.tool-versions') }}-
       - run: mix deps.get
       - run: mix check
 
@@ -80,7 +81,13 @@ jobs:
           path: |
             deps
             _build
-          key: mix-dev-${{ runner.os }}-${{ hashFiles('mix.lock', '.tool-versions') }}
+          key: mix-dev-${{ runner.os }}-${{ hashFiles('.tool-versions') }}-${{ hashFiles('mix.lock') }}
+          restore-keys: mix-dev-${{ runner.os }}-${{ hashFiles('.tool-versions') }}-
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+          restore-keys: playwright-${{ runner.os }}-
       - run: sudo apt-get update && sudo apt-get install -y inotify-tools
       - run: mix deps.get
       - run: mix compile
