@@ -100,7 +100,7 @@ defmodule Picape.Order.SyncTest do
       build(
         :sync_changes,
         add: [
-          build(:product, id: :existing, quantity: 1)
+          build(:product, id: :existing, quantity: 2)
         ]
       )
 
@@ -127,7 +127,7 @@ defmodule Picape.Order.SyncTest do
       build(
         :sync_changes,
         add: [
-          build(:product, id: :existing, quantity: 2)
+          build(:product, id: :existing, quantity: 3)
         ]
       )
 
@@ -171,7 +171,7 @@ defmodule Picape.Order.SyncTest do
       build(
         :sync_changes,
         remove: [
-          build(:product, id: :existing, quantity: 2)
+          build(:product, id: :existing, quantity: 0)
         ]
       )
 
@@ -193,7 +193,7 @@ defmodule Picape.Order.SyncTest do
       build(
         :sync_changes,
         remove: [
-          build(:product, id: :existing, quantity: 7)
+          build(:product, id: :existing, quantity: 3)
         ]
       )
 
@@ -224,7 +224,7 @@ defmodule Picape.Order.SyncTest do
       build(
         :sync_changes,
         remove: [
-          build(:product, id: :existing, quantity: 1)
+          build(:product, id: :existing, quantity: 0)
         ]
       )
 
