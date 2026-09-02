@@ -72,9 +72,12 @@ When `bin/supermarket-snapshot` fails with a 401 on
 $SKILL token tmp/capture.har
 ```
 
-This prints only the SQL you need, with the token value already inlined, so
-you can paste it into `psql` yourself. Do not commit the HAR. The refresh
-token rotates on every use, so use one token in one place only: either the
+This writes the newest access and refresh token from the HAR straight into
+`supermarket_login` of the dev database through `docker compose exec
+postgres psql` and prints nothing but a confirmation, so token values never
+reach the terminal. `PICAPE_DB` selects another database. It exits 1 when
+the HAR has no refresh response. Do not commit the HAR. The refresh token
+rotates on every use, so use one token in one place only: either the
 production app or your local backend.
 
 ## Comparing Picape with the app

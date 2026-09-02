@@ -24,4 +24,8 @@ defmodule PicapeWeb.Router do
   post("/shortcut/ingredient/add", PicapeWeb.ShortcutController, :add_ingredient)
   post("/shortcut/ingredient/add_by_id", PicapeWeb.ShortcutController, :add_ingredient_by_id)
   post("/shortcut/ingredient/remove", PicapeWeb.ShortcutController, :remove_ingredient)
+
+  if Mix.env() == :dev do
+    post("/dev/invalidate-cart", PicapeWeb.DevController, :invalidate_cart)
+  end
 end

@@ -4,7 +4,7 @@ Guidance for coding agents working in this repository. Everything project specif
 
 ## Commands
 
-Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.8.0) and read by asdf, CI and the Dockerfile.
+Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.8.0) and read by asdf, CI and the Dockerfile. A Homebrew `node` earlier in `PATH` wins over the asdf shim; check `node --version` prints 20.8.0 before you trust a frontend result.
 
 Checks (run all three before you report a change as done):
 - `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `bin/compile-check` (fails on any compile warning except the four Absinthe 1.5 deprecation notices), `mix test --warnings-as-errors`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.
@@ -15,7 +15,7 @@ Checks (run all three before you report a change as done):
 Local stack (ports: Phoenix 4010, Expo web 19006, supermarket fake 4020, Postgres 5433):
 - `bin/phx` — Phoenix against your dev database and the live supermarket API. Needs a valid row in `supermarket_login` and `config/dev.secret.exs`.
 - `bin/phx --fake` — resets the seeded `picape_e2e` database and points Phoenix at the supermarket fake. Deterministic, safe, never touches the real cart. This is what `bin/e2e` uses. Logs at `info` level unless `PICAPE_LOG_LEVEL` says otherwise.
-- `bin/supermarket-fake` — the supermarket stand-in on :4020. Serves `test/fixtures/supermarket` and keeps a basket in memory that follows `UpdateMyListBasket` mutations. `POST /__reset` restores the fixture basket.
+- `bin/supermarket-fake` — the supermarket stand-in on :4020. Serves `test/fixtures/supermarket` and keeps a basket in memory that follows `UpdateMyListBasket` mutations. `POST /__reset` restores the fixture basket. Phoenix caches the cart for five hours, so after a reset also `POST http://localhost:4010/dev/invalidate-cart` (a dev-only route in the router); the e2e `beforeEach` does both.
 - `cd frontend && npm run web` — Expo web dev server on :19006. Expo needs about a minute to start; keep it running between runs. Restart it after any change to `frontend/node_modules`.
 - `.claude/launch.json` (local, gitignored by the user's global ignore) has `backend`, `backend-fake`, `supermarket-fake` and `frontend` entries for the built-in browser preview.
 
@@ -87,7 +87,7 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 
 ## Conventions worth knowing
 
-- `test/support` is compiled in every env except prod (see `elixirc_paths/1` in [mix.exs](mix.exs)). Seeds use `Picape.Factory` from there, and `bin/supermarket-fake` and `bin/supermarket-snapshot` use `Picape.SupermarketFake` and `Picape.SupermarketSnapshot`. Shared test helpers go there.
+- `test/support` is compiled in every env: `elixirc_paths/1` in [mix.exs](mix.exs) lists `test` for non-test envs too, and the Dockerfile never copies `test/`, so the release stays clean. Seeds use `Picape.Factory` from there, and `bin/supermarket-fake` and `bin/supermarket-snapshot` use `Picape.SupermarketFake` and `Picape.SupermarketSnapshot`. Shared test helpers go there.
 - `lib/picape/supermarket.ex` has `IO.inspect` calls in `process_request_url/1` and `process_response_status_code/1` that log every outbound HTTP call. They're intentional debug hooks — don't "clean them up" without asking. `.credo.exs` excludes that file from the `IoInspect` check for this reason.
 - `lib/picape/supermarket_old.ex` and `supermarket/search_result_old.ex` are kept around for reference from the pre-v4 supermarket API. Don't extend them; add to the current versions. Credo skips them.
 - The supermarket client expects `X-Correlation-Id` headers and a Bearer token managed by `KeepLogin`. If you add a new endpoint, route it through `get!/put!/post!` on the `Picape.Supermarket` module so it inherits the auth + encoding pipeline, and add a matching route to `Picape.SupermarketFake`.

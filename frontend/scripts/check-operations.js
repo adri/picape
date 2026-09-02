@@ -42,7 +42,7 @@ function resolve(body, seen = new Set()) {
   });
 }
 
-const skippedRules = ['NoUnusedFragmentsRule', 'OverlappingFieldsCanBeMergedRule'];
+const skippedRules = ['OverlappingFieldsCanBeMergedRule'];
 const rules = specifiedRules.filter((rule) => !skippedRules.includes(rule.name));
 let failures = 0;
 for (const doc of documents) {
