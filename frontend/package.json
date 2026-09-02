@@ -7,10 +7,31 @@
     "web": "NODE_OPTIONS=--openssl-legacy-provider expo start --web",
     "build:web": "NODE_OPTIONS=--openssl-legacy-provider npx expo export:web",
     "eject": "expo eject",
-    "test": "jest --watchAll"
+    "test": "jest --ci",
+    "test:watch": "jest --watchAll",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run format:check && npm test"
   },
   "eslintConfig": {
-    "extends": "universe/native"
+    "extends": "universe/native",
+    "env": {
+      "browser": true
+    },
+    "rules": {
+      "react-hooks/rules-of-hooks": "warn"
+    },
+    "overrides": [
+      {
+        "files": [
+          "src/service-worker.js"
+        ],
+        "env": {
+          "serviceworker": true
+        }
+      }
+    ]
   },
   "jest": {
     "preset": "jest-expo"
@@ -57,7 +78,9 @@
     "@babel/core": "^7.19.3",
     "babel-preset-expo": "~9.2.1",
     "eslint-config-universe": "^11.1.1",
-    "jest-expo": "^47.0.0"
+    "jest-expo": "^47.0.0",
+    "prettier": "2.8.8",
+    "react-test-renderer": "18.1.0"
   },
   "private": true
 }
