@@ -14,6 +14,7 @@ module.exports = defineConfig({
     baseURL: 'http://localhost:19006',
     navigationTimeout: 90_000,
     trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
   },
   projects: [{ name: 'iphone', use: { ...devices['iPhone 14'] } }],
   webServer: [
@@ -24,13 +25,13 @@ module.exports = defineConfig({
       timeout: 120_000,
     },
     {
-      command: '../bin/phx --fake',
+      command: 'mkdir -p ../tmp && ../bin/phx --fake > ../tmp/phx-e2e.log 2>&1',
       url: 'http://localhost:4010/graphql',
       reuseExistingServer: true,
       timeout: 180_000,
     },
     {
-      command: 'npm run web --prefix ../frontend',
+      command: 'npm run web --prefix ../frontend > ../tmp/expo-e2e.log 2>&1',
       url: 'http://localhost:19006/',
       reuseExistingServer: true,
       timeout: 240_000,

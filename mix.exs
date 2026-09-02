@@ -86,7 +86,7 @@ defmodule Picape.Mixfile do
         "format --check-formatted",
         "credo --strict",
         "cmd bin/compile-check",
-        "test",
+        "test --warnings-as-errors",
         "sobelow --exit Low --skip --ignore Config.HTTPS"
       ]
     ]

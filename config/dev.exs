@@ -65,4 +65,6 @@ config :picape, Picape.Repo,
   port: 5433,
   pool_size: 10
 
-import_config "#{Mix.env()}.secret.exs"
+if File.exists?(Path.expand("dev.secret.exs", __DIR__)) do
+  import_config "dev.secret.exs"
+end
