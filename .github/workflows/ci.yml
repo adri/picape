@@ -81,7 +81,7 @@ jobs:
             deps
             _build
           key: mix-dev-${{ runner.os }}-${{ hashFiles('mix.lock', '.tool-versions') }}
-      - run: sudo apt-get install -y inotify-tools
+      - run: sudo apt-get update && sudo apt-get install -y inotify-tools
       - run: mix deps.get
       - run: mix compile
       - run: npm ci --no-audit --no-fund --prefix frontend

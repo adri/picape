@@ -9,7 +9,7 @@ module.exports = defineConfig({
   retries: 0,
   timeout: 120_000,
   reporter: [['list']],
-  expect: { toHaveScreenshot: { maxDiffPixels: 100 } },
+  expect: { toHaveScreenshot: { maxDiffPixels: 100, threshold: 0.1 } },
   use: {
     baseURL: 'http://localhost:19006',
     navigationTimeout: 90_000,
