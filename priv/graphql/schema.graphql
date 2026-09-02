@@ -1,0 +1,289 @@
+schema {
+  query: RootQueryType
+  mutation: RootMutationType
+  subscription: RootSubscriptionType
+}
+
+type RootSubscriptionType {
+  orderChanged: Order
+  recipePlanned: Recipe
+  recipeUnplanned: Recipe
+}
+
+"Filtering options for the ingredients"
+input IngredientFilter {
+  "Matching a tag"
+  tagIds: [ID]
+
+  "Ingredient is marked as an essential"
+  essential: Boolean
+}
+
+"Direction to sort in"
+enum OrderDirection {
+  "Ascending"
+  ASC
+
+  "Descending"
+  DESC
+}
+
+type RecipeEdge {
+  quantity: Int
+  recipe: Recipe
+}
+
+type IngredientEdge {
+  node: Ingredient
+}
+
+"Edit an ingredient"
+input EditIngredientInput {
+  ingredientId: ID!
+  supermarketProductId: String!
+  name: String!
+  seasonalName: String
+  isEssential: Boolean!
+  tagIds: [ID]
+}
+
+"Current order, there can only be one order at a time."
+type Order implements Node {
+  "The ID of an object"
+  id: ID!
+
+  totalCount: Int
+
+  totalPrice: Int
+
+  items: [OrderItem]
+}
+
+type PageInfo {
+  "When paginating backwards, are there more items?"
+  hasPreviousPage: Boolean!
+
+  "When paginating forwards, are there more items?"
+  hasNextPage: Boolean!
+
+  "When paginating backwards, the cursor to continue."
+  startCursor: String
+
+  "When paginating forwards, the cursor to continue."
+  endCursor: String
+}
+
+"An ingredient in a certain quantity."
+input IngredientRef {
+  quantity: Int!
+  ingredientId: ID!
+}
+
+type RecipeIngredientEdge {
+  quantity: Int
+  ingredient: Ingredient
+}
+
+type Ingredient implements Node {
+  "The ID of an object"
+  id: ID!
+
+  name: String
+
+  seasonalName: String
+
+  supermarketProductId: String
+
+  isEssential: Boolean
+
+  tags: [IngredientTag]
+
+  imageUrl: String
+
+  supermarketName: String
+
+  nutriscore: String
+
+  warning: IngredientWarning
+
+  isPlanned(inShoppingList: Boolean): Boolean
+
+  orderedQuantity(inShoppingList: Boolean): Int
+
+  plannedRecipes(inShoppingList: Boolean): [RecipeEdge]
+
+  isBought: Boolean
+
+  season: Season
+
+  unitQuantity: String
+}
+
+interface Node {
+  "The ID of the object."
+  id: ID!
+}
+
+type RootQueryType {
+  "Access recipes and ingredients by their ID."
+  node(
+    "The ID of an object."
+    id: ID!
+  ): Node
+
+  "Lists all recipes."
+  recipes: [Recipe]
+
+  "Lists all recipes that were planned in the last order."
+  lastOrderedRecipes: [Recipe]
+
+  "Lists all ingredients which are marked as essential."
+  essentials: [Ingredient]
+
+  "Page through all ingredients."
+  ingredients(first: Int!, filter: IngredientFilter, order: [IngredientOrder]): IngredientConnection
+
+  "The current order including total price and ordered items."
+  currentOrder: Order
+
+  "The last order including total price and ordered items."
+  lastOrder: Order
+
+  "Search Supermarket products using a query string."
+  searchSupermarket(query: String!): [SupermarketSearchResult]
+
+  """
+  Search ingredients using a query string, excluding of
+  ingredient ids possible.
+  """
+  searchIngredient(query: String!, excluded: [ID]): [Ingredient]
+}
+
+type IngredientWarning {
+  outOfStock: Boolean
+  outOfAssortment: Boolean
+  description: String
+}
+
+type IngredientTag implements Node {
+  "The ID of an object"
+  id: ID!
+
+  count: Int
+
+  name: String
+}
+
+"Ordering options for the ingredients"
+input IngredientOrder {
+  "Field to sort on"
+  field: IngredientOrderField
+
+  "Direction to sort on"
+  direction: OrderDirection
+}
+
+"Recipe containing ingredients and metadata"
+type Recipe implements Node {
+  "The ID of an object"
+  id: ID!
+
+  title: String
+
+  description: String
+
+  imageUrl: String
+
+  warning: String
+
+  isPlanned: Boolean
+
+  ingredients: [RecipeIngredientEdge]
+
+  isCooked: Boolean
+}
+
+type Season {
+  label: String
+}
+
+"Fields that ingredients can be sorted on"
+enum IngredientOrderField {
+  "Sort by ingredient name"
+  NAME
+}
+
+type SupermarketSearchResult {
+  id: String
+  name: String
+  price: String
+  imageUrl: String
+  unitQuantity: String
+}
+
+type RootMutationType {
+  "Plan a recipe and order ingredients."
+  planRecipe(recipeId: ID!): Recipe
+
+  "Mark a recipe as cooked."
+  markRecipeAsCooked(recipeId: ID!, cooked: Boolean): Recipe
+
+  "Remove a planned recipe."
+  unplanRecipe(recipeId: ID!): Recipe
+
+  "Updates and synchronizes the current order."
+  syncOrder(
+    "Make sure the supermarket card is refreshed"
+    refresh: Boolean
+  ): Order
+
+  "Starts shopping"
+  startShopping: Order
+
+  "Stops shopping"
+  stopShopping: Order
+
+  "Buy ingredient"
+  buyIngredient(ingredientId: ID!, undo: Boolean): Ingredient
+
+  "Order an ingredient in a certain quantity."
+  orderIngredient(ingredientId: ID!, quantity: Int): Ingredient
+
+  "Add a new ingredient."
+  addIngredient(name: String!, isEssential: Boolean!, supermarketProductId: String!): Ingredient
+
+  "Edit an new ingredient."
+  editIngredient(input: EditIngredientInput!): Ingredient
+
+  "Delete an ingredient."
+  deleteIngredient(ingredientId: ID!): Ingredient
+
+  "Add a new recipe.'"
+  addRecipe(title: String!): Recipe
+
+  "Change a recipe including its ingredients.'"
+  editRecipe(recipeId: ID!, title: String!, description: String, imageUrl: String, ingredients: [IngredientRef!]!): Recipe
+}
+
+"Item that is part of an order"
+type OrderItem implements Node {
+  "The ID of an object"
+  id: ID!
+
+  name: String
+
+  imageUrl: String
+
+  quantity: String
+
+  ingredient: Ingredient
+}
+
+type IngredientConnection {
+  pageInfo: PageInfo!
+
+  edges: [IngredientEdge]
+
+  "Ingredient tags and their counts"
+  tags: [IngredientTag]
+}

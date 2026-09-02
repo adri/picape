@@ -4,7 +4,7 @@ export const EDIT_RECIPE = gql`
     $recipeId: ID!
     $title: String!
     $imageUrl: String
-    $ingredients: [IngredientRef]!
+    $ingredients: [IngredientRef!]!
     $description: String
   ) {
     editRecipe(
