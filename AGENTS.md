@@ -14,7 +14,8 @@ Checks (run all three before you report a change as done):
 
 Local stack (ports: Phoenix 4010, Expo web 19006, supermarket fake 4020, Postgres 5433):
 - `bin/phx` — Phoenix against your dev database and the live supermarket API. Needs a valid row in `supermarket_login` and `config/dev.secret.exs`.
-- `bin/phx --fake` — resets the seeded `picape_e2e` database and points Phoenix at the supermarket fake. Deterministic, safe, never touches the real cart. This is what `bin/e2e` uses. Logs at `info` level unless `PICAPE_LOG_LEVEL` says otherwise.
+- `bin/phx --fake` — resets the seeded `picape_e2e` database and points Phoenix at the supermarket fake. Deterministic, safe, never touches the real cart. This is what `bin/e2e` uses. Logs at `info` level unless `PICAPE_LOG_LEVEL` says otherwise. With `--db NAME` (or `PICAPE_DB` set), for example `bin/phx --fake --db picape_prod`, it keeps that database as it is and skips the reset; the `backend-prod` launch entry does this for the built-in browser. Fake mode also sets `SUPERMARKET_REFRESH=0`, so a copied production login is never refreshed against the fake.
+- `bin/db-restore <dump> [db]` — restores a Postgres custom-format dump (a `pg_dump -Fc` of production) into a local database, default `picape_prod`. Use it for production-like data in the app: real recipe counts, long titles, tags. The dump includes `supermarket_login`; its tokens are a month old and dead, and refreshing them anywhere is pointless. Never run live mode on a copy whose token production still uses, see `SUPERMARKET_REFRESH` below.
 - `bin/supermarket-fake` — the supermarket stand-in on :4020. Serves `test/fixtures/supermarket` and keeps a basket in memory that follows `UpdateMyListBasket` mutations. `POST /__reset` restores the fixture basket. Phoenix caches the cart for five hours, so after a reset also `POST http://localhost:4010/dev/invalidate-cart` (a dev-only route in the router); the e2e `beforeEach` does both.
 - `cd frontend && npm run web` — Expo web dev server on :19006. Expo needs about a minute to start; keep it running between runs. Restart it after any change to `frontend/node_modules`.
 - `.claude/launch.json` (local, gitignored by the user's global ignore) has `backend`, `backend-fake`, `supermarket-fake` and `frontend` entries for the built-in browser preview.
@@ -28,7 +29,8 @@ Inspecting the stack:
 Supermarket (the code and docs say "supermarket", never the chain's name):
 - `bin/supermarket-snapshot` — records trimmed live responses into `test/fixtures/supermarket` and doubles as a smoke test of the supermarket connection. Needs a valid login. If it fails with a 401 on `/mobile-auth/v1/auth/token/refresh`, the refresh token in `supermarket_login` is dead and you need a new one from the supermarket's iOS app.
 - `SUPERMARKET_BASE_URL=http://localhost:4020 mix phx.server` — point any dev process at the fake; `bin/phx --fake` sets this for you.
-- `SUPERMARKET_PROXY=1 bin/phx` — sends all supermarket traffic through Proxyman on :9090 with the Proxyman CA trusted. Both dev-only overrides live in [config/runtime.exs](config/runtime.exs).
+- `SUPERMARKET_PROXY=1 bin/phx` — sends all supermarket traffic through Proxyman on :9090 with the Proxyman CA trusted.
+- `SUPERMARKET_REFRESH=0 bin/phx` — hands out the stored access token but never refreshes it. Refresh tokens rotate on every use, so a local refresh with a copy of production's row logs production out. Use this whenever `supermarket_login` holds production's current token; live calls then work until the access token expires. All three dev-only overrides live in [config/runtime.exs](config/runtime.exs).
 - Capturing traffic, comparing Picape with the supermarket's iOS app, and extracting a fresh refresh token: use the `proxyman-capture` skill in [.claude/skills/proxyman-capture/SKILL.md](.claude/skills/proxyman-capture/SKILL.md). Its `scripts/capture.sh` wraps `proxyman-cli` and prints summaries without headers or bodies.
 
 Other:
@@ -42,6 +44,8 @@ Credentials live in `config/dev.secret.exs` (gitignored, optional: the fake stac
 ## Deploy
 
 GitHub Actions deploys. [ci.yml](.github/workflows/ci.yml) runs the backend check, the frontend check and the screen tests (with `E2E_SKIP_SCREENSHOTS=1`, screenshots uploaded as the `e2e-output` artifact) on every push and pull request. [deploy.yml](.github/workflows/deploy.yml) runs `flyctl deploy --remote-only` after CI succeeds on `master`. It needs the `FLY_API_TOKEN` repository secret in the GitHub repo settings. `fly deploy` from your machine still works but skips the checks.
+
+Inspecting production with `fly`: only read commands, `fly status`, `fly releases`, `fly logs --no-tail`, `fly machine list`, `fly checks list`, `fly config show`. Never `fly deploy`, `fly secrets`, `fly ssh`, `fly scale`, `fly machine` changes, `fly apps destroy` or `fly pg` from an agent session; deploys go through GitHub. The token the agent uses should be a read-only org token (`fly tokens create readonly -x 8760h`) so the API refuses writes regardless of the command; `fly tokens debug` shows `IsUser` for a full login token.
 
 ## Architecture
 
