@@ -31,6 +31,10 @@ if config_env() == :dev do
     config :picape, Picape.Supermarket, base_url: base_url
   end
 
+  if System.get_env("SUPERMARKET_REFRESH") == "0" do
+    config :picape, Picape.Supermarket.KeepLogin, refresh: false
+  end
+
   if System.get_env("SUPERMARKET_PROXY") do
     proxyman_ca = Path.expand("~/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem")
 

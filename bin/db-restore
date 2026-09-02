@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Restores a Postgres custom-format dump into a local database.
+# Usage: bin/db-restore <dump file> [database, default picape_prod]
+# Then: PICAPE_DB=picape_prod bin/phx --fake
+set -euo pipefail
+cd "$(dirname "$0")/.."
+dump=${1:?dump file}
+db=${2:-picape_prod}
+[[ -f $dump ]] || { echo "no such file: $dump" >&2; exit 1; }
+docker compose up -d --wait postgres >/dev/null
+psql() { docker compose exec -T postgres psql -U postgres -v ON_ERROR_STOP=1 -q "$@"; }
+psql -c "drop database if exists \"$db\" with (force)"
+psql -c "create database \"$db\""
+docker compose exec -T postgres pg_restore -U postgres -d "$db" --no-owner --no-privileges --single-transaction < "$dump"
+psql -d "$db" -Atc "select 'recipes ' || count(*) from recipe union all select 'ingredients ' || count(*) from recipe_ingredient union all select 'logins ' || count(*) from supermarket_login"
+echo "restored $dump into $db"
