@@ -1,122 +1,7 @@
 schema {
-  query: RootQueryType
-  mutation: RootMutationType
   subscription: RootSubscriptionType
-}
-
-type RootSubscriptionType {
-  orderChanged: Order
-  recipePlanned: Recipe
-  recipeUnplanned: Recipe
-}
-
-"Filtering options for the ingredients"
-input IngredientFilter {
-  "Matching a tag"
-  tagIds: [ID]
-
-  "Ingredient is marked as an essential"
-  essential: Boolean
-}
-
-"Direction to sort in"
-enum OrderDirection {
-  "Ascending"
-  ASC
-
-  "Descending"
-  DESC
-}
-
-type RecipeEdge {
-  quantity: Int
-  recipe: Recipe
-}
-
-type IngredientEdge {
-  node: Ingredient
-}
-
-"Edit an ingredient"
-input EditIngredientInput {
-  ingredientId: ID!
-  supermarketProductId: String!
-  name: String!
-  seasonalName: String
-  isEssential: Boolean!
-  tagIds: [ID]
-}
-
-"Current order, there can only be one order at a time."
-type Order implements Node {
-  "The ID of an object"
-  id: ID!
-
-  totalCount: Int
-
-  totalPrice: Int
-
-  items: [OrderItem]
-}
-
-type PageInfo {
-  "When paginating backwards, are there more items?"
-  hasPreviousPage: Boolean!
-
-  "When paginating forwards, are there more items?"
-  hasNextPage: Boolean!
-
-  "When paginating backwards, the cursor to continue."
-  startCursor: String
-
-  "When paginating forwards, the cursor to continue."
-  endCursor: String
-}
-
-"An ingredient in a certain quantity."
-input IngredientRef {
-  quantity: Int!
-  ingredientId: ID!
-}
-
-type RecipeIngredientEdge {
-  quantity: Int
-  ingredient: Ingredient
-}
-
-type Ingredient implements Node {
-  "The ID of an object"
-  id: ID!
-
-  name: String
-
-  seasonalName: String
-
-  supermarketProductId: String
-
-  isEssential: Boolean
-
-  tags: [IngredientTag]
-
-  imageUrl: String
-
-  supermarketName: String
-
-  nutriscore: String
-
-  warning: IngredientWarning
-
-  isPlanned(inShoppingList: Boolean): Boolean
-
-  orderedQuantity(inShoppingList: Boolean): Int
-
-  plannedRecipes(inShoppingList: Boolean): [RecipeEdge]
-
-  isBought: Boolean
-
-  season: Season
-
-  unitQuantity: String
+  mutation: RootMutationType
+  query: RootQueryType
 }
 
 interface Node {
@@ -157,68 +42,6 @@ type RootQueryType {
   ingredient ids possible.
   """
   searchIngredient(query: String!, excluded: [ID]): [Ingredient]
-}
-
-type IngredientWarning {
-  outOfStock: Boolean
-  outOfAssortment: Boolean
-  description: String
-}
-
-type IngredientTag implements Node {
-  "The ID of an object"
-  id: ID!
-
-  count: Int
-
-  name: String
-}
-
-"Ordering options for the ingredients"
-input IngredientOrder {
-  "Field to sort on"
-  field: IngredientOrderField
-
-  "Direction to sort on"
-  direction: OrderDirection
-}
-
-"Recipe containing ingredients and metadata"
-type Recipe implements Node {
-  "The ID of an object"
-  id: ID!
-
-  title: String
-
-  description: String
-
-  imageUrl: String
-
-  warning: String
-
-  isPlanned: Boolean
-
-  ingredients: [RecipeIngredientEdge]
-
-  isCooked: Boolean
-}
-
-type Season {
-  label: String
-}
-
-"Fields that ingredients can be sorted on"
-enum IngredientOrderField {
-  "Sort by ingredient name"
-  NAME
-}
-
-type SupermarketSearchResult {
-  id: String
-  name: String
-  price: String
-  imageUrl: String
-  unitQuantity: String
 }
 
 type RootMutationType {
@@ -265,6 +88,30 @@ type RootMutationType {
   editRecipe(recipeId: ID!, title: String!, description: String, imageUrl: String, ingredients: [IngredientRef!]!): Recipe
 }
 
+type RootSubscriptionType {
+  orderChanged: Order
+  recipePlanned: Recipe
+  recipeUnplanned: Recipe
+}
+
+"An ingredient in a certain quantity."
+input IngredientRef {
+  quantity: Int!
+  ingredientId: ID!
+}
+
+"Current order, there can only be one order at a time."
+type Order implements Node {
+  "The ID of an object"
+  id: ID!
+
+  totalCount: Int
+
+  totalPrice: Int
+
+  items: [OrderItem]
+}
+
 "Item that is part of an order"
 type OrderItem implements Node {
   "The ID of an object"
@@ -279,6 +126,145 @@ type OrderItem implements Node {
   ingredient: Ingredient
 }
 
+"Recipe containing ingredients and metadata"
+type Recipe implements Node {
+  "The ID of an object"
+  id: ID!
+
+  title: String
+
+  description: String
+
+  imageUrl: String
+
+  warning: String
+
+  isPlanned: Boolean
+
+  ingredients: [RecipeIngredientEdge]
+
+  isCooked: Boolean
+}
+
+type Ingredient implements Node {
+  "The ID of an object"
+  id: ID!
+
+  name: String
+
+  seasonalName: String
+
+  supermarketProductId: String
+
+  isEssential: Boolean
+
+  tags: [IngredientTag]
+
+  imageUrl: String
+
+  supermarketName: String
+
+  nutriscore: String
+
+  warning: IngredientWarning
+
+  isPlanned(inShoppingList: Boolean): Boolean
+
+  orderedQuantity(inShoppingList: Boolean): Int
+
+  plannedRecipes(inShoppingList: Boolean): [RecipeEdge]
+
+  isBought: Boolean
+
+  season: Season
+
+  unitQuantity: String
+}
+
+type IngredientTag implements Node {
+  "The ID of an object"
+  id: ID!
+
+  count: Int
+
+  name: String
+}
+
+"Filtering options for the ingredients"
+input IngredientFilter {
+  "Matching a tag"
+  tagIds: [ID]
+
+  "Ingredient is marked as an essential"
+  essential: Boolean
+}
+
+"Ordering options for the ingredients"
+input IngredientOrder {
+  "Field to sort on"
+  field: IngredientOrderField
+
+  "Direction to sort on"
+  direction: OrderDirection
+}
+
+"Fields that ingredients can be sorted on"
+enum IngredientOrderField {
+  "Sort by ingredient name"
+  NAME
+}
+
+"Direction to sort in"
+enum OrderDirection {
+  "Ascending"
+  ASC
+
+  "Descending"
+  DESC
+}
+
+"Edit an ingredient"
+input EditIngredientInput {
+  ingredientId: ID!
+  supermarketProductId: String!
+  name: String!
+  seasonalName: String
+  isEssential: Boolean!
+  tagIds: [ID]
+}
+
+type Season {
+  label: String
+}
+
+type RecipeIngredientEdge {
+  quantity: Int
+  ingredient: Ingredient
+}
+
+type IngredientWarning {
+  outOfStock: Boolean
+  outOfAssortment: Boolean
+  description: String
+}
+
+type RecipeEdge {
+  quantity: Int
+  recipe: Recipe
+}
+
+type IngredientEdge {
+  node: Ingredient
+}
+
+type SupermarketSearchResult {
+  id: String
+  name: String
+  price: String
+  imageUrl: String
+  unitQuantity: String
+}
+
 type IngredientConnection {
   pageInfo: PageInfo!
 
@@ -286,4 +272,18 @@ type IngredientConnection {
 
   "Ingredient tags and their counts"
   tags: [IngredientTag]
+}
+
+type PageInfo {
+  "When paginating backwards, are there more items?"
+  hasPreviousPage: Boolean!
+
+  "When paginating forwards, are there more items?"
+  hasNextPage: Boolean!
+
+  "When paginating backwards, the cursor to continue."
+  startCursor: String
+
+  "When paginating forwards, the cursor to continue."
+  endCursor: String
 }
