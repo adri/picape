@@ -10,23 +10,26 @@ $ bin/setup
 ```
 
 ## Scripts
-- `bin/setup`: Install all dependencies and run tests. Use this on your CI server.
-- `bin/update`: Update all dependencies, after pulling or merging.
-- `bin/ci`: Run this locally to run all commands run by CI.
-- `mix phx.server`: Start Phoenix server.
-- `mix ecto.reset`: Drop and reseed the database.
-- `mix test`: Run the Elixir tests.
-- `cd frontend/ && yarn test`: Run Javascript tests.
+- `bin/setup`: Install all dependencies and run the checks.
+- `mix check`: Backend checks (format, credo, compile warnings, tests, sobelow).
+- `cd frontend && npm run check`: Frontend checks (ESLint, Prettier, Jest).
+- `bin/e2e`: Playwright screen tests on an iPhone profile against the fake stack.
+- `bin/phx` / `bin/phx --fake`: Phoenix against your data and the live supermarket API, or against the seeded e2e database and the supermarket fake.
+- `bin/supermarket-fake`, `bin/supermarket-snapshot`: Run the supermarket stand-in, or record fixtures from the live API.
+- `bin/ci`: Everything GitHub Actions runs.
 
 ## Development
-- Web: http://localhost:4001
+- Web: http://localhost:19006 (`cd frontend && npm run web`)
 - API: http://localhost:4010/graphql
 - GraphiQL: http://localhost:4010/graphiql
 
+See [AGENTS.md](AGENTS.md) for the full harness.
+
 ## Deploy
 Hosted on [Fly.io](https://fly.io/) — config in [fly.toml](fly.toml), image built from the [Dockerfile](Dockerfile).
+GitHub Actions deploys `master` after CI passes ([deploy.yml](.github/workflows/deploy.yml)). It needs the `FLY_API_TOKEN` repository secret:
 ```
-fly deploy
+fly tokens create deploy -x 999999h | gh secret set FLY_API_TOKEN
 ```
 
 ## Screenshots
