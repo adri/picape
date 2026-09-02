@@ -3,6 +3,7 @@
 # console errors, failed requests and the size of the rendered root.
 # Saves a screenshot to tmp/probe.png. Usage: bin/web-probe [url]
 set -euo pipefail
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
 cd "$(dirname "$0")/.."
 mkdir -p tmp
 exec node e2e/probe.js "${1:-http://localhost:19006/}"

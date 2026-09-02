@@ -4,7 +4,7 @@ Guidance for coding agents working in this repository. Everything project specif
 
 ## Commands
 
-Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.8.0) and read by asdf and CI; the Dockerfile hardcodes the same versions in its `ARG` lines, keep them in sync. A Homebrew `node` or `elixir` earlier in `PATH` wins over the asdf shim; check `node --version` prints 20.8.0 and `elixir --version` prints 1.20.4 before you trust a result. Put `$HOME/.asdf/shims` first in `PATH` if they do not.
+Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.8.0) and read by asdf and CI; the Dockerfile hardcodes the same versions in its `ARG` lines, keep them in sync. A Homebrew `node` or `elixir` earlier in `PATH` wins over the asdf shim; check `node --version` prints 20.8.0 and `elixir --version` prints 1.20.4 before you trust a result. The `bin/` scripts source [bin/_toolchain](bin/_toolchain), which puts the asdf shims first for you, so prefer them over a bare `mix` when your own `PATH` is wrong. `bin/deploy`, `bin/setup` and `bin/update` do not source it yet.
 
 Checks (run all three before you report a change as done):
 - `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `compile --force --warnings-as-errors`, `mix test --warnings-as-errors`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.

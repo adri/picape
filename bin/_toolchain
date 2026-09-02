@@ -1,0 +1,11 @@
+# Sourced by the bin/ scripts that run mix. Puts the asdf shims first so the
+# Erlang and Elixir pinned in .tool-versions win over a Homebrew install
+# earlier in PATH. Mixing the two loads beams built for the wrong OTP.
+# asdf 0.16+ keeps the shims under ASDF_DATA_DIR; older versions use ASDF_DIR.
+for _shims in "${ASDF_DATA_DIR:-}/shims" "${ASDF_DIR:-}/shims" "${HOME:-}/.asdf/shims"; do
+  if [[ -x "$_shims/mix" ]]; then
+    export PATH="$_shims:$PATH"
+    break
+  fi
+done
+unset _shims

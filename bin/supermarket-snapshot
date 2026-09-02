@@ -2,5 +2,6 @@
 # Records trimmed supermarket responses into test/fixtures/supermarket using the
 # live dev config and login. Also works as a smoke test of the supermarket connection.
 set -euo pipefail
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
 cd "$(dirname "$0")/.."
 exec mix run -e 'Picape.SupermarketSnapshot.run()'

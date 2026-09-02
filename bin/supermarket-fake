@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Serves test/fixtures/supermarket as a stand-in for the supermarket API on :4020.
 set -euo pipefail
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
 cd "$(dirname "$0")/.."
 exec mix run --no-start -e '
 {:ok, _} = Application.ensure_all_started(:plug_cowboy)
