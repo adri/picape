@@ -1,15 +1,16 @@
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
 import { Text, ScrollView, FlatList } from 'react-native';
-import Colors from '../constants/Colors';
-import { ImageCard } from '../components/Card/ImageCard';
-import { SectionHeader } from '../components/Section/SectionHeader';
-import SkeletonContent from 'react-native-skeleton-content';
 import { useSafeArea } from 'react-native-safe-area-context';
+import SkeletonContent from 'react-native-skeleton-content';
+
+import { ImageCard } from '../components/Card/ImageCard';
 import { BackIcon, PlusIcon } from '../components/Icon';
-import { GET_RECIPES } from '../operations/getRecipes';
 import { PlanRecipe } from '../components/Recipe/PlanRecipe';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
 import Type from '../constants/Type';
+import { GET_RECIPES } from '../operations/getRecipes';
 
 export function RecipeListScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
@@ -28,7 +29,7 @@ export function RecipeListScreen({ navigation }) {
         }}
       />
 
-      <SectionHeader title={''}>
+      <SectionHeader title="">
         <Text
           onPress={(e) => {
             e.preventDefault();

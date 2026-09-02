@@ -1,16 +1,21 @@
-import { useQuery } from "@apollo/client";
-import * as React from "react";
-import Colors from "../constants/Colors";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView } from "react-native-gesture-handler";
-import { SectionHeader } from "../components/Section/SectionHeader";
-import { ImageCard } from "../components/Card/ImageCard";
-import SkeletonContent from "react-native-skeleton-content";
-import { GET_LAST_RECIPES } from "../operations/getLastRecipes";
+import { useQuery } from '@apollo/client';
+import * as React from 'react';
+import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import SkeletonContent from 'react-native-skeleton-content';
+
+import { ImageCard } from '../components/Card/ImageCard';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
+import { GET_LAST_RECIPES } from '../operations/getLastRecipes';
 
 export default function CookScreen({ navigation }) {
-  const { loading, error, data = {} } = useQuery(GET_LAST_RECIPES, {
-    fetchPolicy: "cache-and-network",
+  const {
+    loading,
+    error,
+    data = {},
+  } = useQuery(GET_LAST_RECIPES, {
+    fetchPolicy: 'cache-and-network',
   });
   if (error) return `Error! ${error}`;
 
@@ -27,45 +32,44 @@ export default function CookScreen({ navigation }) {
             height: 100,
             margin: 5,
             marginBottom: 10,
-            flexBasis: "45%",
+            flexBasis: '45%',
           })}
           containerStyle={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            alignContent: "stretch",
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignContent: 'stretch',
             paddingHorizontal: 15,
             marginBottom: 50,
           }}
           boneColor={Colors.skeletonBone}
           highlightColor={Colors.skeletonHighlight}
-          isLoading={loading}
-        >
+          isLoading={loading}>
           {recipes.map((recipe, index) => (
             <ImageCard
               key={recipe.id}
               style={{
                 animationDuration: `${200 + 100 * index}ms`,
-                animationPlayState: "running",
+                animationPlayState: 'running',
                 animationKeyframes: {
                   from: { opacity: 0 },
                   to: { opacity: 1 },
                 },
-                transitionProperty: ["background-color", "opacity"],
-                transitionDuration: "200ms",
-                transitionTimingFunction: "ease-in",
-                flexBasis: "50%",
-                width: "100%",
+                transitionProperty: ['background-color', 'opacity'],
+                transitionDuration: '200ms',
+                transitionTimingFunction: 'ease-in',
+                flexBasis: '50%',
+                width: '100%',
               }}
               title={recipe.title}
               imageUrl={recipe.imageUrl}
               onPress={(e) => {
                 e.preventDefault();
-                navigation.navigate("RecipeDetail", {
+                navigation.navigate('RecipeDetail', {
                   id: recipe.id,
                   recipe,
                 });
               }}
-            ></ImageCard>
+            />
           ))}
         </SkeletonContent>
       </ScrollView>

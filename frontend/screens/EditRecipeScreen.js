@@ -1,17 +1,18 @@
 import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import Colors from '../constants/Colors';
-import { SectionHeader } from '../components/Section/SectionHeader';
-import { QuantitySelector } from '../components/Ingredient/QuantitySelector';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+
 import { CloseIcon } from '../components/Icon';
-import { GET_RECIPE } from '../operations/getRecipe';
+import { QuantitySelector } from '../components/Ingredient/QuantitySelector';
 import { InputText } from '../components/Input/InputText';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SearchIngredients } from '../components/Search/SearchIngredients';
-import { EDIT_RECIPE } from '../operations/editRecipe';
 import { FixedFooter } from '../components/Section/FixedFooter';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
+import { EDIT_RECIPE } from '../operations/editRecipe';
+import { GET_RECIPE } from '../operations/getRecipe';
 
 const setIngredientQuantity = (form, ingredientId, quantity) => ({
   ...form,
@@ -117,8 +118,8 @@ export function EditRecipeScreen({
         <View style={styles.container}>
           <InputText
             label="Instructies"
-            multiline={true}
-            scrollEnabled={true}
+            multiline
+            scrollEnabled
             onChangeText={(description) => changeForm({ ...form, description, changed: true })}
             defaultValue={form.description}
             numberOfLines={(form.description || '').split('\n').length}
@@ -157,7 +158,7 @@ export function EditRecipeScreen({
         <View style={[styles.searchContainer]}>
           <SearchIngredients
             autoFocus={false}
-            placeholder={'Igrediënt toevoegen...'}
+            placeholder="Igrediënt toevoegen..."
             customRenderItem={({ item: ingredient, supermarket, searchRef }) => (
               <ListItem
                 title={`${ingredient.name}${ingredient.warning ? ' ⚠️' : ''}`}
@@ -169,7 +170,7 @@ export function EditRecipeScreen({
                     if (supermarket) {
                       // TODO: open "add integdient" screen
                     }
-                    var existing = form.ingredients.find(
+                    const existing = form.ingredients.find(
                       (ref) => ref.ingredient.id === ingredient.id
                     );
                     if (existing) {
@@ -185,10 +186,10 @@ export function EditRecipeScreen({
           />
         </View>
 
-        <View style={styles.spacer}></View>
+        <View style={styles.spacer} />
       </ScrollView>
       <FixedFooter
-        buttonText={'Opslaan'}
+        buttonText="Opslaan"
         disabled={form.changed == false}
         onPress={(e) => {
           e.preventDefault();

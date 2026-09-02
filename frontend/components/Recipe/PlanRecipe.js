@@ -1,7 +1,8 @@
-import * as React from 'react';
 import { useMutation } from '@apollo/client';
-import { PlusIcon, CheckIcon } from '../Icon';
+import * as React from 'react';
+
 import { PLAN_RECIPE, UNPLAN_RECIPE, optimisticResponse } from '../../operations/planRecipe';
+import { PlusIcon, CheckIcon } from '../Icon';
 
 export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
   const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });

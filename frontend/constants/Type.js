@@ -1,4 +1,4 @@
-import { human, systemWeights, iOSUIKit } from "react-native-typography";
+import { human, systemWeights, iOSUIKit } from 'react-native-typography';
 
 // @see https://github.com/hectahertz/react-native-typography#cross-platform
 export default {

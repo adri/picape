@@ -1,9 +1,10 @@
-import * as React from "react";
-import Colors from "../../constants/Colors";
-import { useState, useEffect } from "react";
-import { Badge } from "../Badge/Badge";
-import { PlusIcon, MinusIcon } from "../Icon";
-import { View, Text } from "react-native";
+import * as React from 'react';
+import { useState, useEffect } from 'react';
+import { View, Text } from 'react-native';
+
+import Colors from '../../constants/Colors';
+import { Badge } from '../Badge/Badge';
+import { PlusIcon, MinusIcon } from '../Icon';
 
 export const QuantitySelector = React.memo(function ({ id, orderedQuantity, onChange }) {
   const [opened, setOpened] = useState(false);
@@ -35,10 +36,9 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity, onCh
     return (
       <View
         style={{
-          flexDirection: "row",
-          alignContent: "flex-end",
-        }}
-      >
+          flexDirection: 'row',
+          alignContent: 'flex-end',
+        }}>
         <MinusIcon
           style={{ margin: 10 }}
           onPress={(e) => {
@@ -47,7 +47,7 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity, onCh
           }}
         />
 
-        <View style={{ justifyContent: "center" }}>
+        <View style={{ justifyContent: 'center' }}>
           <Text style={{ color: Colors.text }}>{orderedQuantity}</Text>
         </View>
 

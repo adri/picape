@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { gql, useMutation } from '@apollo/client';
+import * as React from 'react';
+
 import { QuantitySelector } from './QuantitySelector';
 
 const ORDER_INGREDIENT = gql`
@@ -15,9 +16,9 @@ function optimisticResponse(id, orderedQuantity) {
   return {
     __typename: 'Mutation',
     orderIngredient: {
-      id: id,
+      id,
       __typename: 'Ingredient',
-      orderedQuantity: orderedQuantity,
+      orderedQuantity,
     },
   };
 }
@@ -31,7 +32,7 @@ export const OrderQuantity = React.memo(function ({ id, orderedQuantity }) {
       orderedQuantity={orderedQuantity}
       onChange={(id, quantity) => {
         orderIngredient({
-          variables: { ingredientId: id, quantity: quantity },
+          variables: { ingredientId: id, quantity },
           optimisticResponse: optimisticResponse(id, quantity),
         });
       }}

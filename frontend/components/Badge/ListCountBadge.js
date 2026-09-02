@@ -1,11 +1,9 @@
-import { useQuery, useSubscription } from "@apollo/client";
-import * as React from "react";
-import Colors from "../../constants/Colors";
-import { View, Text, StyleSheet } from "react-native";
-import {
-  GET_ORDER_COUNT,
-  SUBSCRIBE_ORDER_COUNT,
-} from "../../operations/getOrderCount";
+import { useQuery, useSubscription } from '@apollo/client';
+import * as React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+import Colors from '../../constants/Colors';
+import { GET_ORDER_COUNT, SUBSCRIBE_ORDER_COUNT } from '../../operations/getOrderCount';
 
 export function ListCountBadge({ focused = false }) {
   const { loading, error, data = {} } = useQuery(GET_ORDER_COUNT);
@@ -19,12 +17,12 @@ export function ListCountBadge({ focused = false }) {
   }
 
   return (
-    <View style={[
-      styles.container,
-      { backgroundColor: focused ? Colors.badgeBackground : Colors.badgeBackgroundInactive }]}>
-      <Text
-        style={{ color: Colors.badgeText, fontSize: 10, fontWeight: "bold" }}
-      >
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: focused ? Colors.badgeBackground : Colors.badgeBackgroundInactive },
+      ]}>
+      <Text style={{ color: Colors.badgeText, fontSize: 10, fontWeight: 'bold' }}>
         {totalCount}
       </Text>
     </View>
@@ -33,13 +31,13 @@ export function ListCountBadge({ focused = false }) {
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
+    position: 'absolute',
     right: -6,
     top: 2,
     borderRadius: 8,
     width: 16,
     height: 16,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

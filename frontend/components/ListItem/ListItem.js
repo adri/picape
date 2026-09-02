@@ -1,9 +1,10 @@
 import * as React from 'react';
-import Colors from '../../constants/Colors';
 import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native';
-import Type from '../../constants/Type';
-import Layout from '../../constants/Layout';
+
 import { Subtitle } from './Subtitle';
+import Colors from '../../constants/Colors';
+import Layout from '../../constants/Layout';
+import Type from '../../constants/Type';
 import { Badge } from '../Badge/Badge';
 
 export function ListItem({

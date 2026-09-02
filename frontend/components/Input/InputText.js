@@ -1,16 +1,9 @@
-import React from "react";
-import Colors from "../../constants/Colors";
-import PropTypes from "prop-types";
-import {
-  Text,
-  View,
-  TextInput,
-  Animated,
-  Easing,
-  Platform,
-  StyleSheet,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from '@expo/vector-icons';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { Text, View, TextInput, Animated, Easing, Platform, StyleSheet } from 'react-native';
+
+import Colors from '../../constants/Colors';
 const Icon = Ionicons;
 
 class InputText extends React.Component {
@@ -90,15 +83,9 @@ class InputText extends React.Component {
             styles.inputContainer,
             inputContainerStyle,
             { transform: [{ translateX }] },
-          ])}
-        >
+          ])}>
           {leftIcon && (
-            <View
-              style={StyleSheet.flatten([
-                styles.iconContainer,
-                leftIconContainerStyle,
-              ])}
-            >
+            <View style={StyleSheet.flatten([styles.iconContainer, leftIconContainerStyle])}>
               {leftIcon}
             </View>
           )}
@@ -120,12 +107,7 @@ class InputText extends React.Component {
           />
 
           {rightIcon && (
-            <View
-              style={StyleSheet.flatten([
-                styles.iconContainer,
-                rightIconContainerStyle,
-              ])}
-            >
+            <View style={StyleSheet.flatten([styles.iconContainer, rightIconContainerStyle])}>
               {rightIcon}
             </View>
           )}
@@ -141,8 +123,7 @@ class InputText extends React.Component {
               margin: 0,
               padding: 0,
             },
-          ])}
-        >
+          ])}>
           {errorMessage}
         </Text>
       </View>
@@ -174,26 +155,26 @@ InputText.defaultProps = {
 
 const styles = {
   container: {
-    width: "100%",
+    width: '100%',
   },
   disabledInput: {
     opacity: 0.5,
   },
   inputContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     borderBottomWidth: 1,
-    alignItems: "center",
+    alignItems: 'center',
     borderColor: Colors.cardBackground,
   },
   iconContainer: {
     height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingRight: 4,
     marginVertical: 4,
   },
   input: {
-    alignSelf: "center",
+    alignSelf: 'center',
     color: Colors.text,
     fontSize: 18,
     flex: 1,
@@ -202,14 +183,14 @@ const styles = {
   error: {
     margin: 5,
     fontSize: 12,
-    color: "red",
+    color: 'red',
   },
   label: {
     fontSize: 16,
     color: Colors.text,
     ...Platform.select({
       default: {
-        fontWeight: "bold",
+        fontWeight: 'bold',
       },
     }),
   },

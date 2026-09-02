@@ -1,7 +1,8 @@
-import * as React from "react";
-import Colors from "../../constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
-import { View, TouchableOpacity } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import * as React from 'react';
+import { View, TouchableOpacity } from 'react-native';
+
+import Colors from '../../constants/Colors';
 
 export function MinusIcon(props) {
   return (
@@ -13,19 +14,18 @@ export function MinusIcon(props) {
             height: 30,
             borderRadius: 15,
             backgroundColor: Colors.iconDefault,
-            alignItems: "center",
-            justifyContent: "center",
+            alignItems: 'center',
+            justifyContent: 'center',
           },
           props.style,
-        ]}
-      >
+        ]}>
         <Ionicons
-          name={"md-remove"}
+          name="md-remove"
           size={25}
           style={{
             marginTop: 2,
           }}
-          color={"white"}
+          color="white"
         />
       </View>
     </TouchableOpacity>
