@@ -45,6 +45,8 @@ Credentials live in `config/dev.secret.exs` (gitignored, optional: the fake stac
 
 GitHub Actions deploys. [ci.yml](.github/workflows/ci.yml) runs the backend check, the frontend check and the screen tests (with `E2E_SKIP_SCREENSHOTS=1`, screenshots uploaded as the `e2e-output` artifact) on every push and pull request. [deploy.yml](.github/workflows/deploy.yml) runs `flyctl deploy --remote-only` after CI succeeds on `master`. It needs the `FLY_API_TOKEN` repository secret in the GitHub repo settings. `fly deploy` from your machine still works but skips the checks.
 
+Sentry reports errors only where `SENTRY_DSN` is set, which [config/runtime.exs](config/runtime.exs) does for `:prod` alone. There is no environment allowlist any more. The [Dockerfile](Dockerfile) runs `mix sentry.package_source_code` before `mix release`; drop that step and Sentry stack traces lose their code snippets. `Sentry.PlugCapture` sits at the top of [the endpoint](lib/picape_web/endpoint.ex) and `Sentry.PlugContext` just before the router, so the router itself needs no Sentry plug.
+
 Inspecting production with `fly`: only read commands, `fly status`, `fly releases`, `fly logs --no-tail`, `fly machine list`, `fly checks list`, `fly config show`. Never `fly deploy`, `fly secrets`, `fly ssh`, `fly scale`, `fly machine` changes, `fly apps destroy` or `fly pg` from an agent session; deploys go through GitHub. The token the agent uses should be a read-only org token (`fly tokens create readonly -x 8760h`) so the API refuses writes regardless of the command; `fly tokens debug` shows `IsUser` for a full login token.
 
 ## Architecture
@@ -105,7 +107,7 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 
 ## Troubleshooting
 
-- `module Sentry.Plug is not loaded` or `PicapeWeb.Router.Helpers is not loaded` at compile: the `_build/<env>` cache compiled Sentry before Plug. Delete that `_build/<env>` directory and compile again. CI can hit this too now that its mix caches carry `restore-keys`: a `mix.lock` bump reuses the previous `_build` instead of building clean. A `.tool-versions` change is always cold, because its hash sits in the restore-key prefix. To force a cold build after a lockfile bump, change the `mix-test-`/`mix-dev-` prefix in [ci.yml](.github/workflows/ci.yml).
+- `module Sentry.PlugCapture is not loaded` or `PicapeWeb.Router.Helpers is not loaded` at compile: the `_build/<env>` cache compiled Sentry before Plug. Delete that `_build/<env>` directory and compile again. CI can hit this too now that its mix caches carry `restore-keys`: a `mix.lock` bump reuses the previous `_build` instead of building clean. A `.tool-versions` change is always cold, because its hash sits in the restore-key prefix. To force a cold build after a lockfile bump, change the `mix-test-`/`mix-dev-` prefix in [ci.yml](.github/workflows/ci.yml).
 - Blank white app in the browser: run `bin/web-probe`. A `Module build failed ... ENOENT` page error means `frontend/node_modules` is incomplete; run `npm ci` in `frontend/` and restart Expo.
 - `bin/e2e` fails every test on the cart badge: Phoenix or the fake is not the one you think. `bin/status` shows what is up; kill stale processes on :4010 and :4020 and rerun so Playwright starts fresh ones.
 - `bin/supermarket-snapshot` returns 401 on the token refresh: the local refresh token is dead. Get a new one with the `proxyman-capture` skill. Use one token in one place only; refresh tokens rotate on use, so sharing one between production and your machine logs one of them out.

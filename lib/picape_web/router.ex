@@ -1,7 +1,5 @@
 defmodule PicapeWeb.Router do
   use PicapeWeb, :router
-  use Plug.ErrorHandler
-  use Sentry.Plug
 
   get("/", PicapeWeb.PageController, :index)
 
