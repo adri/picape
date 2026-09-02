@@ -22,7 +22,7 @@ defmodule Picape.Supermarket.Login do
     |> validate_required([:access_token, :refresh_token])
   end
 
-  def is_expired(%__MODULE__{} = login) do
+  def expired?(%__MODULE__{} = login) do
     expires_in = login.expires_in || 0
 
     expires_at =

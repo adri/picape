@@ -16,7 +16,7 @@ defmodule PicapeWeb.ShortcutController do
 
         render(conn, "add_ingredient.json", %{ingredient: ingredient})
 
-      ingredients when is_list(ingredients) and length(ingredients) > 0 ->
+      [_ | _] = ingredients ->
         render(conn, "choose_ingredient.json", %{ingredients: ingredients})
 
       [] ->

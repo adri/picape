@@ -90,11 +90,11 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.sync_supermarket(order_id())
   end
 
-  def start_shopping(attributes, _info) do
+  def start_shopping(_attributes, _info) do
     Order.start_shopping(order_id())
   end
 
-  def stop_shopping(attributes, _info) do
+  def stop_shopping(_attributes, _info) do
     Order.stop_shopping(order_id())
   end
 

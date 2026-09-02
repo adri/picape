@@ -68,10 +68,9 @@ defmodule PicapeWeb.Graphql.Types do
 
       resolve(fn parent, args, _ctx ->
         batch_fn =
-          cond do
-            args.in_shopping_list -> {Resolver.Order, :ingredients_in_shopping?}
-            true -> {Resolver.Order, :ingredients_planned?}
-          end
+          if args.in_shopping_list,
+            do: {Resolver.Order, :ingredients_in_shopping?},
+            else: {Resolver.Order, :ingredients_planned?}
 
         batch(batch_fn, parent.id, fn results ->
           {:ok, batch_results} = results
@@ -85,10 +84,9 @@ defmodule PicapeWeb.Graphql.Types do
 
       resolve(fn parent, args, _ctx ->
         batch_fn =
-          cond do
-            args.in_shopping_list -> {Resolver.Order, :ingredients_shopping_quantity}
-            true -> {Resolver.Order, :ingredients_ordered_quantity}
-          end
+          if args.in_shopping_list,
+            do: {Resolver.Order, :ingredients_shopping_quantity},
+            else: {Resolver.Order, :ingredients_ordered_quantity}
 
         batch(batch_fn, parent.id, fn results ->
           {:ok, batch_results} = results
@@ -102,10 +100,9 @@ defmodule PicapeWeb.Graphql.Types do
 
       resolve(fn parent, args, _ctx ->
         batch_fn =
-          cond do
-            args.in_shopping_list -> {Resolver.Order, :recipes_shopping_for_ingredient_ids}
-            true -> {Resolver.Order, :recipes_planned_for_ingredient_ids}
-          end
+          if args.in_shopping_list,
+            do: {Resolver.Order, :recipes_shopping_for_ingredient_ids},
+            else: {Resolver.Order, :recipes_planned_for_ingredient_ids}
 
         batch(batch_fn, parent.id, fn results ->
           {:ok, batch_results} = results
