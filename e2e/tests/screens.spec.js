@@ -7,6 +7,8 @@ const tabs = [
   ['shop', /Mandje/],
 ];
 
+const skipScreenshots = process.env.E2E_SKIP_SCREENSHOTS === '1';
+
 function watch(page) {
   const problems = [];
   page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
@@ -21,7 +23,20 @@ function watch(page) {
 async function openApp(page) {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  await expect(page.getByRole('button', { name: /Mandje/ }).getByText('4').first()).toBeVisible({ timeout: 60_000 });
+  await expect(
+    page
+      .getByRole('button', { name: /Mandje/ })
+      .getByText('4')
+      .first()
+  ).toBeVisible({ timeout: 60_000 });
+}
+
+async function checkScreen(page, name) {
+  if (skipScreenshots) {
+    await page.screenshot({ path: `../tmp/e2e/${name}.png` });
+  } else {
+    await expect(page).toHaveScreenshot(`${name}.png`);
+  }
 }
 
 test.beforeEach(async ({ page, request }) => {
@@ -35,7 +50,7 @@ for (const [name, label] of tabs) {
     await openApp(page);
     await page.getByRole('button', { name: label }).click();
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveScreenshot(`${name}.png`);
+    await checkScreen(page, name);
     expect(problems).toEqual([]);
   });
 }
@@ -46,6 +61,6 @@ test('tapping a recipe opens its detail screen', async ({ page }) => {
   await page.getByText('Nasi', { exact: true }).first().click();
   await expect(page.getByText('Chinese Wokmix').first()).toBeVisible();
   await page.waitForLoadState('networkidle');
-  await expect(page).toHaveScreenshot('recipe-detail.png');
+  await checkScreen(page, 'recipe-detail');
   expect(problems).toEqual([]);
 });

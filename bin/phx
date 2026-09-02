@@ -8,7 +8,7 @@ docker compose up -d --wait postgres >/dev/null
 MODE=live
 if [[ "${1:-}" == "--fake" ]]; then
   MODE=fake
-  export PICAPE_DB=picape_e2e SUPERMARKET_BASE_URL=http://localhost:4020
+  export PICAPE_DB=picape_e2e SUPERMARKET_BASE_URL=http://localhost:4020 PICAPE_LOG_LEVEL="${PICAPE_LOG_LEVEL:-info}"
   mix do ecto.drop --quiet, ecto.create --quiet, ecto.migrate --quiet, run priv/repo/seeds.exs
 fi
 echo "$MODE" > tmp/phx.mode

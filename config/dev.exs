@@ -6,21 +6,28 @@ import Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
+legacy_assets_watcher =
+  if File.dir?(Path.expand("../assets/node_modules", __DIR__)) do
+    [
+      bash: [
+        "../bin/spawn_execute.sh",
+        "node",
+        "node_modules/next/dist/bin/next-dev",
+        "-p",
+        "4001",
+        cd: Path.expand("../assets", __DIR__)
+      ]
+    ]
+  else
+    []
+  end
+
 config :picape, PicapeWeb.Endpoint,
   http: [port: 4010],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
-  watchers: [
-    bash: [
-      "../bin/spawn_execute.sh",
-      "node",
-      "node_modules/next/dist/bin/next-dev",
-      "-p",
-      "4001",
-      cd: Path.expand("../assets", __DIR__)
-    ]
-  ]
+  watchers: legacy_assets_watcher
 
 # ## SSL Support
 #
@@ -51,6 +58,7 @@ config :picape, PicapeWeb.Endpoint,
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
+config :logger, level: String.to_atom(System.get_env("PICAPE_LOG_LEVEL") || "debug")
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
