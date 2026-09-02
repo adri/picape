@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Starts Phoenix on :4010 against your dev database and the live supermarket API.
+# --fake: resets the seeded picape_e2e database and talks to the supermarket fake on :4020.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+mkdir -p tmp
+docker compose up -d --wait postgres >/dev/null
+MODE=live
+if [[ "${1:-}" == "--fake" ]]; then
+  MODE=fake
+  export PICAPE_DB=picape_e2e SUPERMARKET_BASE_URL=http://localhost:4020
+  mix do ecto.drop --quiet, ecto.create --quiet, ecto.migrate --quiet, run priv/repo/seeds.exs
+fi
+echo "$MODE" > tmp/phx.mode
+exec mix phx.server

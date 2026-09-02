@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Runs the Playwright screen tests against the fake stack.
+# Starts the supermarket fake, Phoenix (--fake) and Expo web when they are not running.
+# Pass --update to accept the current screenshots as the new baseline.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if lsof -iTCP:4010 -sTCP:LISTEN >/dev/null 2>&1 && [[ "$(cat tmp/phx.mode 2>/dev/null)" != "fake" ]]; then
+  echo "Phoenix on :4010 is running in live mode. Stop it, then rerun bin/e2e." >&2
+  exit 1
+fi
+cd e2e
+if [[ "${1:-}" == "--update" ]]; then
+  exec npx playwright test --update-snapshots
+fi
+exec npx playwright test
