@@ -1,11 +1,7 @@
-import * as AbsintheSocket from '@absinthe/socket';
-import { createAbsintheSocketLink } from '@absinthe/socket-apollo-link';
 import { ApolloClient, ApolloProvider, InMemoryCache, ApolloLink } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import * as Updates from 'expo-updates';
-import { Socket as PhoenixSocket } from 'phoenix';
 import * as React from 'react';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Sentry from './Sentry';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import linking from './navigation/useLinking';
+import { createAbsintheSocketLink } from './src/absintheSocketLink';
 import * as serviceWorkerRegistration from './src/serviceWorkerRegistration';
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
@@ -25,14 +22,10 @@ const onErrorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 const host = __DEV__ ? 'ws://localhost:4010/socket' : 'wss://picape.whybug.com/socket';
-const link = ApolloLink.from([
-  onErrorLink,
-  createAbsintheSocketLink(AbsintheSocket.create(new PhoenixSocket(host))),
-]);
+const link = ApolloLink.from([onErrorLink, createAbsintheSocketLink(host)]);
 const client = new ApolloClient({
   link,
-  cache: new InMemoryCache({ freezeResults: true }),
-  assumeImmutableResults: true,
+  cache: new InMemoryCache(),
 });
 
 const LightTheme = {

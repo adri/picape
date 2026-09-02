@@ -20,6 +20,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+dist/
 web-report/
 
 # Generate on crash by the VM

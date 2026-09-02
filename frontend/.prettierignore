@@ -3,3 +3,4 @@ web-build
 .expo
 package-lock.json
 yarn.lock
+dist
