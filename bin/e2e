@@ -3,6 +3,7 @@
 # Starts the supermarket fake, Phoenix (--fake) and Expo web when they are not running.
 # Pass --update to accept the current screenshots as the new baseline.
 set -euo pipefail
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
 cd "$(dirname "$0")/.."
 if ! lsof -iTCP:4010 -sTCP:LISTEN >/dev/null 2>&1; then
   rm -f tmp/phx.mode

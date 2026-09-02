@@ -5,6 +5,7 @@
 # Runs the same checks as .github/workflows/ci.yml so you can reproduce a
 # CI failure locally. Needs Postgres (docker compose up -d postgres).
 set -xe
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
 export MIX_ENV=test
 
 mix local.rebar --force
