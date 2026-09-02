@@ -9,6 +9,12 @@ config :picape, PicapeWeb.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warning
 
+# assert_reply/assert_push read this. The first GraphQL mutation over the socket
+# costs 58-77ms of warm-up on a fast machine, against a 100ms default, so the
+# subscription tests flake on a CI runner with fewer cores. Steady-state replies
+# take 4-5ms and subscription pushes under 1ms, so this only covers the warm-up.
+config :ex_unit, assert_receive_timeout: 2_000
+
 # Configure your database
 config :picape, Picape.Repo,
   adapter: Ecto.Adapters.Postgres,

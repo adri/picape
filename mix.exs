@@ -38,10 +38,10 @@ defmodule Picape.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:absinthe, "~> 1.5.5"},
+      {:absinthe, "~> 1.11"},
       {:absinthe_phoenix, "~> 2.0.0"},
-      {:absinthe_plug, "~> 1.5.5"},
-      {:absinthe_relay, "~> 1.5.1"},
+      {:absinthe_plug, "~> 1.5.10"},
+      {:absinthe_relay, "~> 1.6"},
       #  {:absinthe_ecto, "~> 1.0.0"},
       {:cors_plug, "~> 1.4"},
       {:con_cache, "~> 0.13.0"},
@@ -88,7 +88,7 @@ defmodule Picape.Mixfile do
       check: [
         "format --check-formatted",
         "credo --strict",
-        "cmd bin/compile-check",
+        "compile --force --warnings-as-errors",
         "test --warnings-as-errors",
         "sobelow --exit Low --skip --ignore Config.HTTPS"
       ]

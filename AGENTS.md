@@ -7,7 +7,7 @@ Guidance for coding agents working in this repository. Everything project specif
 Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.8.0) and read by asdf and CI; the Dockerfile hardcodes the same versions in its `ARG` lines, keep them in sync. A Homebrew `node` earlier in `PATH` wins over the asdf shim; check `node --version` prints 20.8.0 before you trust a frontend result.
 
 Checks (run all three before you report a change as done):
-- `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `bin/compile-check` (fails on any compile warning except the four Absinthe 1.5 deprecation notices), `mix test --warnings-as-errors`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.
+- `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `compile --force --warnings-as-errors`, `mix test --warnings-as-errors`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.
 - `cd frontend && npm run check` — ESLint (`universe/native`), Prettier check, `npm run graphql:check` (validates every `gql` document against `priv/graphql/schema.graphql`), Jest. `npm run format` fixes formatting. Use npm, not yarn: `package-lock.json` is the lockfile the Dockerfile and CI use. Never run `npm ci --dry-run`; with npm 8 it deletes `node_modules` without reinstalling.
 - `bin/e2e` — Playwright screen tests in WebKit with the iPhone 14 profile against the fake stack. Compares against `e2e/tests/__screenshots__/*.png`. `bin/e2e --update` accepts the current screenshots as the new baseline; look at the diff in `tmp/e2e/` before you do. Refuses to run while Phoenix on :4010 is in live mode. Baselines are macOS WebKit renders and only compare on a Mac; `E2E_SKIP_SCREENSHOTS=1` (what CI sets) keeps the functional checks and saves screenshots to `tmp/e2e/` instead of comparing. CI also sets `E2E_BROWSER=chromium` because installing WebKit's system libraries on the runner hangs; locally the suite runs in WebKit.
 - `bin/ci` — what GitHub Actions runs locally: `mix check` plus the frontend check.
@@ -99,7 +99,6 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 
 ## Known gaps in the gate
 
-- `bin/compile-check` whitelists exactly four `map.field notation` warnings Absinthe 1.5 emits on Elixir 1.18. Switch `mix check` back to `compile --warnings-as-errors` once Absinthe is upgraded.
 - ESLint runs `react-hooks/rules-of-hooks` as a warning because seven screens call hooks after an early return. Fix those before you turn it back into an error.
 - The GraphQL check skips `OverlappingFieldsCanBeMergedRule` because `SearchIngredients` aliases `searchIngredient` and `searchSupermarket` to the same name behind `@skip`/`@include`. Give them different aliases, then enable the rule.
 - Screenshot comparison runs only on macOS. CI runs the screen tests without comparison.
