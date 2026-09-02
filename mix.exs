@@ -5,7 +5,7 @@ defmodule Picape.Mixfile do
     [
       app: :picape,
       version: "0.0.1",
-      elixir: "~> 1.4",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:gettext] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
@@ -64,7 +64,7 @@ defmodule Picape.Mixfile do
       {:new_relic_agent, "~> 1.0"},
       {:poison, "~> 3.0"},
       {:httpoison, "~> 1.8.0"},
-      {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 1.4", only: :dev, runtime: false},
       {:quantum, "~> 3.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},

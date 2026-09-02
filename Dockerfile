@@ -12,11 +12,11 @@
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
 #   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20210902-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.18.3-erlang-27.3.3-debian-bookworm-20260421-slim
+#   - Ex: hexpm/elixir:1.20.4-erlang-28.5.0.6-debian-bookworm-20260824-slim
 #
 # Versions match .tool-versions (asdf) — keep in sync with that file.
-ARG BUILDER_IMAGE="hexpm/elixir:1.18.3-erlang-27.3.3-debian-bookworm-20260421-slim"
-ARG RUNNER_IMAGE="debian:bookworm-20260421-slim"
+ARG BUILDER_IMAGE="hexpm/elixir:1.20.4-erlang-28.5.0.6-debian-bookworm-20260824-slim"
+ARG RUNNER_IMAGE="debian:bookworm-20260824-slim"
 ARG NODE_VERSION="20.8.0"
 
 FROM ${BUILDER_IMAGE} as builder

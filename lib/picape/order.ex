@@ -164,8 +164,6 @@ defmodule Picape.Order do
          _now_bought <- Enum.map(not_bought, &Shopping.buy_ingredient(order_id, &1.ingredient.id)),
          _ordered <- Enum.map(not_bought, &order_ingredient("1", &1.ingredient.id, &1.quantity)) do
       last()
-    else
-      error -> {:error, error}
     end
   end
 

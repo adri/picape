@@ -20,8 +20,6 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     with {:ok, recipe_ids} <- Order.planned_recipes(Order.last_order_id()),
          {:ok, recipe_map} <- Recipe.recipes_by_ids(recipe_ids) do
       {:ok, Map.values(recipe_map)}
-    else
-      _ -> {:error, []}
     end
   end
 
