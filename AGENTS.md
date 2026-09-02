@@ -105,7 +105,7 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 
 ## Troubleshooting
 
-- `module Sentry.Plug is not loaded` or `PicapeWeb.Router.Helpers is not loaded` at compile: the `_build/<env>` cache compiled Sentry before Plug. Delete that `_build/<env>` directory and compile again.
+- `module Sentry.Plug is not loaded` or `PicapeWeb.Router.Helpers is not loaded` at compile: the `_build/<env>` cache compiled Sentry before Plug. Delete that `_build/<env>` directory and compile again. CI can hit this too now that its mix caches carry `restore-keys`: a `mix.lock` bump reuses the previous `_build` instead of building clean. A `.tool-versions` change is always cold, because its hash sits in the restore-key prefix. To force a cold build after a lockfile bump, change the `mix-test-`/`mix-dev-` prefix in [ci.yml](.github/workflows/ci.yml).
 - Blank white app in the browser: run `bin/web-probe`. A `Module build failed ... ENOENT` page error means `frontend/node_modules` is incomplete; run `npm ci` in `frontend/` and restart Expo.
 - `bin/e2e` fails every test on the cart badge: Phoenix or the fake is not the one you think. `bin/status` shows what is up; kill stale processes on :4010 and :4020 and rerun so Playwright starts fresh ones.
 - `bin/supermarket-snapshot` returns 401 on the token refresh: the local refresh token is dead. Get a new one with the `proxyman-capture` skill. Use one token in one place only; refresh tokens rotate on use, so sharing one between production and your machine logs one of them out.
