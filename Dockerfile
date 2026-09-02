@@ -51,7 +51,7 @@ COPY mix.exs mix.lock ./
 # install hex + rebar + dependencies
 RUN --mount=type=cache,target=~/.hex/packages/hexpm,sharing=locked \
   --mount=type=cache,target=~/.cache/rebar3,sharing=locked \
-  mix do local.rebar --force, local.hex --force, deps.get --only $MIX_ENV
+  mix do local.rebar --force + local.hex --force + deps.get --only $MIX_ENV
 
 RUN mkdir config
 

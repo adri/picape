@@ -22,7 +22,7 @@ if [[ $FAKE == 1 ]]; then
   export SUPERMARKET_BASE_URL=http://localhost:4020 SUPERMARKET_REFRESH=0 PICAPE_LOG_LEVEL="${PICAPE_LOG_LEVEL:-info}"
   if [[ -z "${PICAPE_DB:-}" ]]; then
     export PICAPE_DB=picape_e2e
-    mix do ecto.drop --quiet, ecto.create --quiet, ecto.migrate --quiet, run priv/repo/seeds.exs
+    mix do ecto.drop --quiet + ecto.create --quiet + ecto.migrate --quiet + run priv/repo/seeds.exs
   else
     echo "fake mode on existing database $PICAPE_DB (no reset)"
   fi
