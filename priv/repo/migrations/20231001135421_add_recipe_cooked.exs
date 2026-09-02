@@ -1,4 +1,4 @@
-defmodule Picape.Repo.Migrations.AddSupermarketLogin do
+defmodule Picape.Repo.Migrations.AddRecipeCooked do
   use Ecto.Migration
 
   def change do
