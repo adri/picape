@@ -18,7 +18,7 @@ defmodule PicapeWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, log: false, namespace: PicapeWeb
+      use Phoenix.Controller, log: false, formats: [html: "View", json: "View"]
       import Plug.Conn
       import PicapeWeb.Router.Helpers
       import PicapeWeb.Gettext
