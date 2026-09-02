@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Shows which parts of the local stack are up, the Phoenix mode, and the logs.
+cd "$(dirname "$0")/.."
+port() {
+  local name=$1 port=$2
+  if lsof -iTCP:"$port" -sTCP:LISTEN -P >/dev/null 2>&1; then
+    printf '%-18s :%-5s up\n' "$name" "$port"
+  else
+    printf '%-18s :%-5s down\n' "$name" "$port"
+  fi
+}
+port postgres 5433
+port phoenix 4010
+port supermarket-fake 4020
+port expo-web 19006
+printf '%-18s %s\n' "phoenix mode" "$(cat tmp/phx.mode 2>/dev/null || echo none)"
+for log in tmp/phx-e2e.log tmp/expo-e2e.log tmp/phx.log tmp/expo.log; do
+  if [[ -f $log ]]; then
+    printf '%-18s %s lines, updated %s\n' "$log" "$(wc -l < "$log" | tr -d ' ')" "$(date -r "$log" +%H:%M:%S)"
+  fi
+done
+exit 0

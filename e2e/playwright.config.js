@@ -16,7 +16,15 @@ module.exports = defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'iphone', use: { ...devices['iPhone 14'] } }],
+  projects: [
+    {
+      name: 'iphone',
+      use: {
+        ...devices['iPhone 14'],
+        ...(process.env.E2E_BROWSER ? { browserName: process.env.E2E_BROWSER } : {}),
+      },
+    },
+  ],
   webServer: [
     {
       command: '../bin/supermarket-fake',
