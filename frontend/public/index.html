@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="%LANG_ISO_CODE%">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -8,13 +8,26 @@
     <meta name="apple-mobile-web-app-title" content="Picape" />
 
     <!--
+      @expo/webpack-config used to inject these. Metro web serves public/
+      verbatim instead, so they are declared here alongside the files.
+     -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/pwa/apple-touch-icon/apple-touch-icon-180.png" />
+
+    <!--
       This viewport works for phones with notches.
       It's optimized for gestures by disabling global zoom.
      -->
     <meta
       name="viewport"
       content="width=device-width,height=device-height,initial-scale=1,maximum-scale=1,user-scalable=0,viewport-fit=cover" />
-    <title>%WEB_TITLE%</title>
+    <title>Picape</title>
     <style>
       /**
        * Extend the react-native-web reset:

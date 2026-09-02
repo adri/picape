@@ -10,7 +10,7 @@ const schema = buildSchema(fs.readFileSync(schemaPath, 'utf8'));
 
 function jsFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    if (['node_modules', 'web-build', '.expo', 'scripts', '__tests__'].includes(entry.name))
+    if (['node_modules', 'web-build', 'dist', '.expo', 'scripts', '__tests__'].includes(entry.name))
       return [];
     const full = path.join(dir, entry.name);
     return entry.isDirectory() ? jsFiles(full) : full.endsWith('.js') ? [full] : [];

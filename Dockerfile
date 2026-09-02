@@ -17,7 +17,7 @@
 # Versions match .tool-versions (asdf) — keep in sync with that file.
 ARG BUILDER_IMAGE="hexpm/elixir:1.20.4-erlang-28.5.0.6-debian-bookworm-20260824-slim"
 ARG RUNNER_IMAGE="debian:bookworm-20260824-slim"
-ARG NODE_VERSION="20.8.0"
+ARG NODE_VERSION="20.20.2"
 
 FROM ${BUILDER_IMAGE} as builder
 
@@ -76,10 +76,10 @@ COPY frontend frontend
 # Build expo from frontend directory
 RUN --mount=type=cache,target=~/.npm,sharing=locked \
   --mount=type=cache,target=/app/frontend/node_modules,sharing=locked \
-  --mount=type=cache,target=/app/frontend/web-build,sharing=locked \
+  --mount=type=cache,target=/app/frontend/dist,sharing=locked \
   cd frontend && npm install --lockfile-only --prefer-offline --no-audit --loglevel=error \
   && npm run build:web \
-  && mkdir /app/expo && cp -R web-build/* /app/priv/static
+  && mkdir /app/expo && cp -R dist/* /app/priv/static
 
 # Compile the release
 COPY lib lib

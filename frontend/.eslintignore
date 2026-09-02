@@ -1,5 +1,6 @@
 node_modules
 web-build
+dist
 .expo
 babel.config.js
-webpack.config.js
+metro.config.js

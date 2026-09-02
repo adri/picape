@@ -22,7 +22,7 @@ defmodule PicapeWeb.Endpoint do
     from: :picape,
     gzip: false,
     only:
-      ~w(css fonts images js favicon.ico robots.txt asset-manifest.json favicon-16.png favicon-32.png favicon.ico index.html manifest.json pwa serve.json service-worker.js service-worker.js.map static)
+      ~w(_expo assets favicon.ico favicon-16.png favicon-32.png index.html manifest.json metadata.json pwa robots.txt serve.json service-worker.js service-worker.js.map)
   )
 
   # Code reloading can be explicitly enabled under the
