@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Fails on compile warnings, except the deprecation notices Absinthe 1.5 emits
+# on Elixir 1.18. Replace with `mix compile --warnings-as-errors` after the
+# Absinthe upgrade.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+export MIX_ENV="${MIX_ENV:-test}"
+output=$(mix compile --force 2>&1)
+status=$?
+echo "$output" | grep -v "map.field notation" | grep -B1 -A8 "warning:"
+if [[ $status -ne 0 ]]; then
+  echo "$output" | tail -20
+  exit $status
+fi
+if echo "$output" | grep -v "map.field notation" | grep -q "warning:"; then
+  echo "compile-check: warnings found" >&2
+  exit 1
+fi
+echo "compile-check: no warnings"

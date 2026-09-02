@@ -18,6 +18,10 @@ defmodule Picape.Mixfile do
   # Configuration for the OTP application.
   #
   # Type `mix help compile.app` for more information.
+  def cli do
+    [preferred_envs: [check: :test, coveralls: :test, "coveralls.json": :test]]
+  end
+
   def application do
     [
       mod: {Picape.Application, []},
@@ -42,7 +46,7 @@ defmodule Picape.Mixfile do
       {:cors_plug, "~> 1.4"},
       {:con_cache, "~> 0.13.0"},
       {:ecto_sql, "~> 3.0"},
-      {:excoveralls, "~> 0.8.0", only: :test},
+      {:excoveralls, "~> 0.18", only: :test},
       {:floki, "~> 0.36"},
       {:jason, "~> 1.1"},
       {:phoenix, "~> 1.6.5"},
@@ -60,7 +64,8 @@ defmodule Picape.Mixfile do
       {:httpoison, "~> 1.8.0"},
       {:mix_test_watch, "~> 0.3", only: :dev, runtime: false},
       {:quantum, "~> 3.0"},
-      {:credo, "~> 0.7", only: [:dev, :test]},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:mix_docker, "~> 0.5.0"}
     ]
   end
@@ -76,7 +81,14 @@ defmodule Picape.Mixfile do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "graphql.schema": ["loadpaths", "absinthe.schema.json"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      check: [
+        "format --check-formatted",
+        "credo --strict",
+        "cmd bin/compile-check",
+        "test",
+        "sobelow --exit Low --skip --ignore Config.HTTPS"
+      ]
     ]
   end
 end
