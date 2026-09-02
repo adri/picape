@@ -20,6 +20,13 @@ function watch(page) {
   return problems;
 }
 
+// webpack-dev-server keeps an HMR channel open, so the network never goes quiet
+// for the 500ms `networkidle` wants and the wait burns its whole timeout on CI.
+// Settling is best effort; the assertions after each call are the real signal.
+async function settle(page) {
+  await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {});
+}
+
 function cartBadge(page, count) {
   return page
     .getByRole('button', { name: /Mandje/ })
@@ -29,7 +36,7 @@ function cartBadge(page, count) {
 
 async function openApp(page) {
   await page.goto('/');
-  await page.waitForLoadState('networkidle');
+  await settle(page);
   await expect(cartBadge(page, 4)).toBeVisible({ timeout: 60_000 });
 }
 
@@ -52,7 +59,7 @@ for (const [name, label] of tabs) {
     const problems = watch(page);
     await openApp(page);
     await page.getByRole('button', { name: label }).click();
-    await page.waitForLoadState('networkidle');
+    await settle(page);
     await checkScreen(page, name);
     expect(problems).toEqual([]);
   });
@@ -63,7 +70,7 @@ test('tapping a recipe opens its detail screen', async ({ page }) => {
   await openApp(page);
   await page.getByText('Nasi', { exact: true }).first().click();
   await expect(page.getByText('Chinese Wokmix').first()).toBeVisible();
-  await page.waitForLoadState('networkidle');
+  await settle(page);
   await checkScreen(page, 'recipe-detail');
   expect(problems).toEqual([]);
 });
