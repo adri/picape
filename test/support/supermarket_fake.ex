@@ -21,11 +21,14 @@ defmodule Picape.SupermarketFake do
     Plug.Cowboy.http(__MODULE__, [], port: port)
   end
 
-  @doc "Restores the basket to basket.json and drops Picape's cached copy of it."
+  @doc "Restores the basket to basket.json and drops the cached copy Picape keeps."
+
   def reset do
-    Agent.update(@state, fn _ -> fixture("basket.json") end)
+    reset_basket()
     Picape.Supermarket.invalidate_cart()
   end
+
+  def reset_basket, do: Agent.update(@state, fn _ -> fixture("basket.json") end)
 
   post "/graphql" do
     case conn.body_params do
@@ -45,7 +48,7 @@ defmodule Picape.SupermarketFake do
   end
 
   post "/__reset" do
-    reset()
+    reset_basket()
     send_resp(conn, 204, "")
   end
 

@@ -12,4 +12,5 @@ if [[ "${1:-}" == "--fake" ]]; then
   mix do ecto.drop --quiet, ecto.create --quiet, ecto.migrate --quiet, run priv/repo/seeds.exs
 fi
 echo "$MODE" > tmp/phx.mode
-exec mix phx.server
+trap 'rm -f tmp/phx.mode' EXIT
+mix phx.server

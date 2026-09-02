@@ -9,7 +9,7 @@ Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work.
 Checks (run these before you report a change as done):
 - `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `bin/compile-check` (fails on any compile warning except the Absinthe 1.5 deprecation notices), `mix test`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.
 - `cd frontend && npm run check` — ESLint (`universe/native`), Prettier check, Jest. `npm run format` fixes formatting. Use npm, not yarn: `package-lock.json` is the lockfile the Dockerfile and CI use.
-- `bin/e2e` — Playwright screen tests in WebKit with the iPhone 14 profile against the fake stack. Compares against `e2e/tests/__screenshots__/*.png`. `bin/e2e --update` accepts the current screenshots as the new baseline; look at the diff in `tmp/e2e/` before you do. Refuses to run while Phoenix on :4010 is in live mode.
+- `bin/e2e` — Playwright screen tests in WebKit with the iPhone 14 profile against the fake stack. Compares against `e2e/tests/__screenshots__/*.png`. `bin/e2e --update` accepts the current screenshots as the new baseline; look at the diff in `tmp/e2e/` before you do. Refuses to run while Phoenix on :4010 is in live mode. Baselines are macOS WebKit renders and only compare on a Mac. Server output goes to `tmp/phx-e2e.log` and `tmp/expo-e2e.log`, so a failing run prints only the test results.
 - `bin/ci` — what GitHub Actions runs: `mix check` plus the frontend check.
 
 Local stack (ports: Phoenix 4010, Expo web 19006, supermarket fake 4020, Postgres 5433):
@@ -43,7 +43,7 @@ Credentials live in `config/dev.secret.exs` (gitignored) and `config/runtime.exs
 
 ## Deploy
 
-GitHub Actions deploys. [ci.yml](.github/workflows/ci.yml) runs the backend and frontend checks on every push and pull request. [deploy.yml](.github/workflows/deploy.yml) runs `flyctl deploy --remote-only` after CI succeeds on `master`. It needs the `FLY_API_TOKEN` repository variable in the GitHub repo settings. `fly deploy` from your machine still works but skips the checks.
+GitHub Actions deploys. [ci.yml](.github/workflows/ci.yml) runs the backend and frontend checks on every push and pull request. [deploy.yml](.github/workflows/deploy.yml) runs `flyctl deploy --remote-only` after CI succeeds on `master`. It needs the `FLY_API_TOKEN` repository secret in the GitHub repo settings. `fly deploy` from your machine still works but skips the checks.
 
 ## Architecture
 

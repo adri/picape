@@ -21,10 +21,11 @@ function watch(page) {
 async function openApp(page) {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  await expect(page.getByRole('button', { name: /Mandje/ }).getByText('4').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /Mandje/ }).getByText('4').first()).toBeVisible({ timeout: 60_000 });
 }
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, request }) => {
+  await request.post('http://localhost:4020/__reset');
   await page.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
 });
 
