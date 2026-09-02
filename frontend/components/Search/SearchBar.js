@@ -8,11 +8,11 @@ import { InputText } from '../Input/InputText';
 const Icon = Ionicons;
 const defaultSearchIcon = {
   size: 20,
-  name: 'ios-search',
+  name: 'search',
   color: Colors.iconDefault,
 };
 const defaultClearIcon = {
-  name: 'ios-close-circle',
+  name: 'close-circle',
   size: 20,
   color: Colors.iconDefault,
 };

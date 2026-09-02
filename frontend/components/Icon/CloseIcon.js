@@ -19,7 +19,7 @@ export function CloseIcon(props) {
           props.style,
         ]}>
         <Ionicons
-          name="ios-close"
+          name="close"
           size={25}
           style={{
             alignSelf: 'center',

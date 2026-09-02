@@ -35,6 +35,6 @@
     "ios": {
       "bundleIdentifier": "com.adri.picape"
     },
-    "plugins": ["sentry-expo"]
+    "plugins": ["sentry-expo", "expo-font"]
   }
 }
