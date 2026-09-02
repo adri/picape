@@ -4,7 +4,9 @@
 # Pass --update to accept the current screenshots as the new baseline.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if lsof -iTCP:4010 -sTCP:LISTEN >/dev/null 2>&1 && [[ "$(cat tmp/phx.mode 2>/dev/null)" != "fake" ]]; then
+if ! lsof -iTCP:4010 -sTCP:LISTEN >/dev/null 2>&1; then
+  rm -f tmp/phx.mode
+elif [[ "$(cat tmp/phx.mode 2>/dev/null)" != "fake" ]]; then
   echo "Phoenix on :4010 is running in live mode. Stop it, then rerun bin/e2e." >&2
   exit 1
 fi

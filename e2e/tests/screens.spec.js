@@ -20,15 +20,17 @@ function watch(page) {
   return problems;
 }
 
+function cartBadge(page, count) {
+  return page
+    .getByRole('button', { name: /Mandje/ })
+    .getByText(String(count))
+    .first();
+}
+
 async function openApp(page) {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  await expect(
-    page
-      .getByRole('button', { name: /Mandje/ })
-      .getByText('4')
-      .first()
-  ).toBeVisible({ timeout: 60_000 });
+  await expect(cartBadge(page, 4)).toBeVisible({ timeout: 60_000 });
 }
 
 async function checkScreen(page, name) {
@@ -41,6 +43,7 @@ async function checkScreen(page, name) {
 
 test.beforeEach(async ({ page, request }) => {
   await request.post('http://localhost:4020/__reset');
+  await request.post('http://localhost:4010/dev/invalidate-cart');
   await page.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
 });
 
@@ -62,5 +65,19 @@ test('tapping a recipe opens its detail screen', async ({ page }) => {
   await expect(page.getByText('Chinese Wokmix').first()).toBeVisible();
   await page.waitForLoadState('networkidle');
   await checkScreen(page, 'recipe-detail');
+  expect(problems).toEqual([]);
+});
+
+test('raising a quantity in the cart syncs with the supermarket', async ({ page }) => {
+  const problems = watch(page);
+  await openApp(page);
+  await page.getByRole('button', { name: /Mandje/ }).click();
+  const butter = page
+    .getByText('Butter', { exact: true })
+    .locator('xpath=ancestor::div[.//div[text()="1"]][1]');
+  await butter.getByText('1', { exact: true }).click();
+  await butter.locator('div[tabindex="0"]').last().click();
+  await expect(cartBadge(page, 5)).toBeVisible();
+  await expect(page.getByText('2', { exact: true })).toHaveCount(2);
   expect(problems).toEqual([]);
 });
