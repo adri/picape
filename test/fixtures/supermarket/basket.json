@@ -1,0 +1,258 @@
+{
+  "data": {
+    "basket": {
+      "__typename": "Basket",
+      "canChangeDelivery": true,
+      "itemsInOrder": [
+        {
+          "__typename": "BasketItem",
+          "position": 1,
+          "originCode": "MANUAL",
+          "quantity": 1,
+          "product": {
+            "__typename": "Product",
+            "id": 10567923,
+            "title": "Roomboter ongezouten",
+            "salesUnitSize": "250 g",
+            "category": "Zuivel",
+            "hqId": 10567923,
+            "shopType": "SUPERMARKET",
+            "availability": {
+              "__typename": "ProductAvailability",
+              "availabilityLabel": null,
+              "isOrderable": true,
+              "online": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              },
+              "offline": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              }
+            },
+            "imagePack": [
+              {
+                "__typename": "ProductImagePack",
+                "angle": "HERO",
+                "small": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 80,
+                  "width": 80,
+                  "url": "https://static.supermarket.test/dam/product/10567923_80x80.png"
+                },
+                "medium": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 200,
+                  "width": 200,
+                  "url": "https://static.supermarket.test/dam/product/10567923_200x200.png"
+                },
+                "large": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 400,
+                  "width": 400,
+                  "url": "https://static.supermarket.test/dam/product/10567923_400x400.png"
+                }
+              }
+            ],
+            "listPrice": {
+              "__typename": "Money",
+              "amount": 2.49
+            },
+            "priceV2": {
+              "__typename": "ProductPrice",
+              "discount": null,
+              "promotionLabel": null,
+              "now": {
+                "__typename": "Money",
+                "amount": 2.49
+              },
+              "was": null
+            },
+            "properties": [],
+            "virtualBundleProducts": []
+          },
+          "isClosed": false,
+          "allocatedQuantity": 1
+        },
+        {
+          "__typename": "BasketItem",
+          "position": 2,
+          "originCode": "MANUAL",
+          "quantity": 2,
+          "product": {
+            "__typename": "Product",
+            "id": 10291994,
+            "title": "Kipfilet",
+            "salesUnitSize": "300 g",
+            "category": "Zuivel",
+            "hqId": 10291994,
+            "shopType": "SUPERMARKET",
+            "availability": {
+              "__typename": "ProductAvailability",
+              "availabilityLabel": null,
+              "isOrderable": true,
+              "online": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              },
+              "offline": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              }
+            },
+            "imagePack": [
+              {
+                "__typename": "ProductImagePack",
+                "angle": "HERO",
+                "small": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 80,
+                  "width": 80,
+                  "url": "https://static.supermarket.test/dam/product/10291994_80x80.png"
+                },
+                "medium": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 200,
+                  "width": 200,
+                  "url": "https://static.supermarket.test/dam/product/10291994_200x200.png"
+                },
+                "large": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 400,
+                  "width": 400,
+                  "url": "https://static.supermarket.test/dam/product/10291994_400x400.png"
+                }
+              }
+            ],
+            "listPrice": {
+              "__typename": "Money",
+              "amount": 4.29
+            },
+            "priceV2": {
+              "__typename": "ProductPrice",
+              "discount": null,
+              "promotionLabel": null,
+              "now": {
+                "__typename": "Money",
+                "amount": 4.29
+              },
+              "was": null
+            },
+            "properties": [],
+            "virtualBundleProducts": []
+          },
+          "isClosed": false,
+          "allocatedQuantity": 2
+        }
+      ],
+      "itemsInList": [
+        {
+          "__typename": "BasketListItem",
+          "position": 3,
+          "originCode": "MANUAL",
+          "quantity": 1,
+          "product": {
+            "__typename": "Product",
+            "id": 10583837,
+            "title": "Zilvervliesrijst",
+            "salesUnitSize": "400 g",
+            "category": "Zuivel",
+            "hqId": 10583837,
+            "shopType": "SUPERMARKET",
+            "availability": {
+              "__typename": "ProductAvailability",
+              "availabilityLabel": null,
+              "isOrderable": true,
+              "online": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              },
+              "offline": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              }
+            },
+            "imagePack": [
+              {
+                "__typename": "ProductImagePack",
+                "angle": "HERO",
+                "small": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 80,
+                  "width": 80,
+                  "url": "https://static.supermarket.test/dam/product/10583837_80x80.png"
+                },
+                "medium": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 200,
+                  "width": 200,
+                  "url": "https://static.supermarket.test/dam/product/10583837_200x200.png"
+                },
+                "large": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 400,
+                  "width": 400,
+                  "url": "https://static.supermarket.test/dam/product/10583837_400x400.png"
+                }
+              }
+            ],
+            "listPrice": {
+              "__typename": "Money",
+              "amount": 1.79
+            },
+            "priceV2": {
+              "__typename": "ProductPrice",
+              "discount": null,
+              "promotionLabel": null,
+              "now": {
+                "__typename": "Money",
+                "amount": 1.79
+              },
+              "was": null
+            },
+            "properties": [],
+            "virtualBundleProducts": []
+          },
+          "isStrikethrough": false
+        }
+      ],
+      "externalItems": [],
+      "notes": [],
+      "summary": {
+        "__typename": "BasketSummary",
+        "isCancellable": true,
+        "quantity": 4,
+        "shoppingType": "DELIVERY",
+        "lastUserChangeDateTime": "2026-01-01T10:00:00Z",
+        "price": {
+          "__typename": "BasketPrice",
+          "discount": {
+            "__typename": "Money",
+            "amount": 0
+          },
+          "totalPrice": {
+            "__typename": "Money",
+            "amount": 12.86
+          },
+          "priceAfterDiscount": {
+            "__typename": "Money",
+            "amount": 12.86
+          },
+          "priceBeforeDiscount": {
+            "__typename": "Money",
+            "amount": 12.86
+          }
+        }
+      }
+    }
+  }
+}

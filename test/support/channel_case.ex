@@ -27,6 +27,7 @@ defmodule PicapeWeb.ChannelCase do
 
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Picape.Repo)
+    Picape.SupermarketFake.reset()
 
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(Picape.Repo, {:shared, self()})

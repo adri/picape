@@ -1,0 +1,79 @@
+{
+  "page": {
+    "size": 3,
+    "totalElements": 3,
+    "totalPages": 1,
+    "number": 0
+  },
+  "products": [
+    {
+      "webshopId": 10567923,
+      "hqId": 10567923,
+      "title": "Roomboter ongezouten",
+      "salesUnitSize": "250 g",
+      "priceBeforeBonus": 2.49,
+      "availableOnline": true,
+      "orderable": true,
+      "brand": "Huismerk",
+      "mainCategory": "Zuivel",
+      "images": [
+        {
+          "width": 80,
+          "height": 80,
+          "url": "https://static.supermarket.test/dam/product/10567923_80x80.png"
+        },
+        {
+          "width": 200,
+          "height": 200,
+          "url": "https://static.supermarket.test/dam/product/10567923_200x200.png"
+        }
+      ]
+    },
+    {
+      "webshopId": 10281999,
+      "hqId": 10281999,
+      "title": "Rundergehakt",
+      "salesUnitSize": "500 g",
+      "priceBeforeBonus": 5.99,
+      "availableOnline": true,
+      "orderable": true,
+      "brand": "Huismerk",
+      "mainCategory": "Zuivel",
+      "images": [
+        {
+          "width": 80,
+          "height": 80,
+          "url": "https://static.supermarket.test/dam/product/10281999_80x80.png"
+        },
+        {
+          "width": 200,
+          "height": 200,
+          "url": "https://static.supermarket.test/dam/product/10281999_200x200.png"
+        }
+      ]
+    },
+    {
+      "webshopId": 10999999,
+      "hqId": 10999999,
+      "title": "Melk niet online",
+      "salesUnitSize": "1 l",
+      "priceBeforeBonus": 1.19,
+      "availableOnline": false,
+      "orderable": false,
+      "brand": "Huismerk",
+      "mainCategory": "Zuivel",
+      "images": [
+        {
+          "width": 80,
+          "height": 80,
+          "url": "https://static.supermarket.test/dam/product/10999999_80x80.png"
+        },
+        {
+          "width": 200,
+          "height": 200,
+          "url": "https://static.supermarket.test/dam/product/10999999_200x200.png"
+        }
+      ]
+    }
+  ]
+}
