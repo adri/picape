@@ -37,13 +37,12 @@ config :logger, :console,
 config :absinthe, schema: PicapeWeb.Graphql.Schema
 
 config :sentry,
-  dsn: System.get_env("SENTRY_DSN"),
-  included_environments: [:prod],
+  # Sentry 13 defaults to Finch. Reuse the hackney HTTPoison already pulls in.
+  client: Sentry.HackneyClient,
   environment_name: Mix.env(),
   enable_source_code_context: true,
   json_library: Jason,
-  root_source_code_path: File.cwd!(),
-  use_error_logger: true,
+  root_source_code_paths: [File.cwd!()],
   tags: %{
     env: "production"
   }

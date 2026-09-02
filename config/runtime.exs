@@ -5,6 +5,8 @@ if config_env() == :prod do
 
   config :picape, PicapeWeb.Endpoint, server: true
 
+  config :sentry, dsn: System.get_env("SENTRY_DSN")
+
   config :picape, Picape.Repo,
     adapter: Ecto.Adapters.Postgres,
     url: System.get_env("DATABASE_URL"),

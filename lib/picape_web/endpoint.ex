@@ -1,4 +1,5 @@
 defmodule PicapeWeb.Endpoint do
+  use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :picape
   use Absinthe.Phoenix.Endpoint
 
@@ -53,6 +54,9 @@ defmodule PicapeWeb.Endpoint do
   #    signing_salt: "iO7xCAa+"
 
   plug(CORSPlug)
+
+  # After Plug.Parsers so Sentry can scrub the parsed request body.
+  plug(Sentry.PlugContext)
   # Add Timber plugs for capturing HTTP context and events
   # plug(Timber.Integrations.SessionContextPlug)
   # plug(Timber.Integrations.HTTPContextPlug)
