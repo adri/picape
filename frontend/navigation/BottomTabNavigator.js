@@ -83,7 +83,7 @@ function BottomTabNavigator() {
         options={{
           title: 'Recepten',
           tabBarAccessibilityLabel: 'Recepten',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="ios-restaurant" />,
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="restaurant" />,
         }}
       />
       <BottomTab.Screen
@@ -92,7 +92,7 @@ function BottomTabNavigator() {
         options={{
           title: 'Zoeken',
           tabBarAccessibilityLabel: 'Zoeken',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="ios-search" />,
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
         }}
       />
       <BottomTab.Screen
@@ -101,7 +101,7 @@ function BottomTabNavigator() {
         options={{
           title: 'Basics',
           tabBarAccessibilityLabel: 'Basics',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="ios-home" />,
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
         }}
       />
       <BottomTab.Screen
@@ -114,7 +114,7 @@ function BottomTabNavigator() {
             <TabBarIcon
               focused={focused}
               badge={<ListCountBadge focused={focused} />}
-              name="ios-cart"
+              name="cart"
             />
           ),
         }}

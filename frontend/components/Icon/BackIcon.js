@@ -16,7 +16,7 @@ export function BackIcon(props) {
           margin: 10,
         }}>
         <Ionicons
-          name="ios-chevron-back"
+          name="chevron-back"
           size={25}
           style={{
             alignSelf: 'center',

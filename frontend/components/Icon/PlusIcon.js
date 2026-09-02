@@ -8,7 +8,7 @@ export function PlusIcon(props) {
   return (
     <TouchableOpacity onPress={props.onPress}>
       <View style={[styles.container, props.style]}>
-        <Ionicons name="md-add" size={25} style={styles.icon} color="white" />
+        <Ionicons name="add" size={25} style={styles.icon} color="white" />
       </View>
     </TouchableOpacity>
   );

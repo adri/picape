@@ -20,7 +20,7 @@ export function RefreshIcon(props) {
           props.style,
         ]}>
         <Ionicons
-          name="ios-refresh"
+          name="refresh"
           size={18}
           style={{
             lineHeight: 35,

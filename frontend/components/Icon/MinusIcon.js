@@ -20,7 +20,7 @@ export function MinusIcon(props) {
           props.style,
         ]}>
         <Ionicons
-          name="md-remove"
+          name="remove"
           size={25}
           style={{
             marginTop: 2,
