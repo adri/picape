@@ -1,49 +1,47 @@
 # AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for coding agents working in this repository. Everything project specific that an agent must remember lives here, not in agent memory.
 
 ## Commands
 
-Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work.
+Use Mix directly in the repo root. The `bin/` scripts wrap multi-process work. Tool versions are pinned in `.tool-versions` (Erlang, Elixir, Node 20.8.0) and read by asdf, CI and the Dockerfile.
 
-Checks (run these before you report a change as done):
-- `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `bin/compile-check` (fails on any compile warning except the Absinthe 1.5 deprecation notices), `mix test`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.
-- `cd frontend && npm run check` — ESLint (`universe/native`), Prettier check, Jest. `npm run format` fixes formatting. Use npm, not yarn: `package-lock.json` is the lockfile the Dockerfile and CI use.
-- `bin/e2e` — Playwright screen tests in WebKit with the iPhone 14 profile against the fake stack. Compares against `e2e/tests/__screenshots__/*.png`. `bin/e2e --update` accepts the current screenshots as the new baseline; look at the diff in `tmp/e2e/` before you do. Refuses to run while Phoenix on :4010 is in live mode. Baselines are macOS WebKit renders and only compare on a Mac. Server output goes to `tmp/phx-e2e.log` and `tmp/expo-e2e.log`, so a failing run prints only the test results.
-- `bin/ci` — what GitHub Actions runs: `mix check` plus the frontend check.
+Checks (run all three before you report a change as done):
+- `mix check` — backend gate, runs in the test env: `format --check-formatted`, `credo --strict`, `bin/compile-check` (fails on any compile warning except the four Absinthe 1.5 deprecation notices), `mix test --warnings-as-errors`, `mix sobelow`. Needs Postgres: `docker compose up -d postgres`.
+- `cd frontend && npm run check` — ESLint (`universe/native`), Prettier check, `npm run graphql:check` (validates every `gql` document against `priv/graphql/schema.graphql`), Jest. `npm run format` fixes formatting. Use npm, not yarn: `package-lock.json` is the lockfile the Dockerfile and CI use. Never run `npm ci --dry-run`; with npm 8 it deletes `node_modules` without reinstalling.
+- `bin/e2e` — Playwright screen tests in WebKit with the iPhone 14 profile against the fake stack. Compares against `e2e/tests/__screenshots__/*.png`. `bin/e2e --update` accepts the current screenshots as the new baseline; look at the diff in `tmp/e2e/` before you do. Refuses to run while Phoenix on :4010 is in live mode. Baselines are macOS WebKit renders and only compare on a Mac; `E2E_SKIP_SCREENSHOTS=1` (what CI sets) keeps the functional checks and saves screenshots to `tmp/e2e/` instead of comparing. CI also sets `E2E_BROWSER=chromium` because installing WebKit's system libraries on the runner hangs; locally the suite runs in WebKit.
+- `bin/ci` — what GitHub Actions runs locally: `mix check` plus the frontend check.
 
 Local stack (ports: Phoenix 4010, Expo web 19006, supermarket fake 4020, Postgres 5433):
 - `bin/phx` — Phoenix against your dev database and the live supermarket API. Needs a valid row in `supermarket_login` and `config/dev.secret.exs`.
-- `bin/phx --fake` — resets the seeded `picape_e2e` database and points Phoenix at the supermarket fake. Deterministic, safe, never touches the real cart. This is what `bin/e2e` uses.
+- `bin/phx --fake` — resets the seeded `picape_e2e` database and points Phoenix at the supermarket fake. Deterministic, safe, never touches the real cart. This is what `bin/e2e` uses. Logs at `info` level unless `PICAPE_LOG_LEVEL` says otherwise.
 - `bin/supermarket-fake` — the supermarket stand-in on :4020. Serves `test/fixtures/supermarket` and keeps a basket in memory that follows `UpdateMyListBasket` mutations. `POST /__reset` restores the fixture basket.
-- `cd frontend && npm run web` — Expo web dev server on :19006. Expo needs about a minute to start; keep it running between runs.
-- `.claude/launch.json` has `backend`, `backend-fake`, `supermarket-fake` and `frontend` entries for the built-in browser preview.
+- `cd frontend && npm run web` — Expo web dev server on :19006. Expo needs about a minute to start; keep it running between runs. Restart it after any change to `frontend/node_modules`.
+- `.claude/launch.json` (local, gitignored by the user's global ignore) has `backend`, `backend-fake`, `supermarket-fake` and `frontend` entries for the built-in browser preview.
+
+Inspecting the stack:
+- `bin/status` — which ports are up, the Phoenix mode, and the size and age of each log in `tmp/`.
+- `bin/web-probe [url]` — loads the page in WebKit on the iPhone profile and prints page errors, console errors and failed requests, and writes `tmp/probe.png`. Use it before reading any log when the app looks blank or broken.
+- `PICAPE_LOG_LEVEL=debug bin/phx --fake` — turn Phoenix debug logging back on. e2e runs write Phoenix to `tmp/phx-e2e.log` and Expo to `tmp/expo-e2e.log`; Playwright stores a screenshot and trace of each failed test under `tmp/e2e/`.
+- The intentional `IO.inspect` hooks in `Picape.Supermarket` print every outbound supermarket URL and status code, prefixed `133:` and `129:`.
 
 Supermarket (the code and docs say "supermarket", never the chain's name):
-- `bin/supermarket-snapshot` — records trimmed live responses into `test/fixtures/supermarket` and doubles as a smoke test of the supermarket connection. Needs a valid login. If it fails with a 401 on `/mobile-auth/v1/auth/token/refresh`, the refresh token in `supermarket_login` is dead and you need a new one from the supermarket's iOS app (see below).
+- `bin/supermarket-snapshot` — records trimmed live responses into `test/fixtures/supermarket` and doubles as a smoke test of the supermarket connection. Needs a valid login. If it fails with a 401 on `/mobile-auth/v1/auth/token/refresh`, the refresh token in `supermarket_login` is dead and you need a new one from the supermarket's iOS app.
 - `SUPERMARKET_BASE_URL=http://localhost:4020 mix phx.server` — point any dev process at the fake; `bin/phx --fake` sets this for you.
-- `SUPERMARKET_PROXY=1 bin/phx` — sends all supermarket traffic through Proxyman on :9090 with the Proxyman CA trusted, so you can compare Picape's requests with the app's. Both dev-only overrides live in [config/runtime.exs](config/runtime.exs).
-
-Recording the supermarket's iOS app with Proxyman (the app is App Store only, so use a real iPhone on the same Wi-Fi as the Mac):
-1. Open Proxyman on the Mac. `Tools → Proxy Settings` shows the port (9090) and the Mac's IP.
-2. On the iPhone: `Settings → Wi-Fi → (i) → Configure Proxy → Manual`, server = the Mac's IP, port 9090.
-3. On the iPhone, open `http://proxy.man/ssl` in Safari, install the downloaded profile (`Settings → Profile Downloaded → Install`), then enable it under `Settings → General → About → Certificate Trust Settings`.
-4. In Proxyman: `Tools → SSL Proxying List`, add the API host (the `base_url` host in `config/dev.secret.exs`) with port 443.
-5. `proxyman-cli clear-session`, then use the app: log in, open the basket, add and remove a product.
-6. Export: `/Applications/Proxyman.app/Contents/MacOS/proxyman-cli export-log -m domains --domains <api host> -o tmp/app.har -f har`, then `sleep 3` because the CLI returns before the file is written. Read the HAR with `jq` or the `proxyman-mobile-audit` skill's analyzer.
-7. The request to `/mobile-auth/v1/auth/token/refresh` carries the current `refreshToken`; the response returns a new one. Store that value in `supermarket_login.refresh_token` and clear the proxy setting on the phone afterwards.
+- `SUPERMARKET_PROXY=1 bin/phx` — sends all supermarket traffic through Proxyman on :9090 with the Proxyman CA trusted. Both dev-only overrides live in [config/runtime.exs](config/runtime.exs).
+- Capturing traffic, comparing Picape with the supermarket's iOS app, and extracting a fresh refresh token: use the `proxyman-capture` skill in [.claude/skills/proxyman-capture/SKILL.md](.claude/skills/proxyman-capture/SKILL.md). Its `scripts/capture.sh` wraps `proxyman-cli` and prints summaries without headers or bodies.
 
 Other:
 - `mix ecto.reset` — drop, create, migrate and seed. `PICAPE_DB=picape_e2e` targets the e2e database.
 - `mix test path/to/file.exs:LINE` — single test. Tests start the supermarket fake on :4021 in `test/test_helper.exs`.
-- `mix graphql.schema` — regenerate the Absinthe JSON schema (alias for `absinthe.schema.json`).
+- `mix graphql.schema` — writes the schema SDL to `priv/graphql/schema.graphql`. A test fails when that file is stale, and the frontend GraphQL check reads it, so run this after every schema change and commit the result.
 - `bin/setup` — first-time bootstrap.
 
-Credentials live in `config/dev.secret.exs` (gitignored) and `config/runtime.exs` via env vars (`NEW_RELIC_LICENSE_KEY`, `SENTRY_DSN`, supermarket auth). Don't commit those.
+Credentials live in `config/dev.secret.exs` (gitignored, optional: the fake stack boots without it) and `config/runtime.exs` via env vars (`NEW_RELIC_LICENSE_KEY`, `SENTRY_DSN`, supermarket auth). Don't commit those.
 
 ## Deploy
 
-GitHub Actions deploys. [ci.yml](.github/workflows/ci.yml) runs the backend and frontend checks on every push and pull request. [deploy.yml](.github/workflows/deploy.yml) runs `flyctl deploy --remote-only` after CI succeeds on `master`. It needs the `FLY_API_TOKEN` repository secret in the GitHub repo settings. `fly deploy` from your machine still works but skips the checks.
+GitHub Actions deploys. [ci.yml](.github/workflows/ci.yml) runs the backend check, the frontend check and the screen tests (with `E2E_SKIP_SCREENSHOTS=1`, screenshots uploaded as the `e2e-output` artifact) on every push and pull request. [deploy.yml](.github/workflows/deploy.yml) runs `flyctl deploy --remote-only` after CI succeeds on `master`. It needs the `FLY_API_TOKEN` repository secret in the GitHub repo settings. `fly deploy` from your machine still works but skips the checks.
 
 ## Architecture
 
@@ -52,8 +50,8 @@ Phoenix 1.6 app split the conventional way:
 - `lib/picape/` — domain contexts (no web concerns)
 - `lib/picape_web/` — Phoenix endpoint, router, controllers, and the Absinthe GraphQL layer
 - `frontend/` — Expo/React Native client (current)
-- `assets/` — legacy Next.js bundle, still wired up as a dev watcher
-- `e2e/` — Playwright screen tests, own `package.json` so it survives Expo upgrades
+- `assets/` — legacy Next.js bundle; the dev watcher in [config/dev.exs](config/dev.exs) only spawns it when `assets/node_modules` exists
+- `e2e/` — Playwright screen tests and `probe.js`, own `package.json` so it survives Expo upgrades
 
 ### Domain contexts (`lib/picape/`)
 
@@ -76,10 +74,11 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 - Mutations are wrapped in `handle_errors/1`, which converts `Ecto.Changeset` errors into Absinthe-compatible `{:error, [...]}` tuples.
 - Subscriptions (`order_changed`, `recipe_planned`, `recipe_unplanned`) are triggered off mutations and broadcast on topic `"*"`. They rely on `Absinthe.Subscription` being in the supervision tree.
 - The REST-ish `/shortcut/*` endpoints in [router.ex](lib/picape_web/router.ex) exist for Apple Shortcuts integration and bypass GraphQL entirely.
+- `priv/graphql/schema.graphql` is the committed SDL. `test/graphql/schema_sdl_test.exs` keeps it in sync and `frontend/scripts/check-operations.js` validates the client's operations against it.
 
 ### Frontend
 
-`frontend/` is the active client (Expo SDK 47, React Navigation 5, Apollo Client 3, Absinthe socket link for subscriptions). It is deployed as a PWA and opened on an iPhone, so follow iOS design language. `assets/` is legacy Next.js and only runs because the dev watcher in [config/dev.exs](config/dev.exs) still spawns it.
+`frontend/` is the active client (Expo SDK 47, React Navigation 5, Apollo Client 3, Absinthe socket link for subscriptions). All GraphQL traffic goes over the Phoenix socket, so look at websocket frames, not HTTP, when debugging queries. It is deployed as a PWA and opened on an iPhone, so follow iOS design language.
 
 ### Test data
 
@@ -92,6 +91,19 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 - `lib/picape/supermarket.ex` has `IO.inspect` calls in `process_request_url/1` and `process_response_status_code/1` that log every outbound HTTP call. They're intentional debug hooks — don't "clean them up" without asking. `.credo.exs` excludes that file from the `IoInspect` check for this reason.
 - `lib/picape/supermarket_old.ex` and `supermarket/search_result_old.ex` are kept around for reference from the pre-v4 supermarket API. Don't extend them; add to the current versions. Credo skips them.
 - The supermarket client expects `X-Correlation-Id` headers and a Bearer token managed by `KeepLogin`. If you add a new endpoint, route it through `get!/put!/post!` on the `Picape.Supermarket` module so it inherits the auth + encoding pipeline, and add a matching route to `Picape.SupermarketFake`.
-- `bin/compile-check` whitelists the four `map.field notation` warnings Absinthe 1.5 emits on Elixir 1.18. Switch `mix check` back to `compile --warnings-as-errors` once Absinthe is upgraded.
+- Don't write project notes to agent memory. Put them in this file.
+
+## Known gaps in the gate
+
+- `bin/compile-check` whitelists exactly four `map.field notation` warnings Absinthe 1.5 emits on Elixir 1.18. Switch `mix check` back to `compile --warnings-as-errors` once Absinthe is upgraded.
 - ESLint runs `react-hooks/rules-of-hooks` as a warning because seven screens call hooks after an early return. Fix those before you turn it back into an error.
-- If a build fails with `module Sentry.Plug is not loaded`, the `_build/<env>` cache compiled Sentry before Plug. Delete that `_build/<env>` directory and compile again.
+- The GraphQL check skips `OverlappingFieldsCanBeMergedRule` because `SearchIngredients` aliases `searchIngredient` and `searchSupermarket` to the same name behind `@skip`/`@include`. Give them different aliases, then enable the rule.
+- Screenshot comparison runs only on macOS. CI runs the screen tests without comparison.
+
+## Troubleshooting
+
+- `module Sentry.Plug is not loaded` or `PicapeWeb.Router.Helpers is not loaded` at compile: the `_build/<env>` cache compiled Sentry before Plug. Delete that `_build/<env>` directory and compile again.
+- Blank white app in the browser: run `bin/web-probe`. A `Module build failed ... ENOENT` page error means `frontend/node_modules` is incomplete; run `npm ci` in `frontend/` and restart Expo.
+- `bin/e2e` fails every test on the cart badge: Phoenix or the fake is not the one you think. `bin/status` shows what is up; kill stale processes on :4010 and :4020 and rerun so Playwright starts fresh ones.
+- `bin/supermarket-snapshot` returns 401 on the token refresh: the local refresh token is dead. Get a new one with the `proxyman-capture` skill. Use one token in one place only; refresh tokens rotate on use, so sharing one between production and your machine logs one of them out.
+- Expo prints "Waiting on http://localhost:<port>" for the Metro port, but the web app is always on :19006.
