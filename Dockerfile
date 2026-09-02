@@ -94,7 +94,12 @@ COPY config/runtime.exs config/
 
 COPY rel rel
 COPY bin bin
-RUN mix release
+
+# Sentry 10 moved source-code context from compile time to this build step.
+# Without it, :enable_source_code_context finds no source map and stack traces
+# in Sentry lose their code snippets.
+RUN mix sentry.package_source_code \
+  && mix release
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities

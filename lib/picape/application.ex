@@ -6,6 +6,11 @@ defmodule Picape.Application do
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
   def start(_type, _args) do
+    # Replaces the :use_error_logger option Sentry dropped in 9.0.
+    :logger.add_handler(:picape_sentry, Sentry.LoggerHandler, %{
+      config: %{metadata: [:file, :line]}
+    })
+
     # Define workers and child supervisors to be supervised
     children = [
       {Phoenix.PubSub, name: Picape.PubSub},
