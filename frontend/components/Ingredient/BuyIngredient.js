@@ -1,7 +1,8 @@
-import { useMutation, gql } from "@apollo/client";
-import * as React from "react";
-import { Badge } from "../Badge/Badge";
-import { CheckIcon } from "../Icon";
+import { useMutation, gql } from '@apollo/client';
+import * as React from 'react';
+
+import { Badge } from '../Badge/Badge';
+import { CheckIcon } from '../Icon';
 
 const BUY_INGREDIENT = gql`
   mutation buyIngredient($ingredientId: ID!, $undo: Boolean!) {
@@ -14,11 +15,11 @@ const BUY_INGREDIENT = gql`
 
 function optimisticResponse(id, isBought) {
   return {
-    __typename: "Mutation",
+    __typename: 'Mutation',
     buyIngredient: {
-      id: id,
-      __typename: "Comment",
-      isBought: isBought,
+      id,
+      __typename: 'Comment',
+      isBought,
     },
   };
 }

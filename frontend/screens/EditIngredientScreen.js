@@ -1,15 +1,15 @@
-import { useMutation, useQuery, gql } from "@apollo/client";
+import { useMutation, useQuery, gql } from '@apollo/client';
 import * as React from 'react';
+import { useState, useRef } from 'react';
 import { View, Switch, Text, StyleSheet, ScrollView } from 'react-native';
-import { useState } from 'react';
-import Colors from '../constants/Colors';
-import { SectionHeader } from '../components/Section/SectionHeader';
+
 import { CloseIcon, PlusIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
-import { FixedFooter } from '../components/Section/FixedFooter';
-import { SearchIngredients } from '../components/Search/SearchIngredients';
 import { ListItem } from '../components/ListItem/ListItem';
-import { useRef } from 'react';
+import { SearchIngredients } from '../components/Search/SearchIngredients';
+import { FixedFooter } from '../components/Section/FixedFooter';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 
 const EDIT_INGREDIENT = gql`
@@ -155,7 +155,7 @@ export function EditIngredientScreen({
           <Text style={styles.label}>Supermarket</Text>
           <SearchIngredients
             autoFocus={false}
-            supermarketOnly={true}
+            supermarketOnly
             placeholder={form.supermarketName || ingredient.supermarketName}
             customRenderItem={({ item: ingredient, searchRef }) => (
               <ListItem autoFocus={false} title={ingredient.name} imageUrl={ingredient.imageUrl}>
@@ -178,13 +178,13 @@ export function EditIngredientScreen({
         </View>
       </ScrollView>
       <FixedFooter
-        buttonText={'Bewerken'}
+        buttonText="Bewerken"
         onPress={(e) => {
           e.preventDefault();
           editIngredient({
             variables: {
               input: {
-                ingredientId: ingredientId,
+                ingredientId,
                 name: form.name,
                 supermarketProductId: form.supermarketProductId,
                 isEssential: form.isEssential,

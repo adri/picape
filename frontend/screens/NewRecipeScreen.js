@@ -1,13 +1,14 @@
 import { gql, useMutation } from '@apollo/client';
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import Colors from '../constants/Colors';
-import { SectionHeader } from '../components/Section/SectionHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { CloseIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
-import Type from '../constants/Type';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FixedFooter } from '../components/Section/FixedFooter';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
+import Type from '../constants/Type';
 
 const ADD_RECIPE = gql`
   mutation NewIngredient($title: String!) {
@@ -44,7 +45,7 @@ export function NewRecipeScreen({ navigation }) {
           }}
         />
 
-        <SectionHeader title={''}>
+        <SectionHeader title="">
           <Text
             onPress={(e) => {
               e.preventDefault();
@@ -76,7 +77,7 @@ export function NewRecipeScreen({ navigation }) {
         </View>
       </ScrollView>
       <FixedFooter
-        buttonText={'Toevoegen'}
+        buttonText="Toevoegen"
         onPress={(e) => {
           e.preventDefault();
           addRecipe({

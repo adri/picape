@@ -2,20 +2,21 @@ import { useMutation, useQuery, gql } from '@apollo/client';
 import * as React from 'react';
 import { Text, FlatList, View, ImageBackground, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import Colors from '../constants/Colors';
-import { BackIcon, CheckIcon } from '../components/Icon';
 import Hyperlink from 'react-native-hyperlink';
-import { SectionHeader } from '../components/Section/SectionHeader';
-import { ListItem } from '../components/ListItem/ListItem';
-import SkeletonContent from 'react-native-skeleton-content';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Layout from '../constants/Layout';
-import { Badge } from '../components/Badge/Badge';
-import { EditIcon } from '../components/Icon/EditIcon';
-import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
-import { FixedFooter } from '../components/Section/FixedFooter';
+import SkeletonContent from 'react-native-skeleton-content';
 
-var linkify = require('linkify-it')();
+import { Badge } from '../components/Badge/Badge';
+import { BackIcon, CheckIcon } from '../components/Icon';
+import { EditIcon } from '../components/Icon/EditIcon';
+import { ListItem } from '../components/ListItem/ListItem';
+import { FixedFooter } from '../components/Section/FixedFooter';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
+import Layout from '../constants/Layout';
+import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
+
+const linkify = require('linkify-it')();
 linkify.add('shortcuts:', 'http:');
 
 const GET_RECIPE = gql`
@@ -45,7 +46,7 @@ const GET_RECIPE = gql`
   }
 `;
 
-let timerRegex = /((?<time>\d{1,3}\s*-?\s*\d*)\s*(?:min|minuut|minuten)\b)/i;
+const timerRegex = /((?<time>\d{1,3}\s*-?\s*\d*)\s*(?:min|minuut|minuten)\b)/i;
 
 function stepWithTimerLinks(step) {
   return step.replace(
@@ -101,7 +102,8 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
             flexDirection: 'row',
             width: Dimensions.get('window').width,
             height: 200,
-          }}></View>
+          }}
+        />
       </ImageBackground>
 
       <SectionHeader title={recipe.title}>
@@ -146,7 +148,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
       />
 
       <FlatList
-        horizontal={true}
+        horizontal
         style={{ paddingHorizontal: 20 }}
         data={recipe.ingredients}
         keyExtractor={({ ingredient }) => ingredient.id}
@@ -160,7 +162,8 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                 navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
               }}
               title={`${ingredient.name}${warning}`}
-              imageUrl={ingredient.imageUrl}></ListItem>
+              imageUrl={ingredient.imageUrl}
+            />
           );
         }}
       />
@@ -207,7 +210,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                 style={{ margin: 10 }}
                 onPress={(e) => {
                   e.preventDefault();
-                  let newChecked = [...stepChecked];
+                  const newChecked = [...stepChecked];
                   newChecked[index] = false;
                   setStepsChecked(newChecked);
                 }}
@@ -218,7 +221,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                 style={{ margin: 10 }}
                 onPress={(e) => {
                   e.preventDefault();
-                  let newChecked = [...stepChecked];
+                  const newChecked = [...stepChecked];
                   newChecked[index] = true;
                   setStepsChecked(newChecked);
                 }}

@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client';
 
 export const PLAN_RECIPE = gql`
   mutation PlanRecipe($recipeId: ID!) {
@@ -19,11 +19,11 @@ export const UNPLAN_RECIPE = gql`
 
 export function optimisticResponse(name, id, isPlanned) {
   return {
-    __typename: "Mutation",
+    __typename: 'Mutation',
     [name]: {
-      id: id,
-      __typename: "Recipe",
-      isPlanned: isPlanned,
+      id,
+      __typename: 'Recipe',
+      isPlanned,
     },
   };
 }

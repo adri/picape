@@ -1,7 +1,7 @@
-import { Appearance } from "react-native";
+import { Appearance } from 'react-native';
 
 const colorScheme = Appearance.getColorScheme();
-const tintColor = "#48BB78";
+const tintColor = '#48BB78';
 
 // Palette 12
 const palette = {
@@ -10,161 +10,161 @@ const palette = {
   // and are the ones that determine the overall "look" of the site.
   // Use these for things like primary actions, links, navigation items, icons,
   // accent borders, or text you want to emphasize.
-  "green-050": "#E3F9E5",
-  "green-100": "#C1EAC5",
-  "green-200": "#A3D9A5",
-  "green-300": "#7BC47F",
-  "green-400": "#57AE5B",
-  "green-500": "#3F9142",
-  "green-600": "#2F8132",
-  "green-700": "#207227",
-  "green-800": "#0E5814",
-  "green-900": "#05400A",
+  'green-050': '#E3F9E5',
+  'green-100': '#C1EAC5',
+  'green-200': '#A3D9A5',
+  'green-300': '#7BC47F',
+  'green-400': '#57AE5B',
+  'green-500': '#3F9142',
+  'green-600': '#2F8132',
+  'green-700': '#207227',
+  'green-800': '#0E5814',
+  'green-900': '#05400A',
 
   // Neutrals
   // These are the colors you will use the most and will make up the majority
   // of your UI.Use them for most of your text, backgrounds, and borders, as
   // well as for things like secondary buttons and links.
-  "grey-050": "#F7F7F7",
-  "grey-100": "#E1E1E1",
-  "grey-200": "#CFCFCF",
-  "grey-300": "#B1B1B1",
-  "grey-400": "#9E9E9E",
-  "grey-500": "#7E7E7E",
-  "grey-600": "#626262",
-  "grey-700": "#515151",
-  "grey-800": "#3B3B3B",
-  "grey-900": "#222222",
+  'grey-050': '#F7F7F7',
+  'grey-100': '#E1E1E1',
+  'grey-200': '#CFCFCF',
+  'grey-300': '#B1B1B1',
+  'grey-400': '#9E9E9E',
+  'grey-500': '#7E7E7E',
+  'grey-600': '#626262',
+  'grey-700': '#515151',
+  'grey-800': '#3B3B3B',
+  'grey-900': '#222222',
 
   // Supporting
   // These colors should be used fairly conservatively throughout your UI to
   // avoid overpowering your primary colors. Use them when you need an element
   // to stand out, or to reinforce things like error states or positive trends
   // with the appropriate semantic color.
-  "purple-050": "#EAE2F8",
-  "purple-100": "#CFBCF2",
-  "purple-200": "#A081D9",
-  "purple-300": "#8662C7",
-  "purple-400": "#724BB7",
-  "purple-500": "#653CAD",
-  "purple-600": "#51279B",
-  "purple-700": "#421987",
-  "purple-800": "#34126F",
-  "purple-900": "#240754",
+  'purple-050': '#EAE2F8',
+  'purple-100': '#CFBCF2',
+  'purple-200': '#A081D9',
+  'purple-300': '#8662C7',
+  'purple-400': '#724BB7',
+  'purple-500': '#653CAD',
+  'purple-600': '#51279B',
+  'purple-700': '#421987',
+  'purple-800': '#34126F',
+  'purple-900': '#240754',
 
-  "red-050": "#FFEEEE",
-  "red-100": "#FACDCD",
-  "red-200": "#F29B9B",
-  "red-300": "#E66A6A",
-  "red-400": "#D64545",
-  "red-500": "#BA2525",
-  "red-600": "#A61B1B",
-  "red-700": "#911111",
-  "red-800": "#780A0A",
-  "red-900": "#610404",
+  'red-050': '#FFEEEE',
+  'red-100': '#FACDCD',
+  'red-200': '#F29B9B',
+  'red-300': '#E66A6A',
+  'red-400': '#D64545',
+  'red-500': '#BA2525',
+  'red-600': '#A61B1B',
+  'red-700': '#911111',
+  'red-800': '#780A0A',
+  'red-900': '#610404',
 
-  "yellow-050": "#FFFAEB",
-  "yellow-100": "#FCEFC7",
-  "yellow-200": "#F8E3A3",
-  "yellow-300": "#F9DA8B",
-  "yellow-400": "#F7D070",
-  "yellow-500": "#E9B949",
-  "yellow-600": "#C99A2E",
-  "yellow-700": "#A27C1A",
-  "yellow-800": "#7C5E10",
-  "yellow-900": "#513C06",
+  'yellow-050': '#FFFAEB',
+  'yellow-100': '#FCEFC7',
+  'yellow-200': '#F8E3A3',
+  'yellow-300': '#F9DA8B',
+  'yellow-400': '#F7D070',
+  'yellow-500': '#E9B949',
+  'yellow-600': '#C99A2E',
+  'yellow-700': '#A27C1A',
+  'yellow-800': '#7C5E10',
+  'yellow-900': '#513C06',
 };
 
 const lightTheme = {
   tintColor,
-  text: "black",
+  text: 'black',
   link: tintColor,
-  tabIconDefault: palette["grey-400"],
+  tabIconDefault: palette['grey-400'],
   tabIconSelected: tintColor,
-  tabIconInactive: palette["grey-300"],
-  tabBar: "transparent", //"#fefefe",
-  errorBackground: "red",
-  errorText: "#fff",
-  warningBackground: "#EAEB5E",
-  warningText: "#666804",
+  tabIconInactive: palette['grey-300'],
+  tabBar: 'transparent', //"#fefefe",
+  errorBackground: 'red',
+  errorText: '#fff',
+  warningBackground: '#EAEB5E',
+  warningText: '#666804',
   noticeBackground: tintColor,
-  noticeText: "#fff",
+  noticeText: '#fff',
   checkboxSelected: tintColor,
-  secondaryText: "#aeaeae",
-  skeletonBone: "#E1E9EE",
-  skeletonHighlight: "#F2F8FC",
-  hairLineBackground: "#ececec",
+  secondaryText: '#aeaeae',
+  skeletonBone: '#E1E9EE',
+  skeletonHighlight: '#F2F8FC',
+  hairLineBackground: '#ececec',
 
   // Section
-  sectionHeaderText: "black",
+  sectionHeaderText: 'black',
 
   // Buttons
-  navButtonText: palette["grey-800"], // #22543D?
-  navButtonBackground: "white",
+  navButtonText: palette['grey-800'], // #22543D?
+  navButtonBackground: 'white',
 
-  navButtonSelectedBackground: palette["grey-050"], // palette["green-050"],
-  navButtonSelectedText: palette["green-700"],
+  navButtonSelectedBackground: palette['grey-050'], // palette["green-050"],
+  navButtonSelectedText: palette['green-700'],
 
   // Badge
   badgeBackground: tintColor, // palette["green-400"],
-  badgeBackgroundInactive: palette["grey-300"],
-  badgeText: "white",
+  badgeBackgroundInactive: palette['grey-300'],
+  badgeText: 'white',
 
   // Card
-  cardText: "black",
-  cardSubtitleText: palette["yellow-700"],
-  cardBackground: palette["grey-050"], // "#fafafa"?
-  cardHighlightBackground: palette["yellow-050"],
+  cardText: 'black',
+  cardSubtitleText: palette['yellow-700'],
+  cardBackground: palette['grey-050'], // "#fafafa"?
+  cardHighlightBackground: palette['yellow-050'],
 
   // Icon
-  iconDefault: "#ccc",
+  iconDefault: '#ccc',
   iconSelected: tintColor,
 };
 const darkTheme = {
   tintColor,
-  text: "white",
+  text: 'white',
   link: tintColor,
-  tabIconDefault: palette["grey-200"],
-  tabIconInactive: palette["grey-400"],
+  tabIconDefault: palette['grey-200'],
+  tabIconInactive: palette['grey-400'],
   tabIconSelected: tintColor,
-  tabBar: "transparent", //"#fefefe",
-  errorBackground: "red",
-  errorText: "#fff",
-  warningBackground: "#EAEB5E",
-  warningText: "#666804",
+  tabBar: 'transparent', //"#fefefe",
+  errorBackground: 'red',
+  errorText: '#fff',
+  warningBackground: '#EAEB5E',
+  warningText: '#666804',
   noticeBackground: tintColor,
-  noticeText: "#fff",
+  noticeText: '#fff',
   checkboxSelected: tintColor,
-  secondaryText: "#aeaeae",
-  skeletonBone: palette["grey-900"],
-  skeletonHighlight: palette["grey-700"],
-  hairLineBackground: palette["grey-900"],
+  secondaryText: '#aeaeae',
+  skeletonBone: palette['grey-900'],
+  skeletonHighlight: palette['grey-700'],
+  hairLineBackground: palette['grey-900'],
 
   // Section
-  sectionHeaderText: "white",
+  sectionHeaderText: 'white',
 
   // Buttons
-  navButtonText: palette["grey-800"], // #22543D?
-  navButtonBackground: "white",
+  navButtonText: palette['grey-800'], // #22543D?
+  navButtonBackground: 'white',
 
-  navButtonSelectedBackground: palette["grey-050"], // palette["green-050"],
-  navButtonSelectedText: palette["green-700"],
+  navButtonSelectedBackground: palette['grey-050'], // palette["green-050"],
+  navButtonSelectedText: palette['green-700'],
 
   // Badge
   badgeBackground: tintColor, // palette["green-400"],
-  badgeBackgroundInactive: palette["grey-800"],
-  badgeText: "white",
+  badgeBackgroundInactive: palette['grey-800'],
+  badgeText: 'white',
 
   // Card
-  cardText: "white",
-  cardSubtitleText: palette["yellow-300"],
-  cardBackground: palette["grey-800"], // "#fafafa"?
-  cardHighlightBackground: palette["yellow-900"], // "#fafafa"?
+  cardText: 'white',
+  cardSubtitleText: palette['yellow-300'],
+  cardBackground: palette['grey-800'], // "#fafafa"?
+  cardHighlightBackground: palette['yellow-900'], // "#fafafa"?
 
   // Icon
-  iconDefault: palette["grey-600"],
+  iconDefault: palette['grey-600'],
   iconSelected: tintColor,
 };
-const theme = colorScheme === "dark" ? darkTheme : lightTheme;
+const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
 export default theme;

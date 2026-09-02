@@ -1,9 +1,10 @@
-import Colors from '../../constants/Colors';
-import { InputText } from '../Input/InputText';
+import { Ionicons } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { LayoutAnimation, UIManager, StyleSheet, View, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
+import Colors from '../../constants/Colors';
+import { InputText } from '../Input/InputText';
 const Icon = Ionicons;
 const defaultSearchIcon = {
   size: 20,
@@ -23,7 +24,7 @@ class SearchBar extends Component {
     const { value } = props;
 
     this.state = {
-      hasFocus: props.autoFocus ? true : false,
+      hasFocus: !!props.autoFocus,
       isEmpty: value ? value === '' : true,
       cancelButtonWidth: null,
     };

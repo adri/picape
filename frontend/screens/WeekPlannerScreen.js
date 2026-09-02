@@ -1,17 +1,17 @@
-import { useQuery, useMutation } from "@apollo/client";
-import * as React from 'react';
-import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
-import Colors from '../constants/Colors';
-import { ImageCard } from '../components/Card/ImageCard';
-import { Card } from '../components/Card/Card';
-import { SectionHeader } from '../components/Section/SectionHeader';
-import SkeletonContent from 'react-native-skeleton-content';
-import { useSafeArea } from 'react-native-safe-area-context';
-import { RefreshIcon, CloseIcon, MinusIcon, PlusIcon } from '../components/Icon';
-import { GET_RECIPES } from '../operations/getRecipes';
+import { useQuery, useMutation } from '@apollo/client';
 import { BlurView } from 'expo-blur';
-import { useColorScheme } from 'react-native';
+import * as React from 'react';
+import { View, Text, ScrollView, FlatList, StyleSheet, useColorScheme } from 'react-native';
+import { useSafeArea } from 'react-native-safe-area-context';
+import SkeletonContent from 'react-native-skeleton-content';
+
+import { Card } from '../components/Card/Card';
+import { ImageCard } from '../components/Card/ImageCard';
+import { RefreshIcon, CloseIcon, MinusIcon, PlusIcon } from '../components/Icon';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
+import { GET_RECIPES } from '../operations/getRecipes';
 import { PLAN_RECIPE, optimisticResponse } from '../operations/planRecipe';
 
 function getRandom(recipes, amount) {
@@ -110,7 +110,7 @@ export default function WeekPlannerScreen({ navigation }) {
           <Card
             style={{ flexBasis: '100%', marginTop: 10 }}
             cardStyle={styles.cardStyle}
-            width={'auto'}
+            width="auto"
             height={60}
             key="new-recipe">
             <PlusIcon

@@ -1,14 +1,15 @@
-import * as React from 'react';
-import Colors from '../../constants/Colors';
-import { useState } from 'react';
 import { useLazyQuery, gql } from '@apollo/client';
-import { FlatList, View, Text } from 'react-native';
-import { ListItem } from '../ListItem/ListItem';
-import { OrderQuantity } from '../Ingredient/OrderQuantity';
-import SearchBar from '../Search/SearchBar';
-import { PlusIcon } from '../Icon';
 import { useNavigation } from '@react-navigation/native';
+import * as React from 'react';
+import { useState } from 'react';
+import { FlatList, View, Text } from 'react-native';
+
+import Colors from '../../constants/Colors';
+import { PlusIcon } from '../Icon';
 import { Nutriscore } from '../Ingredient/Nutriscore';
+import { OrderQuantity } from '../Ingredient/OrderQuantity';
+import { ListItem } from '../ListItem/ListItem';
+import SearchBar from '../Search/SearchBar';
 
 const SEARCH_INGREDIENTS = gql`
   query SearchIngredient($query: String!, $supermarket: Boolean!) {
@@ -46,7 +47,7 @@ const renderItem = ({ navigator, item: ingredient, supermarket }) => (
         style={{ margin: 10 }}
         onPress={(e) => {
           e.preventDefault();
-          navigator.navigate('AddIngredient', { ingredient: ingredient });
+          navigator.navigate('AddIngredient', { ingredient });
         }}
       />
     ) : (

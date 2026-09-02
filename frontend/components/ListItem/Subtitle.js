@@ -1,13 +1,11 @@
-import * as React from "react";
-import Colors from "../../constants/Colors";
-import { Text } from "react-native";
-import Type from "../../constants/Type";
-import { Platform, StyleSheet } from "react-native";
+import * as React from 'react';
+import { Text, Platform, StyleSheet } from 'react-native';
+
+import Colors from '../../constants/Colors';
+import Type from '../../constants/Type';
 
 export function Subtitle({ textStyle, subtitle }) {
-  return (
-    <Text style={[Type.subtitle, styles.subtitle, textStyle]}>{subtitle}</Text>
-  );
+  return <Text style={[Type.subtitle, styles.subtitle, textStyle]}>{subtitle}</Text>;
 }
 
 const styles = StyleSheet.create({
@@ -15,9 +13,9 @@ const styles = StyleSheet.create({
     color: Colors.cardSubtitleText,
     ...Platform.select({
       web: {
-        transitionProperty: ["opacity"],
-        transitionDuration: "200ms",
-        transitionTimingFunction: "ease-in",
+        transitionProperty: ['opacity'],
+        transitionDuration: '200ms',
+        transitionTimingFunction: 'ease-in',
       },
     }),
   },

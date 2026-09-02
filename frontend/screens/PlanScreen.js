@@ -2,17 +2,18 @@ import { useQuery } from '@apollo/client';
 import * as React from 'react';
 import { Text, View, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import Colors from '../constants/Colors';
-import { ImageCard } from '../components/Card/ImageCard';
-import { SectionHeader } from '../components/Section/SectionHeader';
-import SkeletonContent from 'react-native-skeleton-content';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Type from '../constants/Type';
-import { PlanRecipe } from '../components/Recipe/PlanRecipe';
-import { GET_RECIPES } from '../operations/getRecipes';
-import { GET_LAST_RECIPES } from '../operations/getLastRecipes';
-import { Separator } from '../components/Section/Separator';
+import SkeletonContent from 'react-native-skeleton-content';
+
 import { Badge } from '../components/Badge/Badge';
+import { ImageCard } from '../components/Card/ImageCard';
+import { PlanRecipe } from '../components/Recipe/PlanRecipe';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import { Separator } from '../components/Section/Separator';
+import Colors from '../constants/Colors';
+import Type from '../constants/Type';
+import { GET_LAST_RECIPES } from '../operations/getLastRecipes';
+import { GET_RECIPES } from '../operations/getRecipes';
 
 function LastRecipesList({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_LAST_RECIPES);
@@ -41,7 +42,7 @@ function LastRecipesList({ navigation }) {
         <FlatList
           style={{ paddingHorizontal: 20, height: 150 }}
           containerStyle={{ paddingLeft: 20 }}
-          horizontal={true}
+          horizontal
           removeClippedSubviews
           data={recipes}
           keyExtractor={(recipe) => recipe.id}
@@ -94,7 +95,7 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
 
       <FlatList
         style={{ paddingHorizontal: 20 }}
-        horizontal={true}
+        horizontal
         removeClippedSubviews
         data={recipes}
         keyExtractor={(recipe) => recipe.id}
@@ -196,7 +197,7 @@ export default function PlanScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={{ paddingBottom: 50 }}>
-        <SectionHeader title={'Recepten'}>
+        <SectionHeader title="Recepten">
           <Text
             onPress={(e) => {
               e.preventDefault();

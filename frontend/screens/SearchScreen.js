@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { SearchIngredients } from '../components/Search/SearchIngredients';
 import { SectionHeader } from '../components/Section/SectionHeader';
-import { StyleSheet, View } from 'react-native';
 
 export default function SearchScreen() {
   return (

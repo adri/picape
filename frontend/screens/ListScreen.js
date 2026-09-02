@@ -1,21 +1,23 @@
-import { useMutation, useQuery, useSubscription } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import * as React from 'react';
-import Colors from '../constants/Colors';
 import { View, FlatList, Text, Dimensions, Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
-import { SectionHeader } from '../components/Section/SectionHeader';
-import { ListItem } from '../components/ListItem/ListItem';
-import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import SkeletonContent from 'react-native-skeleton-content';
-import Type from '../constants/Type';
+
+import { Badge } from '../components/Badge/Badge';
 import { ImageCard } from '../components/Card/ImageCard';
+import { Nutriscore, nutriscore } from '../components/Ingredient/Nutriscore';
+import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
+import { ListItem } from '../components/ListItem/ListItem';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
+
+import Type from '../constants/Type';
 import { SUBSCRIBE_ORDER, GET_ORDER } from '../operations/getOrder';
 import { GET_ORDER_COUNT } from '../operations/getOrderCount';
 import { GET_RECIPES } from '../operations/getRecipes';
 import { START_SHOPPING } from '../operations/startShopping';
-import { Badge } from '../components/Badge/Badge';
-import { Nutriscore, nutriscore } from '../components/Ingredient/Nutriscore';
 
 function PlannedRecipes({ navigation }) {
   const {
@@ -55,7 +57,7 @@ function PlannedRecipes({ navigation }) {
         <FlatList
           style={{ paddingHorizontal: 20, height: 150 }}
           containerStyle={{ paddingLeft: 20 }}
-          horizontal={true}
+          horizontal
           removeClippedSubviews
           data={recipes}
           keyExtractor={(recipe) => recipe.id}

@@ -1,7 +1,8 @@
-import * as React from "react";
-import { View, Text } from "react-native";
-import Colors from "../../constants/Colors";
-import Type from "../../constants/Type";
+import * as React from 'react';
+import { View, Text } from 'react-native';
+
+import Colors from '../../constants/Colors';
+import Type from '../../constants/Type';
 
 export function SectionHeader(props) {
   return (
@@ -9,13 +10,12 @@ export function SectionHeader(props) {
       style={[
         props.style,
         {
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "baseline",
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
           marginHorizontal: 20,
         },
-      ]}
-    >
+      ]}>
       <Text
         style={[
           Type.sectionHeader,
@@ -24,8 +24,7 @@ export function SectionHeader(props) {
             paddingBottom: 15,
             color: Colors.sectionHeaderText,
           },
-        ]}
-      >
+        ]}>
         {props.title}
       </Text>
       {props.children}

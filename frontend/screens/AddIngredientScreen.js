@@ -1,12 +1,13 @@
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from '@apollo/client';
 import * as React from 'react';
-import { View, Switch, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import Colors from '../constants/Colors';
-import { SectionHeader } from '../components/Section/SectionHeader';
+import { View, Switch, Text, StyleSheet, ScrollView } from 'react-native';
+
 import { CloseIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
 import { FixedFooter } from '../components/Section/FixedFooter';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
 
 const ADD_INGREDIENT = gql`
   mutation AddIngredient($name: String!, $isEssential: Boolean!, $supermarketProductId: String!) {
@@ -88,7 +89,7 @@ export function AddIngredientScreen({
         </View>
       </ScrollView>
       <FixedFooter
-        buttonText={'Toevoegen'}
+        buttonText="Toevoegen"
         onPress={(e) => {
           e.preventDefault();
           addIngredient({

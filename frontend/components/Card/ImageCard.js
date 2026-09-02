@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { View, ImageBackground, Text, TouchableOpacity } from 'react-native';
+import { View, ImageBackground, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
 import Colors from '../../constants/Colors';
-import Type from '../../constants/Type';
 import Layout from '../../constants/Layout';
-import { StyleSheet } from 'react-native';
+import Type from '../../constants/Type';
 
 export function ImageCard({
   imageUrl,

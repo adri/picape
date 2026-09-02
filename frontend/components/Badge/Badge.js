@@ -1,6 +1,7 @@
 import * as React from 'react';
-import Colors from '../../constants/Colors';
 import { View, Text, TouchableOpacity } from 'react-native';
+
+import Colors from '../../constants/Colors';
 
 export function Badge({ amount, onPress, outline = false, small, backgroundColor = null }) {
   const badge = (

@@ -1,17 +1,18 @@
-import * as React from 'react';
-import * as SplashScreen from 'expo-splash-screen';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
-import { ApolloClient, ApolloProvider, InMemoryCache, ApolloLink } from '@apollo/client';
 import * as AbsintheSocket from '@absinthe/socket';
 import { createAbsintheSocketLink } from '@absinthe/socket-apollo-link';
-import { Socket as PhoenixSocket } from 'phoenix';
+import { ApolloClient, ApolloProvider, InMemoryCache, ApolloLink } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useColorScheme } from 'react-native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
+import { Socket as PhoenixSocket } from 'phoenix';
+import * as React from 'react';
+import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import Sentry from './Sentry';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import linking from './navigation/useLinking';
-import Sentry from './Sentry';
 import * as serviceWorkerRegistration from './src/serviceWorkerRegistration';
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
@@ -29,7 +30,7 @@ const link = ApolloLink.from([
   createAbsintheSocketLink(AbsintheSocket.create(new PhoenixSocket(host))),
 ]);
 const client = new ApolloClient({
-  link: link,
+  link,
   cache: new InMemoryCache({ freezeResults: true }),
   assumeImmutableResults: true,
 });

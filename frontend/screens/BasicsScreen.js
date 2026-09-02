@@ -1,13 +1,14 @@
-import { useQuery, useSubscription, gql } from "@apollo/client";
-import * as React from "react";
-import { View, FlatList, Dimensions } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import Colors from "../constants/Colors";
-import { SectionHeader } from "../components/Section/SectionHeader";
-import { ListItem } from "../components/ListItem/ListItem";
-import { OrderQuantity } from "../components/Ingredient/OrderQuantity";
-import SkeletonContent from "react-native-skeleton-content";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery, useSubscription, gql } from '@apollo/client';
+import * as React from 'react';
+import { View, FlatList, Dimensions } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import SkeletonContent from 'react-native-skeleton-content';
+
+import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
+import { ListItem } from '../components/ListItem/ListItem';
+import { SectionHeader } from '../components/Section/SectionHeader';
+import Colors from '../constants/Colors';
 
 const GET_BASICS = gql`
   query BasicsList {
@@ -86,7 +87,7 @@ function BasicsList({ navigation }) {
       <SectionHeader title="Altijd in huis" />
       <SkeletonContent
         layout={Array(5).fill({
-          width: Dimensions.get("window").width - 40,
+          width: Dimensions.get('window').width - 40,
           height: 60,
           marginHorizontal: 20,
           marginBottom: 10,
@@ -94,8 +95,7 @@ function BasicsList({ navigation }) {
         boneColor={Colors.skeletonBone}
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ flex: 1 }}
-        isLoading={loading}
-      >
+        isLoading={loading}>
         <FlatList
           style={{ paddingHorizontal: 20 }}
           data={edges}
@@ -108,14 +108,14 @@ function BasicsList({ navigation }) {
               <ListItem
                 style={{
                   animationDuration: `${200 + 100 * index}ms`,
-                  animationPlayState: "running",
+                  animationPlayState: 'running',
                   animationKeyframes: {
                     from: { opacity: 0 },
                     to: { opacity: 1 },
                   },
-                  transitionProperty: ["background-color", "opacity"],
-                  transitionDuration: "200ms",
-                  transitionTimingFunction: "ease-in",
+                  transitionProperty: ['background-color', 'opacity'],
+                  transitionDuration: '200ms',
+                  transitionTimingFunction: 'ease-in',
                   backgroundColor: ingredient.isPlanned
                     ? Colors.cardHighlightBackground
                     : Colors.cardBackground,
@@ -124,15 +124,11 @@ function BasicsList({ navigation }) {
                 imageUrl={ingredient.imageUrl}
                 onImagePress={(e) => {
                   e.preventDefault();
-                  navigation.navigate("EditIngredient", { ingredientId: ingredient.id })
+                  navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
                 }}
                 subtitle={plannedRecipes
-                  .map(
-                    (planned) =>
-                      `${planned.quantity}×\u00A0${planned.recipe.title}`
-                  )
-                  .join(", ")}
-              >
+                  .map((planned) => `${planned.quantity}×\u00A0${planned.recipe.title}`)
+                  .join(', ')}>
                 <OrderQuantity
                   id={ingredient.id}
                   orderedQuantity={ingredient.orderedQuantity}
