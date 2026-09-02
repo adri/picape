@@ -1,0 +1,5 @@
+node_modules
+web-build
+.expo
+package-lock.json
+yarn.lock

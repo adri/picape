@@ -1,0 +1,5 @@
+node_modules
+web-build
+.expo
+babel.config.js
+webpack.config.js
