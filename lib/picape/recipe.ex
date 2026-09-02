@@ -86,7 +86,7 @@ defmodule Picape.Recipe do
         )
       )
       |> Enum.group_by(fn {k, _} -> k end, fn {_, v} -> v end)
-      |> Map.merge(defaults, fn _k, v, v2 -> v end)
+      |> Map.merge(defaults, fn _k, v, _v2 -> v end)
 
     {:ok, result}
   end

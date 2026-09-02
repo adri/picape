@@ -149,7 +149,7 @@ defmodule Picape.Supermarket do
   end
 
   def process_request_url(url) do
-    config(:base_url) <> url |> IO.inspect(label: "133")
+    (config(:base_url) <> url) |> IO.inspect(label: "133")
   end
 
   def process_response_body(body) do
@@ -170,7 +170,7 @@ defmodule Picape.Supermarket do
   @user_agent_graphql "Appie/9.35 (iPhone17,1; iPhone; CPU OS 26_4_2 like Mac OS X)"
   @user_agent_auth "Appie/9.35 (nl.ah.Appie; build:260415110803; iOS 26.4.2) Alamofire/5.11.0"
 
-  defp process_request_headers(headers) do
+  def process_request_headers(headers) do
     is_refresh = Keyword.has_key?(headers, :"X-Refresh-Token")
     is_graphql = Keyword.has_key?(headers, :"X-GraphQL")
 
@@ -198,25 +198,15 @@ defmodule Picape.Supermarket do
     Keyword.put(headers, :Authorization, "Bearer #{KeepLogin.get_access_token()}")
   end
 
-  defp process_request_body(""), do: ""
+  def process_request_body(""), do: ""
 
-  defp process_request_body(body) do
+  def process_request_body(body) do
     Poison.encode!(body)
   end
 
-  # defp process_request_options(options) do
-  #   options
-  #   |> Keyword.merge(
-  #     hackney: [
-  #       {:proxy, {"localhost", 8888}},
-  #       {:ssl_options,
-  #        [
-  #          {:versions, [:"tlsv1.2"]},
-  #          {:cacertfile, "/Users/adrimbp/workspace/proxyman-ca.pem"}
-  #        ]}
-  #     ]
-  #   )
-  # end
+  def process_request_options(options) do
+    Keyword.merge(options, hackney: config(:hackney) || [])
+  end
 
   defp config(key) do
     Application.get_env(:picape, __MODULE__)[key]

@@ -136,7 +136,7 @@ defmodule Picape.Ingredients do
         |> Ingredient.raw_changeset(%{
           supermarket_product_raw: Supermarket.products_by_id(ingredient.supermarket_product_id)
         })
-        |> Repo.update!
+        |> Repo.update!()
       rescue
         _ -> nil
       end

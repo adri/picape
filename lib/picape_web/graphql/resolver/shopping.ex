@@ -9,7 +9,7 @@ defmodule PicapeWeb.Graphql.Resolver.Shopping do
   end
 
   def buy_ingredient(attributes, _info) do
-    bought_ingredient = Shopping.buy_ingredient(Order.last_order_id(), attributes[:ingredient_id], attributes[:undo])
+    Shopping.buy_ingredient(Order.last_order_id(), attributes[:ingredient_id], attributes[:undo])
 
     Resolver.Recipe.ingredient_by_id(String.to_integer(attributes[:ingredient_id]))
   end

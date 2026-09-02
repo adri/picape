@@ -6,7 +6,7 @@ defmodule Picape.Seasonal do
 
   alias Picape.Seasonal.Parser
 
-  def start_link(state) do
+  def start_link(_state) do
     Agent.start_link(fn -> product_infos() end, name: __MODULE__)
   end
 
@@ -18,25 +18,17 @@ defmodule Picape.Seasonal do
   end
 
   def seasons_for_ingredients(
-        ingredients,
-        month \\ DateTime.utc_now().month
+        _ingredients,
+        _month \\ DateTime.utc_now().month
       ) do
-        %{}
-  end
-
-  defp find_season(country_info, seasonal_name, month) do
-    Agent.get(__MODULE__, fn product_infos ->
-      Enum.find(product_infos, fn info ->
-        info.month === month && country_info =~ info.country_nl && seasonal_name == info.product_name_nl
-      end)
-    end)
+    %{}
   end
 
   defp get_seasonal_html() do
     get!(@seasonal_path).body
   end
 
-  defp process_url(url) do
+  def process_url(url) do
     config(:base_url) <> url
   end
 

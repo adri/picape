@@ -13,7 +13,7 @@ defmodule Picape.Supermarket.KeepLogin do
         nil
 
       login ->
-        if Login.is_expired(login) do
+        if Login.expired?(login) do
           renew_login(login).access_token
         else
           login.access_token

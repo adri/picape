@@ -66,10 +66,6 @@ defmodule Picape.Order do
     )
   end
 
-  def planned_recipes(nil) do
-    {:ok, []}
-  end
-
   def cart(order_id) do
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
          {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
@@ -99,6 +95,10 @@ defmodule Picape.Order do
   @doc """
   Returns a list of planned recipe IDs.
   """
+  def planned_recipes(nil) do
+    {:ok, []}
+  end
+
   def planned_recipes(order_id) do
     query =
       from(
@@ -149,21 +149,20 @@ defmodule Picape.Order do
 
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
-    IO.inspect(new_order_id, label: "new_order_id")
     finish_order(order_id, new_order_id)
 
     last()
   end
 
-  def stop_shopping(order_id) do
+  def stop_shopping(_order_id) do
     order_id = last_order_id()
     {:ok, cart} = cart(order_id)
     items = Map.values(cart)
 
     with {:ok, bought} <- Shopping.ingredients_bought?(order_id, Enum.map(items, & &1.ingredient.id)),
          not_bought <- Enum.reject(items, &bought[&1.ingredient.id]),
-         now_bought <- Enum.map(not_bought, &Shopping.buy_ingredient(order_id, &1.ingredient.id)),
-         ordered <- Enum.map(not_bought, &order_ingredient("1", &1.ingredient.id, &1.quantity)) do
+         _now_bought <- Enum.map(not_bought, &Shopping.buy_ingredient(order_id, &1.ingredient.id)),
+         _ordered <- Enum.map(not_bought, &order_ingredient("1", &1.ingredient.id, &1.quantity)) do
       last()
     else
       error -> {:error, error}
@@ -216,9 +215,8 @@ defmodule Picape.Order do
   end
 
   def recipes_planned_for_ingredient_ids(order_id, ingredient_ids) do
-    with {:ok, planned_recipe_ids} <- planned_recipes(order_id),
-         {:ok, recipes_by_ingredients} <- Recipe.recipes_by_ingredient_ids(ingredient_ids, planned_recipe_ids) do
-      {:ok, recipes_by_ingredients}
+    with {:ok, planned_recipe_ids} <- planned_recipes(order_id) do
+      Recipe.recipes_by_ingredient_ids(ingredient_ids, planned_recipe_ids)
     end
   end
 
@@ -274,18 +272,6 @@ defmodule Picape.Order do
     end
   end
 
-  defp planned_ingredients(order_id) do
-    all =
-      from(
-        m in ManualIngredient,
-        where: m.line_id == ^order_id
-      )
-      |> Repo.all()
-      |> Repo.preload(:ingredient)
-
-    {:ok, all}
-  end
-
   defp recipe_ingredient_quantities(order_id) do
     query =
       from(
@@ -297,7 +283,7 @@ defmodule Picape.Order do
     {:ok, Enum.into(Repo.all(query), %{})}
   end
 
-  defp ordered_item_quantities(order_id) do
+  defp ordered_item_quantities(_order_id) do
     {:ok, order} = current()
 
     existing =

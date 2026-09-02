@@ -85,7 +85,7 @@ defmodule Picape.SupermarketOld do
 
   # ---
 
-  defp process_url(url) do
+  def process_url(url) do
     config(:base_url) <> url
   end
 
@@ -93,17 +93,17 @@ defmodule Picape.SupermarketOld do
     Poison.decode!(body)
   end
 
-  defp process_request_headers(headers) do
+  def process_request_headers(headers) do
     headers
     |> Keyword.merge(Accept: "*/*")
     |> Keyword.merge(config(:headers) || [])
   end
 
-  defp process_request_body(body) do
+  def process_request_body(body) do
     Poison.encode!(body)
   end
 
-  defp process_request_options(options) do
+  def process_request_options(options) do
     options
     |> Keyword.merge(cookie: [config(:cookie)])
   end

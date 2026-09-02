@@ -4,7 +4,6 @@ defmodule Picape.Supermarket.AutoMatchIngredients do
   the best match.
   """
   alias Picape.Supermarket
-  alias Picape.Ingredients
   alias Picape.Repo
   alias Picape.Recipe.Ingredient
 
@@ -33,7 +32,6 @@ defmodule Picape.Supermarket.AutoMatchIngredients do
       with {:ok, id} <- search_supermarket_id(ingredient.name),
            details when not is_nil(details) <- Supermarket.products_by_id(id) do
         details
-        |> IO.inspect(label: "details")
       else
         _ -> false
       end
@@ -56,7 +54,6 @@ defmodule Picape.Supermarket.AutoMatchIngredients do
 
       list ->
         {:ok, List.first(list).id}
-        |> IO.inspect(label: "list")
     end
   end
 end

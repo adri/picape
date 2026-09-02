@@ -1,7 +1,7 @@
 defmodule Picape.Supermarket.CartItems do
   @moduledoc """
   Translates an `Order.Sync.Changes` struct into the `BasketMutation`
-  variables that AH's `UpdateMyListBasket` GraphQL mutation expects.
+  variables that the supermarket's `UpdateMyListBasket` GraphQL mutation expects.
 
   Each emitted item is a map with `id`, `quantity`, `isStrikethrough`,
   `newPosition` — sent verbatim like the iOS app does. `quantity: 0`
