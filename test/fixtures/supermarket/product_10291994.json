@@ -1,0 +1,31 @@
+{
+  "productCard": {
+    "webshopId": 10291994,
+    "hqId": 10291994,
+    "title": "Kipfilet",
+    "salesUnitSize": "300 g",
+    "priceBeforeBonus": 4.29,
+    "availableOnline": true,
+    "orderable": true,
+    "brand": "Huismerk",
+    "mainCategory": "Zuivel",
+    "nutriscore": "A",
+    "images": [
+      {
+        "width": 80,
+        "height": 80,
+        "url": "https://static.supermarket.test/dam/product/10291994_80x80.png"
+      },
+      {
+        "width": 200,
+        "height": 200,
+        "url": "https://static.supermarket.test/dam/product/10291994_200x200.png"
+      }
+    ]
+  },
+  "tradeItem": {
+    "description": [
+      "Kipfilet, 300 g."
+    ]
+  }
+}

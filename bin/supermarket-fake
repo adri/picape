@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Serves test/fixtures/supermarket as a stand-in for the supermarket API on :4020.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+exec mix run --no-start -e '
+{:ok, _} = Application.ensure_all_started(:plug_cowboy)
+{:ok, _} = Picape.SupermarketFake.start(4020)
+IO.puts("supermarket fake listening on http://localhost:4020")
+Process.sleep(:infinity)'

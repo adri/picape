@@ -25,3 +25,16 @@ if config_env() == :prod do
       "User-Agent": System.get_env("SUPERMARKET_USER_AGENT")
     ]
 end
+
+if config_env() == :dev do
+  if base_url = System.get_env("SUPERMARKET_BASE_URL") do
+    config :picape, Picape.Supermarket, base_url: base_url
+  end
+
+  if System.get_env("SUPERMARKET_PROXY") do
+    proxyman_ca = Path.expand("~/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem")
+
+    config :picape, Picape.Supermarket,
+      hackney: [proxy: {"localhost", 9090}, ssl_options: [cacertfile: proxyman_ca, verify: :verify_peer]]
+  end
+end

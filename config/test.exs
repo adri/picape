@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
@@ -20,4 +20,4 @@ config :picape, Picape.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   ownership_timeout: 60_000
 
-config :picape, :supermarket, Picape.SupermarketMock
+config :picape, Picape.Supermarket, base_url: "http://localhost:4021", headers: []

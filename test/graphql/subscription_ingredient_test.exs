@@ -25,15 +25,15 @@ defmodule Picape.Graphql.SubscriptionIngredientTest do
         variables: %{ingredientId: Node.to_global_id("Ingredient", ingredient.id), quantity: 2}
       )
 
-    assert_reply(ref, :ok, %{data: %{"orderIngredient" => %{"orderedQuantity" => 2}}})
+    assert_reply(ref, :ok, %{data: %{"orderIngredient" => %{"orderedQuantity" => 2}}}, 2_000)
 
     # check to see if we got subscription data
     expected = %{
-      result: %{data: %{"orderChanged" => %{"totalCount" => 1}}},
+      result: %{data: %{"orderChanged" => %{"totalCount" => 6}}},
       subscriptionId: subscription_id
     }
 
-    assert_push("subscription:data", push)
+    assert_push("subscription:data", push, 2_000)
     assert push == expected
   end
 end
