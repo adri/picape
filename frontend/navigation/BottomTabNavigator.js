@@ -41,8 +41,8 @@ const modal = () => ({
 export default function PlanStackScreen() {
   return (
     <Stack.Navigator
-      headerMode="none"
       screenOptions={() => ({
+        headerShown: false,
         animationEnabled: true,
         ...TransitionPresets.SlideFromRightIOS,
       })}>
@@ -65,13 +65,16 @@ function BottomTabNavigator() {
     <BottomTab.Navigator
       initialRouteName={INITIAL_ROUTE_NAME}
       tabBar={(props) => <TabBar {...props} />}
-      headerTransparent
-      tabBarOptions={{
-        showLabel: false,
-        activeTintColor: Colors.tintColor,
-        inactiveTintColor: Colors.tabIconDefault,
-        style: {
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: Colors.tintColor,
+        tabBarInactiveTintColor: Colors.tabIconDefault,
+        tabBarStyle: {
           backgroundColor: 'transparent',
+          // The separator is drawn on the BlurView below instead, so it lands
+          // above the blur rather than inside it.
+          borderTopWidth: 0,
         },
       }}>
       <BottomTab.Screen
@@ -79,6 +82,7 @@ function BottomTabNavigator() {
         component={PlanScreen}
         options={{
           title: 'Recepten',
+          tabBarAccessibilityLabel: 'Recepten',
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="ios-restaurant" />,
         }}
       />
@@ -87,6 +91,7 @@ function BottomTabNavigator() {
         component={SearchScreen}
         options={{
           title: 'Zoeken',
+          tabBarAccessibilityLabel: 'Zoeken',
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="ios-search" />,
         }}
       />
@@ -95,6 +100,7 @@ function BottomTabNavigator() {
         component={BasicsScreen}
         options={{
           title: 'Basics',
+          tabBarAccessibilityLabel: 'Basics',
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="ios-home" />,
         }}
       />
@@ -103,6 +109,7 @@ function BottomTabNavigator() {
         component={ListScreen}
         options={{
           title: 'Mandje',
+          tabBarAccessibilityLabel: 'Mandje',
           tabBarIcon: ({ focused }) => (
             <TabBarIcon
               focused={focused}
@@ -122,6 +129,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
     backdropFilter: `blur(${100 * 0.2}px)`,
     WebkitBackdropFilter: `saturate(180%) blur(${100 * 0.2}px)`,
   },

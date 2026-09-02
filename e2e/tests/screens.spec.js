@@ -27,11 +27,12 @@ async function settle(page) {
   await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {});
 }
 
+function tab(page, label) {
+  return page.getByLabel(label);
+}
+
 function cartBadge(page, count) {
-  return page
-    .getByRole('button', { name: /Mandje/ })
-    .getByText(String(count))
-    .first();
+  return tab(page, /Mandje/).getByText(String(count)).first();
 }
 
 async function openApp(page) {
@@ -58,7 +59,7 @@ for (const [name, label] of tabs) {
   test(`${name} tab renders`, async ({ page }) => {
     const problems = watch(page);
     await openApp(page);
-    await page.getByRole('button', { name: label }).click();
+    await tab(page, label).click();
     await settle(page);
     await checkScreen(page, name);
     expect(problems).toEqual([]);
@@ -78,7 +79,7 @@ test('tapping a recipe opens its detail screen', async ({ page }) => {
 test('raising a quantity in the cart syncs with the supermarket', async ({ page }) => {
   const problems = watch(page);
   await openApp(page);
-  await page.getByRole('button', { name: /Mandje/ }).click();
+  await tab(page, /Mandje/).click();
   const butter = page
     .getByText('Butter', { exact: true })
     .locator('xpath=ancestor::div[.//div[text()="1"]][1]');
