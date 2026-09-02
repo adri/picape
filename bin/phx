@@ -3,6 +3,7 @@
 # --fake: resets the seeded picape_e2e database and talks to the supermarket fake on :4020.
 # --db NAME: use that database instead (with --fake it is kept as it is, no reset).
 set -euo pipefail
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
 cd "$(dirname "$0")/.."
 mkdir -p tmp
 docker compose up -d --wait postgres >/dev/null

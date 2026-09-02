@@ -2,6 +2,7 @@
 # Pushes the GraphQL schema to Delta
 # Delta detects API changes and notifies e.g. a Slack channel
 set -e # Stop on error
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
 
 # Generate schema
 MIX_ENV=test mix graphql.schema
