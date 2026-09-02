@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -60,7 +60,7 @@ config :phoenix, :stacktrace_depth, 20
 config :picape, Picape.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
-  database: "picape_dev",
+  database: System.get_env("PICAPE_DB") || "picape_dev",
   hostname: "localhost",
   port: 5433,
   pool_size: 10
