@@ -3,7 +3,7 @@ import { BlurView } from 'expo-blur';
 import * as React from 'react';
 import { View, Text, ScrollView, FlatList, StyleSheet, useColorScheme } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
-import SkeletonContent from 'react-native-skeleton-content';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { Card } from '../components/Card/Card';
 import { ImageCard } from '../components/Card/ImageCard';
