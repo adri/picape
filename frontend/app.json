@@ -34,6 +34,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.adri.picape"
-    }
+    },
+    "plugins": ["sentry-expo"]
   }
 }
