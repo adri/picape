@@ -35,7 +35,7 @@ async function openApp(page) {
 
 async function checkScreen(page, name) {
   if (skipScreenshots) {
-    await page.screenshot({ path: `../tmp/e2e/${name}.png` });
+    await page.screenshot({ path: `../tmp/e2e/${name}.png`, scale: 'css' });
   } else {
     await expect(page).toHaveScreenshot(`${name}.png`);
   }

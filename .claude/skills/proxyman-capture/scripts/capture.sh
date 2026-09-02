@@ -44,7 +44,11 @@ case "${1:-}" in
       | "update supermarket_login set access_token = '"'"'\(.access_token)'"'"', refresh_token = '"'"'\(.refresh_token)'"'"', expires_in = \(.expires_in), updated_at = now();"' "$file")
     [[ -n $sql ]] || { echo "no token refresh response in $file; record the app while it starts" >&2; exit 1; }
     cd "$(dirname "$0")/../../../.."
-    echo "$sql" | docker compose exec -T postgres psql -U postgres -d "${PICAPE_DB:-picape_dev}" -q
+    result=$(echo "$sql" | docker compose exec -T postgres psql -U postgres -d "${PICAPE_DB:-picape_dev}")
+    if [[ $result != "UPDATE 1" ]]; then
+      echo "expected UPDATE 1 in ${PICAPE_DB:-picape_dev}, got: $result. Is there exactly one supermarket_login row?" >&2
+      exit 1
+    fi
     echo "supermarket_login updated in ${PICAPE_DB:-picape_dev}; token values were not printed"
     ;;
   *)

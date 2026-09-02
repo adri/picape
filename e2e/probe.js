@@ -13,11 +13,18 @@ const screenshot = path.join(__dirname, '..', 'tmp', 'probe.png');
     if (m.type() === 'error') lines.push(`console.error ${m.text().slice(0, 300)}`);
   });
   page.on('pageerror', (e) => lines.push(`pageerror ${e.message.slice(0, 300)}`));
-  page.on('requestfailed', (r) =>
-    lines.push(`requestfailed ${r.url().slice(0, 120)} ${r.failure()?.errorText}`)
-  );
-  await page.goto(url);
-  await page.waitForLoadState('networkidle');
+  page.on('requestfailed', (r) => {
+    if (r.url().startsWith('http://localhost')) {
+      lines.push(`requestfailed ${r.url().slice(0, 120)} ${r.failure()?.errorText}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
+  try {
+    await page.goto(url, { timeout: 60_000 });
+    await page.waitForLoadState('networkidle', { timeout: 15_000 });
+  } catch (error) {
+    lines.push(`navigation ${error.message.split('\n')[0]}`);
+  }
   await page.waitForTimeout(3000);
   const root = await page
     .locator('#root')
@@ -29,5 +36,5 @@ const screenshot = path.join(__dirname, '..', 'tmp', 'probe.png');
   );
   for (const line of lines) console.log(line);
   await browser.close();
-  process.exit(lines.some((l) => l.startsWith('pageerror')) ? 1 : 0);
+  process.exit(lines.some((l) => l.startsWith('pageerror') || l.startsWith('navigation')) ? 1 : 0);
 })();
