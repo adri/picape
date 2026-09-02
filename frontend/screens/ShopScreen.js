@@ -51,7 +51,7 @@ const GET_SHOPPING_LIST = gql`
 
 const START_SHOPPING = gql`
   mutation StartShopping {
-    StartShopping {
+    startShopping {
       id
     }
   }

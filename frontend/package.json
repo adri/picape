@@ -12,7 +12,8 @@
     "lint": "eslint . --ext .js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run format:check && npm test"
+    "check": "npm run lint && npm run format:check && npm run graphql:check && npm test",
+    "graphql:check": "node scripts/check-operations.js"
   },
   "eslintConfig": {
     "extends": "universe/native",
@@ -29,6 +30,14 @@
         ],
         "env": {
           "serviceworker": true
+        }
+      },
+      {
+        "files": [
+          "scripts/**"
+        ],
+        "env": {
+          "node": true
         }
       }
     ]
