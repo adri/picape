@@ -74,9 +74,10 @@ COPY assets assets
 COPY frontend frontend
 
 # Build expo from frontend directory
+# dist stays off the cache mounts. expo export removes its output directory
+# before it writes, and rmdir on a mount point fails with EBUSY.
 RUN --mount=type=cache,target=~/.npm,sharing=locked \
   --mount=type=cache,target=/app/frontend/node_modules,sharing=locked \
-  --mount=type=cache,target=/app/frontend/dist,sharing=locked \
   cd frontend && npm install --lockfile-only --prefer-offline --no-audit --loglevel=error \
   && npm run build:web \
   && mkdir /app/expo && cp -R dist/* /app/priv/static
