@@ -79,11 +79,14 @@ COPY frontend frontend
 #
 # NODE_ENV is production here, so npm omits devDependencies unless asked.
 # build:web needs workbox-build, which nothing depends on transitively.
+#
+# priv/static is gitignored and holds no tracked file, so a clean checkout
+# has no such directory for COPY priv priv to bring in.
 RUN --mount=type=cache,target=~/.npm,sharing=locked \
   --mount=type=cache,target=/app/frontend/node_modules,sharing=locked \
   cd frontend && npm install --include=dev --lockfile-only --prefer-offline --no-audit --loglevel=error \
   && npm run build:web \
-  && mkdir /app/expo && cp -R dist/* /app/priv/static
+  && mkdir -p /app/priv/static && cp -R dist/* /app/priv/static
 
 # Compile the release
 COPY lib lib
