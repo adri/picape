@@ -140,7 +140,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
           boneColor={Colors.skeletonBone}
           highlightColor={Colors.skeletonHighlight}
           containerStyle={{ paddingHorizontal: 20 }}
-          isLoading={loading}
+          isLoading={loading && !recipe.ingredients}
         />
 
         <FlatList

@@ -10,6 +10,7 @@ import Sentry from './Sentry';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import linking from './navigation/useLinking';
 import { createAbsintheSocketLink } from './src/absintheSocketLink';
+import { persistCacheOnChange, restoreCache } from './src/persistedCache';
 import * as serviceWorkerRegistration from './src/serviceWorkerRegistration';
 
 const onErrorLink = onError(({ graphQLErrors, networkError }) => {
@@ -23,9 +24,27 @@ const onErrorLink = onError(({ graphQLErrors, networkError }) => {
 
 const host = __DEV__ ? 'ws://localhost:4010/socket' : 'wss://picape.whybug.com/socket';
 const link = ApolloLink.from([onErrorLink, createAbsintheSocketLink(host)]);
+
+const cache = new InMemoryCache();
+// Before the first render, so the screens have something to paint rather than
+// sweeping skeletons while the socket connects.
+restoreCache(cache);
+persistCacheOnChange(cache);
+
 const client = new ApolloClient({
   link,
-  cache: new InMemoryCache(),
+  cache,
+  defaultOptions: {
+    watchQuery: {
+      // Show what was restored straight away and refresh it over the socket.
+      // Without this the restored cache would satisfy the query and the screen
+      // would keep showing whatever was true when the app was last closed.
+      fetchPolicy: 'cache-and-network',
+      // Only the first fetch needs the network; refetches within a session are
+      // driven by the subscriptions.
+      nextFetchPolicy: 'cache-first',
+    },
+  },
 });
 
 const LightTheme = {
