@@ -9,6 +9,7 @@ import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { SectionLink } from '../components/Section/SectionLink';
 import Colors from '../constants/Colors';
+import { FloatingTop, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 
 const ADD_RECIPE = gql`
@@ -63,7 +64,7 @@ export function NewRecipeScreen({ navigation }) {
       </ScrollView>
 
       <CloseIcon
-        style={{ position: 'absolute' }}
+        style={{ position: 'absolute', top: FloatingTop, left: Spacing.md }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();

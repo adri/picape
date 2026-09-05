@@ -12,6 +12,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
+import { FloatingTop, Spacing } from '../constants/Spacing';
 import { GET_RECIPES } from '../operations/getRecipes';
 import { PLAN_RECIPE, optimisticResponse } from '../operations/planRecipe';
 
@@ -126,7 +127,11 @@ export default function WeekPlannerScreen({ navigation }) {
       </ScrollView>
 
       <CloseIcon
-        style={{ position: 'absolute', top: insets.top, right: insets.left }}
+        style={{
+          position: 'absolute',
+          top: insets.top + FloatingTop,
+          right: insets.right + Spacing.md,
+        }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();

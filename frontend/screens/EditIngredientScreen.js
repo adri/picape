@@ -12,6 +12,7 @@ import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
+import { FloatingTop, Spacing } from '../constants/Spacing';
 
 const EDIT_INGREDIENT = gql`
   mutation EditIngredient($input: EditIngredientInput!) {
@@ -173,7 +174,7 @@ export function EditIngredientScreen({
       </ScrollView>
 
       <CloseIcon
-        style={{ position: 'absolute' }}
+        style={{ position: 'absolute', top: FloatingTop, left: Spacing.md }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();

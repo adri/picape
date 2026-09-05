@@ -6,13 +6,6 @@
   "short_name": "Picape",
   "start_url": "/?utm_source=web_app_manifest",
   "orientation": "portrait",
-  "related_applications": [
-    {
-      "platform": "itunes",
-      "id": "com.adri.picape"
-    }
-  ],
-  "prefer_related_applications": true,
   "icons": [
     {
       "src": "/pwa/chrome-icon/chrome-icon-144.png",

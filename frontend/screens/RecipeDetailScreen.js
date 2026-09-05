@@ -14,6 +14,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
+import { Spacing } from '../constants/Spacing';
 import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
 
 const linkify = require('linkify-it')();
@@ -228,7 +229,11 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
       </ScrollView>
 
       <BackIcon
-        style={{ position: 'absolute', top: insets.top, left: insets.left + 5 }}
+        style={{
+          position: 'absolute',
+          top: insets.top + Spacing.sm,
+          left: insets.left + Spacing.md,
+        }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();

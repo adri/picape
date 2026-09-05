@@ -6,6 +6,13 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Picape" />
+    <!--
+      Standalone paints the status bar in this colour, so it has to follow the
+      theme or the bar sits as a light band over a dark app. iOS picks the
+      contrasting text colour itself.
+     -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
 
     <!--
       @expo/webpack-config used to inject these. Metro web serves public/
