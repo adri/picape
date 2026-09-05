@@ -10,7 +10,7 @@ import { ListItem } from '../components/ListItem/ListItem';
 import { SearchIngredients } from '../components/Search/SearchIngredients';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
-import Colors from '../constants/Colors';
+import Colors, { useTheme } from '../constants/Colors';
 import Layout from '../constants/Layout';
 import { FloatingTop, Spacing } from '../constants/Spacing';
 
@@ -67,6 +67,7 @@ export function EditIngredientScreen({
   },
 }) {
   const insets = useSafeAreaInsets();
+  const colors = useTheme();
   const [editIngredient] = useMutation(EDIT_INGREDIENT, {
     refetchQueries: ['GetRecipe', 'RecipeList'],
     onCompleted: () => {
@@ -126,13 +127,16 @@ export function EditIngredientScreen({
             label="Naam"
             onChangeText={(name) => changeForm({ ...form, name })}
             defaultValue={form.name}
-            labelStyle={styles.label}
+            labelStyle={[styles.label, { color: colors.text }]}
             inputStyle={styles.input}
-            inputContainerStyle={styles.inputContainer}
+            inputContainerStyle={[
+              styles.inputContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
           />
         </View>
 
-        <View style={[styles.switch]}>
+        <View style={[styles.switch, { backgroundColor: colors.cardBackground }]}>
           <View style={[styles.container]}>
             <Text style={{ color: Colors.text, flexGrow: 1 }}>Altijd in huis</Text>
             <Switch
@@ -147,7 +151,7 @@ export function EditIngredientScreen({
         </View>
 
         <View style={[styles.searchContainer]}>
-          <Text style={styles.label}>Supermarket</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Supermarket</Text>
           <SearchIngredients
             autoFocus={false}
             supermarketOnly
@@ -227,18 +231,15 @@ const styles = StyleSheet.create({
   },
   switch: {
     flex: 1,
-    backgroundColor: Colors.cardBackground,
     marginHorizontal: 20,
     borderRadius: 9,
     padding: 10,
   },
   label: {
-    color: Colors.text,
     paddingBottom: 5,
   },
   inputContainer: {
     borderBottomWidth: 0,
-    backgroundColor: Colors.cardBackground,
     borderRadius: 9,
     minHeight: 36,
   },

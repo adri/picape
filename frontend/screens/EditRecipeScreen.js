@@ -11,7 +11,7 @@ import { ListItem } from '../components/ListItem/ListItem';
 import { SearchIngredients } from '../components/Search/SearchIngredients';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
-import Colors from '../constants/Colors';
+import Colors, { useTheme } from '../constants/Colors';
 import { FloatingTop, Spacing } from '../constants/Spacing';
 import { EDIT_RECIPE } from '../operations/editRecipe';
 import { GET_RECIPE } from '../operations/getRecipe';
@@ -66,6 +66,7 @@ export function EditRecipeScreen({
   });
   const { node: recipe = {} } = data;
   const insets = useSafeAreaInsets();
+  const colors = useTheme();
 
   if (loading) return 'Loading...';
   if (error) return `Error! ${error}`;
@@ -92,9 +93,12 @@ export function EditRecipeScreen({
             label="Naam"
             onChangeText={(title) => changeForm({ ...form, title, changed: true })}
             defaultValue={form.title}
-            labelStyle={styles.label}
+            labelStyle={[styles.label, { color: colors.text }]}
             inputStyle={styles.input}
-            inputContainerStyle={styles.inputContainer}
+            inputContainerStyle={[
+              styles.inputContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
           />
         </View>
 
@@ -104,9 +108,12 @@ export function EditRecipeScreen({
             label="Image"
             onChangeText={(imageUrl) => changeForm({ ...form, imageUrl, changed: true })}
             defaultValue={form.imageUrl}
-            labelStyle={styles.label}
+            labelStyle={[styles.label, { color: colors.text }]}
             inputStyle={styles.input}
-            inputContainerStyle={styles.inputContainer}
+            inputContainerStyle={[
+              styles.inputContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
           />
         </View>
 
@@ -119,14 +126,17 @@ export function EditRecipeScreen({
             defaultValue={form.description}
             numberOfLines={(form.description || '').split('\n').length}
             testID="description"
-            labelStyle={styles.label}
+            labelStyle={[styles.label, { color: colors.text }]}
             inputStyle={[styles.input, styles.descriptionInput]}
-            inputContainerStyle={styles.inputContainer}
+            inputContainerStyle={[
+              styles.inputContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
           />
         </View>
 
         <View style={{ marginHorizontal: 20 }}>
-          <Text style={styles.label}>Ingrediënten</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Ingrediënten</Text>
           {form.ingredients.map((row) => (
             <ListItem
               key={row.ingredient.id}
@@ -233,12 +243,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   label: {
-    color: Colors.text,
     paddingBottom: 5,
   },
   inputContainer: {
     borderBottomWidth: 0,
-    backgroundColor: Colors.cardBackground,
     borderRadius: 9,
     minHeight: 36,
   },

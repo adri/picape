@@ -8,7 +8,7 @@ import { CloseIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
-import Colors from '../constants/Colors';
+import Colors, { useTheme } from '../constants/Colors';
 import { FloatingTop, Spacing } from '../constants/Spacing';
 
 const ADD_INGREDIENT = gql`
@@ -40,6 +40,7 @@ export function AddIngredientScreen({
     supermarketProductId: ingredient.id,
   });
   const insets = useSafeAreaInsets();
+  const colors = useTheme();
   const [addIngredient] = useMutation(ADD_INGREDIENT, {
     onCompleted: () => {
       navigation.goBack();
@@ -63,13 +64,16 @@ export function AddIngredientScreen({
             label="Naam"
             onChangeText={(name) => changeForm({ ...form, name })}
             defaultValue={form.name}
-            labelStyle={styles.label}
+            labelStyle={[styles.label, { color: colors.text }]}
             inputStyle={styles.input}
-            inputContainerStyle={styles.inputContainer}
+            inputContainerStyle={[
+              styles.inputContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
           />
         </View>
 
-        <View style={[styles.switch]}>
+        <View style={[styles.switch, { backgroundColor: colors.cardBackground }]}>
           <View style={[styles.container]}>
             <Text style={{ color: Colors.text, flexGrow: 1 }}>Altijd in huis</Text>
             <Switch
@@ -129,18 +133,15 @@ const styles = StyleSheet.create({
   },
   switch: {
     flex: 1,
-    backgroundColor: Colors.cardBackground,
     marginHorizontal: 20,
     borderRadius: 9,
     padding: 10,
   },
   label: {
-    color: Colors.text,
     paddingBottom: 5,
   },
   inputContainer: {
     borderBottomWidth: 0,
-    backgroundColor: Colors.cardBackground,
     borderRadius: 9,
     minHeight: 36,
   },
