@@ -53,7 +53,7 @@ function PlannedRecipes({ navigation }) {
         boneColor={Colors.skeletonBone}
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ paddingLeft: 0 }}
-        isLoading={loading}>
+        isLoading={loading && recipes.length === 0}>
         <FlatList
           style={{ paddingHorizontal: 20, height: 150 }}
           containerStyle={{ paddingLeft: 20 }}
@@ -124,7 +124,7 @@ export default function ListScreen({ navigation }) {
           boneColor={Colors.skeletonBone}
           highlightColor={Colors.skeletonHighlight}
           containerStyle={{}}
-          isLoading={loading}>
+          isLoading={loading && (currentOrder.items || []).length === 0}>
           <FlatList
             style={{ paddingHorizontal: 20, marginBottom: 50 }}
             data={currentOrder.items}

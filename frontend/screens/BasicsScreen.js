@@ -96,7 +96,7 @@ function BasicsList({ navigation }) {
         boneColor={Colors.skeletonBone}
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ flex: 1 }}
-        isLoading={loading}>
+        isLoading={loading && edges.length === 0}>
         <FlatList
           style={{ paddingHorizontal: 20 }}
           data={edges}

@@ -45,7 +45,7 @@ function LastRecipesList({ navigation }) {
         boneColor={Colors.skeletonBone}
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ paddingLeft: 0 }}
-        isLoading={loading}>
+        isLoading={loading && recipes.length === 0}>
         <FlatList
           style={{ paddingHorizontal: Gutter - Spacing.xs }}
           horizontal
@@ -103,7 +103,7 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
         boneColor={Colors.skeletonBone}
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ paddingLeft: 15 }}
-        isLoading={loading}
+        isLoading={loading && recipes.length === 0}
       />
 
       <FlatList

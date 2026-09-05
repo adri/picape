@@ -66,7 +66,7 @@ export default function WeekPlannerScreen({ navigation }) {
           containerStyle={styles.skeletonContainerStyle}
           boneColor={Colors.skeletonBone}
           highlightColor={Colors.skeletonHighlight}
-          isLoading={loading}>
+          isLoading={loading && chosenRecipes.length === 0}>
           <FlatList
             initialNumToRender={3}
             numColumns={2}
