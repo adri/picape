@@ -7,6 +7,7 @@ import { StyleSheet, useColorScheme } from 'react-native';
 import { ListCountBadge } from '../components/Badge/ListCountBadge';
 import TabBarIcon from '../components/TabBarIcon';
 import Colors from '../constants/Colors';
+import { Hairline } from '../constants/Spacing';
 import { AddIngredientScreen } from '../screens/AddIngredientScreen';
 import BasicsScreen from '../screens/BasicsScreen';
 import { EditIngredientScreen } from '../screens/EditIngredientScreen';
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopWidth: 0.5,
+    borderTopWidth: Hairline,
     borderTopColor: Colors.hairLineBackground,
     backdropFilter: `blur(${100 * 0.2}px)`,
     WebkitBackdropFilter: `saturate(180%) blur(${100 * 0.2}px)`,

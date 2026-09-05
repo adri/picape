@@ -7,6 +7,7 @@ import { CloseIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import { SectionLink } from '../components/Section/SectionLink';
 import Colors from '../constants/Colors';
 import Type from '../constants/Type';
 
@@ -38,24 +39,16 @@ export function NewRecipeScreen({ navigation }) {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="">
-          <Text
+          <SectionLink
+            title="Opslaan"
             onPress={(e) => {
               e.preventDefault();
               navigation.goBack();
             }}
-            style={[
-              Type.sectionLink,
-              {
-                color: Colors.secondaryText,
-                fontSize: 14,
-                paddingBottom: 2,
-              },
-            ]}>
-            Opslaan
-          </Text>
+          />
         </SectionHeader>
 
-        <SectionHeader title="Nieuw Recept" />
+        <SectionHeader title="Nieuw Recept" large />
 
         <View style={styles.container}>
           <InputText

@@ -105,7 +105,7 @@ export function EditIngredientScreen({
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
-        <SectionHeader title="Bewerk ingrediënt" />
+        <SectionHeader title="Bewerk ingrediënt" large />
 
         {ingredient.warning && (
           <View

@@ -11,7 +11,7 @@ export default function SearchScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
-        <SectionHeader title="Zoeken" />
+        <SectionHeader title="Zoeken" large />
         <View style={[styles.searchContainer]}>
           <SearchIngredients />
         </View>

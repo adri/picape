@@ -3,13 +3,13 @@ import { BlurView } from 'expo-blur';
 import * as React from 'react';
 import { View, Text, ScrollView, FlatList, StyleSheet, useColorScheme } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { Card } from '../components/Card/Card';
 import { ImageCard } from '../components/Card/ImageCard';
 import { RefreshIcon, CloseIcon, MinusIcon, PlusIcon } from '../components/Icon';
 import { FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 import { GET_RECIPES } from '../operations/getRecipes';
@@ -52,7 +52,7 @@ export default function WeekPlannerScreen({ navigation }) {
           paddingTop: insets.top,
           paddingBottom: insets.bottom + FOOTER_HEIGHT + 20,
         }}>
-        <SectionHeader title="Week planner" />
+        <SectionHeader title="Week planner" large />
 
         <SkeletonContent
           layout={Array(3).fill({

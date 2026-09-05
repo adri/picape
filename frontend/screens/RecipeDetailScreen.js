@@ -4,7 +4,6 @@ import { Text, FlatList, View, ImageBackground, Dimensions } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler';
 import Hyperlink from 'react-native-hyperlink';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { Badge } from '../components/Badge/Badge';
 import { BackIcon, CheckIcon } from '../components/Icon';
@@ -12,6 +11,7 @@ import { EditIcon } from '../components/Icon/EditIcon';
 import { ListItem } from '../components/ListItem/ListItem';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
@@ -101,7 +101,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
           />
         </ImageBackground>
 
-        <SectionHeader title={recipe.title}>
+        <SectionHeader title={recipe.title} large>
           <EditIcon
             onPress={(e) => {
               e.preventDefault();

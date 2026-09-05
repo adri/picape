@@ -2,12 +2,13 @@ import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
 import { Text, View, ScrollView, FlatList } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { ImageCard } from '../components/Card/ImageCard';
 import { BackIcon, PlusIcon } from '../components/Icon';
 import { PlanRecipe } from '../components/Recipe/PlanRecipe';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import { SectionLink } from '../components/Section/SectionLink';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Type from '../constants/Type';
 import { GET_RECIPES } from '../operations/getRecipes';
@@ -23,23 +24,15 @@ export function RecipeListScreen({ navigation }) {
     <View style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: insets.top }}>
         <SectionHeader title="">
-          <Text
+          <SectionLink
+            title="Nieuw Recept"
             onPress={(e) => {
               e.preventDefault();
               navigation.navigate('NewRecipe');
             }}
-            style={[
-              Type.sectionLink,
-              {
-                color: Colors.secondaryText,
-                fontSize: 14,
-                paddingBottom: 2,
-              },
-            ]}>
-            Nieuw Recept
-          </Text>
+          />
         </SectionHeader>
-        <SectionHeader title="Alle Recepten" />
+        <SectionHeader title="Alle Recepten" large />
 
         <SkeletonContent
           layout={Array(3).fill({

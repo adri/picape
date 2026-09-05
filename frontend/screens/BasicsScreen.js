@@ -3,11 +3,11 @@ import * as React from 'react';
 import { View, FlatList, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 
@@ -85,7 +85,7 @@ function BasicsList({ navigation }) {
   const { basics: { edges = [] } = {} } = data;
   return (
     <View>
-      <SectionHeader title="Altijd in huis" />
+      <SectionHeader title="Altijd in huis" large />
       <SkeletonContent
         layout={Array(5).fill({
           width: Dimensions.get('window').width - 40,
