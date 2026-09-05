@@ -9,6 +9,7 @@ import { InputText } from '../components/Input/InputText';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
+import { FloatingTop, Spacing } from '../constants/Spacing';
 
 const ADD_INGREDIENT = gql`
   mutation AddIngredient($name: String!, $isEssential: Boolean!, $supermarketProductId: String!) {
@@ -84,7 +85,7 @@ export function AddIngredientScreen({
       </ScrollView>
 
       <CloseIcon
-        style={{ position: 'absolute' }}
+        style={{ position: 'absolute', top: FloatingTop, left: Spacing.md }}
         onPress={(e) => {
           e.preventDefault();
           navigation.goBack();
