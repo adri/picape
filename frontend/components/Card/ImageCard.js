@@ -12,10 +12,18 @@ export const CARD_HEIGHT = 134;
 
 // A recipe as a picture with its name underneath, and room in the top corner
 // for the control that plans it.
+//
+// The card fills whatever box its list gives it: a shelf hands it a width, a
+// grid hands it a flex. It never sizes itself off its own contents, because a
+// long title would otherwise stretch the cell and leave the gaps between cards
+// uneven.
 export function ImageCard({
   imageUrl,
-  width,
-  height,
+  height = CARD_HEIGHT,
+  // A shelf keeps every card the same height by giving each title one line, so
+  // the row does not take its height from its longest name. The grid has the
+  // room for two, and there the name is what you are reading.
+  titleLines = 2,
   children,
   onPress,
   title,
@@ -26,10 +34,9 @@ export function ImageCard({
 }) {
   const colors = useTheme();
   const [loaded, setLoaded] = React.useState(false);
-  const size = { width: width || CARD_WIDTH, height: height || CARD_HEIGHT };
 
   return (
-    <View style={[{ paddingHorizontal: Spacing.xs, maxWidth: size.width }, style]}>
+    <View style={style}>
       <ImageBackground
         source={{ uri: imageUrl }}
         onLoad={() => setLoaded(true)}
@@ -45,8 +52,9 @@ export function ImageCard({
           transitionTimingFunction: 'ease-out',
         }}
         style={[
-          size,
           {
+            width: '100%',
+            height,
             borderRadius: Radius.md,
             // Until the picture loads the card is a filled shape rather than a
             // hole in the layout.
@@ -81,7 +89,7 @@ export function ImageCard({
           paddingTop: Spacing.sm,
         }}>
         <Text
-          numberOfLines={2}
+          numberOfLines={titleLines}
           style={[Type.subtitle, { color: colors.cardText, flex: 1, opacity: muted ? 0.5 : 1 }]}
           onPress={onPress}>
           {title}
