@@ -49,7 +49,7 @@ export function RecipeListScreen({ navigation }) {
           quietly turned initialNumToRender and windowSize into no-ops. */}
       <FlatList
         numColumns={2}
-        data={loading ? [] : recipes}
+        data={recipes}
         keyExtractor={(recipe) => recipe.id}
         initialNumToRender={6}
         windowSize={5}
@@ -57,7 +57,7 @@ export function RecipeListScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={header}
         ListEmptyComponent={
-          loading ? (
+          loading && recipes.length === 0 ? (
             <SkeletonContent
               layout={SKELETON_LAYOUT}
               containerStyle={{
