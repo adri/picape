@@ -93,6 +93,10 @@ const lightTheme = {
   skeletonBone: '#E1E9EE',
   skeletonHighlight: '#F2F8FC',
   hairLineBackground: 'rgba(0, 0, 0, 0.1)',
+  // A section that is set apart from the rest of the screen, the way iOS
+  // recesses a grouped list. A tint of the text colour rather than a fixed
+  // grey, so it stays a hint of a panel instead of a slab laid over the page.
+  groupedBackground: 'rgba(0, 0, 0, 0.04)',
 
   // Section
   sectionHeaderText: 'black',
@@ -138,6 +142,7 @@ const darkTheme = {
   skeletonBone: palette['grey-900'],
   skeletonHighlight: palette['grey-700'],
   hairLineBackground: 'rgba(255, 255, 255, 0.15)',
+  groupedBackground: 'rgba(255, 255, 255, 0.06)',
 
   // Section
   sectionHeaderText: 'white',

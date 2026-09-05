@@ -237,7 +237,7 @@ export default function PlanScreen({ navigation }) {
           />
         </SectionHeader>
         <Separator />
-        <View style={{ backgroundColor: Colors.cardBackground }}>
+        <View style={{ backgroundColor: Colors.groupedBackground }}>
           <LastRecipesList navigation={navigation} />
         </View>
         <Separator />
