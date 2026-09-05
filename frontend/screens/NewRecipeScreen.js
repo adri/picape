@@ -8,7 +8,7 @@ import { InputText } from '../components/Input/InputText';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { SectionLink } from '../components/Section/SectionLink';
-import Colors from '../constants/Colors';
+import Colors, { useTheme } from '../constants/Colors';
 import { FloatingTop, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 
@@ -22,6 +22,7 @@ const ADD_RECIPE = gql`
 `;
 export function NewRecipeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const colors = useTheme();
   const [form, changeForm] = useState({
     title: '',
   });
@@ -56,9 +57,12 @@ export function NewRecipeScreen({ navigation }) {
             testID="title"
             label="Title"
             onChangeText={(title) => changeForm({ ...form, title })}
-            labelStyle={styles.label}
+            labelStyle={[styles.label, { color: colors.text }]}
             inputStyle={styles.input}
-            inputContainerStyle={styles.inputContainer}
+            inputContainerStyle={[
+              styles.inputContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
           />
         </View>
       </ScrollView>
@@ -98,12 +102,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   label: {
-    color: Colors.text,
     paddingBottom: 5,
   },
   inputContainer: {
     borderBottomWidth: 0,
-    backgroundColor: Colors.cardBackground,
     borderRadius: 9,
     minHeight: 36,
   },

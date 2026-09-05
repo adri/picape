@@ -133,6 +133,7 @@ class SearchBar extends Component {
           }}
           inputContainerStyle={StyleSheet.flatten([
             styles.inputContainer,
+            { backgroundColor: Colors.cardBackground },
             hasFocus && { marginRight: this.state.cancelButtonWidth },
             inputContainerStyle,
           ])}
@@ -220,7 +221,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderBottomWidth: 0,
-    backgroundColor: Colors.cardBackground,
     borderRadius: 9,
     minHeight: 36,
   },
