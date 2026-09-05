@@ -50,6 +50,10 @@ export default function PlanStackScreen() {
         // each card at viewport height, so its own ScrollView scrolls instead.
         headerMode: 'float',
         animationEnabled: true,
+        // Web detaches every card but the top one, so an edge swipe back
+        // remounts the screen it reveals and shows one blank frame first.
+        // Keeping it attached means it is already painted when the swipe starts.
+        detachPreviousScreen: false,
         ...TransitionPresets.SlideFromRightIOS,
       })}>
       <Stack.Screen name="PlanScreen" component={BottomTabNavigator} />
