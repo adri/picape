@@ -1,34 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as React from 'react';
-import { View, TouchableOpacity } from 'react-native';
 
-import Colors from '../../constants/Colors';
+import { CircleIcon } from './CircleIcon';
 
 export function CloseIcon(props) {
   return (
-    <TouchableOpacity style={[{ width: 50, height: 50 }, props.style]} onPress={props.onPress}>
-      <View
-        style={[
-          {
-            width: 30,
-            height: 30,
-            borderRadius: 15,
-            backgroundColor: Colors.iconDefault,
-            margin: 10,
-          },
-          props.style,
-        ]}>
-        <Ionicons
-          name="close"
-          size={25}
-          style={{
-            alignSelf: 'center',
-            justifyContent: 'center',
-            marginTop: 1,
-          }}
-          color="white"
-        />
-      </View>
-    </TouchableOpacity>
+    <CircleIcon name="close" glyphSize={22} pad={10} accessibilityLabel="Sluiten" {...props} />
   );
 }

@@ -1,29 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as React from 'react';
-import { View, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 
-import Colors from '../../constants/Colors';
+import { CircleIcon } from './CircleIcon';
 
 export function PlusIcon(props) {
-  return (
-    <TouchableOpacity onPress={props.onPress}>
-      <View style={[styles.container, props.style]}>
-        <Ionicons name="add" size={25} style={styles.icon} color="white" />
-      </View>
-    </TouchableOpacity>
-  );
+  return <CircleIcon name="add" glyphSize={25} accessibilityLabel="Toevoegen" {...props} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: Colors.iconDefault,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    lineHeight: 30,
-  },
-});

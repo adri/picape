@@ -2,10 +2,10 @@ import { useQuery } from '@apollo/client';
 import * as React from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { ImageCard } from '../components/Card/ImageCard';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import { GET_LAST_RECIPES } from '../operations/getLastRecipes';
 
@@ -24,7 +24,7 @@ export default function CookScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView>
-        <SectionHeader title="Recepten" />
+        <SectionHeader title="Recepten" large />
 
         <SkeletonContent
           layout={Array(3).fill({

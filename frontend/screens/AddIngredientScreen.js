@@ -54,7 +54,7 @@ export function AddIngredientScreen({
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
-        <SectionHeader title="Ingredient toevogen" />
+        <SectionHeader title="Ingredient toevogen" large />
 
         <View style={styles.container}>
           <InputText

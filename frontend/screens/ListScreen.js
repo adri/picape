@@ -3,7 +3,6 @@ import * as React from 'react';
 import { View, FlatList, Text, Dimensions, Platform, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { Badge } from '../components/Badge/Badge';
 import { ImageCard } from '../components/Card/ImageCard';
@@ -11,9 +10,9 @@ import { Nutriscore, nutriscore } from '../components/Ingredient/Nutriscore';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
-
 import Type from '../constants/Type';
 import { SUBSCRIBE_ORDER, GET_ORDER } from '../operations/getOrder';
 import { GET_ORDER_COUNT } from '../operations/getOrderCount';
@@ -111,7 +110,7 @@ export default function ListScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
-        <SectionHeader title="Je mandje" />
+        <SectionHeader title="Je mandje" large />
 
         <PlannedRecipes navigation={navigation} />
 

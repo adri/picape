@@ -1,19 +1,23 @@
 import * as React from 'react';
 import { View } from 'react-native';
 
-import Colors from '../../constants/Colors';
+import { useTheme } from '../../constants/Colors';
+import { Gutter, Hairline } from '../../constants/Spacing';
 
-export function Separator(props) {
+// The hairline between sections. One device pixel, the same translucent tone as
+// the tab bar's edge, inset to the gutter so it starts where the text does.
+export function Separator({ style, full }) {
+  const colors = useTheme();
+
   return (
     <View
       style={[
-        props.style,
         {
-          marginTop: 20,
-          marginHorizontal: 20,
-          borderTopColor: Colors.hairLineBackground,
-          borderTopWidth: 0.5,
+          marginHorizontal: full ? 0 : Gutter,
+          borderTopColor: colors.hairLineBackground,
+          borderTopWidth: Hairline,
         },
+        style,
       ]}
     />
   );

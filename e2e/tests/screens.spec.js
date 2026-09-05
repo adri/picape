@@ -91,7 +91,9 @@ test('raising a quantity in the cart syncs with the supermarket', async ({ page 
     .getByText('Butter', { exact: true })
     .locator('xpath=ancestor::div[.//div[text()="1"]][1]');
   await butter.getByText('1', { exact: true }).click();
-  await butter.locator('div[tabindex="0"]').last().click();
+  // The icon buttons carry a role and a label now, so select the control by
+  // what it is rather than by the div react-native-web happens to render.
+  await butter.getByRole('button', { name: 'Toevoegen' }).click();
   await expect(cartBadge(page, 5)).toBeVisible();
   await expect(page.getByText('2', { exact: true })).toHaveCount(2);
   expect(problems).toEqual([]);
