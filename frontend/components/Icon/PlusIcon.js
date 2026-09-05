@@ -25,6 +25,5 @@ const styles = StyleSheet.create({
   },
   icon: {
     lineHeight: 30,
-    marginLeft: 2,
   },
 });
