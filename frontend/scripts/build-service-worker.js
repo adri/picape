@@ -11,7 +11,7 @@
 //     that the installed app keeps locally
 //   - app-shell routing: serve index.html for navigations, but not for paths
 //     starting with /_ or paths that look like files
-//   - StaleWhileRevalidate for same-origin .png, capped at 50 entries
+//   - a runtime cache for images, which the recipe photos rely on
 const path = require('path');
 const { generateSW } = require('workbox-build');
 
@@ -52,11 +52,30 @@ generateSW({
   maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
   runtimeCaching: [
     {
-      urlPattern: /\.png$/,
-      handler: 'StaleWhileRevalidate',
+      // Any image, whatever its extension or origin. The rule this replaces
+      // matched /\.png$/, which no recipe photo is: they are .jpg served from
+      // Cloudinary, and a Cloudinary delivery URL need not carry an extension
+      // at all. So the one thing on screen worth caching never was.
+      urlPattern: ({ request }) => request.destination === 'image',
+      // The photos are immutable at their URL, and Cloudinary says so with
+      // `immutable` and a month of max-age. Serving them from the cache without
+      // a revalidating request is what makes a relaunch paint at once, and what
+      // makes the app work with no network at all.
+      handler: 'CacheFirst',
       options: {
         cacheName: 'images',
-        expiration: { maxEntries: 50 },
+        expiration: {
+          // A few hundred recipes' worth, dropped after a month.
+          maxEntries: 200,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+          // Opaque responses are padded to several MB each against the origin's
+          // quota, so a full cache has to evict rather than start failing.
+          purgeOnQuotaError: true,
+        },
+        // Cloudinary answers without CORS headers, so the response is opaque
+        // and reports status 0. Workbox stores only 200 by default, which means
+        // that without this the cache silently keeps nothing.
+        cacheableResponse: { statuses: [0, 200] },
       },
     },
   ],
