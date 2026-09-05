@@ -2,10 +2,11 @@ import { useMutation, gql } from '@apollo/client';
 import * as React from 'react';
 import { useState } from 'react';
 import { View, Switch, Text, StyleSheet, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
-import { FixedFooter } from '../components/Section/FixedFooter';
+import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
 
@@ -37,6 +38,7 @@ export function AddIngredientScreen({
     isEssential: false,
     supermarketProductId: ingredient.id,
   });
+  const insets = useSafeAreaInsets();
   const [addIngredient] = useMutation(ADD_INGREDIENT, {
     onCompleted: () => {
       navigation.goBack();
@@ -48,17 +50,9 @@ export function AddIngredientScreen({
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
-        <CloseIcon
-          style={{ position: 'absolute' }}
-          inputStyle={StyleSheet.flatten([styles.input])}
-          inputContainerStyle={StyleSheet.flatten([styles.inputContainer])}
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.goBack();
-          }}
-        />
-
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
         <SectionHeader title="Ingredient toevogen" />
 
@@ -88,6 +82,14 @@ export function AddIngredientScreen({
           </Text>
         </View>
       </ScrollView>
+
+      <CloseIcon
+        style={{ position: 'absolute' }}
+        onPress={(e) => {
+          e.preventDefault();
+          navigation.goBack();
+        }}
+      />
       <FixedFooter
         buttonText="Toevoegen"
         onPress={(e) => {
