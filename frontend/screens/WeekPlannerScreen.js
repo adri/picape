@@ -8,6 +8,7 @@ import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import { Card } from '../components/Card/Card';
 import { ImageCard } from '../components/Card/ImageCard';
 import { RefreshIcon, CloseIcon, MinusIcon, PlusIcon } from '../components/Icon';
+import { FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
@@ -45,14 +46,12 @@ export default function WeekPlannerScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
-        <CloseIcon
-          style={{ position: 'absolute', top: insets.top, right: insets.left }}
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.goBack();
-          }}
-        />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom + FOOTER_HEIGHT + 20,
+        }}>
         <SectionHeader title="Week planner" />
 
         <SkeletonContent
@@ -125,6 +124,15 @@ export default function WeekPlannerScreen({ navigation }) {
           </Card>
         </SkeletonContent>
       </ScrollView>
+
+      <CloseIcon
+        style={{ position: 'absolute', top: insets.top, right: insets.left }}
+        onPress={(e) => {
+          e.preventDefault();
+          navigation.goBack();
+        }}
+      />
+
       <BlurView
         style={{
           position: 'absolute',

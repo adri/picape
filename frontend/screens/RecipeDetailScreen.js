@@ -10,7 +10,7 @@ import { Badge } from '../components/Badge/Badge';
 import { BackIcon, CheckIcon } from '../components/Icon';
 import { EditIcon } from '../components/Icon/EditIcon';
 import { ListItem } from '../components/ListItem/ListItem';
-import { FixedFooter } from '../components/Section/FixedFooter';
+import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
@@ -80,7 +80,153 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
   });
 
   return (
-    <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
+        <ImageBackground
+          source={{ uri: recipe.imageUrl }}
+          fadeDuration={0}
+          imageStyle={{ resizeMode: 'cover' }}
+          style={{
+            width: Dimensions.get('window').width,
+            height: 200,
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              width: Dimensions.get('window').width,
+              height: 200,
+            }}
+          />
+        </ImageBackground>
+
+        <SectionHeader title={recipe.title}>
+          <EditIcon
+            onPress={(e) => {
+              e.preventDefault();
+              navigation.navigate('EditRecipe', { recipeId: recipe.id });
+            }}
+          />
+        </SectionHeader>
+
+        {recipe.warning && (
+          <View
+            style={{
+              marginHorizontal: 20,
+              padding: 10,
+              marginBottom: 20,
+              backgroundColor: Colors.cardBackground,
+              borderRadius: Layout.borderRadius,
+            }}>
+            <Text style={{ color: Colors.text }}>⚠️ {recipe.warning}</Text>
+          </View>
+        )}
+
+        <SkeletonContent
+          layout={[
+            {
+              width: Dimensions.get('window').width - 40,
+              height: 100,
+              marginBottom: 10,
+            },
+            ...Array(5).fill({
+              width: Dimensions.get('window').width - 40,
+              height: 60,
+              marginBottom: 10,
+            }),
+          ]}
+          boneColor={Colors.skeletonBone}
+          highlightColor={Colors.skeletonHighlight}
+          containerStyle={{ paddingHorizontal: 20 }}
+          isLoading={loading}
+        />
+
+        <FlatList
+          horizontal
+          style={{ paddingHorizontal: 20 }}
+          data={recipe.ingredients}
+          keyExtractor={({ ingredient }) => ingredient.id}
+          renderItem={({ item: { ingredient }, index }) => {
+            const warning = ingredient.warning ? ' ⚠️' : '';
+            return (
+              <ListItem
+                style={{ marginRight: 10 }}
+                onImagePress={(e) => {
+                  e.preventDefault();
+                  navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
+                }}
+                title={`${ingredient.name}${warning}`}
+                imageUrl={ingredient.imageUrl}
+              />
+            );
+          }}
+        />
+
+        {steps.map((step, index) => {
+          return (
+            <View
+              key={`step-${index}`}
+              style={{
+                marginHorizontal: 20,
+                marginBottom: 20,
+                padding: 10,
+                borderRadius: Layout.borderRadius,
+                opacity: stepChecked[index] ? 0.7 : 1,
+                backgroundColor: Colors.cardBackground,
+                flexDirection: 'row',
+              }}>
+              <Hyperlink
+                linkify={linkify}
+                style={{ flex: 1, alignSelf: 'stretch' }}
+                linkDefault={!stepChecked[index]}
+                linkStyle={{ color: Colors.link }}
+                linkText={(url) => {
+                  if (url.includes('shortcuts://run-shortcut?name=Timer')) {
+                    return new URLSearchParams(url).get('text');
+                  }
+
+                  if (url.includes('youtube.com')) {
+                    return 'Youtube';
+                  }
+
+                  return url;
+                }}>
+                <Text
+                  style={{
+                    color: stepChecked[index] ? Colors.secondaryText : Colors.text,
+                  }}>
+                  {stepWithTimerLinks(step)}
+                </Text>
+              </Hyperlink>
+
+              {stepChecked[index] ? (
+                <CheckIcon
+                  style={{ margin: 10 }}
+                  onPress={(e) => {
+                    e.preventDefault();
+                    const newChecked = [...stepChecked];
+                    newChecked[index] = false;
+                    setStepsChecked(newChecked);
+                  }}
+                />
+              ) : (
+                <Badge
+                  outline
+                  style={{ margin: 10 }}
+                  onPress={(e) => {
+                    e.preventDefault();
+                    const newChecked = [...stepChecked];
+                    newChecked[index] = true;
+                    setStepsChecked(newChecked);
+                  }}
+                />
+              )}
+            </View>
+          );
+        })}
+      </ScrollView>
+
       <BackIcon
         style={{ position: 'absolute', top: insets.top, left: insets.left + 5 }}
         onPress={(e) => {
@@ -89,148 +235,6 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         }}
       />
 
-      <ImageBackground
-        source={{ uri: recipe.imageUrl }}
-        fadeDuration={0}
-        imageStyle={{ resizeMode: 'cover' }}
-        style={{
-          width: Dimensions.get('window').width,
-          height: 200,
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            width: Dimensions.get('window').width,
-            height: 200,
-          }}
-        />
-      </ImageBackground>
-
-      <SectionHeader title={recipe.title}>
-        <EditIcon
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.navigate('EditRecipe', { recipeId: recipe.id });
-          }}
-        />
-      </SectionHeader>
-
-      {recipe.warning && (
-        <View
-          style={{
-            marginHorizontal: 20,
-            padding: 10,
-            marginBottom: 20,
-            backgroundColor: Colors.cardBackground,
-            borderRadius: Layout.borderRadius,
-          }}>
-          <Text style={{ color: Colors.text }}>⚠️ {recipe.warning}</Text>
-        </View>
-      )}
-
-      <SkeletonContent
-        layout={[
-          {
-            width: Dimensions.get('window').width - 40,
-            height: 100,
-            marginBottom: 10,
-          },
-          ...Array(5).fill({
-            width: Dimensions.get('window').width - 40,
-            height: 60,
-            marginBottom: 10,
-          }),
-        ]}
-        boneColor={Colors.skeletonBone}
-        highlightColor={Colors.skeletonHighlight}
-        containerStyle={{ paddingHorizontal: 20 }}
-        isLoading={loading}
-      />
-
-      <FlatList
-        horizontal
-        style={{ paddingHorizontal: 20 }}
-        data={recipe.ingredients}
-        keyExtractor={({ ingredient }) => ingredient.id}
-        renderItem={({ item: { ingredient }, index }) => {
-          const warning = ingredient.warning ? ' ⚠️' : '';
-          return (
-            <ListItem
-              style={{ marginRight: 10 }}
-              onImagePress={(e) => {
-                e.preventDefault();
-                navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
-              }}
-              title={`${ingredient.name}${warning}`}
-              imageUrl={ingredient.imageUrl}
-            />
-          );
-        }}
-      />
-
-      {steps.map((step, index) => {
-        return (
-          <View
-            key={`step-${index}`}
-            style={{
-              marginHorizontal: 20,
-              marginBottom: 20,
-              padding: 10,
-              borderRadius: Layout.borderRadius,
-              opacity: stepChecked[index] ? 0.7 : 1,
-              backgroundColor: Colors.cardBackground,
-              flexDirection: 'row',
-            }}>
-            <Hyperlink
-              linkify={linkify}
-              style={{ flex: 1, alignSelf: 'stretch' }}
-              linkDefault={!stepChecked[index]}
-              linkStyle={{ color: Colors.link }}
-              linkText={(url) => {
-                if (url.includes('shortcuts://run-shortcut?name=Timer')) {
-                  return new URLSearchParams(url).get('text');
-                }
-
-                if (url.includes('youtube.com')) {
-                  return 'Youtube';
-                }
-
-                return url;
-              }}>
-              <Text
-                style={{
-                  color: stepChecked[index] ? Colors.secondaryText : Colors.text,
-                }}>
-                {stepWithTimerLinks(step)}
-              </Text>
-            </Hyperlink>
-
-            {stepChecked[index] ? (
-              <CheckIcon
-                style={{ margin: 10 }}
-                onPress={(e) => {
-                  e.preventDefault();
-                  const newChecked = [...stepChecked];
-                  newChecked[index] = false;
-                  setStepsChecked(newChecked);
-                }}
-              />
-            ) : (
-              <Badge
-                outline
-                style={{ margin: 10 }}
-                onPress={(e) => {
-                  e.preventDefault();
-                  const newChecked = [...stepChecked];
-                  newChecked[index] = true;
-                  setStepsChecked(newChecked);
-                }}
-              />
-            )}
-          </View>
-        );
-      })}
-      <View style={{ height: 60 }} />
       <FixedFooter
         buttonText={recipe.isCooked ? 'Toch niet gekookt' : 'Gekookt'}
         onPress={(e) => {
@@ -243,6 +247,6 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
           });
         }}
       />
-    </ScrollView>
+    </View>
   );
 }

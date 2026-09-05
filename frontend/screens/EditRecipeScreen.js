@@ -2,13 +2,14 @@ import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon } from '../components/Icon';
 import { QuantitySelector } from '../components/Ingredient/QuantitySelector';
 import { InputText } from '../components/Input/InputText';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SearchIngredients } from '../components/Search/SearchIngredients';
-import { FixedFooter } from '../components/Section/FixedFooter';
+import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
 import { EDIT_RECIPE } from '../operations/editRecipe';
@@ -63,6 +64,7 @@ export function EditRecipeScreen({
     },
   });
   const { node: recipe = {} } = data;
+  const insets = useSafeAreaInsets();
 
   if (loading) return 'Loading...';
   if (error) return `Error! ${error}`;
@@ -77,17 +79,9 @@ export function EditRecipeScreen({
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
-        <CloseIcon
-          style={{ position: 'absolute' }}
-          inputStyle={StyleSheet.flatten([styles.input])}
-          inputContainerStyle={StyleSheet.flatten([styles.inputContainer])}
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.goBack();
-          }}
-        />
-
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
         <SectionHeader title="Bewerk recept" />
 
@@ -185,9 +179,16 @@ export function EditRecipeScreen({
             )}
           />
         </View>
-
-        <View style={styles.spacer} />
       </ScrollView>
+
+      <CloseIcon
+        style={{ position: 'absolute' }}
+        onPress={(e) => {
+          e.preventDefault();
+          navigation.goBack();
+        }}
+      />
+
       <FixedFooter
         buttonText="Opslaan"
         disabled={form.changed == false}
@@ -229,9 +230,6 @@ const styles = StyleSheet.create({
   descriptionInput: {
     marginTop: 10,
     marginBottom: 10,
-  },
-  spacer: {
-    marginTop: 100,
   },
   label: {
     color: Colors.text,

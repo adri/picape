@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
-import { Text, ScrollView, FlatList } from 'react-native';
+import { Text, View, ScrollView, FlatList } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
@@ -20,7 +20,86 @@ export function RecipeListScreen({ navigation }) {
   if (error) return `Error! ${error}`;
 
   return (
-    <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: insets.top }}>
+        <SectionHeader title="">
+          <Text
+            onPress={(e) => {
+              e.preventDefault();
+              navigation.navigate('NewRecipe');
+            }}
+            style={[
+              Type.sectionLink,
+              {
+                color: Colors.secondaryText,
+                fontSize: 14,
+                paddingBottom: 2,
+              },
+            ]}>
+            Nieuw Recept
+          </Text>
+        </SectionHeader>
+        <SectionHeader title="Alle Recepten" />
+
+        <SkeletonContent
+          layout={Array(3).fill({
+            width: 50,
+            height: 60,
+            margin: 5,
+            marginBottom: 10,
+            flexBasis: '50%',
+          })}
+          containerStyle={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignContent: 'stretch',
+            paddingHorizontal: 15,
+            marginBottom: 50,
+          }}
+          boneColor={Colors.skeletonBone}
+          highlightColor={Colors.skeletonHighlight}
+          isLoading={loading}>
+          <FlatList
+            initialNumToRender={3}
+            numColumns={2}
+            windowSize={3}
+            data={recipes}
+            keyExtractor={(recipe) => recipe.id}
+            renderItem={({ item: recipe }, index) => {
+              return (
+                <ImageCard
+                  style={{
+                    animationDuration: `${100 + 10 * index}ms`,
+                    animationPlayState: 'running',
+                    animationKeyframes: {
+                      from: { opacity: 0 },
+                      to: { opacity: 1 },
+                    },
+                    transitionProperty: ['opacity'],
+                    transitionDuration: '200ms',
+                    transitionTimingFunction: 'ease-in',
+                    flexBasis: '50%',
+                  }}
+                  imageStyle={{ width: '100%' }}
+                  key={recipe.id}
+                  title={recipe.title}
+                  imageUrl={recipe.imageUrl}
+                  badges={recipe.warning && <Text>⚠️</Text>}
+                  onPress={(e) => {
+                    e.preventDefault();
+                    navigation.navigate('RecipeDetail', {
+                      id: recipe.id,
+                      recipe,
+                    });
+                  }}>
+                  <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
+                </ImageCard>
+              );
+            }}
+          />
+        </SkeletonContent>
+      </ScrollView>
+
       <BackIcon
         style={{ position: 'absolute', top: insets.top, left: insets.left + 5 }}
         onPress={(e) => {
@@ -28,83 +107,6 @@ export function RecipeListScreen({ navigation }) {
           navigation.goBack();
         }}
       />
-
-      <SectionHeader title="">
-        <Text
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.navigate('NewRecipe');
-          }}
-          style={[
-            Type.sectionLink,
-            {
-              color: Colors.secondaryText,
-              fontSize: 14,
-              paddingBottom: 2,
-            },
-          ]}>
-          Nieuw Recept
-        </Text>
-      </SectionHeader>
-      <SectionHeader title="Alle Recepten" />
-
-      <SkeletonContent
-        layout={Array(3).fill({
-          width: 50,
-          height: 60,
-          margin: 5,
-          marginBottom: 10,
-          flexBasis: '50%',
-        })}
-        containerStyle={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          alignContent: 'stretch',
-          paddingHorizontal: 15,
-          marginBottom: 50,
-        }}
-        boneColor={Colors.skeletonBone}
-        highlightColor={Colors.skeletonHighlight}
-        isLoading={loading}>
-        <FlatList
-          initialNumToRender={3}
-          numColumns={2}
-          windowSize={3}
-          data={recipes}
-          keyExtractor={(recipe) => recipe.id}
-          renderItem={({ item: recipe }, index) => {
-            return (
-              <ImageCard
-                style={{
-                  animationDuration: `${100 + 10 * index}ms`,
-                  animationPlayState: 'running',
-                  animationKeyframes: {
-                    from: { opacity: 0 },
-                    to: { opacity: 1 },
-                  },
-                  transitionProperty: ['opacity'],
-                  transitionDuration: '200ms',
-                  transitionTimingFunction: 'ease-in',
-                  flexBasis: '50%',
-                }}
-                imageStyle={{ width: '100%' }}
-                key={recipe.id}
-                title={recipe.title}
-                imageUrl={recipe.imageUrl}
-                badges={recipe.warning && <Text>⚠️</Text>}
-                onPress={(e) => {
-                  e.preventDefault();
-                  navigation.navigate('RecipeDetail', {
-                    id: recipe.id,
-                    recipe,
-                  });
-                }}>
-                <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
-              </ImageCard>
-            );
-          }}
-        />
-      </SkeletonContent>
-    </ScrollView>
+    </View>
   );
 }

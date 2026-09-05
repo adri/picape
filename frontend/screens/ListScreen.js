@@ -12,6 +12,7 @@ import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
+import Layout from '../constants/Layout';
 
 import Type from '../constants/Type';
 import { SUBSCRIBE_ORDER, GET_ORDER } from '../operations/getOrder';
@@ -109,7 +110,7 @@ export default function ListScreen({ navigation }) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
         <SectionHeader title="Je mandje" />
 
         <PlannedRecipes navigation={navigation} />
