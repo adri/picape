@@ -43,6 +43,12 @@ export default function PlanStackScreen() {
     <Stack.Navigator
       screenOptions={() => ({
         headerShown: false,
+        // On web the 'screen' header mode lets a card overflow the body so the
+        // browser scrolls the document and can hide its address bar. This app
+        // is a standalone PWA with no address bar, and that mode carries the
+        // pinned back buttons and footers away with the content. 'float' keeps
+        // each card at viewport height, so its own ScrollView scrolls instead.
+        headerMode: 'float',
         animationEnabled: true,
         ...TransitionPresets.SlideFromRightIOS,
       })}>

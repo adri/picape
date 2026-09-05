@@ -9,6 +9,7 @@ import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
+import Layout from '../constants/Layout';
 
 const GET_BASICS = gql`
   query BasicsList {
@@ -146,7 +147,7 @@ function BasicsList({ navigation }) {
 export default function PlanScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={{ paddingBottom: 50 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
         <BasicsList navigation={navigation} />
       </ScrollView>
     </SafeAreaView>

@@ -6,6 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Layout from '../../constants/Layout';
 
+// What the footer occupies above the bottom safe-area inset: the button's
+// 10 margin, its 20 of vertical padding, one line of text and the 20 below it.
+// A screen adds this to its scroll padding so its last row clears the footer.
+export const FOOTER_HEIGHT = 70;
+
 export function FixedFooter({ buttonText, onPress, disabled }) {
   const insets = useSafeAreaInsets();
   return (

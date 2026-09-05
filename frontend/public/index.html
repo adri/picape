@@ -41,8 +41,10 @@
         -webkit-overflow-scrolling: touch;
         margin: 0px;
         padding: 0px;
-        /* Allows content to fill the viewport and go beyond the bottom */
-        min-height: 100%;
+        /* The shell is exactly the viewport, so every screen scrolls its own
+           ScrollView instead of the document. Overlays a screen pins with
+           position: absolute then stay put while its content moves. */
+        height: 100%;
       }
       #root {
         flex-shrink: 0;
@@ -56,13 +58,12 @@
         scroll-behavior: smooth;
         /* Prevent text size change on orientation change https://gist.github.com/tfausak/2222823#file-ios-8-web-app-html-L138 */
         -webkit-text-size-adjust: 100%;
-        height: calc(100% + env(safe-area-inset-top));
       }
 
       body {
         display: flex;
-        /* Allows you to scroll below the viewport; default value is visible */
-        overflow-y: auto;
+        /* The document never scrolls; the screens do. */
+        overflow: hidden;
         overscroll-behavior-y: none;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
