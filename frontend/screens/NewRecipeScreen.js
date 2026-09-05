@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
-import { FixedFooter } from '../components/Section/FixedFooter';
+import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
 import Type from '../constants/Type';
@@ -34,17 +34,9 @@ export function NewRecipeScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
-        <CloseIcon
-          style={{ position: 'absolute', top: insets.top, left: insets.left + 5 }}
-          inputStyle={StyleSheet.flatten([styles.input])}
-          inputContainerStyle={StyleSheet.flatten([styles.inputContainer])}
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.goBack();
-          }}
-        />
-
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="">
           <Text
             onPress={(e) => {
@@ -76,6 +68,14 @@ export function NewRecipeScreen({ navigation }) {
           />
         </View>
       </ScrollView>
+
+      <CloseIcon
+        style={{ position: 'absolute' }}
+        onPress={(e) => {
+          e.preventDefault();
+          navigation.goBack();
+        }}
+      />
       <FixedFooter
         buttonText="Toevoegen"
         onPress={(e) => {

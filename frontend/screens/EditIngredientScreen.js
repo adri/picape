@@ -2,12 +2,13 @@ import { useMutation, useQuery, gql } from '@apollo/client';
 import * as React from 'react';
 import { useState, useRef } from 'react';
 import { View, Switch, Text, StyleSheet, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CloseIcon, PlusIcon } from '../components/Icon';
 import { InputText } from '../components/Input/InputText';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SearchIngredients } from '../components/Search/SearchIngredients';
-import { FixedFooter } from '../components/Section/FixedFooter';
+import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
@@ -64,6 +65,7 @@ export function EditIngredientScreen({
     params: { ingredientId },
   },
 }) {
+  const insets = useSafeAreaInsets();
   const [editIngredient] = useMutation(EDIT_INGREDIENT, {
     refetchQueries: ['GetRecipe', 'RecipeList'],
     onCompleted: () => {
@@ -99,17 +101,9 @@ export function EditIngredientScreen({
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }} stickyHeaderIndices={[0]}>
-        <CloseIcon
-          style={{ position: 'absolute' }}
-          inputStyle={StyleSheet.flatten([styles.input])}
-          inputContainerStyle={StyleSheet.flatten([styles.inputContainer])}
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.goBack();
-          }}
-        />
-
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
         <SectionHeader title="Bewerk ingrediënt" />
 
@@ -177,6 +171,14 @@ export function EditIngredientScreen({
           />
         </View>
       </ScrollView>
+
+      <CloseIcon
+        style={{ position: 'absolute' }}
+        onPress={(e) => {
+          e.preventDefault();
+          navigation.goBack();
+        }}
+      />
       <FixedFooter
         buttonText="Bewerken"
         onPress={(e) => {
