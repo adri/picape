@@ -1,12 +1,15 @@
 import * as React from 'react';
-import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native';
+import { View, Image, Text, TouchableOpacity } from 'react-native';
 
 import { Subtitle } from './Subtitle';
-import Colors from '../../constants/Colors';
-import Layout from '../../constants/Layout';
+import { useTheme } from '../../constants/Colors';
+import { Radius, Spacing } from '../../constants/Spacing';
 import Type from '../../constants/Type';
-import { Badge } from '../Badge/Badge';
 
+const THUMB = 40;
+
+// One ingredient: its picture, its name, and whatever control the screen puts
+// on the right.
 export function ListItem({
   style,
   title,
@@ -17,28 +20,61 @@ export function ListItem({
   textStyle,
   onImagePress,
 }) {
+  const colors = useTheme();
+
   let image = (
-    <View style={styles.imageContainer}>
+    <View
+      style={{
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: Spacing.xs,
+        // Product shots come as cut-outs on white, so the tile stays light in
+        // both themes. It is a shade off pure white so an image that fails to
+        // load reads as an empty tile rather than a hole punched in the row.
+        backgroundColor: '#f2f2f2',
+        borderRadius: Radius.sm,
+        width: THUMB + Spacing.sm,
+        height: THUMB + Spacing.sm,
+      }}>
       <Image
         source={{ uri: imageUrl }}
-        fadeDuration={0.2}
         resizeMode="contain"
-        style={styles.image}
+        style={{ width: THUMB, height: THUMB }}
       />
     </View>
   );
 
   if (onImagePress) {
-    image = <TouchableOpacity onPress={onImagePress}>{image}</TouchableOpacity>;
+    image = (
+      <TouchableOpacity
+        onPress={onImagePress}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={title}>
+        {image}
+      </TouchableOpacity>
+    );
   }
 
   return (
-    <View style={[styles.container, style]}>
+    <View
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: Spacing.md,
+          marginBottom: Spacing.sm,
+          padding: Spacing.sm,
+          backgroundColor: colors.cardBackground,
+          borderRadius: Radius.md,
+        },
+        style,
+      ]}>
       {image}
-      <View style={styles.titleContainer}>
-        <Text style={[Type.body, { color: Colors.cardText }, textStyle]}>
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <Text numberOfLines={2} style={[Type.body, { color: colors.cardText }, textStyle]}>
           {title}
-          {!!badges && <View style={{ marginLeft: 3 }}>{badges}</View>}
+          {!!badges && <View style={{ marginLeft: Spacing.xs }}>{badges}</View>}
         </Text>
         {!!subtitle && <Subtitle subtitle={subtitle} textStyle={textStyle} />}
       </View>
@@ -46,32 +82,3 @@ export function ListItem({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginBottom: 10,
-    flexDirection: 'row',
-    backgroundColor: Colors.cardBackground,
-    paddingHorizontal: 10,
-    paddingLeft: 5,
-    paddingVertical: 5,
-    borderRadius: Layout.borderRadius,
-  },
-  imageContainer: {
-    justifyContent: 'center',
-    padding: 4,
-    backgroundColor: 'white',
-    borderRadius: 8,
-  },
-  image: {
-    width: 40,
-    height: 40,
-  },
-  titleContainer: {
-    flex: 1,
-    marginLeft: 10,
-    alignSelf: 'stretch',
-    justifyContent: 'center',
-  },
-});

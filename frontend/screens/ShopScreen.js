@@ -4,7 +4,6 @@ import * as React from 'react';
 import { Linking, Text, FlatList, View, Dimensions, Platform, useColorScheme } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useSafeArea } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Svg, { Path } from 'react-native-svg';
 
 import { Badge } from '../components/Badge/Badge';
@@ -12,6 +11,7 @@ import { CloseIcon, CheckIcon } from '../components/Icon';
 import { BuyIngredient } from '../components/Ingredient/BuyIngredient';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 

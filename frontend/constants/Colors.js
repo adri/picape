@@ -1,6 +1,5 @@
-import { Appearance } from 'react-native';
+import { Appearance, useColorScheme } from 'react-native';
 
-const colorScheme = Appearance.getColorScheme();
 const tintColor = '#48BB78';
 
 // Palette 12
@@ -165,6 +164,29 @@ const darkTheme = {
   iconDefault: palette['grey-600'],
   iconSelected: tintColor,
 };
-const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+function themeFor(scheme) {
+  return scheme === 'dark' ? darkTheme : lightTheme;
+}
 
-export default theme;
+// Subscribes to the appearance, so a component that reads its colours here
+// repaints when iOS switches theme under it. Prefer this in anything that
+// renders colour.
+export function useTheme() {
+  return themeFor(useColorScheme());
+}
+
+// The same palette as a live object: each property resolves when it is read
+// rather than when this module is imported. Reading the scheme once at import
+// froze every colour to whichever theme the app happened to boot in, which left
+// black text on black after a switch to dark. A frozen read inside a
+// module-scope StyleSheet.create still freezes, so colour belongs in the
+// component body, from useTheme.
+const Colors = {};
+for (const key of Object.keys(lightTheme)) {
+  Object.defineProperty(Colors, key, {
+    enumerable: true,
+    get: () => themeFor(Appearance.getColorScheme())[key],
+  });
+}
+
+export default Colors;

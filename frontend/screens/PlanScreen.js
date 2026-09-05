@@ -3,16 +3,17 @@ import * as React from 'react';
 import { Text, View, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SkeletonContent from '../components/Skeleton/SkeletonContent';
 
 import { Badge } from '../components/Badge/Badge';
 import { ImageCard } from '../components/Card/ImageCard';
 import { PlanRecipe } from '../components/Recipe/PlanRecipe';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import { SectionLink } from '../components/Section/SectionLink';
 import { Separator } from '../components/Section/Separator';
+import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
-import Type from '../constants/Type';
+import { Gutter, Spacing } from '../constants/Spacing';
 import { GET_LAST_RECIPES } from '../operations/getLastRecipes';
 import { GET_RECIPES } from '../operations/getRecipes';
 
@@ -22,8 +23,13 @@ function LastRecipesList({ navigation }) {
   if (error) return `Error! ${error}`;
 
   const { recipes = [] } = data;
+
+  // Nothing cooked recently means nothing to show. A heading over an empty
+  // strip reads as a section that failed to load.
+  if (!loading && recipes.length === 0) return null;
+
   return (
-    <View>
+    <View style={{ paddingBottom: Spacing.xl }}>
       <SectionHeader title="Dit heb je in huis" />
       <SkeletonContent
         layout={[
@@ -41,9 +47,9 @@ function LastRecipesList({ navigation }) {
         containerStyle={{ paddingLeft: 0 }}
         isLoading={loading}>
         <FlatList
-          style={{ paddingHorizontal: 20, height: 150 }}
-          containerStyle={{ paddingLeft: 20 }}
+          style={{ paddingHorizontal: Gutter - Spacing.xs }}
           horizontal
+          showsHorizontalScrollIndicator={false}
           removeClippedSubviews
           data={recipes}
           keyExtractor={(recipe) => recipe.id}
@@ -58,7 +64,8 @@ function LastRecipesList({ navigation }) {
                   });
                 }}
                 key={recipe.id}
-                width={100}
+                width={110}
+                height={110}
                 title={recipe.title}
                 imageUrl={recipe.imageUrl}
                 muted={recipe.isCooked}
@@ -73,9 +80,14 @@ function LastRecipesList({ navigation }) {
 
 function FilteredRecipeList({ navigation, loading, title, recipes }) {
   const plannedCount = filterByRecipe(recipes, (r) => r.isPlanned).length;
+
+  if (!loading && recipes.length === 0) return null;
+
   return (
-    <View>
-      <SectionHeader title={title}>{plannedCount && <Badge amount={plannedCount} />}</SectionHeader>
+    <View style={{ paddingBottom: Spacing.xl }}>
+      <SectionHeader title={title}>
+        {plannedCount > 0 && <Badge amount={plannedCount} />}
+      </SectionHeader>
 
       <SkeletonContent
         layout={[
@@ -95,8 +107,9 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
       />
 
       <FlatList
-        style={{ paddingHorizontal: 20 }}
+        style={{ paddingHorizontal: Gutter - Spacing.xs }}
         horizontal
+        showsHorizontalScrollIndicator={false}
         removeClippedSubviews
         data={recipes}
         keyExtractor={(recipe) => recipe.id}
@@ -144,52 +157,58 @@ function filterByRecipe(recipes, match) {
   return recipes.filter((recipe) => match(recipe));
 }
 
+// The shelves the home screen sorts recipes onto, in order. A shelf with
+// nothing on it is dropped rather than rendered as a heading over a gap.
+const SHELVES = [
+  {
+    title: 'Met aardappelen',
+    pick: (recipes) => filterByIngredient(recipes, (i) => i.name === 'Aardappelen'),
+  },
+  {
+    title: 'Met rijst',
+    pick: (recipes) => filterByIngredient(recipes, (i) => i.name.toLowerCase().includes('rijst')),
+  },
+  {
+    title: 'Met pasta',
+    pick: (recipes) =>
+      filterByIngredient(
+        recipes,
+        (i) => i.name.toLowerCase().includes('pasta') || i.name.toLowerCase().includes('noodles')
+      ),
+  },
+  {
+    title: 'Met wraps',
+    pick: (recipes) => filterByIngredient(recipes, (i) => i.name.toLowerCase().includes('wrap')),
+  },
+  {
+    title: 'Soep',
+    pick: (recipes) => filterByRecipe(recipes, (r) => r.title.toLowerCase().includes('soep')),
+  },
+];
+
 function RecipeList({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
 
   if (error) return `Error! ${error}`;
 
   const { recipes = [] } = data;
+  const shelves = SHELVES.map((shelf) => ({ ...shelf, recipes: shelf.pick(recipes) })).filter(
+    (shelf) => loading || shelf.recipes.length > 0
+  );
 
   return (
     <View>
-      <FilteredRecipeList
-        loading={loading}
-        navigation={navigation}
-        title="Met aardappelen"
-        recipes={filterByIngredient(recipes, (i) => i.name == 'Aardappelen')}
-      />
-      <Separator />
-      <FilteredRecipeList
-        loading={loading}
-        navigation={navigation}
-        title="Met rijst"
-        recipes={filterByIngredient(recipes, (i) => i.name.toLowerCase().includes('rijst'))}
-      />
-      <Separator />
-      <FilteredRecipeList
-        loading={loading}
-        navigation={navigation}
-        title="Met pasta"
-        recipes={filterByIngredient(
-          recipes,
-          (i) => i.name.toLowerCase().includes('pasta') || i.name.toLowerCase().includes('noodles')
-        )}
-      />
-      <Separator />
-      <FilteredRecipeList
-        loading={loading}
-        navigation={navigation}
-        title="Met wraps"
-        recipes={filterByIngredient(recipes, (i) => i.name.toLowerCase().includes('wrap'))}
-      />
-      <Separator />
-      <FilteredRecipeList
-        loading={loading}
-        navigation={navigation}
-        title="Soep"
-        recipes={filterByRecipe(recipes, (r) => r.title.toLowerCase().includes('soep'))}
-      />
+      {shelves.map((shelf, index) => (
+        <React.Fragment key={shelf.title}>
+          {index > 0 && <Separator />}
+          <FilteredRecipeList
+            loading={loading}
+            navigation={navigation}
+            title={shelf.title}
+            recipes={shelf.recipes}
+          />
+        </React.Fragment>
+      ))}
     </View>
   );
 }
@@ -198,40 +217,24 @@ export default function PlanScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
-        <SectionHeader title="Recepten">
-          <Text
+        <SectionHeader title="Recepten" large>
+          <SectionLink
+            title="Planner"
             onPress={(e) => {
               e.preventDefault();
               navigation.navigate('WeekPlanner');
             }}
-            style={[
-              Type.sectionLink,
-              {
-                color: Colors.secondaryText,
-                fontSize: 14,
-                paddingBottom: 2,
-              },
-            ]}>
-            Planner
-          </Text>
-          <Text
+          />
+          <SectionLink
+            title="Bekijk alles"
             onPress={(e) => {
               e.preventDefault();
               navigation.navigate('RecipeList');
             }}
-            style={[
-              Type.sectionLink,
-              {
-                color: Colors.secondaryText,
-                fontSize: 14,
-                paddingBottom: 2,
-              },
-            ]}>
-            Bekijk alles
-          </Text>
+          />
         </SectionHeader>
         <Separator />
-        <View style={{ backgroundColor: Colors.skeletonBone }}>
+        <View style={{ backgroundColor: Colors.cardBackground }}>
           <LastRecipesList navigation={navigation} />
         </View>
         <Separator />

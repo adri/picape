@@ -83,7 +83,7 @@ export function EditRecipeScreen({
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
-        <SectionHeader title="Bewerk recept" />
+        <SectionHeader title="Bewerk recept" large />
 
         <View style={styles.container}>
           <InputText
