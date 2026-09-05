@@ -49,6 +49,10 @@ defmodule Picape.Factory do
     %Picape.Recipe.IngredientRef{quantity: 1}
   end
 
+  def build(:planned_recipe) do
+    %Picape.Order.PlannedRecipe{line_id: "1", quantity: 1}
+  end
+
   def build(:product_map, attributes) do
     Map.merge(%{}, attributes)
   end

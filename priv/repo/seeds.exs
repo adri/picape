@@ -53,7 +53,7 @@ graded_young_cheese = insert! :ingredient, name: "Graded Young Cheese", supermar
 graded_mozarella = insert! :ingredient, name: "Graded Mozarella", supermarket_product_id: 10762991
 
 # Recipes
-insert! :recipe, title: "Nasi", image_url: "https://user-images.githubusercontent.com/133832/28996360-3152b366-79ff-11e7-9d0e-01ffb907e32c.jpg", ingredients: [
+nasi = insert! :recipe, title: "Nasi", image_url: "https://user-images.githubusercontent.com/133832/28996360-3152b366-79ff-11e7-9d0e-01ffb907e32c.jpg", ingredients: [
   chicken,
   rice,
   chinese_veges,
@@ -62,7 +62,7 @@ insert! :recipe, title: "Nasi", image_url: "https://user-images.githubuserconten
   egg,
   oil_cooking,
 ]
-insert! :recipe, title: "Shoarma", image_url: "https://user-images.githubusercontent.com/133832/28996359-31513040-79ff-11e7-9dd1-59917a2247e5.jpg", ingredients: [
+shoarma = insert! :recipe, title: "Shoarma", image_url: "https://user-images.githubusercontent.com/133832/28996359-31513040-79ff-11e7-9dd1-59917a2247e5.jpg", ingredients: [
   shoarma,
   pita,
   rucola,
@@ -73,3 +73,16 @@ insert! :recipe, title: "Pizza", image_url: "https://user-images.githubuserconte
   graded_mozarella,
   tomato_puree,
 ]
+
+
+# A finished order. Without one `lastOrderedRecipes` is empty, so the plan
+# screen's "Dit heb je in huis" shelf never rendered and no screenshot ever
+# covered it, nor a card's cooked state.
+#
+# `start_shopping` moves the current order's contents to a line id of the
+# microsecond clock and leaves "1" free for the next one, so a finished order
+# has a large id and the current one does not. Seeding it that way keeps this
+# out of the current order, which is what the cart and the basics tab read.
+finished_order = "1700000000000000"
+insert! :planned_recipe, line_id: finished_order, recipe_id: nasi.id
+insert! :planned_recipe, line_id: finished_order, recipe_id: shoarma.id, cooked: true
