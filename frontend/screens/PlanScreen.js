@@ -5,7 +5,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '../components/Badge/Badge';
-import { ImageCard } from '../components/Card/ImageCard';
+import { CARD_WIDTH, ImageCard } from '../components/Card/ImageCard';
 import { PlanRecipe } from '../components/Recipe/PlanRecipe';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { SectionLink } from '../components/Section/SectionLink';
@@ -47,9 +47,9 @@ function LastRecipesList({ navigation }) {
         containerStyle={{ paddingLeft: 0 }}
         isLoading={loading && recipes.length === 0}>
         <FlatList
-          style={{ paddingHorizontal: Gutter - Spacing.xs }}
           horizontal
           showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: Gutter, gap: Spacing.md }}
           removeClippedSubviews
           data={recipes}
           keyExtractor={(recipe) => recipe.id}
@@ -64,8 +64,9 @@ function LastRecipesList({ navigation }) {
                   });
                 }}
                 key={recipe.id}
-                width={110}
+                style={{ width: 110 }}
                 height={110}
+                titleLines={1}
                 title={recipe.title}
                 imageUrl={recipe.imageUrl}
                 muted={recipe.isCooked}
@@ -107,9 +108,9 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
       />
 
       <FlatList
-        style={{ paddingHorizontal: Gutter - Spacing.xs }}
         horizontal
         showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: Gutter, gap: Spacing.md }}
         removeClippedSubviews
         data={recipes}
         keyExtractor={(recipe) => recipe.id}
@@ -117,6 +118,7 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
           return (
             <ImageCard
               style={{
+                width: CARD_WIDTH,
                 animationDuration: `${200}ms`,
                 animationPlayState: 'running',
                 animationKeyframes: {
@@ -135,6 +137,7 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
                 });
               }}
               key={recipe.id}
+              titleLines={1}
               title={recipe.title}
               imageUrl={recipe.imageUrl}
               badges={recipe.warning && <Text>⚠️</Text>}>

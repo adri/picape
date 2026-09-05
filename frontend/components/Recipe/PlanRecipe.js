@@ -11,7 +11,6 @@ export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
   if (isPlanned) {
     return (
       <CheckIcon
-        style={{ margin: 5 }}
         onPress={(e) => {
           e.preventDefault();
           unplanRecipe({
@@ -25,7 +24,6 @@ export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
 
   return (
     <PlusIcon
-      style={{ margin: 5 }}
       onPress={(e) => {
         e.preventDefault();
         planRecipe({
