@@ -47,6 +47,9 @@ export function RecipeListScreen({ navigation }) {
           in a ScrollView made it lay out every recipe at once, because a list
           given unbounded height has no window to virtualise against, which
           quietly turned initialNumToRender and windowSize into no-ops. */}
+      {/* Each cell takes exactly half the row and pads itself, rather than
+          flexing to fill it. A flexed item is alone on the last row whenever
+          the count is odd, and it then stretches to full width. */}
       <FlatList
         numColumns={2}
         data={recipes}
@@ -63,8 +66,7 @@ export function RecipeListScreen({ navigation }) {
               containerStyle={{
                 flexDirection: 'row',
                 flexWrap: 'wrap',
-                paddingHorizontal: Gutter,
-                gap: Spacing.md,
+                paddingHorizontal: Gutter - Spacing.xs,
               }}
               boneColor={Colors.skeletonBone}
               highlightColor={Colors.skeletonHighlight}
@@ -76,10 +78,10 @@ export function RecipeListScreen({ navigation }) {
           paddingTop: insets.top,
           paddingBottom: insets.bottom + Spacing.xxl,
         }}
-        columnWrapperStyle={{ paddingHorizontal: Gutter, gap: Spacing.md }}
+        columnWrapperStyle={{ paddingHorizontal: Gutter - Spacing.xs }}
         renderItem={({ item: recipe }) => (
           <ImageCard
-            style={{ flex: 1, paddingBottom: Spacing.xl }}
+            style={{ width: '50%', paddingHorizontal: Spacing.xs, paddingBottom: Spacing.xl }}
             imageStyle={{ width: '100%' }}
             title={recipe.title}
             imageUrl={recipe.imageUrl}
