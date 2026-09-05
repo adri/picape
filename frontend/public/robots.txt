@@ -1,0 +1,3 @@
+# A personal grocery planner. Nothing here is meant to be found in a search.
+User-agent: *
+Disallow: /
