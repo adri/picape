@@ -93,7 +93,7 @@ const lightTheme = {
   secondaryText: '#aeaeae',
   skeletonBone: '#E1E9EE',
   skeletonHighlight: '#F2F8FC',
-  hairLineBackground: '#ececec',
+  hairLineBackground: 'rgba(0, 0, 0, 0.1)',
 
   // Section
   sectionHeaderText: 'black',
@@ -138,7 +138,7 @@ const darkTheme = {
   secondaryText: '#aeaeae',
   skeletonBone: palette['grey-900'],
   skeletonHighlight: palette['grey-700'],
-  hairLineBackground: palette['grey-900'],
+  hairLineBackground: 'rgba(255, 255, 255, 0.15)',
 
   // Section
   sectionHeaderText: 'white',
