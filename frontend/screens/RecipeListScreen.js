@@ -63,8 +63,8 @@ export function RecipeListScreen({ navigation }) {
               containerStyle={{
                 flexDirection: 'row',
                 flexWrap: 'wrap',
-                paddingHorizontal: Gutter - Spacing.xs,
-                gap: Spacing.sm,
+                paddingHorizontal: Gutter,
+                gap: Spacing.md,
               }}
               boneColor={Colors.skeletonBone}
               highlightColor={Colors.skeletonHighlight}
@@ -76,10 +76,10 @@ export function RecipeListScreen({ navigation }) {
           paddingTop: insets.top,
           paddingBottom: insets.bottom + Spacing.xxl,
         }}
-        columnWrapperStyle={{ paddingHorizontal: Gutter - Spacing.xs }}
+        columnWrapperStyle={{ paddingHorizontal: Gutter, gap: Spacing.md }}
         renderItem={({ item: recipe }) => (
           <ImageCard
-            style={{ flexBasis: '50%', paddingBottom: Spacing.xl }}
+            style={{ flex: 1, paddingBottom: Spacing.xl }}
             imageStyle={{ width: '100%' }}
             title={recipe.title}
             imageUrl={recipe.imageUrl}
