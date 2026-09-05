@@ -28,6 +28,12 @@ export const Radius = {
 // this instead so separators stay one device pixel.
 export const Hairline = 0.5;
 
+// A back or close button floats over its screen rather than sitting in the
+// layout, so it needs the offset that lands it on the same line as the header
+// row opposite it: the row's top padding plus half its line, less half the
+// button. Screens use this instead of hugging the safe-area edge.
+export const FloatingTop = Spacing.lg;
+
 // Anything a finger has to hit is at least this tall and wide, per the iOS
 // Human Interface Guidelines. Controls drawn smaller than this keep their look
 // and make up the difference with hitSlop.
