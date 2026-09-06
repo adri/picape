@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge } from '../components/Badge/Badge';
 import { BackIcon, EditIcon } from '../components/Icon';
-import { Nutriscore } from '../components/Ingredient/Nutriscore';
+import { Nutriscore, hasNutriscore } from '../components/Ingredient/Nutriscore';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { Separator } from '../components/Section/Separator';
 import { useTheme } from '../constants/Colors';
@@ -132,7 +132,7 @@ export function IngredientDetailScreen({
           </View>
         )}
 
-        {!!ingredient.nutriscore && (
+        {hasNutriscore(ingredient.nutriscore) && (
           <>
             <Separator />
             <View style={[styles.block, styles.nutriscore]}>

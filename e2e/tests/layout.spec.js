@@ -300,6 +300,66 @@ test('every ingredient row puts its control in the same place', async ({ page })
   expect(new Set(insets).size, `trailing insets differ: ${insets.join(', ')}`).toBe(1);
 });
 
+test('a cart row wears a Nutri-Score only when the supermarket gave one', async ({ page }) => {
+  await openApp(page);
+  await tab(page, /Mandje/).click();
+  await settle(page);
+
+  // Seeded next to three graded products: one the supermarket answers "N/A"
+  // for, which used to reach the row as a grey badge reading "N/A". Found by
+  // its picture, not its label, because the label sits in the line that carries
+  // the badge, so nothing on the row reads as the name on its own.
+  await expect(page.getByRole('button', { name: 'Parmezaanse kaas', exact: true })).toHaveCount(1);
+
+  const rows = await page.evaluate(() => {
+    const isRow = (el) => {
+      const style = getComputedStyle(el);
+      return (
+        style.borderRadius !== '0px' &&
+        style.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+        el.children.length === 3 &&
+        el.getBoundingClientRect().width > 200
+      );
+    };
+
+    return Array.from(document.querySelectorAll('div'))
+      .filter(isRow)
+      .map((row) => {
+        const [picture, label, control] = row.children;
+        const box = row.getBoundingClientRect();
+        // The row's own pill, which is the only one inside the label: the
+        // quantity control is a pill too, and it sits outside it.
+        const badge = Array.from(label.querySelectorAll('div')).find((el) =>
+          getComputedStyle(el).borderRadius.startsWith('999')
+        );
+
+        return {
+          name: picture.getAttribute('aria-label'),
+          badge: badge ? badge.innerText.trim() : null,
+          height: Math.round(box.height),
+          inset: Math.round(box.right - control.getBoundingClientRect().right),
+        };
+      });
+  });
+
+  expect(rows.length, 'found no cart rows').toBeGreaterThan(1);
+  expect(rows.map((row) => row.badge).filter(Boolean).length, 'no graded row').toBeGreaterThan(0);
+  expect(
+    rows.filter((row) => row.badge === null).map((row) => row.name),
+    'a graded row lost its Nutri-Score, or an ungraded one kept an empty badge'
+  ).toEqual(['Parmezaanse kaas']);
+
+  // An empty badge is invisible in a screenshot but "N/A" is not, and neither
+  // belongs on a row.
+  expect(await page.locator('body').innerText()).not.toContain('N/A');
+
+  // And dropping the badge from one row leaves every row where it was: the
+  // badge sits inside the label, so it must move neither the row's own height
+  // nor the control on the far side of it.
+  expect(new Set(rows.map((row) => row.height)).size, 'rows differ in height').toBe(1);
+  expect(new Set(rows.map((row) => row.inset)).size, 'trailing insets differ').toBe(1);
+});
+
 test('tapping the tab you are already on scrolls that screen to the top', async ({ page }) => {
   await openApp(page);
   await tab(page, /Basics/).click();

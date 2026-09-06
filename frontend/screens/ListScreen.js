@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '../components/Badge/Badge';
 import { ImageCard } from '../components/Card/ImageCard';
-import { Nutriscore, nutriscore } from '../components/Ingredient/Nutriscore';
+import { Nutriscore, hasNutriscore } from '../components/Ingredient/Nutriscore';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
@@ -173,7 +173,7 @@ export default function ListScreen({ navigation }) {
                   title={ingredient?.name || item.name}
                   imageUrl={ingredient?.imageUrl || item.imageUrl}
                   badges={
-                    ingredient?.nutriscore ? (
+                    hasNutriscore(ingredient?.nutriscore) ? (
                       <Nutriscore nutriscore={ingredient.nutriscore} />
                     ) : null
                   }

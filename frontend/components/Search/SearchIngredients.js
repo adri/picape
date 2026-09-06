@@ -6,7 +6,7 @@ import { FlatList, View, Text } from 'react-native';
 
 import Colors from '../../constants/Colors';
 import { PlusIcon } from '../Icon';
-import { Nutriscore } from '../Ingredient/Nutriscore';
+import { Nutriscore, hasNutriscore } from '../Ingredient/Nutriscore';
 import { OrderQuantity } from '../Ingredient/OrderQuantity';
 import { ListItem } from '../ListItem/ListItem';
 import SearchBar from '../Search/SearchBar';
@@ -35,7 +35,11 @@ const SEARCH_INGREDIENTS = gql`
 const renderItem = ({ navigator, item: ingredient, supermarket }) => (
   <ListItem
     title={`${ingredient.name}${ingredient.warning ? ' ⚠️' : ''}`}
-    badges={ingredient?.nutriscore ? <Nutriscore nutriscore={ingredient.nutriscore} /> : null}
+    badges={
+      hasNutriscore(ingredient?.nutriscore) ? (
+        <Nutriscore nutriscore={ingredient.nutriscore} />
+      ) : null
+    }
     imageUrl={ingredient.imageUrl}
     onImagePress={(e) => {
       e.preventDefault();
