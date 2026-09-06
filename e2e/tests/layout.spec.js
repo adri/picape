@@ -207,7 +207,10 @@ test('the details screen keeps the way to the edit screen open', async ({ page }
   // product behind it. Lose the button here and the basics tab has a toggle
   // nothing can reach any more.
   await page.getByRole('button', { name: 'Bewerken' }).first().click();
-  await expect(page.getByText('Altijd in huis')).toBeVisible();
+  // Not the "Altijd in huis" label: the basics tab's own heading says that too,
+  // and detachPreviousScreen keeps that screen in the DOM behind this one, so
+  // the label matches three times. This sentence belongs to the edit screen.
+  await expect(page.getByText(/Als dit aan staat/)).toBeVisible();
 
   // And back out of edit is back to the details, not out to the list.
   await page.getByRole('button', { name: 'Sluiten' }).first().click();
