@@ -114,7 +114,7 @@ Expo inlines `process.env.EXPO_PUBLIC_*` from dotenv files only, not from the sh
 ### Test data
 
 - `priv/repo/seeds.exs` is the e2e dataset. `bin/phx --fake` loads it into `picape_e2e`, and the Playwright screenshots depend on it. The plan screen groups recipes by ingredient names such as `rijst`, `pasta` and `wrap`, so keep those names Dutch.
-- `test/fixtures/supermarket/*.json` are synthetic supermarket responses in the shape the code reads. `basket.json` product ids match the seeded essentials so the shop tab shows named ingredients.
+- `test/fixtures/supermarket/*.json` are supermarket responses in the shape the code reads. `basket.json` and `search.json` are synthetic; `basket.json` product ids match the seeded essentials so the shop tab shows named ingredients. The `product_*.json` are verbatim `productCard` objects recorded from production, with only `webshopId` and `hqId` rewritten to the id in the filename, so a screen built against the fake sees the fields production actually sends. Write a hand-made product fixture and you get a shape the code does not read: the old ones carried `nutriscore` and `orderable` at the top of the card, where production sends `properties.nutriscore[0]`, `isOrderable` and `orderAvailabilityStatus`.
 
 ## Conventions worth knowing
 

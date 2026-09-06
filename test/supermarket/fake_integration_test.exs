@@ -24,7 +24,9 @@ defmodule Picape.Supermarket.FakeIntegrationTest do
   end
 
   test "product details fall back to a recorded product for unknown ids" do
-    assert get_in(Supermarket.products_by_id(10_567_923), ["productCard", "title"]) == "Roomboter ongezouten"
+    assert get_in(Supermarket.products_by_id(10_567_923), ["productCard", "title"]) ==
+             "Flower Farm Bakken zonder palm"
+
     assert get_in(Supermarket.products_by_id(1), ["productCard", "title"]) != nil
   end
 

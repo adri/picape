@@ -157,7 +157,9 @@ defmodule Picape.MCPTest do
 
       assert ingredient.supermarket_product_id == 10_567_923
       assert ingredient.is_essential == false
-      assert get_in(ingredient.supermarket_product_raw, ["productCard", "title"]) == "Roomboter ongezouten"
+
+      assert get_in(ingredient.supermarket_product_raw, ["productCard", "title"]) ==
+               "Flower Farm Bakken zonder palm"
     end
 
     test "refuses a supermarket product that is already an ingredient" do

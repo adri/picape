@@ -1,31 +1,164 @@
 {
+  "productId": 10567923,
   "productCard": {
-    "webshopId": 10567923,
     "hqId": 10567923,
-    "title": "Roomboter ongezouten",
-    "salesUnitSize": "250 g",
-    "priceBeforeBonus": 2.49,
-    "availableOnline": true,
-    "orderable": true,
-    "brand": "Huismerk",
-    "mainCategory": "Zuivel",
-    "nutriscore": "A",
+    "brand": "Flower Farm",
+    "nix18": false,
+    "title": "Flower Farm Bakken zonder palm",
     "images": [
       {
-        "width": 80,
-        "height": 80,
-        "url": "https://static.supermarket.test/dam/product/10567923_80x80.png"
+        "url": "https://static.ah.nl/dam/product/AHI_62686f435f657146536a4b4e636c55646c6b39336651?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+        "width": 800,
+        "height": 800
       },
       {
+        "url": "https://static.ah.nl/dam/product/AHI_62686f435f657146536a4b4e636c55646c6b39336651?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+        "width": 400,
+        "height": 400
+      },
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_62686f435f657146536a4b4e636c55646c6b39336651?revLabel=1&rendition=200x200_WEBP&fileType=binary",
         "width": 200,
-        "height": 200,
-        "url": "https://static.supermarket.test/dam/product/10567923_200x200.png"
+        "height": 200
+      },
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_62686f435f657146536a4b4e636c55646c6b39336651?revLabel=1&rendition=48x48_GIF&fileType=binary",
+        "width": 48,
+        "height": 48
+      },
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_62686f435f657146536a4b4e636c55646c6b39336651?revLabel=1&rendition=80x80_JPG&fileType=binary",
+        "width": 80,
+        "height": 80
       }
-    ]
-  },
-  "tradeItem": {
-    "description": [
-      "Roomboter ongezouten, 250 g."
-    ]
+    ],
+    "isBonus": true,
+    "isSample": false,
+    "shopType": "AH",
+    "webshopId": 10567923,
+    "isFavorite": false,
+    "properties": {
+      "da_grape": [],
+      "nutriscore": [
+        "D"
+      ],
+      "da_free_of_sugar": [
+        "Ja"
+      ],
+      "da_store_department": [
+        "Houdbaar"
+      ],
+      "da_available_in_store": [
+        "true"
+      ],
+      "da_excluded_assortment": [
+        "false"
+      ],
+      "da_salted_or_not_salted": [
+        "Gezouten"
+      ],
+      "sp_exclude_dieet_laag_vet": [
+        "Laag vet"
+      ],
+      "sp_exclude_dieet_laag_zout": [
+        "Laag zout"
+      ],
+      "sp_include_dieet_laag_suiker": [
+        "Laag suiker"
+      ],
+      "sp_include_dieet_vegetarisch": [
+        "Vegetarisch"
+      ],
+      "sp_include_dieet_veganistisch": [
+        "Veganistisch"
+      ],
+      "sp_include_intolerance_geen_vis": [
+        "Geen vis"
+      ],
+      "da_sugar_added_or_no_sugar_added": [
+        "Geen toegevoegde suikers"
+      ],
+      "sp_include_intolerance_geen_melk": [
+        "Geen melk"
+      ],
+      "sp_include_intolerance_geen_soja": [
+        "Geen soja"
+      ],
+      "sp_include_intolerance_geen_noten": [
+        "Geen noten"
+      ],
+      "sp_include_intolerance_geen_sesam": [
+        "Geen sesam"
+      ],
+      "sp_include_intolerance_geen_eieren": [
+        "Geen eieren"
+      ],
+      "sp_include_intolerance_geen_gluten": [
+        "Geen gluten"
+      ],
+      "sp_include_intolerance_geen_lupine": [
+        "Geen lupine"
+      ],
+      "sp_include_intolerance_geen_pindas": [
+        "Geen pinda's"
+      ],
+      "sp_include_intolerance_geen_lactose": [
+        "Geen lactose"
+      ],
+      "sp_include_intolerance_geen_mosterd": [
+        "Geen mosterd"
+      ],
+      "sp_include_intolerance_geen_sulfiet": [
+        "Geen sulfiet"
+      ],
+      "sp_include_intolerance_geen_selderij": [
+        "Geen selderij"
+      ],
+      "sp_include_intolerance_geen_schelpdieren": [
+        "Geen schelpdieren (schaaldieren)"
+      ],
+      "sp_include_intolerance_geen_kreeftachtigen": [
+        "Geen kreeftachtigen (schaaldieren)"
+      ]
+    },
+    "isOrderable": true,
+    "segmentType": "AH",
+    "subCategory": "Bak- en braadboter",
+    "bonusEndDate": "2026-09-06",
+    "discountType": "AH",
+    "hasListPrice": false,
+    "isBonusPrice": false,
+    "mainCategory": "Zuivel, eieren",
+    "hqPromotionId": 189802,
+    "isStapelBonus": false,
+    "promotionType": "NATIONAL",
+    "propertyIcons": [
+      "vegan"
+    ],
+    "salesUnitSize": "200 g",
+    "subCategoryId": 18190,
+    "bonusMechanism": "1 + 1 gratis",
+    "bonusSegmentId": 806595,
+    "bonusStartDate": "2026-08-31",
+    "discountLabels": [
+      {
+        "code": "DISCOUNT_X_PLUS_Y_FREE",
+        "count": 1,
+        "freeCount": 1,
+        "defaultDescription": "1+1 gratis"
+      }
+    ],
+    "availableOnline": true,
+    "descriptionFull": "Het regenwoud is essentieel voor onze planeet, maar wordt nog steeds gekapt voor niet-duurzame palmolieplantages. Bij the flower farm vinden wij dat dat anders kan. Daarom kiezen wij voor alternatieven zonder ontbossing. Kleine, dagelijkse keuzes zorgen samen voor een groot domino-effect. Doe je mee?",
+    "isInfiniteBonus": false,
+    "isVirtualBundle": false,
+    "priceBeforeBonus": 2.59,
+    "extraDescriptions": [],
+    "isPreviouslyBought": false,
+    "unitPriceDescription": "normale prijs per kg €12.95",
+    "descriptionHighlights": "<p>Zo maak je echt impact! Met deze alleskunner kan je koken, bakken en braden: palmolievrij en lekker veelzijdig.</p><p><ul><li>Vrij van palmolie en kokosolie</li><li>100% plantaardig en natuurlijk</li><li>Perfect voor koken, bakken en braden</li></ul></p>",
+    "bonusPeriodDescription": "",
+    "bonusSegmentDescription": "Alle The Flower Farm",
+    "orderAvailabilityStatus": "IN_ASSORTMENT"
   }
 }
