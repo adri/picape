@@ -7,7 +7,7 @@ defmodule Picape.MCP.Tools do
   GraphQL API hands out.
   """
 
-  alias Picape.{Ingredients, Order, Recipe, Seasonal, Supermarket}
+  alias Picape.{Bonus, Ingredients, Order, Recipe, Seasonal, Supermarket}
 
   # The GraphQL resolvers hardcode the same order id: there is one open order.
   @order_id "1"
@@ -229,6 +229,23 @@ defmodule Picape.MCP.Tools do
             description: "Month number, 1 for January. Defaults to the current month."
           }
         }
+      name: "list_bonus_offers",
+      description:
+        "List the supermarket's personal bonus offers for the week the current order is delivered in, " <>
+          "with how many may be activated and how many already are. Offers that cover an ingredient " <>
+          "Picape knows come first and name those ingredients.",
+      inputSchema: %{type: "object", properties: %{}}
+    },
+    %{
+      name: "activate_bonus_offer",
+      description:
+        "Activate one personal bonus offer. This is a real write to the loyalty account: it spends one " <>
+          "of the week's activations, cannot be undone, and the number of activations is limited. Take " <>
+          "the `offer_id` from list_bonus_offers and ask before spending one.",
+      inputSchema: %{
+        type: "object",
+        properties: %{offer_id: %{type: "string", description: "The `id` from a list_bonus_offers result"}},
+        required: ["offer_id"]
       }
     }
   ]
@@ -388,6 +405,12 @@ defmodule Picape.MCP.Tools do
 
   defp run("seasonal_produce", args) do
     {:ok, Seasonal.overview(args["month"] || Date.utc_today().month)}
+  defp run("list_bonus_offers", _args), do: {:ok, render_bonus(Bonus.offers())}
+
+  defp run("activate_bonus_offer", args) do
+    with {:ok, bonus} <- Bonus.activate(args["offer_id"]) do
+      {:ok, render_bonus(bonus)}
+    end
   end
 
   defp plan(recipe_id, unplan) do
@@ -510,6 +533,26 @@ defmodule Picape.MCP.Tools do
 
   defp render_recipe_ingredient(ref) do
     %{ingredient_id: ref.ingredient.id, name: ref.ingredient.name, quantity: ref.quantity}
+  end
+
+  defp render_bonus(bonus) do
+    %{
+      maximum_activations: bonus.maximum_activations,
+      activated_count: bonus.activated_count,
+      offers: Enum.map(bonus.offers, &render_bonus_offer/1)
+    }
+  end
+
+  defp render_bonus_offer(offer) do
+    %{
+      offer_id: offer.id,
+      title: offer.title,
+      discount: offer.discount,
+      category: offer.category,
+      product_count: offer.product_count,
+      is_activated: offer.is_activated,
+      ingredients: Enum.map(offer.ingredients, &%{id: &1.id, name: &1.name})
+    }
   end
 
   defp warning_description(ingredient) do

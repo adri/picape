@@ -41,6 +41,8 @@ defmodule Picape.MCPTest do
                "recipe_history",
                "ingredient_history",
                "seasonal_produce"
+               "list_bonus_offers",
+               "activate_bonus_offer"
              ]
 
       assert Enum.all?(tools, &(&1["inputSchema"]["type"] == "object"))
