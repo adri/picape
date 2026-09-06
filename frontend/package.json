@@ -5,7 +5,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web --port 19006",
-    "build:web": "expo export --platform web && node scripts/build-service-worker.js",
+    "build:web": "expo export --platform web && node scripts/build-launch-images.js && node scripts/build-service-worker.js",
     "eject": "expo eject",
     "test": "jest --ci",
     "test:watch": "jest --watchAll",
