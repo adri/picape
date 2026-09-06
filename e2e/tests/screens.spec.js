@@ -42,10 +42,13 @@ function cartBadge(page, count) {
   return tab(page, /Mandje/).getByText(String(count)).first();
 }
 
-async function openApp(page) {
+async function openApp(page, testInfo) {
   await page.goto('/');
   await settle(page);
   await expect(cartBadge(page, 4)).toBeVisible({ timeout: 60_000 });
+  if (testInfo && testInfo.project.name === 'iphone-standalone') {
+    await expectInsetsApplied(page, STANDALONE_INSETS);
+  }
 }
 
 async function checkScreen(page, name) {
@@ -56,16 +59,89 @@ async function checkScreen(page, name) {
   }
 }
 
-test.beforeEach(async ({ page, request }) => {
+// What an iPhone with a notch and a home indicator reports in portrait, which
+// is what the app sees once it is installed to the home screen.
+const STANDALONE_INSETS = { top: 59, bottom: 34 };
+
+// react-native-safe-area-context reads the insets on web by putting a hidden
+// div in the body whose padding is env(safe-area-inset-*) and measuring it. A
+// browser resolves those to 0, so that one element gets the values instead.
+//
+// It is done by watching for the element rather than by installing a
+// stylesheet up front: an init script runs before the document has anywhere to
+// append one, and a stylesheet added later can lose the race with React's
+// effect. Setting the padding on the element itself always lands, and because
+// the library gave it `transition: padding`, the change fires the transitionend
+// it already listens for, so it re-measures and the app picks the insets up.
+async function emulateStandalone(page, { top, bottom }) {
+  await page.addInitScript(
+    ([t, b]) => {
+      const isProbe = (node) =>
+        node.nodeType === 1 && node.style && node.style.transitionProperty === 'padding';
+
+      const apply = (el) => {
+        el.style.setProperty('padding-top', `${t}px`, 'important');
+        el.style.setProperty('padding-bottom', `${b}px`, 'important');
+        el.style.setProperty('padding-left', '0px', 'important');
+        el.style.setProperty('padding-right', '0px', 'important');
+      };
+
+      const start = () => {
+        Array.from(document.body.children).forEach((el) => isProbe(el) && apply(el));
+        new MutationObserver((records) => {
+          records.forEach((record) =>
+            record.addedNodes.forEach((node) => isProbe(node) && apply(node))
+          );
+        }).observe(document.body, { childList: true });
+      };
+
+      if (document.body) start();
+      else document.addEventListener('DOMContentLoaded', start, { once: true });
+    },
+    [top, bottom]
+  );
+}
+
+// An emulation that silently does nothing is worse than none: it produces
+// confident screenshots of the wrong thing. Check the app actually consumed the
+// insets before any assertion depends on them.
+async function expectInsetsApplied(page, { top, bottom }) {
+  const measured = await page.evaluate(() => {
+    const probe = Array.from(document.body.children).find(
+      (el) => el.style && el.style.transitionProperty === 'padding'
+    );
+    if (!probe) return null;
+    const style = getComputedStyle(probe);
+    return { top: style.paddingTop, bottom: style.paddingBottom };
+  });
+  expect(measured, 'safe-area probe element not found').not.toBeNull();
+  expect(measured).toEqual({ top: `${top}px`, bottom: `${bottom}px` });
+
+  // And that the app read them, rather than just the stylesheet landing: the
+  // plan screen's SafeAreaView pushes its title below the notch.
+  const titleTop = await page
+    .getByText('Recepten', { exact: true })
+    .first()
+    .evaluate((el) => el.getBoundingClientRect().top);
+  expect(titleTop, 'app did not apply the top inset').toBeGreaterThanOrEqual(top);
+}
+
+test.beforeEach(async ({ page, request }, testInfo) => {
   await request.post('http://localhost:4020/__reset');
+  // Planned recipes are database rows, so a test that plans one would
+  // otherwise leave it planned for everything after it.
+  await request.post('http://localhost:4010/dev/reset-plan');
   await request.post('http://localhost:4010/dev/invalidate-cart');
   await page.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
+  if (testInfo.project.name === 'iphone-standalone') {
+    await emulateStandalone(page, STANDALONE_INSETS);
+  }
 });
 
 for (const [name, label] of tabs) {
-  test(`${name} tab renders`, async ({ page }) => {
+  test(`${name} tab renders`, async ({ page }, testInfo) => {
     const problems = watch(page);
-    await openApp(page);
+    await openApp(page, testInfo);
     await tab(page, label).click();
     await settle(page);
     await checkScreen(page, name);
@@ -73,9 +149,9 @@ for (const [name, label] of tabs) {
   });
 }
 
-test('tapping a recipe opens its detail screen', async ({ page }) => {
+test('tapping a recipe opens its detail screen', async ({ page }, testInfo) => {
   const problems = watch(page);
-  await openApp(page);
+  await openApp(page, testInfo);
   await page.getByText('Nasi', { exact: true }).first().click();
   await expect(page.getByText('Chinese Wokmix').first()).toBeVisible();
   await settle(page);
@@ -83,9 +159,9 @@ test('tapping a recipe opens its detail screen', async ({ page }) => {
   expect(problems).toEqual([]);
 });
 
-test('raising a quantity in the cart syncs with the supermarket', async ({ page }) => {
+test('raising a quantity in the cart syncs with the supermarket', async ({ page }, testInfo) => {
   const problems = watch(page);
-  await openApp(page);
+  await openApp(page, testInfo);
   await tab(page, /Mandje/).click();
   const butter = page
     .getByText('Butter', { exact: true })
