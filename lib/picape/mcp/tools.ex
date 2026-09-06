@@ -15,6 +15,9 @@ defmodule Picape.MCP.Tools do
   @string %{type: "string"}
   @integer %{type: "integer"}
 
+  # Everything edit_ingredient lets a caller change.
+  @ingredient_fields [:name, :supermarket_product_id, :is_essential]
+
   @tools [
     %{
       name: "search_ingredients",
@@ -80,6 +83,28 @@ defmodule Picape.MCP.Tools do
           }
         },
         required: ["name", "supermarket_product_id"]
+      }
+    },
+    %{
+      name: "edit_ingredient",
+      description:
+        "Change an ingredient Picape already knows. Only the fields you send change; anything you " <>
+          "leave out keeps its current value, and the ingredient's tags are never touched. Use this to " <>
+          "point an ingredient at another supermarket product when the supermarket stopped selling the " <>
+          "old one: search_ingredients reports that as a `warning`, and passing the `id` of a " <>
+          "search_supermarket result refetches the product behind the ingredient.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          ingredient_id: @integer,
+          supermarket_product_id: %{type: "integer", description: "The `id` from a search_supermarket result"},
+          name: %{type: "string", description: "The name Picape shows, in Dutch"},
+          is_essential: %{
+            type: "boolean",
+            description: "Essentials are staples you always have; they are left out of recipe totals"
+          }
+        },
+        required: ["ingredient_id"]
       }
     },
     %{
@@ -217,6 +242,18 @@ defmodule Picape.MCP.Tools do
     end
   end
 
+  defp run("edit_ingredient", args) do
+    with {:ok, ingredient} <- fetch_ingredient(args["ingredient_id"]) do
+      @ingredient_fields
+      |> Enum.reduce(%{ingredient_id: ingredient.id}, &copy_argument(&2, args, &1))
+      |> Ingredients.edit_ingredient()
+      |> case do
+        {:ok, edited} -> {:ok, List.first(render_ingredients([edited]))}
+        {:error, changeset} -> {:error, inspect(changeset.errors)}
+      end
+    end
+  end
+
   defp run("list_recipes", args) do
     recipes =
       case args["query"] do
@@ -279,6 +316,15 @@ defmodule Picape.MCP.Tools do
     case Ingredients.ingredients_by_ids([id]) do
       {:ok, %{^id => ingredient}} -> {:ok, ingredient}
       _ -> {:error, "no ingredient with id #{inspect(id)}"}
+    end
+  end
+
+  # An argument the caller left out never reaches the changeset, so the
+  # ingredient keeps the value it already has.
+  defp copy_argument(params, args, field) do
+    case Map.fetch(args, Atom.to_string(field)) do
+      {:ok, value} -> Map.put(params, field, value)
+      :error -> params
     end
   end
 

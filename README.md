@@ -38,6 +38,7 @@ It is a route in the Phoenix router, so it is up whenever the app is, on the dat
 | `get_shopping_list` | Read the current order: items, quantities, totals |
 | `set_ingredient_quantity` | Put an ingredient on the list, change it, or remove it with quantity 0 |
 | `add_ingredient` | Teach Picape an ingredient, backed by a supermarket product ID |
+| `edit_ingredient` | Change an ingredient, for example onto another supermarket product |
 | `list_recipes` | List recipes, optionally filtered on title |
 | `get_recipe` | Read one recipe with its ingredients |
 | `add_recipe` | Create a recipe with a title |
@@ -66,11 +67,12 @@ curl -s localhost:4010/mcp -H 'content-type: application/json' \
 ```
 
 Notes on the tools:
-- IDs are plain database IDs, not the Relay global IDs the GraphQL API hands out. The exception is `search_supermarket`, whose `id` is a supermarket product ID meant for `add_ingredient`.
+- IDs are plain database IDs, not the Relay global IDs the GraphQL API hands out. The exception is `search_supermarket`, whose `id` is a supermarket product ID meant for `add_ingredient` and `edit_ingredient`.
 - Picape has no recipe search, so `list_recipes` fetches every recipe and filters on the title.
 - Picape cannot create a recipe with its ingredients in one call. Call `add_recipe` first, then `edit_recipe`.
 - `edit_recipe` replaces the whole ingredient list. Read the recipe first and send back every ingredient you want to keep.
-- There is no delete for recipes.
+- `edit_ingredient` is the other way round: it changes only the fields you send and leaves the rest, tags included. When the supermarket drops a product, `search_ingredients` reports a `warning` and `edit_ingredient` moves the ingredient onto a replacement product, which keeps the recipes that use it.
+- There is no delete for recipes or ingredients.
 
 ## Deploy
 Hosted on [Fly.io](https://fly.io/) — config in [fly.toml](fly.toml), image built from the [Dockerfile](Dockerfile).

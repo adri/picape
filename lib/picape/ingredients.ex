@@ -104,21 +104,30 @@ defmodule Picape.Ingredients do
     Repo.one(from(i in Ingredient, where: i.supermarket_product_id == ^supermarket_id))
   end
 
+  @doc """
+  Updates an ingredient with the fields `params` carries. A field that is absent
+  keeps its current value, so a caller that only wants to move the ingredient to
+  another supermarket product needs to send nothing else.
+  """
   def edit_ingredient(params) do
-    tags = Repo.all(from(t in IngredientTag, where: t.id in ^params[:tag_ids]))
-
     Repo.get(Ingredient, params[:ingredient_id])
     |> Repo.preload(:tags)
-    |> Ingredient.edit_changeset(
-      Map.put(
-        params,
-        :supermarket_product_raw,
-        Supermarket.products_by_id(params[:supermarket_product_id])
-      )
-    )
-    |> Ecto.Changeset.put_assoc(:tags, tags)
+    |> Ingredient.edit_changeset(put_product_raw(params))
+    |> put_tags(params)
     |> Repo.update()
   end
+
+  defp put_product_raw(%{supermarket_product_id: product_id} = params) when not is_nil(product_id) do
+    Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(product_id))
+  end
+
+  defp put_product_raw(params), do: params
+
+  defp put_tags(changeset, %{tag_ids: tag_ids}) when is_list(tag_ids) do
+    Ecto.Changeset.put_assoc(changeset, :tags, Repo.all(from(t in IngredientTag, where: t.id in ^tag_ids)))
+  end
+
+  defp put_tags(changeset, _params), do: changeset
 
   def delete_ingredient(params) do
     Repo.get(Ingredient, params[:ingredient_id])

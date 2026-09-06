@@ -127,6 +127,7 @@ defmodule Picape.Recipe.Ingredient do
       :supermarket_product_raw
     ])
     |> validate_required([:name, :is_essential])
+    |> unique_constraint(:supermarket_product_id)
   end
 
   @doc false

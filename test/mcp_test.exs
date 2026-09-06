@@ -27,6 +27,7 @@ defmodule Picape.MCPTest do
                "get_shopping_list",
                "set_ingredient_quantity",
                "add_ingredient",
+               "edit_ingredient",
                "list_recipes",
                "get_recipe",
                "add_recipe",
@@ -170,6 +171,80 @@ defmodule Picape.MCPTest do
     end
   end
 
+  describe "edit_ingredient" do
+    test "moves the ingredient to another supermarket product and refetches it" do
+      ingredient =
+        insert!(:ingredient,
+          name: "Sinaasappels",
+          supermarket_product_id: 519_017,
+          supermarket_product_raw: %{
+            "productCard" => %{
+              "title" => "AH Biologisch Handsinaasappelen",
+              "orderAvailabilityStatus" => "NO_LONGER_IN_ASSORTMENT"
+            }
+          }
+        )
+
+      assert [%{"warning" => "Niet leverbaar"}] = call!("search_ingredients", %{query: "sinaas"})
+
+      assert %{"warning" => nil, "name" => "Sinaasappels"} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 238_913})
+
+      edited = Repo.get!(Ingredient, ingredient.id)
+
+      assert edited.supermarket_product_id == 238_913
+
+      assert get_in(edited.supermarket_product_raw, ["productCard", "title"]) ==
+               "AH Biologisch Parmigiano reggiano"
+    end
+
+    test "changes only the fields the call carries" do
+      ingredient = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017, is_essential: true)
+      tag = insert!(:ingredient_tag, name: "Fruit")
+      tag_ingredient(ingredient, tag)
+
+      assert %{"name" => "Handsinaasappels", "is_essential" => true} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, name: "Handsinaasappels"})
+
+      edited = Repo.get!(Ingredient, ingredient.id) |> Repo.preload(:tags)
+
+      assert edited.supermarket_product_id == 519_017
+      assert edited.supermarket_product_raw == nil
+      assert Enum.map(edited.tags, & &1.id) == [tag.id]
+    end
+
+    test "keeps the tags when the product moves" do
+      ingredient = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+      tag = insert!(:ingredient_tag, name: "Fruit")
+      tag_ingredient(ingredient, tag)
+
+      call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 238_913})
+
+      edited = Repo.get!(Ingredient, ingredient.id) |> Repo.preload(:tags)
+
+      assert Enum.map(edited.tags, & &1.id) == [tag.id]
+    end
+
+    test "reports an unknown ingredient" do
+      assert call_error("edit_ingredient", %{ingredient_id: 999_999, supermarket_product_id: 238_913}) ==
+               "no ingredient with id 999999"
+    end
+
+    test "reports a name that is sent but empty" do
+      ingredient = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+
+      assert call_error("edit_ingredient", %{ingredient_id: ingredient.id, name: nil}) =~ "name"
+    end
+
+    test "reports a supermarket product another ingredient already owns" do
+      insert!(:ingredient, name: "Parmezaan", supermarket_product_id: 238_913)
+      ingredient = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+
+      assert call_error("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 238_913}) =~
+               "has already been taken"
+    end
+  end
+
   describe "list_recipes" do
     test "lists every recipe with its ingredients" do
       insert!(:recipe, title: "Nasi", ingredients: [insert!(:ingredient, name: "Rijst")])
@@ -287,6 +362,14 @@ defmodule Picape.MCPTest do
 
     assert result["isError"]
     content(result)["error"]
+  end
+
+  defp tag_ingredient(ingredient, tag) do
+    ingredient
+    |> Repo.preload(:tags)
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:tags, [tag])
+    |> Repo.update!()
   end
 
   defp content(result) do
