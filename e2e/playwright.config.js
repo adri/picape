@@ -42,6 +42,22 @@ module.exports = defineConfig({
         ...(process.env.E2E_BROWSER ? { browserName: process.env.E2E_BROWSER } : {}),
       },
     },
+    {
+      // An iPad Pro 13" in portrait, which is 1024x1366 points. Playwright ships
+      // no descriptor that wide, so the 11" one supplies the user agent and the
+      // touch flags and the viewport is set here.
+      //
+      // It earns its own project because every rule that only binds above the
+      // content width is invisible to a phone baseline: a column that stopped
+      // being capped, or a grid that went back to two columns, still passes
+      // every iPhone screenshot.
+      name: 'ipad',
+      use: {
+        ...devices['iPad Pro 11'],
+        viewport: { width: 1024, height: 1366 },
+        ...(process.env.E2E_BROWSER ? { browserName: process.env.E2E_BROWSER } : {}),
+      },
+    },
   ],
   webServer: [
     {

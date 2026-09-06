@@ -173,6 +173,19 @@ test('tapping an ingredient opens its detail screen', async ({ page }, testInfo)
   expect(problems).toEqual([]);
 });
 
+// The only grid whose column count follows the width, so it is the one screen
+// where a phone baseline proves nothing: drop the rule and the phone still
+// renders two columns and passes.
+test('the home screen opens every recipe', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  await page.getByRole('link', { name: 'Bekijk alles' }).click();
+  await expect(page.getByText('Alle Recepten')).toHaveCount(1);
+  await settle(page);
+  await checkScreen(page, 'recipe-list');
+  expect(problems).toEqual([]);
+});
+
 test('the home screen opens what was bought before', async ({ page }, testInfo) => {
   const problems = watch(page);
   await openApp(page, testInfo);
