@@ -5,7 +5,10 @@ import { useTheme } from '../../constants/Colors';
 import { Radius, hitSlopFor } from '../../constants/Spacing';
 import Type from '../../constants/Type';
 
-const SIZE = { small: 16, regular: 28 };
+// Exported so a row that may or may not show a badge can reserve its height and
+// not jump when one appears.
+export const BADGE_SIZE = { small: 16, regular: 28 };
+const SIZE = BADGE_SIZE;
 
 // A count, or an empty ring to tick off. Sized so the number sits on the
 // optical centre rather than the text baseline.
