@@ -97,6 +97,11 @@ const lightTheme = {
   // recesses a grouped list. A tint of the text colour rather than a fixed
   // grey, so it stays a hint of a panel instead of a slab laid over the page.
   groupedBackground: 'rgba(0, 0, 0, 0.04)',
+  // The page itself, and the same colour at zero alpha. A gradient needs both
+  // ends written in the same colour: fading to a bare `transparent` fades
+  // through black, which greys the middle of a light gradient.
+  background: '#ffffff',
+  backgroundFade: 'rgba(255, 255, 255, 0)',
 
   // Section
   sectionHeaderText: 'black',
@@ -143,6 +148,8 @@ const darkTheme = {
   skeletonHighlight: palette['grey-700'],
   hairLineBackground: 'rgba(255, 255, 255, 0.15)',
   groupedBackground: 'rgba(255, 255, 255, 0.06)',
+  background: '#000000',
+  backgroundFade: 'rgba(0, 0, 0, 0)',
 
   // Section
   sectionHeaderText: 'white',
