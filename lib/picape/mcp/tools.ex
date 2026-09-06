@@ -7,7 +7,7 @@ defmodule Picape.MCP.Tools do
   GraphQL API hands out.
   """
 
-  alias Picape.{Ingredients, Order, Recipe, Supermarket}
+  alias Picape.{Ingredients, Order, Recipe, Seasonal, Supermarket}
 
   # The GraphQL resolvers hardcode the same order id: there is one open order.
   @order_id "1"
@@ -207,6 +207,29 @@ defmodule Picape.MCP.Tools do
         type: "object",
         properties: %{limit: %{type: "integer", minimum: 1, description: "How many ingredients, at most. Default 50."}}
       }
+    },
+    %{
+      name: "seasonal_produce",
+      description:
+        "What is in season in the Netherlands in a given month, and which of the user's recipes make " <>
+          "the most of it. Returns the ingredients Picape knows that are in season, the ones that are " <>
+          "out of season, and every recipe that uses produce the calendar carries, ranked by in-season " <>
+          "ingredients minus out-of-season ones. The calendar is a hand-written Dutch growing calendar. " <>
+          "It is not the user's buying habits, and it is not where the supermarket sources a product. " <>
+          "It only covers produce whose Dutch season changes through the year, so it names neither " <>
+          "year-round staples like potatoes and onions nor imports like citrus: an ingredient it does " <>
+          "not name is unknown, not out of season.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          month: %{
+            type: "integer",
+            minimum: 1,
+            maximum: 12,
+            description: "Month number, 1 for January. Defaults to the current month."
+          }
+        }
+      }
     }
   ]
 
@@ -361,6 +384,10 @@ defmodule Picape.MCP.Tools do
     {:ok, history} = Order.ingredient_history(@order_id, args["limit"] || 50)
 
     {:ok, Enum.map(history, &render_ingredient_history/1)}
+  end
+
+  defp run("seasonal_produce", args) do
+    {:ok, Seasonal.overview(args["month"] || Date.utc_today().month)}
   end
 
   defp plan(recipe_id, unplan) do

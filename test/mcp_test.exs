@@ -39,7 +39,8 @@ defmodule Picape.MCPTest do
                "unplan_recipe",
                "mark_recipe_as_cooked",
                "recipe_history",
-               "ingredient_history"
+               "ingredient_history",
+               "seasonal_produce"
              ]
 
       assert Enum.all?(tools, &(&1["inputSchema"]["type"] == "object"))
@@ -463,6 +464,49 @@ defmodule Picape.MCPTest do
 
   defp days_ago(days) do
     NaiveDateTime.utc_now() |> NaiveDateTime.add(-days, :day) |> NaiveDateTime.truncate(:second)
+  end
+
+  describe "seasonal_produce" do
+    test "splits the ingredients Picape knows over the Dutch calendar" do
+      insert!(:ingredient, name: "Boerenkool")
+      insert!(:ingredient, name: "Asperges groen")
+      insert!(:ingredient, name: "Flespompoen")
+
+      assert %{"month" => 1, "in_season" => ["Boerenkool"], "out_of_season" => out_of_season} =
+               call!("seasonal_produce", %{month: 1})
+
+      assert out_of_season == ["Asperges groen (asperges)", "Flespompoen (pompoen)"]
+    end
+
+    test "answers for the current month when the caller names none" do
+      assert call!("seasonal_produce")["month"] == Date.utc_today().month
+    end
+
+    test "leaves out an ingredient the calendar does not name" do
+      insert!(:ingredient, name: "Bananen")
+      insert!(:ingredient, name: "Paprika poeder")
+
+      assert %{"in_season" => [], "out_of_season" => []} = call!("seasonal_produce", %{month: 7})
+    end
+
+    test "ranks recipes on in-season produce minus out-of-season produce" do
+      pompoen = insert!(:ingredient, name: "Pompoen")
+      prei = insert!(:ingredient, name: "Prei")
+      asperges = insert!(:ingredient, name: "Asperges wit")
+
+      insert!(:recipe, title: "Pompoensoep", ingredients: [pompoen, prei])
+      insert!(:recipe, title: "Pompoenrisotto", ingredients: [pompoen, asperges])
+      insert!(:recipe, title: "Aspergequiche", ingredients: [asperges])
+      insert!(:recipe, title: "Nasi", ingredients: [insert!(:ingredient, name: "Rijst")])
+
+      recipes = call!("seasonal_produce", %{month: 10})["recipes"]
+
+      assert Enum.map(recipes, &{&1["title"], &1["score"]}) == [
+               {"Pompoensoep", 2},
+               {"Pompoenrisotto", 0},
+               {"Aspergequiche", -1}
+             ]
+    end
   end
 
   defp request(method, params \\ %{}) do

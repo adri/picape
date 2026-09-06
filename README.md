@@ -48,6 +48,7 @@ It is a route in the Phoenix router, so it is up whenever the app is, on the dat
 | `mark_recipe_as_cooked` | Record that a recipe from the last order was cooked, like the app's "Gekookt" button |
 | `recipe_history` | How often each recipe was planned, and how long ago that was |
 | `ingredient_history` | How often each ingredient was bought, how long ago, and the days between buys |
+| `seasonal_produce` | What is in season in the Netherlands this month, and which recipes use the most of it |
 
 Start the app with `bin/phx`, then add it to Claude Code:
 ```
@@ -79,6 +80,7 @@ Notes on the tools:
 - The two history tools read finished orders only, nine years of them. The order being planned now is not history yet, an ingredient taken off a list again was never bought, and a recipe that was unplanned again was never cooked, so none of the three count.
 - `ingredient_history` reports `average_gap_days` next to `times_bought_last_year` on purpose. A gap on its own cannot tell an ingredient that is due from one that was dropped: both sit far past it. An ingredient with a ten-day gap, last bought 538 days ago and bought zero times in the last year is not overdue, it is gone.
 - `mark_recipe_as_cooked` writes to the order that was last shopped, the same one the app's "Gekookt" button writes to. A recipe that was not on that order cannot be marked cooked on it; the reply's `is_cooked` reports what the order holds afterwards.
+- `seasonal_produce` answers from a hand-written Dutch growing calendar in [`Picape.Seasonal`](lib/picape/seasonal.ex), not from purchase history and not from the supermarket. It ranks every recipe that uses produce the calendar carries on in-season ingredients minus out-of-season ones. It only names produce whose Dutch season changes through the year, so an ingredient it does not name is unknown, not out of season.
 
 ## Deploy
 Hosted on [Fly.io](https://fly.io/) — config in [fly.toml](fly.toml), image built from the [Dockerfile](Dockerfile).
