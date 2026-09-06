@@ -35,7 +35,18 @@ function LastRecipesList({ navigation }) {
 
   return (
     <View style={{ paddingBottom: Spacing.xl }}>
-      <SectionHeader title="Dit heb je in huis" />
+      {/* This section is the last order, so the way to every order before it
+          belongs beside it. The screen's own title row is full: a third link
+          there overflows the row and cuts "Bekijk alles" off the edge. */}
+      <SectionHeader title="Dit heb je in huis">
+        <SectionLink
+          title="Eerder gekocht"
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.navigate('PreviouslyOrdered');
+          }}
+        />
+      </SectionHeader>
       <SkeletonContent
         layout={[
           {
