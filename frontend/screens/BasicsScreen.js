@@ -118,17 +118,17 @@ function BasicsList({ navigation, open, selectedId, inPane }) {
           windowSize={6}
           removeClippedSubviews
           keyExtractor={({ ingredient }) => ingredient.id}
-          renderItem={({ item: { ingredient }, index }) => {
+          renderItem={({ item: { ingredient } }) => {
             const plannedRecipes = ingredient.plannedRecipes || [];
             return (
               <ListItem
                 style={{
-                  animationDuration: `${200 + 100 * index}ms`,
-                  animationPlayState: 'running',
-                  animationKeyframes: {
-                    from: { opacity: 0 },
-                    to: { opacity: 1 },
-                  },
+                  // No entrance animation. `animationKeyframes` in an inline
+                  // style is dropped by react-native-web's compiler, which only
+                  // emits an @keyframes rule from StyleSheet.create, so these
+                  // rows carried the cart's `200 + 100 * index` duration
+                  // against `animation-name: none` and never faded at all.
+                  // The state transition below is the part that worked.
                   transitionProperty: ['background-color', 'opacity'],
                   transitionDuration: '200ms',
                   transitionTimingFunction: 'ease-in',

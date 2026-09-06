@@ -120,17 +120,16 @@ function FilteredRecipeList({ navigation, loading, title, recipes }) {
         removeClippedSubviews
         data={recipes}
         keyExtractor={(recipe) => recipe.id}
-        renderItem={({ item: recipe, index }) => {
+        renderItem={({ item: recipe }) => {
           return (
             <ImageCard
               style={{
                 width: CARD_WIDTH,
-                animationDuration: `${200}ms`,
-                animationPlayState: 'running',
-                animationKeyframes: {
-                  from: { opacity: 0 },
-                  to: { opacity: 1 },
-                },
+                // No entrance animation: `animationKeyframes` in an inline
+                // style is dropped by react-native-web's compiler, which only
+                // emits an @keyframes rule from StyleSheet.create, so this
+                // never faded. The card's own picture already cross-dissolves
+                // in as it arrives, which is the part you can see.
                 transitionProperty: ['opacity'],
                 transitionDuration: '200ms',
                 transitionTimingFunction: 'ease-in',
