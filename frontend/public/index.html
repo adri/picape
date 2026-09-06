@@ -62,6 +62,11 @@
       }
 
       html {
+        /* Anything the browser paints for itself rather than from these rules
+           follows the declared scheme: the over-scroll area, the status bar in
+           standalone, form controls. Undeclared means light, which is white
+           under a black app. */
+        color-scheme: light dark;
         scroll-behavior: smooth;
         /* Prevent text size change on orientation change https://gist.github.com/tfausak/2222823#file-ios-8-web-app-html-L138 */
         -webkit-text-size-adjust: 100%;
