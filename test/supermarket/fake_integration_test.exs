@@ -8,11 +8,18 @@ defmodule Picape.Supermarket.FakeIntegrationTest do
   test "the current order comes from the fake basket" do
     {:ok, %Line{} = line} = Order.current()
 
-    assert length(line.items) == 3
-    assert line.total_count == 4
-    assert line.total_price == 1286
-    assert line.total_discount == 150
-    assert Enum.map(line.items, & &1.name) == ["Roomboter ongezouten", "Kipfilet", "Zilvervliesrijst"]
+    assert length(line.items) == 4
+    assert line.total_count == 5
+    assert line.total_price == 1879
+    assert line.total_discount == 216
+
+    assert Enum.map(line.items, & &1.name) == [
+             "Roomboter ongezouten",
+             "Kipfilet",
+             "Parmigiano reggiano",
+             "Zilvervliesrijst"
+           ]
+
     assert Enum.all?(line.items, &String.starts_with?(&1.image_url, "https://static.supermarket.test/"))
   end
 

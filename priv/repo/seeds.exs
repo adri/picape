@@ -43,6 +43,10 @@ tomato_puree = insert! :essential, name: "Tomatopuree", supermarket_product_id: 
 flour = insert! :essential, name: "Flour", supermarket_product_id: 10964101
 yeast = insert! :essential, name: "Yeast", supermarket_product_id: 10568334
 bananas = insert! :essential, name: "Bananas", supermarket_product_id: 10691218
+# The supermarket grades most of what it sells and answers "N/A" for the rest,
+# so the seeded cart needs one of each. Without a product the supermarket does
+# not grade, no screen ever renders a row without a Nutri-Score.
+insert! :essential, name: "Parmezaanse kaas", supermarket_product_id: 238913
 
 # Ingredients
 shoarma = insert! :ingredient, name: "Shoarma", supermarket_product_id: 10291907

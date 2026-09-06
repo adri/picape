@@ -149,6 +149,82 @@
           },
           "isClosed": false,
           "allocatedQuantity": 2
+        },
+        {
+          "__typename": "BasketItem",
+          "position": 4,
+          "originCode": "MANUAL",
+          "quantity": 1,
+          "product": {
+            "__typename": "Product",
+            "id": 238913,
+            "title": "Parmigiano reggiano",
+            "salesUnitSize": "ca. 145 g",
+            "category": "Kaas",
+            "hqId": 238913,
+            "shopType": "SUPERMARKET",
+            "availability": {
+              "__typename": "ProductAvailability",
+              "availabilityLabel": null,
+              "isOrderable": true,
+              "online": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              },
+              "offline": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              }
+            },
+            "imagePack": [
+              {
+                "__typename": "ProductImagePack",
+                "angle": "HERO",
+                "small": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 80,
+                  "width": 80,
+                  "url": "https://static.supermarket.test/dam/product/238913_80x80.png"
+                },
+                "medium": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 200,
+                  "width": 200,
+                  "url": "https://static.supermarket.test/dam/product/238913_200x200.png"
+                },
+                "large": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 400,
+                  "width": 400,
+                  "url": "https://static.supermarket.test/dam/product/238913_400x400.png"
+                }
+              }
+            ],
+            "listPrice": {
+              "__typename": "Money",
+              "amount": 6.59
+            },
+            "priceV2": {
+              "__typename": "ProductPrice",
+              "discount": null,
+              "promotionLabel": null,
+              "now": {
+                "__typename": "Money",
+                "amount": 5.93
+              },
+              "was": {
+                "__typename": "Money",
+                "amount": 6.59
+              }
+            },
+            "properties": [],
+            "virtualBundleProducts": []
+          },
+          "isClosed": false,
+          "allocatedQuantity": 1
         }
       ],
       "itemsInList": [
@@ -230,26 +306,26 @@
       "summary": {
         "__typename": "BasketSummary",
         "isCancellable": true,
-        "quantity": 4,
+        "quantity": 5,
         "shoppingType": "DELIVERY",
         "lastUserChangeDateTime": "2026-01-01T10:00:00Z",
         "price": {
           "__typename": "BasketPrice",
           "discount": {
             "__typename": "Money",
-            "amount": 1.5
+            "amount": 2.16
           },
           "totalPrice": {
             "__typename": "Money",
-            "amount": 12.86
+            "amount": 18.79
           },
           "priceAfterDiscount": {
             "__typename": "Money",
-            "amount": 12.86
+            "amount": 18.79
           },
           "priceBeforeDiscount": {
             "__typename": "Money",
-            "amount": 14.36
+            "amount": 20.95
           }
         }
       }

@@ -45,7 +45,7 @@ function cartBadge(page, count) {
 async function openApp(page, testInfo) {
   await page.goto('/');
   await settle(page);
-  await expect(cartBadge(page, 4)).toBeVisible({ timeout: 60_000 });
+  await expect(cartBadge(page, 5)).toBeVisible({ timeout: 60_000 });
   if (testInfo && testInfo.project.name === 'iphone-standalone') {
     await expectInsetsApplied(page, STANDALONE_INSETS);
   }
@@ -200,7 +200,7 @@ test('raising a quantity in the cart syncs with the supermarket', async ({ page 
   // The icon buttons carry a role and a label now, so select the control by
   // what it is rather than by the div react-native-web happens to render.
   await butter.getByRole('button', { name: 'Toevoegen' }).click();
-  await expect(cartBadge(page, 5)).toBeVisible();
+  await expect(cartBadge(page, 6)).toBeVisible();
   await expect(page.getByText('2', { exact: true })).toHaveCount(2);
   expect(problems).toEqual([]);
 });
