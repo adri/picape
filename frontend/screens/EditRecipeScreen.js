@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -55,7 +55,7 @@ export function EditRecipeScreen({
     params: { recipeId },
   },
 }) {
-  const { loading, error, data = {} } = useQuery(GET_RECIPE, { variables: { recipeId } });
+  const { error, data = {} } = useQuery(GET_RECIPE, { variables: { recipeId } });
   const [editRecipe] = useMutation(EDIT_RECIPE, {
     onCompleted: () => {
       navigation.goBack();
@@ -67,17 +67,30 @@ export function EditRecipeScreen({
   const { node: recipe = {} } = data;
   const insets = useSafeAreaInsets();
   const colors = useTheme();
+  const [form, changeForm] = useState(null);
 
-  if (loading) return 'Loading...';
+  // The query answers a render later than the first whenever the cache is
+  // cold, so the form cannot be seeded from its initial value. Seeding it in an
+  // effect instead of re-keying the screen: the navigator owns this element, so
+  // the screen cannot re-key itself. Only ever seeds, so a refetch that lands
+  // while you are typing does not throw your edits away.
+  useEffect(() => {
+    if (!recipe.id) return;
+
+    changeForm(
+      (current) =>
+        current ?? {
+          title: recipe.title,
+          description: recipe.description,
+          imageUrl: recipe.imageUrl,
+          ingredients: recipe.ingredients,
+          changed: false,
+        }
+    );
+  }, [recipe]);
+
   if (error) return `Error! ${error}`;
-
-  const [form, changeForm] = useState({
-    title: recipe.title,
-    description: recipe.description,
-    imageUrl: recipe.imageUrl,
-    ingredients: recipe.ingredients,
-    changed: false,
-  });
+  if (!form) return 'Loading...';
 
   return (
     <View style={{ flex: 1 }}>
