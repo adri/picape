@@ -368,6 +368,148 @@ test('a cart row wears a Nutri-Score only when the supermarket gave one', async 
   expect(new Set(rows.map((row) => row.inset)).size, 'trailing insets differ').toBe(1);
 });
 
+// A tablet opens a detail beside its list instead of pushing it. What follows
+// is everything about that a screenshot cannot record: that the list is still
+// there and still where you left it, that the way out of the pane is not the
+// way out of the list, and that a width with no room for a pane hands you the
+// detail rather than dropping it.
+const paneOnly = (testInfo) =>
+  test.skip(testInfo.project.name !== 'ipad', 'below a tablet width the detail is pushed');
+
+test('picking another ingredient swaps the pane and leaves the list alone', async ({
+  page,
+}, testInfo) => {
+  paneOnly(testInfo);
+
+  await openApp(page);
+  await tab(page, /Basics/).click();
+  await settle(page);
+
+  // Rows are found by their picture: the name shares its line with the badges,
+  // so nothing on the row reads as the name on its own. Both are seeded into
+  // the basics list and nowhere else that is mounted here.
+  const chicken = page.getByRole('button', { name: 'Chicken', exact: true });
+  const butter = page.getByRole('button', { name: 'Butter', exact: true });
+  await expect(chicken).toHaveCount(1);
+  await expect(butter).toHaveCount(1);
+
+  await chicken.click();
+  // The supermarket's own name for the product, which belongs to the pane and
+  // to nothing else on the screen.
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toHaveCount(1);
+
+  const heading = page.getByRole('heading', { name: 'Altijd in huis' });
+  await expect(heading).toHaveCount(1);
+  const before = await boxOf(heading);
+
+  await butter.click();
+  await expect(page.getByText('Flower Farm Bakken zonder palm')).toHaveCount(1);
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toHaveCount(0);
+
+  // Nothing was pushed: the list is the same list, in the same place.
+  await expect(heading).toHaveCount(1);
+  expect((await boxOf(heading)).top, 'the list moved when the pane changed').toBe(before.top);
+  await expect(chicken).toBeVisible();
+
+  // And the pane carries no back button, because the list it belongs to never
+  // left. One that did nothing would be worse than none.
+  await expect(page.getByRole('button', { name: 'Terug' })).toHaveCount(0);
+});
+
+test('a width with no room for the pane hands over what was in it', async ({ page }, testInfo) => {
+  paneOnly(testInfo);
+
+  await openApp(page);
+  await tab(page, /Basics/).click();
+  await settle(page);
+  await page.getByRole('button', { name: 'Chicken', exact: true }).click();
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toHaveCount(1);
+
+  // What an iPad gives an app in a multitasking split, and what a rotation into
+  // one costs it: the pane goes. Dropping the selection with it would leave you
+  // back on the list with nothing to show for the tap.
+  await page.setViewportSize({ width: 500, height: 1366 });
+
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toHaveCount(1);
+
+  // Pushed rather than beside, so now it needs the button the pane did not.
+  const back = page.getByRole('button', { name: 'Terug' });
+  await expect(back).toHaveCount(1);
+  await back.click();
+
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Altijd in huis' })).toHaveCount(1);
+});
+
+// The grid behind "Bekijk alles", and the Nasi card in it.
+//
+// Scoped to the grid: every seeded recipe also has a card on the home screen,
+// which detachPreviousScreen keeps mounted underneath this one, so the name
+// alone matches twice.
+//
+// Nasi rather than any other recipe because marking a recipe cooked writes a
+// row on the last order, and for a recipe that was not on it that row is new
+// and nothing takes it away again: it joins "Dit heb je in huis" for the rest
+// of the dataset's life. Nasi was on that order already, so the write is an
+// update the test can undo.
+async function openRecipeGrid(page) {
+  await openApp(page);
+  await page.getByRole('link', { name: 'Bekijk alles' }).click();
+  await expect(page.getByText('Alle Recepten')).toHaveCount(1);
+
+  const card = page.getByTestId('recipe-grid').getByRole('button', { name: 'Nasi', exact: true });
+  await expect(card).toHaveCount(1);
+
+  return card;
+}
+
+test('finishing with a recipe empties the pane rather than closing the list', async ({
+  page,
+}, testInfo) => {
+  paneOnly(testInfo);
+
+  const card = await openRecipeGrid(page);
+  await card.click();
+  await expect(page.getByRole('heading', { name: 'Nasi' })).toHaveCount(1);
+
+  // "Gekookt" used to go back, and back from a pane is out of the list the
+  // pane sits beside. Cooked is a row in the database and survives the run, so
+  // this reads the button rather than assuming which way it sits.
+  const cook = page.getByRole('button', { name: /^(Gekookt|Toch niet gekookt)$/ });
+  const undo = (await cook.innerText()).startsWith('Toch') ? 'Gekookt' : 'Toch niet gekookt';
+  await cook.click();
+
+  // Cooked is a row in the database and the home screen sorts its shelf on it,
+  // so leaving it toggled fails the screenshot of every screen after this test
+  // rather than only this one. The check is held rather than thrown so the
+  // recipe goes back either way, and reported once it has.
+  let failure = null;
+  try {
+    await expect(page.getByRole('heading', { name: 'Nasi' })).toHaveCount(0);
+    await expect(page.getByText('Kies een recept')).toHaveCount(1);
+    await expect(page.getByText('Alle Recepten')).toHaveCount(1);
+  } catch (error) {
+    failure = error;
+  }
+
+  // Putting it back takes a reload: the mutation does not write the new value
+  // into the cached recipe, so on this page the button still offers what it
+  // offered before it was pressed.
+  try {
+    const again = await openRecipeGrid(page);
+    await again.click();
+    await page.getByRole('button', { name: undo }).click();
+    await expect(page.getByText('Kies een recept')).toHaveCount(1);
+  } catch (error) {
+    // A check that already failed is why the recipe is in a state this cannot
+    // put back, so report that one rather than the clean-up that tripped over
+    // it.
+    throw failure || error;
+  }
+
+  if (failure) throw failure;
+});
+
 test('tapping the tab you are already on scrolls that screen to the top', async ({ page }) => {
   await openApp(page);
   await tab(page, /Basics/).click();
