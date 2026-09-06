@@ -39,6 +39,32 @@ function boxOf(locator) {
   });
 }
 
+// The scroller of the screen you are looking at. A tab screen scrolls inside
+// its own box rather than the document, and detachPreviousScreen keeps every
+// screen you have already opened in the page, so the one that counts is the box
+// that both overflows and is still painted.
+async function scroller(page) {
+  const handle = await page.evaluateHandle(() =>
+    Array.from(document.querySelectorAll('div')).find((el) => {
+      const style = getComputedStyle(el);
+      return (
+        (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+        el.scrollHeight > el.clientHeight + 1 &&
+        el.getBoundingClientRect().height > 0
+      );
+    })
+  );
+
+  expect(handle.asElement(), 'this screen has nothing to scroll').not.toBeNull();
+
+  return {
+    offset: () => handle.evaluate((el) => Math.round(el.scrollTop)),
+    // Assigned rather than scrolled with `scrollTo`, which the box smooths and
+    // therefore does not finish before the next line reads it back.
+    scrollTo: (top) => handle.evaluate((el, y) => (el.scrollTop = y), top),
+  };
+}
+
 test.beforeEach(async ({ page, request }) => {
   await request.post('http://localhost:4020/__reset');
   // Planned recipes are database rows, so a test that plans one would
@@ -272,4 +298,38 @@ test('every ingredient row puts its control in the same place', async ({ page })
 
   expect(insets.length, 'found no ingredient rows to compare').toBeGreaterThan(1);
   expect(new Set(insets).size, `trailing insets differ: ${insets.join(', ')}`).toBe(1);
+});
+
+test('tapping the tab you are already on scrolls that screen to the top', async ({ page }) => {
+  await openApp(page);
+  await tab(page, /Basics/).click();
+  await settle(page);
+  // By its picture, not its label: the row's name sits in a line that also
+  // carries the ingredient's badges, so nothing there reads as the name alone.
+  await expect(page.getByRole('button', { name: 'Appel Pear Juice', exact: true })).toBeVisible();
+
+  const basics = await scroller(page);
+  await basics.scrollTo(200);
+  expect(await basics.offset(), 'the screen did not scroll').toBe(200);
+
+  // The whole point of a second tap on the tab you are on. The scroll is
+  // animated, so it arrives over a few frames rather than at once.
+  await tab(page, /Basics/).click();
+  await expect
+    .poll(basics.offset, { message: 'a second tap on the tab left the screen where it was' })
+    .toBe(0);
+
+  // And the other half of the rule: a tap that switches tabs is a tap on a tab
+  // you are not on, and it has to leave the screen you are leaving alone.
+  // Reading it while the tab is away reads 0 whatever happened, because the
+  // navigator hides that screen and a hidden box has no scroll position, so
+  // come back to it and look.
+  await basics.scrollTo(200);
+  await tab(page, /Mandje/).click();
+  await expect(page.getByRole('heading', { name: 'Je mandje' })).toBeVisible();
+  await tab(page, /Basics/).click();
+  await settle(page);
+  await expect(page.getByRole('button', { name: 'Appel Pear Juice', exact: true })).toBeVisible();
+
+  expect(await basics.offset(), 'switching tabs scrolled the screen you left').toBe(200);
 });
