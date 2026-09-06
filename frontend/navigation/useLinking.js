@@ -23,6 +23,9 @@ const config = {
       RecipeList: {
         path: 'recipes',
       },
+      Bonus: {
+        path: 'bonus',
+      },
       WeekPlanner: {
         path: 'planner',
       },

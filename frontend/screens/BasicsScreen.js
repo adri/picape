@@ -86,10 +86,19 @@ function BasicsList({ navigation, open, selectedId, inPane }) {
   const { basics: { edges = [] } = {} } = data;
   return (
     <View>
-      {/* What you always keep in and what you have bought before are the same
-          question asked twice, so the way to the second sits beside the first
-          rather than on a screen about recipes. */}
+      {/* What you always keep in, what you bought before, and which offers the
+          supermarket picked out for you are the same question asked three
+          times: what is it that you buy every week. So the ways to the other
+          two sit beside the first rather than on a screen about recipes or on
+          the basket, which is about this order and not about the week. */}
       <SectionHeader title="Altijd in huis" large>
+        <SectionLink
+          title="Bonus"
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.navigate('Bonus');
+          }}
+        />
         <SectionLink
           title="Eerder gekocht"
           onPress={(e) => {
