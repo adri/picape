@@ -1,3 +1,4 @@
+import { useScrollToTop } from '@react-navigation/native';
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -8,9 +9,12 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import Layout from '../constants/Layout';
 
 export default function SearchScreen() {
+  const scrollRef = React.useRef(null);
+  useScrollToTop(scrollRef);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
         <SectionHeader title="Zoeken" large />
         <View style={[styles.searchContainer]}>
           <SearchIngredients />

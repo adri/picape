@@ -1,4 +1,5 @@
 import { useQuery, useSubscription, gql } from '@apollo/client';
+import { useScrollToTop } from '@react-navigation/native';
 import * as React from 'react';
 import { View, FlatList, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -145,9 +146,12 @@ function BasicsList({ navigation }) {
 }
 
 export default function PlanScreen({ navigation }) {
+  const scrollRef = React.useRef(null);
+  useScrollToTop(scrollRef);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
         <BasicsList navigation={navigation} />
       </ScrollView>
     </SafeAreaView>

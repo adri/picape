@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
+import { useScrollToTop } from '@react-navigation/native';
 import * as React from 'react';
 import { View, FlatList, Text, Dimensions, Platform, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -97,6 +98,9 @@ function PlannedRecipes({ navigation }) {
 }
 
 export default function ListScreen({ navigation }) {
+  const scrollRef = React.useRef(null);
+  useScrollToTop(scrollRef);
+
   // idea: use the count of order items to know how many skeletons to render
   const { data: countData } = useQuery(GET_ORDER_COUNT, {
     fetchPolicy: 'cache-only',
@@ -121,7 +125,7 @@ export default function ListScreen({ navigation }) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
         <SectionHeader title="Je mandje" large>
           <View style={styles.orderTotal}>
             <Text style={[Type.row, { color: Colors.text }]}>

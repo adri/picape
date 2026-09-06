@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client';
+import { useScrollToTop } from '@react-navigation/native';
 import * as React from 'react';
 import { Text, View, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -233,9 +234,12 @@ function RecipeList({ navigation }) {
 }
 
 export default function PlanScreen({ navigation }) {
+  const scrollRef = React.useRef(null);
+  useScrollToTop(scrollRef);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
         <SectionHeader title="Recepten" large>
           <SectionLink
             title="Planner"
