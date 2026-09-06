@@ -125,6 +125,27 @@ defmodule PicapeWeb.Graphql.Types do
     )
 
     field(:unit_quantity, :string, resolve: from_object(:unit_quantity))
+
+    @desc "What the supermarket charges today, in cents."
+    field(:price, :integer, resolve: from_object(:price))
+
+    @desc "In cents, and only while a bonus is taking something off."
+    field(:price_before_bonus, :integer, resolve: from_object(:price_before_bonus))
+
+    @desc "The supermarket's own wording for the price per kilo or litre."
+    field(:unit_price_description, :string, resolve: from_object(:unit_price_description))
+
+    @desc "Days the product keeps after delivery."
+    field(:min_best_before_days, :integer, resolve: from_object(:min_best_before_days))
+
+    @desc "The running bonus, as the supermarket words it, for example \"1 + 1 gratis\"."
+    field(:bonus_mechanism, :string, resolve: from_object(:bonus_mechanism))
+
+    @desc "The supermarket's product description, as text."
+    field(:supermarket_description, :string, resolve: from_object(:supermarket_description))
+
+    @desc "The bullet points under that description."
+    field(:supermarket_highlights, list_of(:string), resolve: from_object(:supermarket_highlights))
   end
 
   node object(:ingredient_tag) do

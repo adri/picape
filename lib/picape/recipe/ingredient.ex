@@ -3,6 +3,7 @@ defmodule Picape.Recipe.Ingredient do
   import Ecto.Changeset
   alias Picape.Recipe.Ingredient
   alias Picape.Supermarket
+  alias Picape.Supermarket.Description
 
   schema "recipe_ingredient" do
     field(:is_essential, :boolean, default: false)
@@ -67,6 +68,47 @@ defmodule Picape.Recipe.Ingredient do
   def fetch(ingredient, :nutriscore) do
     {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "properties", "nutriscore", Access.at(0)]) || ""}
   end
+
+  def fetch(ingredient, :price) do
+    card = product_card(ingredient)
+    {:ok, cents(card["currentPrice"] || card["priceBeforeBonus"])}
+  end
+
+  # Without a bonus, priceBeforeBonus is the price rather than something to
+  # strike through, so it is only a price *before* when a current price exists.
+  def fetch(ingredient, :price_before_bonus) do
+    card = product_card(ingredient)
+
+    case card["currentPrice"] do
+      nil -> :error
+      _ -> {:ok, cents(card["priceBeforeBonus"])}
+    end
+  end
+
+  def fetch(ingredient, :unit_price_description) do
+    {:ok, product_card(ingredient)["unitPriceDescription"] || ""}
+  end
+
+  def fetch(ingredient, :min_best_before_days) do
+    {:ok, product_card(ingredient)["minBestBeforeDays"]}
+  end
+
+  def fetch(ingredient, :bonus_mechanism) do
+    {:ok, product_card(ingredient)["bonusMechanism"] || ""}
+  end
+
+  def fetch(ingredient, :supermarket_description) do
+    {:ok, Description.paragraphs(product_card(ingredient)["descriptionHighlights"])}
+  end
+
+  def fetch(ingredient, :supermarket_highlights) do
+    {:ok, Description.highlights(product_card(ingredient)["descriptionHighlights"])}
+  end
+
+  defp product_card(ingredient), do: get_in(ingredient.supermarket_product_raw, ["productCard"]) || %{}
+
+  defp cents(nil), do: nil
+  defp cents(amount), do: round(amount * 100)
 
   @doc false
   def edit_changeset(%Ingredient{} = ingredient, attrs) do

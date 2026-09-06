@@ -181,6 +181,27 @@ type Ingredient implements Node {
   season: Season
 
   unitQuantity: String
+
+  "What the supermarket charges today, in cents."
+  price: Int
+
+  "In cents, and only while a bonus is taking something off."
+  priceBeforeBonus: Int
+
+  "The supermarket's own wording for the price per kilo or litre."
+  unitPriceDescription: String
+
+  "Days the product keeps after delivery."
+  minBestBeforeDays: Int
+
+  "The running bonus, as the supermarket words it, for example \"1 + 1 gratis\"."
+  bonusMechanism: String
+
+  "The supermarket's product description, as text."
+  supermarketDescription: String
+
+  "The bullet points under that description."
+  supermarketHighlights: [String]
 }
 
 type IngredientTag implements Node {
