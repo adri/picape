@@ -1,18 +1,16 @@
 import { useQuery, useMutation } from '@apollo/client';
-import { BlurView } from 'expo-blur';
 import * as React from 'react';
-import { View, Text, ScrollView, FlatList, StyleSheet, useColorScheme } from 'react-native';
+import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
 
 import { Card } from '../components/Card/Card';
 import { ImageCard } from '../components/Card/ImageCard';
-import { RefreshIcon, CloseIcon, MinusIcon, PlusIcon } from '../components/Icon';
-import { FOOTER_HEIGHT } from '../components/Section/FixedFooter';
+import { BackIcon, RefreshIcon, MinusIcon, PlusIcon } from '../components/Icon';
+import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import Layout from '../constants/Layout';
-import { FloatingTop, Spacing } from '../constants/Spacing';
+import { FloatingTop, Gutter, Spacing } from '../constants/Spacing';
 import { GET_RECIPES } from '../operations/getRecipes';
 import { PLAN_RECIPE, optimisticResponse } from '../operations/planRecipe';
 
@@ -71,6 +69,7 @@ export default function WeekPlannerScreen({ navigation }) {
             initialNumToRender={3}
             numColumns={2}
             windowSize={3}
+            columnWrapperStyle={{ paddingHorizontal: Gutter - Spacing.xs }}
             data={chosenRecipes}
             keyExtractor={(recipe) => recipe.id}
             renderItem={({ item: recipe, index }) => {
@@ -90,14 +89,12 @@ export default function WeekPlannerScreen({ navigation }) {
                     });
                   }}>
                   <RefreshIcon
-                    style={styles.refreshIcon}
                     onPress={(e) => {
                       e.preventDefault();
                       setRecipes(replaceRecipe(chosenRecipes, index, getRandom(recipes, 1)[0]));
                     }}
                   />
                   <MinusIcon
-                    style={styles.minusIcon}
                     onPress={(e) => {
                       e.preventDefault();
                       setRecipes(removeRecipe(chosenRecipes, index));
@@ -126,11 +123,11 @@ export default function WeekPlannerScreen({ navigation }) {
         </SkeletonContent>
       </ScrollView>
 
-      <CloseIcon
+      <BackIcon
         style={{
           position: 'absolute',
           top: insets.top + FloatingTop,
-          right: insets.right + Spacing.md,
+          left: insets.left + Spacing.md,
         }}
         onPress={(e) => {
           e.preventDefault();
@@ -138,46 +135,28 @@ export default function WeekPlannerScreen({ navigation }) {
         }}
       />
 
-      <BlurView
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
+      <FixedFooter
+        buttonText="Recepten plannen"
+        onPress={(e) => {
+          e.preventDefault();
+          chosenRecipes.map(({ id }) =>
+            planRecipe({
+              variables: { recipeId: id },
+              optimisticResponse: optimisticResponse('planRecipe', id, true),
+            })
+          );
+          navigation.goBack();
         }}
-        tint={useColorScheme()}
-        intensity={100}>
-        <Text
-          onPress={(e) => {
-            e.preventDefault();
-            chosenRecipes.map(({ id }) =>
-              planRecipe({
-                variables: { recipeId: id },
-                optimisticResponse: optimisticResponse('planRecipe', id, true),
-              })
-            );
-            navigation.goBack();
-          }}
-          style={{
-            color: Colors.text,
-            alignSelf: 'center',
-            padding: 10,
-            paddingHorizontal: 20,
-            marginTop: 20,
-            marginBottom: insets.bottom + 20,
-            backgroundColor: Colors.iconDefault,
-            borderRadius: Layout.borderRadius,
-          }}>
-          Recepten plannen
-        </Text>
-      </BlurView>
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   imageCard: {
-    flexBasis: '50%',
+    width: '50%',
+    paddingHorizontal: Spacing.xs,
+    paddingBottom: Spacing.xl,
   },
   imageCardStyle: {
     width: '100%',
@@ -193,13 +172,5 @@ const styles = StyleSheet.create({
     alignContent: 'stretch',
     paddingHorizontal: 15,
     marginBottom: 100,
-  },
-  refreshIcon: {
-    marginTop: 10,
-    marginRight: 10,
-  },
-  minusIcon: {
-    marginTop: 10,
-    marginLeft: 10,
   },
 });
