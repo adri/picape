@@ -66,12 +66,19 @@ graded_mozarella = insert! :ingredient, name: "Graded Mozarella", supermarket_pr
 # line into the steps you tick off, and without one every seeded recipe rendered
 # a single empty card, so no screenshot ever covered a step. One step names a
 # duration, which is what the screen turns into a timer link.
+#
+# It ends with a YouTube link, the way five of the production recipes do. The
+# screen lifts that link out of the steps and gives it a player of its own. The
+# `m.` host is deliberate: one of those five was written on a phone, so the
+# host is not always `www.`
 nasi_steps = String.trim("""
 Kook de rijst volgens de aanwijzing op de verpakking en laat hem afkoelen.
 
 Bak de kip in de olie tot hij gaar is, en schep de wokgroenten erdoor.
 
 Roer de nasimix en de ketjap erdoor en bak alles nog 5 minuten door.
+
+https://m.youtube.com/watch?v=CgpbnBlN_ZU
 """)
 nasi = insert! :recipe, title: "Nasi", description: nasi_steps, image_url: "https://user-images.githubusercontent.com/133832/28996360-3152b366-79ff-11e7-9d0e-01ffb907e32c.jpg", ingredients: [
   chicken,

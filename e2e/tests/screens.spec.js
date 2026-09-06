@@ -154,8 +154,26 @@ test('tapping a recipe opens its detail screen', async ({ page }, testInfo) => {
   await openApp(page, testInfo);
   await page.getByText('Nasi', { exact: true }).first().click();
   await expect(page.getByText('Chinese Wokmix').first()).toBeVisible();
+  // The seeded description ends in a YouTube link, which this screen turns into
+  // a player you start yourself. The label belongs to this screen alone, so it
+  // cannot match the home screen that stays mounted underneath.
+  await expect(page.getByRole('button', { name: 'Video afspelen' })).toHaveCount(1);
+  // And the link is gone from the steps, rather than sitting under the player
+  // it was replaced by.
+  await expect(page.getByText('youtube', { exact: false })).toHaveCount(0);
   await settle(page);
   await checkScreen(page, 'recipe-detail');
+  // The player sits under the steps, which is off the first screen, so it takes
+  // a capture of its own. Its thumbnail is on youtube.com, which the beforeEach
+  // aborts, so what this records is the embed with nothing to show: the state
+  // every recipe falls back to when the picture will not load.
+  // Centred rather than merely in view: the footer button floats over the
+  // bottom of the screen, and the least scroll that satisfies "visible" leaves
+  // the player behind it.
+  await page
+    .getByRole('button', { name: 'Video afspelen' })
+    .evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await checkScreen(page, 'recipe-detail-video');
   expect(problems).toEqual([]);
 });
 

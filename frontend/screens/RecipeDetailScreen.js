@@ -10,6 +10,7 @@ import { Badge } from '../components/Badge/Badge';
 import { BackIcon, CheckIcon } from '../components/Icon';
 import { EditIcon } from '../components/Icon/EditIcon';
 import { ListItem } from '../components/ListItem/ListItem';
+import { takeYoutubeLink, YoutubeEmbed } from '../components/Recipe/YoutubeEmbed';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
@@ -71,7 +72,10 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
   const { recipe = params.recipe } = data;
   const insets = useSafeAreaInsets();
   const columnInset = contentInset(useWindowDimensions().width);
-  const steps = (recipe.description || '').split('\n\n');
+  const { videoId, description } = takeYoutubeLink(recipe.description);
+  // A step the link was the whole of leaves an empty paragraph behind, and a
+  // recipe with no description at all was already rendering one blank card.
+  const steps = description.split('\n\n').filter((step) => step.trim());
   const [stepChecked, setStepsChecked] = React.useState([]);
   const [markRecipeAsCooked] = useMutation(MARK_RECIPE_AS_COOKED, {
     onCompleted: () => {
@@ -198,10 +202,6 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                     return new URLSearchParams(url).get('text');
                   }
 
-                  if (url.includes('youtube.com')) {
-                    return 'Youtube';
-                  }
-
                   return url;
                 }}>
                 <Text
@@ -235,6 +235,11 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
             </View>
           );
         })}
+
+        {/* Under the steps rather than over them. A recipe fits on one screen
+            today, and a second picture the size of the hero above the steps
+            would push every one of them off it. */}
+        {videoId && <YoutubeEmbed videoId={videoId} />}
       </ScrollView>
 
       <BackIcon
