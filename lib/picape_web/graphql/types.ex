@@ -217,6 +217,32 @@ defmodule PicapeWeb.Graphql.Types do
     field(:node, :ingredient)
   end
 
+  @desc "The supermarket's personal bonus offers for one period."
+  object :bonus do
+    @desc "How many of the offers may be activated in this period."
+    field(:maximum_activations, :integer)
+    field(:activated_count, :integer)
+    @desc "Offers that cover an ingredient Picape knows come first."
+    field(:offers, list_of(:bonus_offer))
+  end
+
+  @desc "One personal bonus offer."
+  object :bonus_offer do
+    @desc "The supermarket's own offer id, not a Picape ID."
+    field(:id, :string)
+    field(:title, :string)
+    field(:subtitle, :string)
+    field(:category, :string)
+    @desc "The discount as the supermarket words it, for example \"20% korting\"."
+    field(:discount, :string)
+    field(:image_url, :string)
+    @desc "How many supermarket products the offer covers."
+    field(:product_count, :integer)
+    field(:is_activated, :boolean)
+    @desc "The ingredients Picape knows among those products."
+    field(:ingredients, list_of(:ingredient))
+  end
+
   object :supermarket_search_result do
     field(:id, :string)
     field(:name, :string)

@@ -37,6 +37,9 @@ type RootQueryType {
   "The last order including total price and ordered items."
   lastOrder: Order
 
+  "The personal bonus offers for the period the current order is delivered in."
+  bonus: Bonus
+
   "Search Supermarket products using a query string."
   searchSupermarket(query: String!): [SupermarketSearchResult]
 
@@ -74,6 +77,12 @@ type RootMutationType {
 
   "Order an ingredient in a certain quantity."
   orderIngredient(ingredientId: ID!, quantity: Int): Ingredient
+
+  """
+  Activate one personal bonus offer. This spends one of the period's
+  activations on the loyalty account and cannot be undone.
+  """
+  activateBonusOffer(offerId: String!): Bonus
 
   "Add a new ingredient."
   addIngredient(name: String!, isEssential: Boolean!, supermarketProductId: String!): Ingredient
@@ -284,6 +293,42 @@ type RecipeEdge {
 
 type IngredientEdge {
   node: Ingredient
+}
+
+"The supermarket's personal bonus offers for one period."
+type Bonus {
+  "How many of the offers may be activated in this period."
+  maximumActivations: Int
+
+  activatedCount: Int
+
+  "Offers that cover an ingredient Picape knows come first."
+  offers: [BonusOffer]
+}
+
+"One personal bonus offer."
+type BonusOffer {
+  "The supermarket's own offer id, not a Picape ID."
+  id: String
+
+  title: String
+
+  subtitle: String
+
+  category: String
+
+  "The discount as the supermarket words it, for example \"20% korting\"."
+  discount: String
+
+  imageUrl: String
+
+  "How many supermarket products the offer covers."
+  productCount: Int
+
+  isActivated: Boolean
+
+  "The ingredients Picape knows among those products."
+  ingredients: [Ingredient]
 }
 
 type SupermarketSearchResult {

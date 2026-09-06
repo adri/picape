@@ -79,6 +79,11 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(&Resolver.Order.last/3)
     end
 
+    @desc "The personal bonus offers for the period the current order is delivered in."
+    field :bonus, :bonus do
+      resolve(&Resolver.Bonus.offers/3)
+    end
+
     @desc "Search Supermarket products using a query string."
     field :search_supermarket, list_of(:supermarket_search_result) do
       arg(:query, non_null(:string))
@@ -150,6 +155,15 @@ defmodule PicapeWeb.Graphql.Schema do
       arg(:ingredient_id, non_null(:id))
       arg(:quantity, :integer, default_value: 1)
       resolve(handle_errors(&Resolver.Order.order_ingredient/2))
+    end
+
+    @desc """
+    Activate one personal bonus offer. This spends one of the period's
+    activations on the loyalty account and cannot be undone.
+    """
+    field :activate_bonus_offer, :bonus do
+      arg(:offer_id, non_null(:string))
+      resolve(handle_errors(&Resolver.Bonus.activate/2))
     end
 
     @desc "Add a new ingredient."
