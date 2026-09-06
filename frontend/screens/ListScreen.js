@@ -13,6 +13,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
+import { Gutter, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 import { SUBSCRIBE_ORDER, GET_ORDER } from '../operations/getOrder';
 import { GET_ORDER_COUNT } from '../operations/getOrderCount';
@@ -55,9 +56,9 @@ function PlannedRecipes({ navigation }) {
         containerStyle={{ paddingLeft: 0 }}
         isLoading={loading && recipes.length === 0}>
         <FlatList
-          style={{ paddingHorizontal: 20, height: 150 }}
-          containerStyle={{ paddingLeft: 20 }}
           horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: Gutter, gap: Spacing.md }}
           removeClippedSubviews
           data={recipes}
           keyExtractor={(recipe) => recipe.id}
@@ -72,7 +73,9 @@ function PlannedRecipes({ navigation }) {
                   });
                 }}
                 key={recipe.id}
-                width={100}
+                style={{ width: 110 }}
+                height={110}
+                titleLines={1}
                 title={recipe.title}
                 imageUrl={recipe.imageUrl}
               />

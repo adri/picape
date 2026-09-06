@@ -75,7 +75,14 @@ export function ImageCard({
           delayPressIn={100}
         />
         {!!children && (
-          <View style={{ position: 'absolute', top: Spacing.sm, right: Spacing.sm }}>
+          <View
+            style={{
+              position: 'absolute',
+              top: Spacing.sm,
+              right: Spacing.sm,
+              flexDirection: 'row',
+              gap: Spacing.sm,
+            }}>
             {children}
           </View>
         )}
