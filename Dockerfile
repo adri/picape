@@ -65,12 +65,6 @@ RUN --mount=type=cache,target=~/.hex/packages/hexpm,sharing=locked \
 
 COPY priv priv
 
-# note: if your project uses a tool like https://purgecss.com/,
-# which customizes asset compilation based on what it finds in
-# your Elixir templates, you will need to move the asset compilation
-# step down so that `lib` is available.
-COPY assets assets
-
 COPY frontend frontend
 
 # Build expo from frontend directory
@@ -142,7 +136,6 @@ RUN chown nobody /app
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/prod/rel/picape ./
 COPY --from=builder --chown=nobody:root /app/bin ./bin
-# COPY --from=builder --chown=nobody:root /app/assets ./assets
 
 USER nobody
 

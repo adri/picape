@@ -3,31 +3,12 @@ import Config
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
-# The watchers configuration can be used to run external
-# watchers to your application. For example, we use it
-# with brunch.io to recompile .js and .css sources.
-legacy_assets_watcher =
-  if File.dir?(Path.expand("../assets/node_modules", __DIR__)) do
-    [
-      bash: [
-        "../bin/spawn_execute.sh",
-        "node",
-        "node_modules/next/dist/bin/next-dev",
-        "-p",
-        "4001",
-        cd: Path.expand("../assets", __DIR__)
-      ]
-    ]
-  else
-    []
-  end
-
 config :picape, PicapeWeb.Endpoint,
   http: [port: 4010],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
-  watchers: legacy_assets_watcher
+  watchers: []
 
 # ## SSL Support
 #

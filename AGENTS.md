@@ -56,7 +56,6 @@ Phoenix 1.8 app split the conventional way:
 - `lib/picape/` — domain contexts (no web concerns)
 - `lib/picape_web/` — Phoenix endpoint, router, controllers, and the Absinthe GraphQL layer
 - `frontend/` — Expo/React Native client (current)
-- `assets/` — legacy Next.js bundle; the dev watcher in [config/dev.exs](config/dev.exs) only spawns it when `assets/node_modules` exists
 - `e2e/` — Playwright screen tests and `probe.js`, own `package.json` so it survives Expo upgrades
 
 ### Domain contexts (`lib/picape/`)
