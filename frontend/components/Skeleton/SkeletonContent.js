@@ -2,6 +2,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { prefersReducedMotion } from '../../constants/Motion';
+
 // Drop-in replacement for react-native-skeleton-content, which was last
 // published in 2022 and pulls in react-native-reanimated 2.1.0. That version
 // calls findNodeHandle, which react-native-web 0.20 removed, so it breaks the
@@ -34,34 +36,42 @@ function Bone({ layout, boneColor, highlightColor }) {
         // accidentally reveal the gradient outside the bone.
         { overflow: 'hidden', backgroundColor: layout.backgroundColor || boneColor },
       ]}>
-      <View
-        style={[
-          styles.gradient,
-          {
-            // A CSS animation rather than Animated. react-native-web has no
-            // native driver, so Animated would step this transform from
-            // JavaScript on every frame, for every bone on the screen at once,
-            // on the same thread that is rendering the screen underneath. A
-            // keyframed transform runs on the compositor and costs the main
-            // thread nothing.
-            animationKeyframes: [
-              {
-                '0%': { transform: [{ translateX: -distance }] },
-                '100%': { transform: [{ translateX: distance }] },
-              },
-            ],
-            animationDuration: `${DURATION}ms`,
-            animationIterationCount: 'infinite',
-            animationTimingFunction: 'cubic-bezier(0.5, 0, 0.25, 1)',
-          },
-        ]}>
-        <LinearGradient
-          colors={[boneColor, highlightColor, boneColor]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.gradientChild}
-        />
-      </View>
+      {/* The sweep is the one thing in the app that travels and never stops:
+          it starts on its own, repeats for as long as the query takes, and
+          runs beside content the reader is trying to read. That is what the
+          reduced-motion preference is about, so a reader who set it gets the
+          bone standing still. It still says the same thing, because the bone
+          itself is the placeholder. */}
+      {prefersReducedMotion() ? null : (
+        <View
+          style={[
+            styles.gradient,
+            {
+              // A CSS animation rather than Animated. react-native-web has no
+              // native driver, so Animated would step this transform from
+              // JavaScript on every frame, for every bone on the screen at once,
+              // on the same thread that is rendering the screen underneath. A
+              // keyframed transform runs on the compositor and costs the main
+              // thread nothing.
+              animationKeyframes: [
+                {
+                  '0%': { transform: [{ translateX: -distance }] },
+                  '100%': { transform: [{ translateX: distance }] },
+                },
+              ],
+              animationDuration: `${DURATION}ms`,
+              animationIterationCount: 'infinite',
+              animationTimingFunction: 'cubic-bezier(0.5, 0, 0.25, 1)',
+            },
+          ]}>
+          <LinearGradient
+            colors={[boneColor, highlightColor, boneColor]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientChild}
+          />
+        </View>
+      )}
     </View>
   );
 }

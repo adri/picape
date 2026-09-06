@@ -1,5 +1,9 @@
 import { createBottomTabNavigator, BottomTabBar } from '@react-navigation/bottom-tabs';
-import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+  TransitionPresets,
+} from '@react-navigation/stack';
 import { BlurView } from 'expo-blur';
 import * as React from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
@@ -8,6 +12,7 @@ import { ListCountBadge } from '../components/Badge/ListCountBadge';
 import TabBarIcon from '../components/TabBarIcon';
 import Colors, { useTheme } from '../constants/Colors';
 import { contentColumn } from '../constants/Layout';
+import { prefersReducedMotion } from '../constants/Motion';
 import { Hairline } from '../constants/Spacing';
 import { AddIngredientScreen } from '../screens/AddIngredientScreen';
 import BasicsScreen from '../screens/BasicsScreen';
@@ -41,9 +46,21 @@ function TabBar(props) {
 
 const Stack = createStackNavigator();
 
+// A card slides in from the right and a modal rises from the bottom, which is
+// exactly the axis travel a reader who asked for less motion is asking not to
+// see. Apple's own answer to Reduce Motion is to swap a transition along an
+// axis for a fade rather than to drop it, so only the interpolator changes: the
+// gesture, its direction and the timing stay as they are, and the screen
+// cross-fades over the one behind it instead of sliding across it.
+const reduceMotion = () =>
+  prefersReducedMotion()
+    ? { cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }
+    : null;
+
 const modal = () => ({
   animationEnabled: true,
   ...TransitionPresets.ModalPresentationIOS,
+  ...reduceMotion(),
 });
 
 export default function PlanStackScreen() {
@@ -63,6 +80,7 @@ export default function PlanStackScreen() {
         // Keeping it attached means it is already painted when the swipe starts.
         detachPreviousScreen: false,
         ...TransitionPresets.SlideFromRightIOS,
+        ...reduceMotion(),
       })}>
       <Stack.Screen name="PlanScreen" component={BottomTabNavigator} />
       <Stack.Screen name="RecipeList" component={RecipeListScreen} />

@@ -543,3 +543,82 @@ test('tapping the tab you are already on scrolls that screen to the top', async 
 
   expect(await basics.offset(), 'switching tabs scrolled the screen you left').toBe(200);
 });
+
+// Watches how far anything travels, and whether anything cross-fades, over the
+// frames that follow. React Navigation animates a card on web by writing the
+// transform and the opacity straight onto the element, so reading the inline
+// style costs no layout and catches every frame the browser paints.
+async function watchMotion(page) {
+  await page.addInitScript(() => {
+    window.__motion = { travelled: 0, crossFaded: false };
+    const tick = () => {
+      for (const el of document.querySelectorAll('div[style]')) {
+        const moved = /translateX\((-?[\d.]+)px\)/.exec(el.style.transform || '');
+        if (moved) {
+          window.__motion.travelled = Math.max(window.__motion.travelled, Math.abs(+moved[1]));
+        }
+        const opacity = el.style.opacity;
+        if (opacity !== '' && +opacity > 0.001 && +opacity < 0.999) {
+          window.__motion.crossFaded = true;
+        }
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+// Opens a recipe and reports what the screen did on the way in.
+async function openRecipe(page) {
+  await page.evaluate(() => {
+    window.__motion.travelled = 0;
+    window.__motion.crossFaded = false;
+  });
+  await page.getByText('Nasi', { exact: true }).first().click();
+  await expect(page.getByText('Chinese Wokmix').first()).toBeVisible();
+  await page.waitForTimeout(1_000);
+  return page.evaluate(() => window.__motion);
+}
+
+// Reduce Motion is a system setting and honouring it is not optional, but
+// nothing about it shows in a screenshot: an app that ignores the preference
+// renders identically to one that answers it. So measure the travel.
+//
+// Both halves run on the phone alone. Neither the preference nor the transition
+// has anything to do with the size of the display, and the pair would otherwise
+// cost two more app boots in every project.
+test('a screen slides in from the right when no preference is set', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'iphone', 'the transition does not depend on the display');
+  await watchMotion(page);
+  await openApp(page);
+
+  // The control for the test below. Without it, an app that had stopped
+  // animating screens at all would pass that one and prove nothing.
+  const motion = await openRecipe(page);
+  expect(motion.travelled, 'the screen no longer slides in at all').toBeGreaterThan(100);
+});
+
+test('a screen cross-fades in when the reader asked for less motion', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'iphone', 'the transition does not depend on the display');
+  // Set here rather than through `test.use({ reducedMotion: 'reduce' })`: that
+  // resolves the fixture but never reaches the context, and the page still
+  // reads no-preference. And set before the first load, because the app reads
+  // the query once when its motion module is first imported.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await watchMotion(page);
+  await openApp(page);
+
+  // An emulation that silently does nothing would make everything below pass
+  // while proving none of it, so check the page really was asked.
+  const asked = await page.evaluate(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+  expect(asked, 'the browser was not emulating the preference').toBe(true);
+
+  const motion = await openRecipe(page);
+  expect(motion.travelled, 'the screen still slid across').toBe(0);
+  // Apple asks for the axis to be replaced by a fade rather than for the
+  // transition to be dropped, so the screen still has to arrive over the one
+  // behind it instead of appearing in a single frame.
+  expect(motion.crossFaded, 'the screen appeared in a single frame').toBe(true);
+});
