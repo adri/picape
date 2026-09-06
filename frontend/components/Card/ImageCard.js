@@ -1,5 +1,6 @@
+import { ImageBackground } from 'expo-image';
 import * as React from 'react';
-import { View, ImageBackground, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { useTheme } from '../../constants/Colors';
 import { Radius, Spacing } from '../../constants/Spacing';
@@ -9,6 +10,8 @@ import Type from '../../constants/Type';
 // row scrolls. The 3:2 crop is what the photos are shot at.
 export const CARD_WIDTH = 200;
 export const CARD_HEIGHT = 134;
+
+const FADE_IN = { duration: 260, effect: 'cross-dissolve', timing: 'ease-out' };
 
 // A recipe as a picture with its name underneath, and room in the top corner
 // for the control that plans it.
@@ -33,23 +36,19 @@ export function ImageCard({
   badges,
 }) {
   const colors = useTheme();
-  const [loaded, setLoaded] = React.useState(false);
 
   return (
     <View style={style}>
       <ImageBackground
         source={{ uri: imageUrl }}
-        onLoad={() => setLoaded(true)}
+        contentFit="cover"
+        // The picture arrives over the network. Fading it in over the
+        // placeholder reads as the card filling in, where a hard swap reads
+        // as a glitch.
+        transition={FADE_IN}
         imageStyle={{
           borderRadius: Radius.md,
-          resizeMode: 'cover',
-          // The picture arrives over the network. Fading it in over the
-          // placeholder reads as the card filling in, where a hard swap reads
-          // as a glitch.
           opacity: muted ? 0.2 : 1,
-          transitionProperty: 'opacity',
-          transitionDuration: '260ms',
-          transitionTimingFunction: 'ease-out',
         }}
         style={[
           {
@@ -57,8 +56,9 @@ export function ImageCard({
             height,
             borderRadius: Radius.md,
             // Until the picture loads the card is a filled shape rather than a
-            // hole in the layout.
-            backgroundColor: loaded ? 'transparent' : colors.cardBackground,
+            // hole in the layout. The picture paints over it, so this needs no
+            // state of its own.
+            backgroundColor: colors.cardBackground,
           },
           imageStyle,
         ]}>

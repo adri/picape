@@ -1,6 +1,7 @@
 import { useMutation, useQuery, gql } from '@apollo/client';
+import { ImageBackground } from 'expo-image';
 import * as React from 'react';
-import { Text, FlatList, View, ImageBackground, Dimensions } from 'react-native';
+import { Text, FlatList, View, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Hyperlink from 'react-native-hyperlink';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -87,8 +88,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <ImageBackground
           source={{ uri: recipe.imageUrl }}
-          fadeDuration={0}
-          imageStyle={{ resizeMode: 'cover' }}
+          contentFit="cover"
           style={{
             width: Dimensions.get('window').width,
             height: 200,

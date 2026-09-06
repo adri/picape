@@ -1,5 +1,6 @@
+import { Image } from 'expo-image';
 import * as React from 'react';
-import { View, Image, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 import { Subtitle } from './Subtitle';
 import { useTheme } from '../../constants/Colors';
@@ -38,7 +39,7 @@ export function ListItem({
       }}>
       <Image
         source={{ uri: imageUrl }}
-        resizeMode="contain"
+        contentFit="contain"
         style={{ width: THUMB, height: THUMB }}
       />
     </View>
