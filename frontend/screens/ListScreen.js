@@ -16,6 +16,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout, { CONTENT_MAX_WIDTH, contentColumn } from '../constants/Layout';
+import { Duration, Easing } from '../constants/Motion';
 import { Gutter, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 import { SUBSCRIBE_ORDER, GET_ORDER } from '../operations/getOrder';
@@ -214,7 +215,7 @@ export default function ListScreen({ navigation }) {
             style={{ paddingHorizontal: 20, marginBottom: 50 }}
             data={currentOrder.items}
             keyExtractor={(item) => item.id}
-            renderItem={({ item, index }) => {
+            renderItem={({ item }) => {
               const ingredient = item.ingredient;
               const plannedRecipes = ingredient?.plannedRecipes || [];
               return (
@@ -222,7 +223,6 @@ export default function ListScreen({ navigation }) {
                   style={[
                     styles.fadeIn,
                     {
-                      animationDuration: `${200 + 100 * index}ms`,
                       backgroundColor: ingredient?.isPlanned
                         ? Colors.cardHighlightBackground
                         : Colors.cardBackground,
@@ -323,6 +323,18 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
     gap: Spacing.sm,
   },
+  // The handoff from the skeleton to the rows it was standing in for. One
+  // constant duration, the same for every row.
+  //
+  // It used to be `200 + 100 * index`, which is a duration and not a delay, so
+  // the row's fade got slower the further down the basket it sat: row 20 took
+  // 2.2s and row 40 took 4.2s. Scrolled to the bottom of a real basket, the
+  // rows you are looking at were the slowest ones on the screen, which is the
+  // whole of the "it takes forever to appear" report.
+  //
+  // No stagger replaces it. A stagger would mark rows arriving one after
+  // another, and they do not: the query answers once and the whole list
+  // replaces the whole skeleton. Row 12 has nothing of its own to say.
   fadeIn: {
     ...Platform.select({
       web: {
@@ -331,8 +343,10 @@ const styles = StyleSheet.create({
           from: { opacity: 0 },
           to: { opacity: 1 },
         },
+        animationDuration: Duration.fast,
+        animationTimingFunction: Easing.enter,
         transitionProperty: ['background-color', 'opacity'],
-        transitionDuration: '200ms',
+        transitionDuration: Duration.fast,
         transitionTimingFunction: 'ease-in',
       },
     }),
