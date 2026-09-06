@@ -33,17 +33,18 @@ function formatEuros(cents) {
 const weekdays = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 const months = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
 
-function formatDeliverySlot({ deliveryDate, deliveryStartTime, deliveryEndTime }) {
-  if (!deliveryDate || !deliveryStartTime || !deliveryEndTime) return null;
+// The day is the part worth knowing at a glance. The window within it decides
+// nothing while you are still filling the basket, and spelling it out cost a
+// line of its own under the heading.
+function formatDeliveryDay({ deliveryDate }) {
+  if (!deliveryDate) return null;
 
   // Split rather than parsed: `new Date('2026-09-09')` is UTC midnight, which
   // is the day before west of Greenwich, and the weekday would be wrong.
   const [year, month, day] = deliveryDate.split('-').map(Number);
   const weekday = weekdays[new Date(year, month - 1, day).getDay()];
-  const from = deliveryStartTime.slice(0, 5);
-  const until = deliveryEndTime.slice(0, 5);
 
-  return `${weekday} ${day} ${months[month - 1]} ${from} – ${until}`;
+  return `${weekday} ${day} ${months[month - 1]}`;
 }
 
 function PlannedRecipes({ navigation }) {
@@ -141,16 +142,21 @@ export default function ListScreen({ navigation }) {
   const { currentOrder: currentOrderQuery = {} } = data;
   const { currentOrder: currentOrderSubscription } = subscription;
   const currentOrder = currentOrderSubscription || currentOrderQuery;
-  const deliverySlot = formatDeliverySlot(currentOrder);
+  const deliveryDay = formatDeliveryDay(currentOrder);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
         <SectionHeader title="Je mandje" large>
           <View style={styles.orderTotal}>
-            <Text style={[Type.row, { color: Colors.text }]}>
-              {currentOrder.totalPrice > 0 ? formatEuros(currentOrder.totalPrice) : ''}
-            </Text>
+            <View style={styles.orderTotalLine}>
+              {deliveryDay && (
+                <Text style={[Type.subtitle, { color: Colors.secondaryText }]}>{deliveryDay}</Text>
+              )}
+              <Text style={[Type.row, { color: Colors.text }]}>
+                {currentOrder.totalPrice > 0 ? formatEuros(currentOrder.totalPrice) : ''}
+              </Text>
+            </View>
             {currentOrder.totalDiscount > 0 && (
               <Text style={[Type.subtitle, { color: Colors.savingsText }]}>
                 {formatEuros(currentOrder.totalDiscount)} bespaard
@@ -158,12 +164,6 @@ export default function ListScreen({ navigation }) {
             )}
           </View>
         </SectionHeader>
-
-        {deliverySlot && (
-          <Text style={[Type.subtitle, styles.deliverySlot, { color: Colors.text }]}>
-            Bezorging {deliverySlot}
-          </Text>
-        )}
 
         <PlannedRecipes navigation={navigation} />
 
@@ -250,17 +250,18 @@ const styles = StyleSheet.create({
   // Room for both lines whether or not the order has arrived and whether or not
   // the bonus took anything off, so the heading keeps one height and the basket
   // below it never jumps once the total loads.
-  // Its own line rather than a third item beside the title: the heading's right
-  // side already stacks the total and the savings, and the slot is a fact about
-  // the whole order rather than about its money.
-  deliverySlot: {
-    marginHorizontal: Gutter,
-    marginBottom: Spacing.md,
-  },
   orderTotal: {
     alignItems: 'flex-end',
     justifyContent: 'center',
     minHeight: Type.row.lineHeight + Type.subtitle.lineHeight,
+  },
+  // The delivery day rides on the total's line rather than taking one of its
+  // own. It is a short label and the heading already reserves two lines, so a
+  // third would have made the heading taller for every order.
+  orderTotalLine: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: Spacing.sm,
   },
   fadeIn: {
     ...Platform.select({

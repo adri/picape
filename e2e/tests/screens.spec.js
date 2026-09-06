@@ -193,7 +193,7 @@ test('the cart shows the booked delivery slot', async ({ page }, testInfo) => {
   await tab(page, /Mandje/).click();
   // The whole line, and only the cart has it: detachPreviousScreen keeps the
   // home screen mounted underneath, so a shorter locator could match twice.
-  await expect(page.getByText('Bezorging wo 9 sep 08:00 – 12:00')).toHaveCount(1);
+  await expect(page.getByText('wo 9 sep', { exact: true })).toHaveCount(1);
   expect(problems).toEqual([]);
 });
 
