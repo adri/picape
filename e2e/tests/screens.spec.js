@@ -163,13 +163,14 @@ test('tapping a recipe opens its detail screen', async ({ page }, testInfo) => {
   await expect(page.getByText('youtube', { exact: false })).toHaveCount(0);
   await settle(page);
   await checkScreen(page, 'recipe-detail');
-  // The player sits under the steps, which is off the first screen, so it takes
-  // a capture of its own. Its thumbnail is on youtube.com, which the beforeEach
-  // aborts, so what this records is the embed with nothing to show: the state
-  // every recipe falls back to when the picture will not load.
-  // Centred rather than merely in view: the footer button floats over the
-  // bottom of the screen, and the least scroll that satisfies "visible" leaves
-  // the player behind it.
+  // The player sits under the steps, which on a phone is off the first screen,
+  // so it takes a capture of its own. Its thumbnail is on youtube.com, which
+  // the beforeEach aborts, so what this records is the frame with nothing in
+  // it: what a recipe falls back to whenever the picture will not load.
+  //
+  // Centred rather than merely scrolled into view: the footer button floats
+  // over the bottom of the screen, and the least scroll that satisfies
+  // "visible" leaves the player behind it.
   await page
     .getByRole('button', { name: 'Video afspelen' })
     .evaluate((el) => el.scrollIntoView({ block: 'center' }));
