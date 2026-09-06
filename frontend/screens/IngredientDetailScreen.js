@@ -158,7 +158,7 @@ export function IngredientDetailScreen({
 
         {hasNutriscore(ingredient.nutriscore) && (
           <>
-            <Separator />
+            <Separator style={styles.divider} />
             <View style={[styles.block, styles.nutriscore]}>
               <Text style={[Type.row, { color: colors.text }]}>Nutri-Score</Text>
               <Nutriscore nutriscore={ingredient.nutriscore} />
@@ -168,7 +168,7 @@ export function IngredientDetailScreen({
 
         {(!!ingredient.supermarketDescription || highlights.length > 0) && (
           <>
-            <Separator />
+            <Separator style={styles.divider} />
             <View style={styles.block}>
               {!!ingredient.supermarketDescription && (
                 <Text style={[Type.body, { color: colors.text }]}>
@@ -216,6 +216,11 @@ const styles = StyleSheet.create({
     marginHorizontal: Gutter,
     marginBottom: Spacing.lg,
     gap: Spacing.xs,
+  },
+  // The block above a rule ends on a step of the scale, and without the same
+  // step below it the next section starts on the line.
+  divider: {
+    marginBottom: Spacing.lg,
   },
   card: {
     padding: Spacing.md,
