@@ -73,6 +73,46 @@ defmodule Picape.Graphql.QueryIngredientTest do
     assert %{"price" => 279, "priceBeforeBonus" => nil, "bonusMechanism" => ""} = details
   end
 
+  # A tenth of the production ingredients sit on a product the supermarket has
+  # stopped selling, so nothing Picape orders for them ever arrives. Every
+  # seeded product used to be in the assortment, so this branch had never run.
+  test "an ingredient the supermarket no longer sells carries a warning" do
+    card = Map.put(product_card(), "orderAvailabilityStatus", "NO_LONGER_IN_ASSORTMENT")
+    insert!(:ingredient, name: "Milk", supermarket_product_raw: %{"productCard" => card})
+
+    assert {:ok, %{data: %{"searchIngredient" => [ingredient]}}} = run(warning_query(), variables: %{"query" => "Mil"})
+
+    assert ingredient === %{
+             "warning" => %{
+               "description" => "Niet leverbaar",
+               "outOfStock" => false,
+               "outOfAssortment" => true
+             }
+           }
+  end
+
+  test "an ingredient the supermarket still sells carries no warning" do
+    card = Map.put(product_card(), "orderAvailabilityStatus", "IN_ASSORTMENT")
+    insert!(:ingredient, name: "Milk", supermarket_product_raw: %{"productCard" => card})
+
+    assert {:ok, %{data: %{"searchIngredient" => [ingredient]}}} = run(warning_query(), variables: %{"query" => "Mil"})
+
+    assert ingredient === %{"warning" => nil}
+  end
+
+  defp warning_query do
+    "
+    query search($query: String!) {
+      searchIngredient(query: $query) {
+        warning {
+          description
+          outOfStock
+          outOfAssortment
+        }
+      }
+    }"
+  end
+
   defp details_query do
     "
     query search($query: String!) {

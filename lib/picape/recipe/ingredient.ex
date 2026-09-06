@@ -38,6 +38,8 @@ defmodule Picape.Recipe.Ingredient do
     {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "title"]) || ""}
   end
 
+  # The description is what the screens put in front of the reader, and the app
+  # speaks Dutch everywhere else. Short enough to sit beside a name on a row.
   def fetch(ingredient, :warning) do
     status = get_in(ingredient.supermarket_product_raw, ["productCard", "orderAvailabilityStatus"]) || ""
     out_of_stock = status == "OUT_OF_STOCK"
@@ -47,7 +49,7 @@ defmodule Picape.Recipe.Ingredient do
       {true, _} ->
         {:ok,
          %{
-           description: "Ingredient is out of stock",
+           description: "Uitverkocht",
            out_of_stock: true,
            out_of_assortment: false
          }}
@@ -55,7 +57,7 @@ defmodule Picape.Recipe.Ingredient do
       {_, true} ->
         {:ok,
          %{
-           description: "Ingredient is out of assortment",
+           description: "Niet leverbaar",
            out_of_stock: false,
            out_of_assortment: true
          }}
