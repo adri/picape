@@ -213,9 +213,12 @@ test('the basics screen opens what was bought before', async ({ page }, testInfo
   // By role: the screen it opens carries the same words as its own heading, and
   // detachPreviousScreen keeps this link in the DOM behind that screen.
   await page.getByRole('link', { name: 'Eerder gekocht' }).click();
-  // A seeded ingredient that is on no earlier order but this one, so the
-  // assertion cannot pass on whatever is left mounted underneath.
-  await expect(page.getByText('Kidney beans', { exact: true })).toHaveCount(1);
+  // Scoped to this screen's own list: the basics screen it opened from carries
+  // a Kidney beans row too, and detachPreviousScreen keeps it mounted
+  // underneath, so the name alone matches twice.
+  await expect(
+    page.getByTestId('previously-ordered').getByText('Kidney beans', { exact: true })
+  ).toHaveCount(1);
   await settle(page);
   await checkScreen(page, 'previously-ordered');
   expect(problems).toEqual([]);

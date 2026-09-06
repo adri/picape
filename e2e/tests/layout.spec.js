@@ -215,7 +215,13 @@ test('ordering from the bought-before list leaves the row where it was', async (
   // carries its own count, so it reads as added. Filter the ordered ones out
   // and a row vanishes under the finger that tapped it and everything below
   // jumps up a line, which no baseline can show.
-  const tile = page.getByRole('button', { name: 'Kidney beans', exact: true });
+  //
+  // Scoped to this screen's own list: it opens from the basics screen, which
+  // carries a Kidney beans row too and which detachPreviousScreen keeps mounted
+  // underneath, so the name alone matches twice.
+  const tile = page
+    .getByTestId('previously-ordered')
+    .getByRole('button', { name: 'Kidney beans', exact: true });
   await expect(tile).toBeVisible();
   const row = tile.locator('xpath=..');
   const before = await boxOf(tile);

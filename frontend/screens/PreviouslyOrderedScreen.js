@@ -45,6 +45,10 @@ export function PreviouslyOrderedScreen({ navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <FlatList
+        // The basics list this screen opens from carries most of the same
+        // ingredients, and detachPreviousScreen keeps it mounted underneath, so
+        // a screen test has no way to name a row here without it.
+        testID="previously-ordered"
         data={ingredients}
         keyExtractor={(ingredient) => ingredient.id}
         initialNumToRender={12}
