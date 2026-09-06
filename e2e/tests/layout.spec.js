@@ -178,6 +178,33 @@ test('the cart keeps its recipes off its ingredients', async ({ page }) => {
   expect(gap, 'the recipe strip runs into the first ingredient row').toBeGreaterThanOrEqual(16);
 });
 
+test('ordering from the bought-before list leaves the row where it was', async ({ page }) => {
+  await openApp(page);
+  await page.getByRole('link', { name: 'Eerder gekocht' }).click();
+
+  // The list is everything bought on an earlier order, and it deliberately
+  // keeps showing what is already on the list rather than dropping it: the row
+  // carries its own count, so it reads as added. Filter the ordered ones out
+  // and a row vanishes under the finger that tapped it and everything below
+  // jumps up a line, which no baseline can show.
+  const tile = page.getByRole('button', { name: 'Kidney beans', exact: true });
+  await expect(tile).toBeVisible();
+  const row = tile.locator('xpath=..');
+  const before = await boxOf(tile);
+
+  await row.getByLabel('Toevoegen').click();
+  await expect(row.getByText('1', { exact: true })).toBeVisible();
+
+  const after = await boxOf(tile);
+  expect(after.top, 'the row moved when it was ordered').toBe(before.top);
+
+  // Put it back. An ordered ingredient is a row in the database, so without
+  // this the rest of the suite runs against a cart this test filled.
+  await row.getByText('1', { exact: true }).click();
+  await row.getByLabel('Verwijderen').click();
+  await expect(row.getByLabel('Toevoegen')).toBeVisible();
+});
+
 async function openChickenDetail(page) {
   await openApp(page);
   await tab(page, /Basics/).click();

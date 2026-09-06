@@ -173,6 +173,20 @@ test('tapping an ingredient opens its detail screen', async ({ page }, testInfo)
   expect(problems).toEqual([]);
 });
 
+test('the home screen opens what was bought before', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  // By role: the screen it opens carries the same words as its own heading, and
+  // detachPreviousScreen keeps this link in the DOM behind that screen.
+  await page.getByRole('link', { name: 'Eerder gekocht' }).click();
+  // A seeded ingredient that is on no earlier order but this one, so the
+  // assertion cannot pass on whatever is left mounted underneath.
+  await expect(page.getByText('Kidney beans', { exact: true })).toHaveCount(1);
+  await settle(page);
+  await checkScreen(page, 'previously-ordered');
+  expect(problems).toEqual([]);
+});
+
 test('raising a quantity in the cart syncs with the supermarket', async ({ page }, testInfo) => {
   const problems = watch(page);
   await openApp(page, testInfo);
