@@ -39,7 +39,10 @@ function PlannedRecipes({ navigation }) {
   }
 
   return (
-    <View>
+    // The strip and the ingredient list below it are two different things, and
+    // without this they touch: the last card's label runs straight into the
+    // first row. Same step the plan screen puts under its shelves.
+    <View style={{ paddingBottom: Spacing.xl }}>
       <SkeletonContent
         layout={[
           {

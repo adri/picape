@@ -105,6 +105,51 @@ test('a recipe strip shows its labels in full', async ({ page }) => {
   expect(cropped, 'the strip crops its own label').toBeNull();
 });
 
+test('the cart keeps its recipes off its ingredients', async ({ page }) => {
+  await openApp(page);
+
+  // The strip of planned recipes only exists once something is planned, and the
+  // seeded cart has nothing planned, so no screenshot of it has ever contained
+  // the strip. The gap under it went to zero and the last card's label ran
+  // straight into the first ingredient row.
+  await page.getByRole('button', { name: 'Toevoegen' }).first().click();
+  await expect(page.getByRole('button', { name: 'Gedaan' }).first()).toBeVisible();
+
+  await tab(page, /Mandje/).click();
+  await settle(page);
+  await expect(page.getByText('Chicken', { exact: true }).first()).toBeVisible();
+
+  const gap = await page.evaluate(() => {
+    const rows = Array.from(document.querySelectorAll('div')).filter((el) => {
+      const style = getComputedStyle(el);
+      return (
+        style.borderRadius !== '0px' &&
+        style.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+        el.children.length === 3 &&
+        el.getBoundingClientRect().width > 200
+      );
+    });
+    if (rows.length === 0) return null;
+    const firstRow = rows[0].getBoundingClientRect().top;
+
+    // The strip scrolls sideways, so it is the widest thing above the first row
+    // that clips on its x axis. The outer page scroller sits below it.
+    const strip = Array.from(document.querySelectorAll('div'))
+      .filter((el) => getComputedStyle(el).overflowX !== 'visible')
+      .map((el) => el.getBoundingClientRect())
+      .filter((box) => box.width > 200 && box.bottom <= firstRow + 1)
+      .sort((a, b) => b.bottom - a.bottom)[0];
+    if (!strip) return null;
+
+    return Math.round(firstRow - strip.bottom);
+  });
+
+  expect(gap, 'found no recipe strip above the ingredients').not.toBeNull();
+  // One step below what the screen sets, so a deliberate change to the next
+  // size down still passes and a collapse back to nothing does not.
+  expect(gap, 'the recipe strip runs into the first ingredient row').toBeGreaterThanOrEqual(16);
+});
+
 test('every ingredient row puts its control in the same place', async ({ page }) => {
   await openApp(page);
   await tab(page, /Basics/).click();
