@@ -1,0 +1,533 @@
+{
+  "data": {
+    "bonusPersonalPromotionBundles": [
+      {
+        "__typename": "PersonalPromotionBundles",
+        "maximumActivations": 10,
+        "error": null
+      }
+    ],
+    "bonusPromotions": [
+      {
+        "__typename": "Promotion",
+        "id": "385466",
+        "hqId": 893967,
+        "title": "AH Gekoelde deegwaren",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Maaltijden, salades",
+        "productCount": 5,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "20% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303936363839?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303936363839?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303936363839?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "355420",
+        "hqId": 885613,
+        "title": "AH Biologische snoepgroente tomaat 400 gram",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Groente, aardappelen",
+        "productCount": 1,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "15% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303433393539?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303433393539?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303433393539?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "566856",
+        "hqId": 964459,
+        "title": "Saitaku",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Pasta, rijst, wereldkeuken",
+        "productCount": 27,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "2e halve prijs"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303638373933?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303638373933?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303638373933?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "671729",
+        "hqId": 64960,
+        "title": "AH Biologische mozzarela",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Kaas",
+        "productCount": 3,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "20% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_513657755662485954674f7771644e59586853786251?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_513657755662485954674f7771644e59586853786251?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_513657755662485954674f7771644e59586853786251?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "508069",
+        "hqId": 931461,
+        "title": "AH Biologisch knäckebröd",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Bakkerij",
+        "productCount": 2,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "15% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303131313130?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303131313130?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130303131313130?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "789465",
+        "hqId": 174877,
+        "title": "Alpro cooking",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Zuivel, eieren",
+        "productCount": 2,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "voor 1.50"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_516a444572734851516e364168665261745368445577?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_516a444572734851516e364168665261745368445577?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_516a444572734851516e364168665261745368445577?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "718751",
+        "hqId": 110741,
+        "title": "Vegetarische Slager",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Vegetarisch, vegan en plantaardig",
+        "productCount": 12,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "20% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_69654f466d64667653514f6a66704a784f5061313551?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_69654f466d64667653514f6a66704a784f5061313551?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_69654f466d64667653514f6a66704a784f5061313551?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "512005",
+        "hqId": 932954,
+        "title": "AH Nectarines schaal 1 kilo",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Fruit, verse sappen",
+        "productCount": 1,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "15% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_43545239393532343234?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_43545239393532343234?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_43545239393532343234?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "355414",
+        "hqId": 885610,
+        "title": "AH Biologische zoete puntpaprika 2 stuks",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Groente, aardappelen",
+        "productCount": 1,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "20% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_43545239393339333033?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_43545239393339333033?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_43545239393339333033?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "385524",
+        "hqId": 893996,
+        "title": "AH Stamppotten 500 gram 2-vaks",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Maaltijden, salades",
+        "productCount": 7,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "2 voor 7.00"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_576837376e454e335147366f7473525741796e4c5677?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_576837376e454e335147366f7473525741796e4c5677?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_576837376e454e335147366f7473525741796e4c5677?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "693937",
+        "hqId": 86525,
+        "title": "AH Sportvoeding 300-500 gram",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Gezondheid en sport",
+        "productCount": 6,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "15% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_674164555f516768536b7569425345424c5350563541?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_674164555f516768536b7569425345424c5350563541?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_674164555f516768536b7569425345424c5350563541?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "587730",
+        "hqId": 978062,
+        "title": "AH Biologisch gekookte maiskolven",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Groente, aardappelen",
+        "productCount": 1,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "15% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_6a5377555a6b452d51696d724f566954493747455a41?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_6a5377555a6b452d51696d724f566954493747455a41?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_6a5377555a6b452d51696d724f566954493747455a41?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "734526",
+        "hqId": 125793,
+        "title": "Bakkersbrood Rond half",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Bakkerij",
+        "productCount": 2,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "2e halve prijs"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130313930323834?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130313930323834?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130313930323834?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "768701",
+        "hqId": 156684,
+        "title": "AH glutenvrij",
+        "subtitle": "m.u.v. Glutenvrij van de bakkerij",
+        "activationStatus": "ACTIVATABLE",
+        "category": "Glutenvrij",
+        "productCount": 48,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "15% korting"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130313338393231?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130313338393231?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+            "width": 400
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/dam/product/AHI_4354523130313338393231?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+            "width": 800
+          }
+        ]
+      },
+      {
+        "__typename": "Promotion",
+        "id": "795760",
+        "hqId": 179308,
+        "title": "Witte Reus toiletblokken",
+        "subtitle": null,
+        "activationStatus": "ACTIVATABLE",
+        "category": "Huishouden",
+        "productCount": 22,
+        "periodStart": "2026-09-07",
+        "periodEnd": "2026-09-13",
+        "rawPromotionLabels": [
+          {
+            "__typename": "RawPromotionLabel",
+            "defaultDescription": "1+2 gratis"
+          }
+        ],
+        "images": [
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/mam/bonus/COMBIBEELD_179308_AH_NL_WK37_WITTE-REUS?rendition=200px&fileType=binary&version=41FG0bqA7bmFa11mn21eSg",
+            "width": 200
+          },
+          {
+            "__typename": "PromotionImage",
+            "url": "https://static.ah.nl/mam/bonus/COMBIBEELD_179308_AH_NL_WK37_WITTE-REUS?rendition=708px&fileType=binary&version=41FG0bqA7bmFa11mn21eSg",
+            "width": 708
+          }
+        ]
+      }
+    ]
+  }
+}

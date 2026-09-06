@@ -100,6 +100,13 @@ defmodule Picape.Ingredients do
     |> Repo.insert()
   end
 
+  @doc "The ingredients behind a set of supermarket product ids, keyed by that id."
+  def by_supermarket_product_ids(supermarket_ids) do
+    from(i in Ingredient, where: i.supermarket_product_id in ^supermarket_ids)
+    |> Repo.all()
+    |> Map.new(fn ingredient -> {ingredient.supermarket_product_id, ingredient} end)
+  end
+
   def by_supermarket_id(supermarket_id) do
     Repo.one(from(i in Ingredient, where: i.supermarket_product_id == ^supermarket_id))
   end

@@ -17,6 +17,21 @@ defmodule Picape.Supermarket do
 
   @update_my_list_basket "mutation UpdateMyListBasket($items: [BasketMutation!]!, $input: BasketInput) { basketItemsUpdate(items: $items, input: $input) { __typename status } }"
 
+  @fetch_bonus_box_offers File.read!(Path.join([:code.priv_dir(:picape), "ah_graphql", "FetchBonusBoxOffers.graphql"]))
+  @fetch_bonus_promotion_with_products File.read!(
+                                         Path.join([
+                                           :code.priv_dir(:picape),
+                                           "ah_graphql",
+                                           "FetchBonusPromotionWithProducts.graphql"
+                                         ])
+                                       )
+
+  @activate_personal_promotion "mutation BonusActivatePersonalPromotion($externalId: Int!, $startDate: String!) { bonusActivatePersonalPromotion(externalId: $externalId, startDate: $startDate) { __typename message status } }"
+
+  # The states a personal offer can be in while it is still worth showing: one
+  # you may still take, and one you already took.
+  @bonus_states ["ACTIVATABLE", "ACTIVATED"]
+
   def search(""), do: []
 
   def search(query) do
@@ -63,6 +78,75 @@ defmodule Picape.Supermarket do
 
       %{"items" => items, "basket" => basket, "order" => data["order"]}
     end)
+  end
+
+  @doc """
+  The personal bonus offers for one period, with how many of them may be
+  activated. Dates are ISO 8601, the way the supermarket wants them.
+  """
+  def bonus_offers(period_start, period_end) do
+    ConCache.get_or_store(:supermarket, {:bonus_offers, period_start}, fn ->
+      %{status_code: 200, body: %{"data" => data}} =
+        graphql!("FetchBonusBoxOffers", @fetch_bonus_box_offers, %{
+          "filterSet" => "APP_BONUS_BOX",
+          "periodStart" => period_start,
+          "periodEnd" => period_end,
+          "filterUnavailableProducts" => false,
+          "forcePromotionVisibility" => true,
+          "states" => @bonus_states
+        })
+
+      data
+    end)
+  end
+
+  @doc "The supermarket product ids one personal bonus offer covers."
+  def bonus_offer_product_ids(offer_id, period_start, period_end) do
+    ConCache.get_or_store(:supermarket, {:bonus_offer_products, offer_id, period_start}, fn ->
+      %{status_code: 200, body: %{"data" => %{"bonusPromotions" => promotions}}} =
+        graphql!("FetchBonusPromotionWithProducts", @fetch_bonus_promotion_with_products, %{
+          "filterSet" => "APP_BONUS_BOX",
+          "id" => offer_id,
+          "periodStart" => period_start,
+          "periodEnd" => period_end,
+          "segmentType" => ["BONUS_BOX"],
+          "filterUnavailableProducts" => false,
+          "forcePromotionVisibility" => true,
+          "showAllPromotionSegments" => true,
+          "states" => @bonus_states
+        })
+
+      promotions
+      |> Enum.flat_map(&(&1["products"] || []))
+      |> Enum.map(& &1["id"])
+    end)
+  end
+
+  @doc """
+  Activates one personal bonus offer on the account. `external_id` is the
+  offer's `hqId`, not the `id` every read uses.
+  """
+  def activate_bonus_offer(external_id, start_date) do
+    case graphql!("BonusActivatePersonalPromotion", @activate_personal_promotion, %{
+           "externalId" => external_id,
+           "startDate" => start_date
+         }) do
+      %{
+        status_code: 200,
+        body: %{"data" => %{"bonusActivatePersonalPromotion" => %{"status" => "SUCCESS"}}}
+      } ->
+        {:ok, :activated}
+
+      %{body: %{"data" => %{"bonusActivatePersonalPromotion" => %{"message" => message}}}} ->
+        {:error, message}
+
+      other ->
+        {:error, inspect(other)}
+    end
+  end
+
+  def invalidate_bonus_offers(period_start) do
+    ConCache.delete(:supermarket, {:bonus_offers, period_start})
   end
 
   defp graphql!(operation_name, query, variables) do

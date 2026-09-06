@@ -1,0 +1,40 @@
+{
+  "data": {
+    "bonusPromotions": [
+      {
+        "__typename": "Promotion",
+        "id": "385524",
+        "products": [
+          {
+            "__typename": "Product",
+            "id": 10567923
+          },
+          {
+            "__typename": "Product",
+            "id": 111145
+          },
+          {
+            "__typename": "Product",
+            "id": 121110
+          },
+          {
+            "__typename": "Product",
+            "id": 132478
+          },
+          {
+            "__typename": "Product",
+            "id": 145678
+          },
+          {
+            "__typename": "Product",
+            "id": 156789
+          },
+          {
+            "__typename": "Product",
+            "id": 167890
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -11,6 +11,7 @@ defmodule Picape.SupermarketFake do
 
   @dir Path.expand("../fixtures/supermarket", __DIR__)
   @state __MODULE__.State
+  @activations __MODULE__.Activations
 
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
   plug(:match)
@@ -18,6 +19,7 @@ defmodule Picape.SupermarketFake do
 
   def start(port) do
     {:ok, _} = Agent.start_link(fn -> fixture("basket.json") end, name: @state)
+    {:ok, _} = Agent.start_link(fn -> MapSet.new() end, name: @activations)
     Plug.Cowboy.http(__MODULE__, [], port: port)
   end
 
@@ -26,9 +28,13 @@ defmodule Picape.SupermarketFake do
   def reset do
     reset_basket()
     Picape.Supermarket.invalidate_cart()
+    Picape.Bonus.invalidate()
   end
 
-  def reset_basket, do: Agent.update(@state, fn _ -> fixture("basket.json") end)
+  def reset_basket do
+    Agent.update(@state, fn _ -> fixture("basket.json") end)
+    Agent.update(@activations, fn _ -> MapSet.new() end)
+  end
 
   post "/graphql" do
     case conn.body_params do
@@ -41,6 +47,15 @@ defmodule Picape.SupermarketFake do
         json(conn, %{
           "data" => %{"basketItemsUpdate" => %{"__typename" => "BasketMutationResult", "status" => "SUCCESS"}}
         })
+
+      %{"operationName" => "FetchBonusBoxOffers"} ->
+        json(conn, bonus_offers())
+
+      %{"operationName" => "FetchBonusPromotionWithProducts", "variables" => %{"id" => id}} ->
+        json(conn, fixture("bonus_products_#{id}.json") || no_products(id))
+
+      %{"operationName" => "BonusActivatePersonalPromotion", "variables" => %{"externalId" => external_id}} ->
+        json(conn, activate(external_id))
 
       %{"operationName" => other} ->
         send_resp(conn, 400, "no fixture for GraphQL operation #{inspect(other)}")
@@ -66,6 +81,53 @@ defmodule Picape.SupermarketFake do
 
   match _ do
     send_resp(conn, 404, "no fixture for #{conn.method} #{conn.request_path}")
+  end
+
+  # The offer fixture is recorded before anything was activated, so the state an
+  # earlier mutation left behind is written over it on the way out.
+  defp bonus_offers do
+    activated = Agent.get(@activations, & &1)
+
+    update_in(fixture("bonus_offers.json"), ["data", "bonusPromotions"], fn promotions ->
+      Enum.map(promotions, &activation_status(&1, activated))
+    end)
+  end
+
+  defp activation_status(promotion, activated) do
+    if MapSet.member?(activated, promotion["hqId"]),
+      do: Map.put(promotion, "activationStatus", "ACTIVATED"),
+      else: promotion
+  end
+
+  defp activate(external_id) do
+    if known_offer?(external_id) do
+      Agent.update(@activations, &MapSet.put(&1, external_id))
+      bonus_activation_result("OFFER_ACTIVATED", "SUCCESS")
+    else
+      bonus_activation_result("OFFER_NOT_FOUND", "FAILURE")
+    end
+  end
+
+  defp known_offer?(external_id) do
+    fixture("bonus_offers.json")
+    |> get_in(["data", "bonusPromotions"])
+    |> Enum.any?(&(&1["hqId"] == external_id))
+  end
+
+  defp bonus_activation_result(message, status) do
+    %{
+      "data" => %{
+        "bonusActivatePersonalPromotion" => %{
+          "__typename" => "ActivatePersonalPromotionResponse",
+          "message" => message,
+          "status" => status
+        }
+      }
+    }
+  end
+
+  defp no_products(id) do
+    %{"data" => %{"bonusPromotions" => [%{"__typename" => "Promotion", "id" => id, "products" => []}]}}
   end
 
   defp update_basket(response, items) do
