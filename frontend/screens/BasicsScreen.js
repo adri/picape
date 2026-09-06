@@ -10,7 +10,7 @@ import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import Layout from '../constants/Layout';
+import Layout, { CONTENT_MAX_WIDTH, contentColumn } from '../constants/Layout';
 
 const GET_BASICS = gql`
   query BasicsList {
@@ -89,7 +89,7 @@ function BasicsList({ navigation }) {
       <SectionHeader title="Altijd in huis" large />
       <SkeletonContent
         layout={Array(5).fill({
-          width: Dimensions.get('window').width - 40,
+          width: Math.min(Dimensions.get('window').width, CONTENT_MAX_WIDTH) - 40,
           height: 60,
           marginHorizontal: 20,
           marginBottom: 10,
@@ -151,7 +151,9 @@ export default function PlanScreen({ navigation }) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={[contentColumn, { paddingBottom: Layout.tabBarHeight }]}>
         <BasicsList navigation={navigation} />
       </ScrollView>
     </SafeAreaView>

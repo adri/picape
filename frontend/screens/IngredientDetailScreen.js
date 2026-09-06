@@ -11,6 +11,7 @@ import { Nutriscore, hasNutriscore } from '../components/Ingredient/Nutriscore';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { Separator } from '../components/Section/Separator';
 import { useTheme } from '../constants/Colors';
+import { contentColumn } from '../constants/Layout';
 import { Gutter, Radius, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 
@@ -80,7 +81,7 @@ export function IngredientDetailScreen({
     <View style={{ flex: 1 }}>
       {/* Outside the scroller: the way back stays put however far the
           description runs. */}
-      <View style={[styles.topBar, { paddingTop: insets.top + Spacing.sm }]}>
+      <View style={[styles.topBar, contentColumn, { paddingTop: insets.top + Spacing.sm }]}>
         <BackIcon
           onPress={(e) => {
             e.preventDefault();
@@ -98,7 +99,8 @@ export function IngredientDetailScreen({
         />
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xxl }}>
+      <ScrollView
+        contentContainerStyle={[contentColumn, { paddingBottom: insets.bottom + Spacing.xxl }]}>
         {!!ingredient.largeImageUrl && (
           <View style={styles.photo}>
             <Image

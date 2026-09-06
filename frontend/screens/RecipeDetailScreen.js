@@ -1,7 +1,7 @@
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { ImageBackground } from 'expo-image';
 import * as React from 'react';
-import { Text, FlatList, View, Dimensions } from 'react-native';
+import { Text, FlatList, View, Dimensions, useWindowDimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Hyperlink from 'react-native-hyperlink';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,7 +14,7 @@ import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import Layout from '../constants/Layout';
+import Layout, { CONTENT_MAX_WIDTH, contentColumn, contentInset } from '../constants/Layout';
 import { Gutter, Spacing } from '../constants/Spacing';
 import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
 
@@ -70,6 +70,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
   if (error) return `Error! ${error}`;
   const { recipe = params.recipe } = data;
   const insets = useSafeAreaInsets();
+  const columnInset = contentInset(useWindowDimensions().width);
   const steps = (recipe.description || '').split('\n\n');
   const [stepChecked, setStepsChecked] = React.useState([]);
   const [markRecipeAsCooked] = useMutation(MARK_RECIPE_AS_COOKED, {
@@ -85,18 +86,21 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
     <View style={{ flex: 1 }}>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
+        contentContainerStyle={[
+          contentColumn,
+          { paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 },
+        ]}>
         <ImageBackground
           source={{ uri: recipe.imageUrl }}
           contentFit="cover"
           style={{
-            width: Dimensions.get('window').width,
+            width: '100%',
             height: 200,
           }}>
           <View
             style={{
               flexDirection: 'row',
-              width: Dimensions.get('window').width,
+              width: '100%',
               height: 200,
             }}
           />
@@ -127,12 +131,12 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         <SkeletonContent
           layout={[
             {
-              width: Dimensions.get('window').width - 40,
+              width: Math.min(Dimensions.get('window').width, CONTENT_MAX_WIDTH) - 40,
               height: 100,
               marginBottom: 10,
             },
             ...Array(5).fill({
-              width: Dimensions.get('window').width - 40,
+              width: Math.min(Dimensions.get('window').width, CONTENT_MAX_WIDTH) - 40,
               height: 60,
               marginBottom: 10,
             }),
@@ -237,7 +241,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         style={{
           position: 'absolute',
           top: insets.top + Spacing.sm,
-          left: insets.left + Spacing.md,
+          left: insets.left + columnInset + Spacing.md,
         }}
         onPress={(e) => {
           e.preventDefault();

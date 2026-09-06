@@ -13,7 +13,7 @@ import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import Layout from '../constants/Layout';
+import Layout, { CONTENT_MAX_WIDTH, contentColumn } from '../constants/Layout';
 import { Gutter, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 import { SUBSCRIBE_ORDER, GET_ORDER } from '../operations/getOrder';
@@ -173,7 +173,9 @@ export default function ListScreen({ navigation }) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={[contentColumn, { paddingBottom: Layout.tabBarHeight }]}>
         <SectionHeader title="Je mandje" large>
           <View style={styles.orderTotal}>
             <View style={styles.orderTotalLine}>
@@ -196,7 +198,7 @@ export default function ListScreen({ navigation }) {
 
         <SkeletonContent
           layout={Array(countData?.currentOrder?.totalCount || 5).fill({
-            width: Dimensions.get('window').width - 40,
+            width: Math.min(Dimensions.get('window').width, CONTENT_MAX_WIDTH) - 40,
             height: 60,
             marginHorizontal: 20,
             marginBottom: 10,
