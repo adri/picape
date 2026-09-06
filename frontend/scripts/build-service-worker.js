@@ -37,10 +37,14 @@ generateSW({
   // browser fails with "An unknown error occurred when fetching the script".
   inlineWorkboxRuntime: true,
   clientsClaim: true,
-  // A new worker waits rather than taking over mid-session. Nothing prompts it
-  // to activate, so an update lands once every tab for the page has closed,
-  // which is what the old src/service-worker.js did too.
-  skipWaiting: false,
+  // A waiting worker only activates once every tab for the page has closed. An
+  // installed PWA on iOS is suspended rather than closed, so that moment can be
+  // weeks away and the home-screen app keeps serving the build it was installed
+  // with. The worker takes over as soon as it has installed instead, and
+  // serviceWorkerRegistration.js reloads the page onto it. Safe here because
+  // the export is a single bundle: the page never fetches a chunk mid-session
+  // that the new precache no longer has.
+  skipWaiting: true,
   navigateFallback: '/index.html',
   navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
   // Metro hashes with 32 hex after a dash or a dot: index-<32>.js and

@@ -2,10 +2,9 @@
 // register() is not called by default.
 
 // This lets the app load faster on subsequent visits in production, and gives
-// it offline capabilities. However, it also means that developers (and users)
-// will only see deployed updates on subsequent visits to a page, after all the
-// existing tabs open on the page have been closed, since previously cached
-// resources are updated in the background.
+// it offline capabilities. A deployed update is picked up on the next resume:
+// the page asks for a new worker whenever it becomes visible, and reloads once
+// that worker takes control.
 
 // To learn more about the benefits of this model and instructions on how to
 // opt-in, read https://cra.link/PWA
@@ -58,10 +57,70 @@ export function register(config) {
   }
 }
 
+// An installed PWA is suspended when you leave it and resumed when you come
+// back, so it can run for weeks without ever loading the page again. Nothing
+// would go looking for a new worker in that time. Ask on every resume, and the
+// check costs one conditional request against a worker that answers 304.
+//
+// pageshow as well as visibilitychange: iOS has not been dependable about
+// firing visibilitychange when a home-screen app is resumed, and a resume that
+// never asks is the whole failure this is here to prevent.
+//
+// update() rejects whenever the network is down, which for a shopping app in a
+// supermarket is an ordinary Tuesday. Sentry captures unhandled rejections, so
+// swallowing it is what keeps every offline resume out of the issue list.
+function checkForUpdateOnResume(registration) {
+  const ask = () => registration.update().catch(() => {});
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') ask();
+  });
+  window.addEventListener('pageshow', ask);
+}
+
+// The worker skips waiting, so a new one takes control while the page is still
+// showing the build the old one served. Reloading is what puts the new build on
+// screen.
+//
+// It waits for the page to be hidden first. Navigation state is not restored
+// (App.js keeps setInitialNavigationState off), so a reload drops you on the
+// default tab at the top. Doing that under someone halfway down their cart is
+// worse than being a version behind for one more resume.
+//
+// A page that loaded with no worker is claimed by the one it just installed.
+// That first claim is not an update, so it is swallowed. Every later one is a
+// new build, and the listener has to be attached either way: a freshly
+// installed home-screen app always loads uncontrolled the first time, and that
+// is precisely the page that then stays open for weeks.
+function reloadWhenTheNewWorkerTakesOver() {
+  let controlled = Boolean(navigator.serviceWorker.controller);
+  let pending = false;
+
+  const reloadWhenHidden = () => {
+    if (!pending || document.visibilityState !== 'hidden') return;
+    document.removeEventListener('visibilitychange', reloadWhenHidden);
+    window.location.reload();
+  };
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!controlled) {
+      controlled = true;
+      return;
+    }
+    if (pending) return;
+    pending = true;
+    document.addEventListener('visibilitychange', reloadWhenHidden);
+    reloadWhenHidden();
+  });
+}
+
 function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
+      reloadWhenTheNewWorkerTakesOver();
+      checkForUpdateOnResume(registration);
+
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
@@ -70,13 +129,9 @@ function registerValidSW(swUrl, config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              // At this point, the updated precached content has been fetched,
-              // but the previous service worker will still serve the older
-              // content until all client tabs are closed.
-              console.log(
-                'New content is available and will be used when all ' +
-                  'tabs for this page are closed. See https://cra.link/PWA.'
-              );
+              // The new worker activates itself from here, and the
+              // controllerchange listener above reloads the page onto it.
+              console.log('New content is available; reloading.');
 
               // Execute callback
               if (config && config.onUpdate) {
