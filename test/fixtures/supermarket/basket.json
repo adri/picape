@@ -225,6 +225,79 @@
           },
           "isClosed": false,
           "allocatedQuantity": 1
+        },
+        {
+          "__typename": "BasketItem",
+          "position": 5,
+          "originCode": "MANUAL",
+          "quantity": 1,
+          "product": {
+            "__typename": "Product",
+            "id": 519017,
+            "title": "Handsinaasappelen",
+            "salesUnitSize": "4 stuks",
+            "category": "Fruit",
+            "hqId": 519017,
+            "shopType": "SUPERMARKET",
+            "availability": {
+              "__typename": "ProductAvailability",
+              "availabilityLabel": null,
+              "isOrderable": true,
+              "online": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              },
+              "offline": {
+                "__typename": "ProductAvailabilityStatus",
+                "status": "AVAILABLE"
+              }
+            },
+            "imagePack": [
+              {
+                "__typename": "ProductImagePack",
+                "angle": "HERO",
+                "small": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 80,
+                  "width": 80,
+                  "url": "https://static.supermarket.test/dam/product/519017_80x80.png"
+                },
+                "medium": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 200,
+                  "width": 200,
+                  "url": "https://static.supermarket.test/dam/product/519017_200x200.png"
+                },
+                "large": {
+                  "__typename": "ProductImage",
+                  "angle": "HERO",
+                  "height": 400,
+                  "width": 400,
+                  "url": "https://static.supermarket.test/dam/product/519017_400x400.png"
+                }
+              }
+            ],
+            "listPrice": {
+              "__typename": "Money",
+              "amount": 3.29
+            },
+            "priceV2": {
+              "__typename": "ProductPrice",
+              "discount": null,
+              "promotionLabel": null,
+              "now": {
+                "__typename": "Money",
+                "amount": 3.29
+              },
+              "was": null
+            },
+            "properties": [],
+            "virtualBundleProducts": []
+          },
+          "isClosed": false,
+          "allocatedQuantity": 1
         }
       ],
       "itemsInList": [
@@ -306,7 +379,7 @@
       "summary": {
         "__typename": "BasketSummary",
         "isCancellable": true,
-        "quantity": 5,
+        "quantity": 6,
         "shoppingType": "DELIVERY",
         "lastUserChangeDateTime": "2026-01-01T10:00:00Z",
         "price": {
@@ -317,15 +390,15 @@
           },
           "totalPrice": {
             "__typename": "Money",
-            "amount": 18.79
+            "amount": 22.08
           },
           "priceAfterDiscount": {
             "__typename": "Money",
-            "amount": 18.79
+            "amount": 22.08
           },
           "priceBeforeDiscount": {
             "__typename": "Money",
-            "amount": 20.95
+            "amount": 24.24
           }
         }
       }

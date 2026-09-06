@@ -28,7 +28,7 @@ function tab(page, label) {
 async function openApp(page) {
   await page.goto('/');
   await settle(page);
-  await expect(tab(page, /Mandje/).getByText('5').first()).toBeVisible({ timeout: 60_000 });
+  await expect(tab(page, /Mandje/).getByText('6').first()).toBeVisible({ timeout: 60_000 });
 }
 
 // The box of the element that actually paints the text, not the row around it.

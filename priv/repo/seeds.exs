@@ -47,6 +47,10 @@ bananas = insert! :essential, name: "Bananas", supermarket_product_id: 10691218
 # so the seeded cart needs one of each. Without a product the supermarket does
 # not grade, no screen ever renders a row without a Nutri-Score.
 insert! :essential, name: "Parmezaanse kaas", supermarket_product_id: 238913
+# A tenth of the ingredients in the production database point at a product the
+# supermarket has stopped selling, and five of those are essentials it reorders
+# every week. Without one here, nothing renders the warning that says so.
+insert! :essential, name: "Sinaasappel", supermarket_product_id: 519017
 
 # Ingredients
 shoarma = insert! :ingredient, name: "Shoarma", supermarket_product_id: 10291907

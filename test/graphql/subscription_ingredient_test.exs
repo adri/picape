@@ -29,7 +29,7 @@ defmodule Picape.Graphql.SubscriptionIngredientTest do
 
     # check to see if we got subscription data
     expected = %{
-      result: %{data: %{"orderChanged" => %{"totalCount" => 7}}},
+      result: %{data: %{"orderChanged" => %{"totalCount" => 8}}},
       subscriptionId: subscription_id
     }
 

@@ -1,0 +1,175 @@
+{
+  "productId": 519017,
+  "productCard": {
+    "hqId": 519017,
+    "brand": "AH Biologisch",
+    "nix18": false,
+    "title": "AH Biologisch Handsinaasappelen",
+    "images": [
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_694d76417969594e543153654630356b315346454d51?revLabel=1&rendition=800x800_WEBP&fileType=binary",
+        "width": 800,
+        "height": 800
+      },
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_694d76417969594e543153654630356b315346454d51?revLabel=1&rendition=400x400_WEBP&fileType=binary",
+        "width": 400,
+        "height": 400
+      },
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_694d76417969594e543153654630356b315346454d51?revLabel=1&rendition=200x200_WEBP&fileType=binary",
+        "width": 200,
+        "height": 200
+      },
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_694d76417969594e543153654630356b315346454d51?revLabel=1&rendition=48x48_GIF&fileType=binary",
+        "width": 48,
+        "height": 48
+      },
+      {
+        "url": "https://static.ah.nl/dam/product/AHI_694d76417969594e543153654630356b315346454d51?revLabel=1&rendition=80x80_JPG&fileType=binary",
+        "width": 80,
+        "height": 80
+      }
+    ],
+    "isBonus": true,
+    "isSample": false,
+    "shopType": "AH",
+    "labelType": "PREMIUM",
+    "webshopId": 519017,
+    "isFavorite": false,
+    "properties": {
+      "da_taste": [
+        "Appel",
+        "Sinaasappel"
+      ],
+      "nutriscore": [
+        "A"
+      ],
+      "sp_kenmerk": [
+        "biologisch"
+      ],
+      "np_biologisch": [
+        "biologisch"
+      ],
+      "da_free_of_sugar": [
+        "Nee"
+      ],
+      "da_store_department": [
+        "Vers"
+      ],
+      "da_available_in_store": [
+        "true"
+      ],
+      "da_excluded_assortment": [
+        "false"
+      ],
+      "da_salted_or_not_salted": [
+        "Ongezouten"
+      ],
+      "sp_include_dieet_laag_vet": [
+        "Laag vet"
+      ],
+      "sp_include_dieet_laag_zout": [
+        "Laag zout"
+      ],
+      "sp_exclude_dieet_laag_suiker": [
+        "Laag suiker"
+      ],
+      "sp_include_dieet_vegetarisch": [
+        "Vegetarisch"
+      ],
+      "sp_include_dieet_veganistisch": [
+        "Veganistisch"
+      ],
+      "sp_include_intolerance_geen_vis": [
+        "Geen vis"
+      ],
+      "da_sugar_added_or_no_sugar_added": [
+        "Geen toegevoegde suikers"
+      ],
+      "sp_include_intolerance_geen_melk": [
+        "Geen melk"
+      ],
+      "sp_include_intolerance_geen_soja": [
+        "Geen soja"
+      ],
+      "sp_include_intolerance_geen_noten": [
+        "Geen noten"
+      ],
+      "sp_include_intolerance_geen_sesam": [
+        "Geen sesam"
+      ],
+      "sp_include_intolerance_geen_eieren": [
+        "Geen eieren"
+      ],
+      "sp_include_intolerance_geen_gluten": [
+        "Geen gluten"
+      ],
+      "sp_include_intolerance_geen_lupine": [
+        "Geen lupine"
+      ],
+      "sp_include_intolerance_geen_pindas": [
+        "Geen pinda's"
+      ],
+      "sp_include_intolerance_geen_lactose": [
+        "Geen lactose"
+      ],
+      "sp_include_intolerance_geen_mosterd": [
+        "Geen mosterd"
+      ],
+      "sp_include_intolerance_geen_sulfiet": [
+        "Geen sulfiet"
+      ],
+      "sp_include_intolerance_geen_selderij": [
+        "Geen selderij"
+      ],
+      "sp_include_intolerance_geen_schelpdieren": [
+        "Geen schelpdieren (schaaldieren)"
+      ],
+      "sp_include_intolerance_geen_kreeftachtigen": [
+        "Geen kreeftachtigen (schaaldieren)"
+      ]
+    },
+    "isOrderable": false,
+    "segmentType": "PREMIUM",
+    "subCategory": "Sinaasappels",
+    "bonusEndDate": "2034-12-31",
+    "discountType": "PO",
+    "hasListPrice": false,
+    "isBonusPrice": false,
+    "mainCategory": "Fruit, verse sappen",
+    "hqPromotionId": 187161,
+    "isStapelBonus": false,
+    "promotionType": "PERSONAL",
+    "propertyIcons": [
+      "vegan",
+      "biologisch"
+    ],
+    "salesUnitSize": "4 stuks",
+    "subCategoryId": 4947,
+    "bonusMechanism": "10% KORTING",
+    "bonusSegmentId": 803465,
+    "bonusStartDate": "2026-08-03",
+    "discountLabels": [
+      {
+        "code": "DISCOUNT_PERCENTAGE",
+        "percentage": 10,
+        "precisePercentage": 10,
+        "defaultDescription": "10% korting"
+      }
+    ],
+    "availableOnline": true,
+    "descriptionFull": "",
+    "isInfiniteBonus": false,
+    "isVirtualBundle": false,
+    "priceBeforeBonus": 3.29,
+    "extraDescriptions": [],
+    "minBestBeforeDays": 5,
+    "isPreviouslyBought": false,
+    "descriptionHighlights": "",
+    "bonusPeriodDescription": "",
+    "bonusSegmentDescription": "Bio Premium Stuks",
+    "orderAvailabilityStatus": "NO_LONGER_IN_ASSORTMENT"
+  }
+}

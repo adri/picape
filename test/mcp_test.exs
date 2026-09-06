@@ -100,8 +100,8 @@ defmodule Picape.MCPTest do
       insert!(:ingredient, name: "Roomboter", supermarket_product_id: 10_567_923)
 
       # In cents. The supermarket sends euros as floats and the cart used to
-      # truncate them, so this was 18 for a basket of 18.79.
-      assert %{"total_count" => 5, "total_price" => 1879, "items" => items} = call!("get_shopping_list")
+      # truncate them, so this was 22 for a basket of 22.08.
+      assert %{"total_count" => 6, "total_price" => 2208, "items" => items} = call!("get_shopping_list")
 
       assert %{"name" => "Roomboter ongezouten", "quantity" => 1, "ingredient" => %{"name" => "Roomboter"}} =
                Enum.find(items, &(&1["name"] == "Roomboter ongezouten"))
