@@ -87,6 +87,26 @@ finished_order = "1700000000000000"
 insert! :planned_recipe, line_id: finished_order, recipe_id: nasi.id
 insert! :planned_recipe, line_id: finished_order, recipe_id: shoarma.id, cooked: true
 
+# What was put on those orders by hand, which is what "Eerder gekocht" reads
+# back. Two orders rather than one, and every row with its own timestamp, so
+# the screen has an order it can get wrong: most recently bought on top.
+older_order = "1600000000000000"
+
+[
+  {creme_fraice, older_order, ~N[2026-07-04 17:10:00]},
+  {corn, older_order, ~N[2026-07-04 17:11:00]},
+  {kidney_beans, older_order, ~N[2026-07-04 17:12:00]},
+  {bananas, finished_order, ~N[2026-08-15 18:20:00]},
+  {appelsap, finished_order, ~N[2026-08-15 18:21:00]},
+  {graded_old_cheese, finished_order, ~N[2026-08-15 18:22:00]}
+]
+|> Enum.each(fn {ingredient, line_id, bought_at} ->
+  insert! :manual_ingredient,
+    line_id: line_id,
+    ingredient_id: ingredient.id,
+    inserted_at: bought_at
+end)
+
 # supermarket_product_raw is what carries an ingredient's picture, its price,
 # its nutriscore and the supermarket's description of it, and only the nightly
 # job fills it. Until it runs, a seeded database has none of that and every
