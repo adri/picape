@@ -49,8 +49,6 @@ config :sentry,
 
 config :picape, :supermarket, Picape.Supermarket
 
-config :picape, Picape.Seasonal, base_url: "https://groentefruit.milieucentraal.nl/"
-
 config :phoenix, :json_library, Jason
 config :phoenix, :format_encoders, json: Jason
 config :mix_docker, image: "adri/picape"

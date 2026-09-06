@@ -70,7 +70,6 @@ Each top-level `.ex` file is a context module; the sibling directory holds its E
 - **Supermarket** (`supermarket.ex`, `supermarket/`) — HTTPoison-based client for the supermarket's `mobile-services` / `mobile-auth` APIs. Auth is a refresh-token flow handled by `Supermarket.KeepLogin`; responses are cached in a `ConCache` named `:supermarket`. `CartItems.apply_changes/2` translates internal change structs into the JSON shape the supermarket's cart endpoint expects, and `apply_changes/2` retries up to 3x on 400s and re-applies on 409 conflicts.
 - **Ingredients** (`ingredients.ex`) — ingredient CRUD plus `match_supermarket_products/0` which runs nightly to reconcile ingredients with their supermarket product IDs.
 - **Shopping** (`shopping.ex`, `shopping/bought_ingredient.ex`) — tracks which ingredients have been marked bought during an active shopping session.
-- **Seasonal** (`seasonal.ex`, `seasonal/`) — scrapes `groentefruit.milieucentraal.nl` once and keeps the parsed data in an `Agent` + `ConCache` for lookups.
 - **Scheduler** (`scheduler.ex`) — Quantum jobs defined in [config/config.exs](config/config.exs): daily cart/order sync, hourly supermarket access-token refresh, daily ingredient/product matching.
 
 Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex): `Phoenix.PubSub` → `Repo` → `Endpoint` → `Absinthe.Subscription` → `Scheduler` → `ConCache(:supermarket)`.

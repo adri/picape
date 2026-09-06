@@ -190,8 +190,6 @@ type Ingredient implements Node {
 
   isBought: Boolean
 
-  season: Season
-
   unitQuantity: String
 
   "What the supermarket charges today, in cents."
@@ -266,10 +264,6 @@ input EditIngredientInput {
   seasonalName: String
   isEssential: Boolean!
   tagIds: [ID]
-}
-
-type Season {
-  label: String
 }
 
 type RecipeIngredientEdge {

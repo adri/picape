@@ -125,12 +125,6 @@ defmodule PicapeWeb.Graphql.Types do
       resolve: batched({Resolver.Shopping, :ingredients_bought?})
     )
 
-    field(:season, :season,
-      resolve: fn parent, _args, _ctx ->
-        {:ok, List.first(Map.values(Resolver.Recipe.seasons_for_ingredients([parent])))}
-      end
-    )
-
     field(:unit_quantity, :string, resolve: from_object(:unit_quantity))
 
     @desc "What the supermarket charges today, in cents."
@@ -195,10 +189,6 @@ defmodule PicapeWeb.Graphql.Types do
     field(:seasonal_name, :string)
     field(:is_essential, non_null(:boolean))
     field(:tag_ids, list_of(:id))
-  end
-
-  object :season do
-    field(:label, :string)
   end
 
   object :recipe_ingredient_edge do

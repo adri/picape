@@ -36,9 +36,6 @@ const GET_BASICS = gql`
               title
             }
           }
-          season {
-            label
-          }
         }
       }
     }
