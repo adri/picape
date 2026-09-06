@@ -13,6 +13,9 @@ export const CARD_HEIGHT = 134;
 
 const FADE_IN = { duration: 260, effect: 'cross-dissolve', timing: 'ease-out' };
 
+// What marks the card whose recipe the pane is showing.
+const RING = 2;
+
 // A recipe as a picture with its name underneath, and room in the top corner
 // for the control that plans it.
 //
@@ -34,6 +37,9 @@ export function ImageCard({
   imageStyle,
   muted,
   badges,
+  // Set only by a grid that opens its cards into a pane beside itself, and then
+  // on every card. Left out, the picture keeps the frame it always had.
+  selected,
 }) {
   const colors = useTheme();
 
@@ -59,6 +65,10 @@ export function ImageCard({
             // hole in the layout. The picture paints over it, so this needs no
             // state of its own.
             backgroundColor: colors.cardBackground,
+          },
+          selected !== undefined && {
+            borderWidth: RING,
+            borderColor: selected ? colors.tintColor : 'transparent',
           },
           imageStyle,
         ]}>

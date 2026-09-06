@@ -3,14 +3,16 @@ import * as React from 'react';
 import { Text, View, FlatList, useWindowDimensions } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
 
+import RecipeDetailScreen from './RecipeDetailScreen';
 import { ImageCard } from '../components/Card/ImageCard';
 import { BackIcon } from '../components/Icon';
+import { SplitView, useSelection } from '../components/Layout/SplitView';
 import { PlanRecipe } from '../components/Recipe/PlanRecipe';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { SectionLink } from '../components/Section/SectionLink';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import { gridColumns } from '../constants/Layout';
+import { DETAIL_PANE_WIDTH, gridColumns } from '../constants/Layout';
 import { FloatingTop, Gutter, Spacing } from '../constants/Spacing';
 import { GET_RECIPES } from '../operations/getRecipes';
 
@@ -25,13 +27,13 @@ const CELL_IMAGE_STYLE = { width: '100%' };
 // The boundary only holds while the props stay equal, so the cell style is
 // memoised on the column count rather than rebuilt per card, and the press
 // handler is bound to the recipe rather than rebuilt by the list on every pass.
-const RecipeCell = React.memo(function RecipeCell({ recipe, navigation, cellStyle }) {
+const RecipeCell = React.memo(function RecipeCell({ recipe, open, selected, cellStyle }) {
   const openRecipe = React.useCallback(
     (e) => {
       e.preventDefault();
-      navigation.navigate('RecipeDetail', { id: recipe.id, recipe });
+      open({ id: recipe.id, recipe });
     },
-    [navigation, recipe]
+    [open, recipe]
   );
 
   return (
@@ -40,6 +42,7 @@ const RecipeCell = React.memo(function RecipeCell({ recipe, navigation, cellStyl
       imageStyle={CELL_IMAGE_STYLE}
       title={recipe.title}
       imageUrl={recipe.imageUrl}
+      selected={selected}
       badges={recipe.warning && <Text>⚠️</Text>}
       onPress={openRecipe}>
       <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
@@ -51,7 +54,10 @@ export function RecipeListScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
   const { recipes = [] } = data;
   const insets = useSafeArea();
-  const columns = gridColumns(useWindowDimensions().width);
+  const { wide, selected, open, clear } = useSelection('RecipeDetail');
+  // The grid fits its columns to the room the pane leaves it, not to the
+  // display: four columns behind a recipe is four slivers.
+  const columns = gridColumns(useWindowDimensions().width - (wide ? DETAIL_PANE_WIDTH : 0));
   const cellStyle = React.useMemo(
     () => ({
       width: `${100 / columns}%`,
@@ -71,9 +77,14 @@ export function RecipeListScreen({ navigation }) {
   );
   const renderItem = React.useCallback(
     ({ item: recipe }) => (
-      <RecipeCell recipe={recipe} navigation={navigation} cellStyle={cellStyle} />
+      <RecipeCell
+        recipe={recipe}
+        open={open}
+        selected={wide ? selected?.id === recipe.id : undefined}
+        cellStyle={cellStyle}
+      />
     ),
-    [navigation, cellStyle]
+    [open, wide, selected, cellStyle]
   );
 
   if (error) return `Error! ${error}`;
@@ -93,7 +104,7 @@ export function RecipeListScreen({ navigation }) {
     </View>
   );
 
-  return (
+  const grid = (
     <View style={{ flex: 1 }}>
       {/* The grid is the scroller, with the headings as its header. Nesting it
           in a ScrollView made it lay out every recipe at once, because a list
@@ -107,6 +118,10 @@ export function RecipeListScreen({ navigation }) {
           when a rotation changes how many cards fit. */}
       <FlatList
         key={columns}
+        // Every seeded recipe has a card on the home screen too, and
+        // detachPreviousScreen keeps that screen mounted underneath this one,
+        // so a screen test has no way to name a card in this grid without it.
+        testID="recipe-grid"
         numColumns={columns}
         data={recipes}
         keyExtractor={(recipe) => recipe.id}
@@ -150,5 +165,26 @@ export function RecipeListScreen({ navigation }) {
         }}
       />
     </View>
+  );
+
+  if (!wide) return grid;
+
+  return (
+    <SplitView
+      list={grid}
+      placeholder="Kies een recept"
+      onDismiss={clear}
+      detail={
+        selected && (
+          // Keyed on the recipe, so picking another one starts its steps
+          // unticked rather than carrying the last recipe's ticks over.
+          <RecipeDetailScreen
+            key={selected.id}
+            navigation={navigation}
+            route={{ params: selected }}
+          />
+        )
+      }
+    />
   );
 }

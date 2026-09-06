@@ -9,6 +9,11 @@ import Type from '../../constants/Type';
 
 const THUMB = 40;
 
+// What marks the row whose detail the pane is showing. Every row in such a list
+// carries it, transparent until it is the one, so picking a different row moves
+// nothing.
+const RING = 2;
+
 // One ingredient: its picture, its name, and whatever control the screen puts
 // on the right.
 export function ListItem({
@@ -20,6 +25,11 @@ export function ListItem({
   imageUrl,
   textStyle,
   onImagePress,
+  // Only a list that opens its rows into a pane beside itself passes this, and
+  // it then passes it on every row. Left out, the row carries no ring at all
+  // rather than a transparent one, so a screen that pushes its detail is laid
+  // out to the pixel it always was.
+  selected,
 }) {
   const colors = useTheme();
 
@@ -73,6 +83,10 @@ export function ListItem({
           paddingRight: children ? Spacing.lg : Spacing.sm,
           backgroundColor: colors.cardBackground,
           borderRadius: Radius.md,
+        },
+        selected !== undefined && {
+          borderWidth: RING,
+          borderColor: selected ? colors.tintColor : 'transparent',
         },
         style,
       ]}>

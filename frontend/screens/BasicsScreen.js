@@ -5,7 +5,9 @@ import { View, FlatList, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { IngredientDetailScreen } from './IngredientDetailScreen';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
+import { SplitView, useSelection } from '../components/Layout/SplitView';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { SectionLink } from '../components/Section/SectionLink';
@@ -77,7 +79,7 @@ const SUBSCRIBE_PLANNED_RECIPES = gql`
   }
 `;
 
-function BasicsList({ navigation }) {
+function BasicsList({ navigation, open, selectedId, inPane }) {
   const { loading, error, data = {} } = useQuery(GET_BASICS);
   useSubscription(SUBSCRIBE_PLANNED_RECIPES);
   useSubscription(SUBSCRIBE_UNPLANNED_RECIPES);
@@ -136,9 +138,10 @@ function BasicsList({ navigation }) {
                 }}
                 title={ingredient.name}
                 imageUrl={ingredient.imageUrl}
+                selected={inPane ? selectedId === ingredient.id : undefined}
                 onImagePress={(e) => {
                   e.preventDefault();
-                  navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
+                  open({ ingredientId: ingredient.id });
                 }}
                 subtitle={plannedRecipes
                   .map((planned) => `${planned.quantity}×\u00A0${planned.recipe.title}`)
@@ -160,14 +163,39 @@ function BasicsList({ navigation }) {
 export default function PlanScreen({ navigation }) {
   const scrollRef = React.useRef(null);
   useScrollToTop(scrollRef);
+  const { wide, selected, open, clear } = useSelection('IngredientDetail');
 
-  return (
+  const list = (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={[contentColumn, { paddingBottom: Layout.tabBarHeight }]}>
-        <BasicsList navigation={navigation} />
+        <BasicsList
+          navigation={navigation}
+          open={open}
+          selectedId={selected?.ingredientId}
+          inPane={wide}
+        />
       </ScrollView>
     </SafeAreaView>
+  );
+
+  if (!wide) return list;
+
+  return (
+    <SplitView
+      list={list}
+      placeholder="Kies een ingrediënt"
+      onDismiss={clear}
+      detail={
+        selected && (
+          <IngredientDetailScreen
+            key={selected.ingredientId}
+            navigation={navigation}
+            route={{ params: selected }}
+          />
+        )
+      }
+    />
   );
 }

@@ -25,6 +25,18 @@ export function contentInset(available) {
   return Math.max(0, (available - CONTENT_MAX_WIDTH) / 2);
 }
 
+// How wide the display has to be before a list screen opens its detail beside
+// itself instead of pushing it. Below this there is not enough room for both a
+// list you can still read and a detail worth reading, so the phone behaviour is
+// the right one. An iPad is 1024 across its short side, so both orientations
+// take the pane; a phone and a half-screen multitasking slide-over do not.
+export const PANE_MIN_WIDTH = 1000;
+
+// What the detail pane takes. It is a document rather than a list, so it gets a
+// fixed measure and the list keeps whatever is left: a wider display buys you
+// more recipes across, not longer lines to read.
+export const DETAIL_PANE_WIDTH = 600;
+
 // A recipe card wants about this much room, its share of the gutter included.
 const GRID_COLUMN_WIDTH = 220;
 

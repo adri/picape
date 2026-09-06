@@ -5,10 +5,12 @@ import { View, FlatList, Text, Dimensions, Platform, StyleSheet } from 'react-na
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { IngredientDetailScreen } from './IngredientDetailScreen';
 import { Badge } from '../components/Badge/Badge';
 import { ImageCard } from '../components/Card/ImageCard';
 import { Nutriscore, hasNutriscore } from '../components/Ingredient/Nutriscore';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
+import { SplitView, useSelection } from '../components/Layout/SplitView';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
@@ -147,6 +149,7 @@ function PlannedRecipes({ navigation }) {
 export default function ListScreen({ navigation }) {
   const scrollRef = React.useRef(null);
   useScrollToTop(scrollRef);
+  const { wide, selected, open, clear } = useSelection('IngredientDetail');
 
   // idea: use the count of order items to know how many skeletons to render
   const { data: countData } = useQuery(GET_ORDER_COUNT, {
@@ -171,7 +174,7 @@ export default function ListScreen({ navigation }) {
   const currentOrder = currentOrderSubscription || currentOrderQuery;
   const deliveryDay = formatDeliveryDay(currentOrder);
 
-  return (
+  const list = (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
         ref={scrollRef}
@@ -228,11 +231,15 @@ export default function ListScreen({ navigation }) {
                   title={ingredient?.name || item.name}
                   imageUrl={ingredient?.imageUrl || item.imageUrl}
                   badges={badgesFor(ingredient)}
+                  selected={wide ? selected?.ingredientId === ingredient?.id : undefined}
                   onImagePress={(e) => {
                     e.preventDefault();
                     if (ingredient) {
-                      navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
+                      open({ ingredientId: ingredient.id });
                     } else {
+                      // A line the supermarket put in the cart that Picape has
+                      // no ingredient for. What that opens is a form to make
+                      // one, not a detail, so it stays a screen of its own.
                       navigation.navigate('AddIngredient', { ingredient: item });
                     }
                   }}
@@ -268,6 +275,25 @@ export default function ListScreen({ navigation }) {
         )}
       </ScrollView>
     </SafeAreaView>
+  );
+
+  if (!wide) return list;
+
+  return (
+    <SplitView
+      list={list}
+      placeholder="Kies een ingrediënt"
+      onDismiss={clear}
+      detail={
+        selected && (
+          <IngredientDetailScreen
+            key={selected.ingredientId}
+            navigation={navigation}
+            route={{ params: selected }}
+          />
+        )
+      }
+    />
   );
 }
 

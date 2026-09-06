@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Badge } from '../components/Badge/Badge';
 import { BackIcon, CheckIcon } from '../components/Icon';
 import { EditIcon } from '../components/Icon/EditIcon';
+import { useDetailPane } from '../components/Layout/SplitView';
 import { ListItem } from '../components/ListItem/ListItem';
 import { takeYoutubeLink, YoutubeEmbed } from '../components/Recipe/YoutubeEmbed';
 import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
@@ -60,6 +61,10 @@ function stepWithTimerLinks(step) {
 }
 
 export default function RecipeDetailScreen({ route: { params }, navigation }) {
+  // Beside a list rather than on top of it, this screen has no stack under it:
+  // the way out is to empty the pane, and there is no back button because the
+  // list it belongs to never left.
+  const { inPane, dismiss } = useDetailPane();
   const {
     loading,
     error,
@@ -79,7 +84,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
   const [stepChecked, setStepsChecked] = React.useState([]);
   const [markRecipeAsCooked] = useMutation(MARK_RECIPE_AS_COOKED, {
     onCompleted: () => {
-      navigation.goBack();
+      dismiss();
     },
     onError: (error) => {
       alert(error.message);
@@ -242,17 +247,19 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
         {videoId && <YoutubeEmbed videoId={videoId} />}
       </ScrollView>
 
-      <BackIcon
-        style={{
-          position: 'absolute',
-          top: insets.top + Spacing.sm,
-          left: insets.left + columnInset + Spacing.md,
-        }}
-        onPress={(e) => {
-          e.preventDefault();
-          navigation.goBack();
-        }}
-      />
+      {!inPane && (
+        <BackIcon
+          style={{
+            position: 'absolute',
+            top: insets.top + Spacing.sm,
+            left: insets.left + columnInset + Spacing.md,
+          }}
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.goBack();
+          }}
+        />
+      )}
 
       <FixedFooter
         buttonText={recipe.isCooked ? 'Toch niet gekookt' : 'Gekookt'}

@@ -8,10 +8,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Badge } from '../components/Badge/Badge';
 import { BackIcon, EditIcon } from '../components/Icon';
 import { Nutriscore, hasNutriscore } from '../components/Ingredient/Nutriscore';
+import { useDetailPane } from '../components/Layout/SplitView';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { Separator } from '../components/Section/Separator';
 import { useTheme } from '../constants/Colors';
-import { contentColumn } from '../constants/Layout';
+import Layout, { contentColumn } from '../constants/Layout';
 import { Gutter, Radius, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 
@@ -68,6 +69,9 @@ export function IngredientDetailScreen({
 }) {
   const insets = useSafeAreaInsets();
   const colors = useTheme();
+  // Beside the list rather than pushed over it: the list never left, so there
+  // is nothing to go back to and no button offering it.
+  const { inPane } = useDetailPane();
   const { data: { node: ingredient } = {}, loading } = useQuery(GET_INGREDIENT_DETAIL, {
     variables: { ingredientId },
   });
@@ -81,13 +85,23 @@ export function IngredientDetailScreen({
     <View style={{ flex: 1 }}>
       {/* Outside the scroller: the way back stays put however far the
           description runs. */}
-      <View style={[styles.topBar, contentColumn, { paddingTop: insets.top + Spacing.sm }]}>
-        <BackIcon
-          onPress={(e) => {
-            e.preventDefault();
-            navigation.goBack();
-          }}
-        />
+      <View
+        style={[
+          styles.topBar,
+          contentColumn,
+          {
+            paddingTop: insets.top + Spacing.sm,
+            justifyContent: inPane ? 'flex-end' : 'space-between',
+          },
+        ]}>
+        {!inPane && (
+          <BackIcon
+            onPress={(e) => {
+              e.preventDefault();
+              navigation.goBack();
+            }}
+          />
+        )}
         {/* The edit screen is the only way to the ingredient's own name, its
             "altijd in huis" switch and the product behind it, so this screen
             has to carry the door to it. */}
@@ -100,7 +114,14 @@ export function IngredientDetailScreen({
       </View>
 
       <ScrollView
-        contentContainerStyle={[contentColumn, { paddingBottom: insets.bottom + Spacing.xxl }]}>
+        contentContainerStyle={[
+          contentColumn,
+          {
+            // The tab bar spans the display, so in a pane it crosses this
+            // column too and the last line would end up under it.
+            paddingBottom: insets.bottom + Spacing.xxl + (inPane ? Layout.tabBarHeight : 0),
+          },
+        ]}>
         {!!ingredient.largeImageUrl && (
           <View style={styles.photo}>
             <Image

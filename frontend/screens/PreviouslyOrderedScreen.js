@@ -3,13 +3,20 @@ import * as React from 'react';
 import { View, FlatList, Dimensions, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { IngredientDetailScreen } from './IngredientDetailScreen';
 import { BackIcon } from '../components/Icon';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
+import { SplitView, useSelection } from '../components/Layout/SplitView';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import { CONTENT_MAX_WIDTH, contentColumn, contentInset } from '../constants/Layout';
+import {
+  CONTENT_MAX_WIDTH,
+  DETAIL_PANE_WIDTH,
+  contentColumn,
+  contentInset,
+} from '../constants/Layout';
 import { FloatingTop, Gutter, Spacing } from '../constants/Spacing';
 import { GET_PREVIOUSLY_ORDERED } from '../operations/getPreviouslyOrdered';
 
@@ -27,7 +34,8 @@ const ROW_MARGIN = { marginHorizontal: Gutter };
 export function PreviouslyOrderedScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_PREVIOUSLY_ORDERED);
   const insets = useSafeAreaInsets();
-  const columnInset = contentInset(useWindowDimensions().width);
+  const { wide, selected, open, clear } = useSelection('IngredientDetail');
+  const columnInset = contentInset(useWindowDimensions().width - (wide ? DETAIL_PANE_WIDTH : 0));
 
   if (error) return `Error! ${error}`;
 
@@ -42,7 +50,7 @@ export function PreviouslyOrderedScreen({ navigation }) {
     </View>
   );
 
-  return (
+  const list = (
     <View style={{ flex: 1 }}>
       <FlatList
         // The basics list this screen opens from carries most of the same
@@ -87,9 +95,10 @@ export function PreviouslyOrderedScreen({ navigation }) {
             ]}
             title={ingredient.name}
             imageUrl={ingredient.imageUrl}
+            selected={wide ? selected?.ingredientId === ingredient.id : undefined}
             onImagePress={(e) => {
               e.preventDefault();
-              navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
+              open({ ingredientId: ingredient.id });
             }}>
             <OrderQuantity id={ingredient.id} orderedQuantity={ingredient.orderedQuantity} />
           </ListItem>
@@ -108,5 +117,24 @@ export function PreviouslyOrderedScreen({ navigation }) {
         }}
       />
     </View>
+  );
+
+  if (!wide) return list;
+
+  return (
+    <SplitView
+      list={list}
+      placeholder="Kies een ingrediënt"
+      onDismiss={clear}
+      detail={
+        selected && (
+          <IngredientDetailScreen
+            key={selected.ingredientId}
+            navigation={navigation}
+            route={{ params: selected }}
+          />
+        )
+      }
+    />
   );
 }
