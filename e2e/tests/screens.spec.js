@@ -178,6 +178,28 @@ test('tapping a recipe opens its detail screen', async ({ page }, testInfo) => {
   expect(problems).toEqual([]);
 });
 
+// The pencil on the recipe detail screen, reached from a browser context whose
+// persisted Apollo cache is empty. That is the state the edit screen used to
+// come up blank in: its query answers a render later than the first, and the
+// render that waited called one hook fewer, which React ends the page over.
+// `watch` turns that into a failure rather than a screenshot of nothing.
+test('the recipe detail screen opens the edit screen', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  await page.getByText('Nasi', { exact: true }).first().click();
+  await expect(page.getByText('Chinese Wokmix').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Bewerken' }).click();
+
+  // By heading, and one of them: detachPreviousScreen keeps the recipe and the
+  // home screen mounted underneath, and both carry recipe names and headings.
+  await expect(page.getByRole('heading', { name: 'Bewerk recept' })).toHaveCount(1);
+  // The form is seeded from the query rather than left empty, which is the
+  // half of the fix a rendered screen alone does not prove.
+  await expect(page.getByTestId('title')).toHaveValue('Nasi');
+  await settle(page);
+  expect(problems).toEqual([]);
+});
+
 test('tapping an ingredient opens its detail screen', async ({ page }, testInfo) => {
   const problems = watch(page);
   await openApp(page, testInfo);
