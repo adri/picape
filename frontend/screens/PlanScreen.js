@@ -28,6 +28,11 @@ function LastRecipesList({ navigation }) {
   // strip reads as a section that failed to load.
   if (!loading && recipes.length === 0) return null;
 
+  // What is still to cook comes first; what is already cooked falls to the end
+  // of the shelf rather than sitting in the way of it. Sort is stable, so each
+  // group keeps the order the server sent.
+  const ordered = [...recipes].sort((a, b) => Number(a.isCooked) - Number(b.isCooked));
+
   return (
     <View style={{ paddingBottom: Spacing.xl }}>
       <SectionHeader title="Dit heb je in huis" />
@@ -51,7 +56,7 @@ function LastRecipesList({ navigation }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: Gutter, gap: Spacing.md }}
           removeClippedSubviews
-          data={recipes}
+          data={ordered}
           keyExtractor={(recipe) => recipe.id}
           renderItem={({ item: recipe, index }) => {
             return (
