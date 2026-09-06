@@ -19,10 +19,48 @@ const SKELETON_LAYOUT = Array(6).fill({
   marginBottom: Spacing.xl,
 });
 
+const CELL_STYLE = { width: '50%', paddingHorizontal: Spacing.xs, paddingBottom: Spacing.xl };
+const CELL_IMAGE_STYLE = { width: '100%' };
+
+// One card, behind a memo boundary. The list renders itself three times while
+// the stack animates this screen in: once for the first window, again once it
+// has measured itself, and again as the window grows. Without the boundary
+// every card already on screen re-rendered on each of those passes, and that
+// work lands on the same thread that is drawing the slide.
+//
+// The boundary only holds while the props stay equal, so the styles are module
+// constants and the press handler is bound to the recipe rather than rebuilt
+// by the list on every pass.
+const RecipeCell = React.memo(function RecipeCell({ recipe, navigation }) {
+  const openRecipe = React.useCallback(
+    (e) => {
+      e.preventDefault();
+      navigation.navigate('RecipeDetail', { id: recipe.id, recipe });
+    },
+    [navigation, recipe]
+  );
+
+  return (
+    <ImageCard
+      style={CELL_STYLE}
+      imageStyle={CELL_IMAGE_STYLE}
+      title={recipe.title}
+      imageUrl={recipe.imageUrl}
+      badges={recipe.warning && <Text>⚠️</Text>}
+      onPress={openRecipe}>
+      <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
+    </ImageCard>
+  );
+});
+
 export function RecipeListScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
   const { recipes = [] } = data;
   const insets = useSafeArea();
+  const renderItem = React.useCallback(
+    ({ item: recipe }) => <RecipeCell recipe={recipe} navigation={navigation} />,
+    [navigation]
+  );
 
   if (error) return `Error! ${error}`;
 
@@ -79,23 +117,7 @@ export function RecipeListScreen({ navigation }) {
           paddingBottom: insets.bottom + Spacing.xxl,
         }}
         columnWrapperStyle={{ paddingHorizontal: Gutter - Spacing.xs }}
-        renderItem={({ item: recipe }) => (
-          <ImageCard
-            style={{ width: '50%', paddingHorizontal: Spacing.xs, paddingBottom: Spacing.xl }}
-            imageStyle={{ width: '100%' }}
-            title={recipe.title}
-            imageUrl={recipe.imageUrl}
-            badges={recipe.warning && <Text>⚠️</Text>}
-            onPress={(e) => {
-              e.preventDefault();
-              navigation.navigate('RecipeDetail', {
-                id: recipe.id,
-                recipe,
-              });
-            }}>
-            <PlanRecipe id={recipe.id} isPlanned={recipe.isPlanned} />
-          </ImageCard>
-        )}
+        renderItem={renderItem}
       />
 
       <BackIcon
