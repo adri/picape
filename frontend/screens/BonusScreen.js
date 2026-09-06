@@ -24,14 +24,20 @@ const SKELETON_LAYOUT = Array(8).fill({
 // the list can stay flush and its scroll bar sits at the edge of the screen.
 const ROW_MARGIN = { marginHorizontal: Gutter };
 
-// An offer is worth activating because of what it covers, so what Picape knows
-// behind it comes before the shelf the supermarket filed it under.
+// The discount leads, because it is why you would take the offer at all. Then
+// what Picape knows behind it, and only failing that the shelf the supermarket
+// filed it under.
+//
+// It reads as one line rather than a coloured pill beside the name: a pill goes
+// inside the row's title, which is capped at two lines, and every offer name
+// here is long enough that the cap then trails an ellipsis after the pill.
 function subtitleFor(offer) {
-  if (offer.ingredients.length > 0) {
-    return offer.ingredients.map((ingredient) => ingredient.name).join(', ');
-  }
+  const covers =
+    offer.ingredients.length > 0
+      ? offer.ingredients.map((ingredient) => ingredient.name).join(', ')
+      : `${offer.category} · ${offer.productCount} producten`;
 
-  return `${offer.category} · ${offer.productCount} producten`;
+  return offer.discount ? `${offer.discount} · ${covers}` : covers;
 }
 
 // Activating is one way: the offer is spent on the loyalty account and there is
@@ -128,16 +134,6 @@ export function BonusScreen({ navigation }) {
             ]}
             title={offer.title}
             imageUrl={offer.imageUrl}
-            badges={
-              !!offer.discount && (
-                <Badge
-                  small
-                  style={{ paddingHorizontal: Spacing.sm }}
-                  amount={offer.discount}
-                  backgroundColor={Colors.promotionBackground}
-                />
-              )
-            }
             subtitle={subtitleFor(offer)}>
             <Activate offer={offer} hasRoom={hasRoom} />
           </ListItem>
