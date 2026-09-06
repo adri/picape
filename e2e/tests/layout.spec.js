@@ -176,6 +176,42 @@ test('the cart keeps its recipes off its ingredients', async ({ page }) => {
   expect(gap, 'the recipe strip runs into the first ingredient row').toBeGreaterThanOrEqual(16);
 });
 
+async function openChickenDetail(page) {
+  await openApp(page);
+  await tab(page, /Basics/).click();
+  await settle(page);
+  await page.getByRole('button', { name: 'Chicken', exact: true }).click();
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toBeVisible();
+}
+
+test('the ingredient details screen shows no markup', async ({ page }) => {
+  await openChickenDetail(page);
+
+  // The supermarket writes descriptionHighlights as HTML, and React Native has
+  // nothing that renders markup: an unparsed field lands on the screen as
+  // "<p>Deze malse kipfilet is 100% naturel</p><p><ul><li>...", which a baseline
+  // records as correct the day it is accepted.
+  const text = await page.locator('body').innerText();
+  const tags = text.match(/<\/?(p|ul|li|strong)>/gi);
+
+  expect(tags, `the description reached the screen as markup: ${tags}`).toBeNull();
+});
+
+test('the details screen keeps the way to the edit screen open', async ({ page }) => {
+  await openChickenDetail(page);
+
+  // Details replaced edit on the ingredient image, and the edit screen is the
+  // only path to the ingredient's name, its "altijd in huis" switch and the
+  // product behind it. Lose the button here and the basics tab has a toggle
+  // nothing can reach any more.
+  await page.getByRole('button', { name: 'Bewerken' }).first().click();
+  await expect(page.getByText('Altijd in huis')).toBeVisible();
+
+  // And back out of edit is back to the details, not out to the list.
+  await page.getByRole('button', { name: 'Sluiten' }).first().click();
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toBeVisible();
+});
+
 test('every ingredient row puts its control in the same place', async ({ page }) => {
   await openApp(page);
   await tab(page, /Basics/).click();

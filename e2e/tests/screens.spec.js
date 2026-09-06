@@ -159,6 +159,20 @@ test('tapping a recipe opens its detail screen', async ({ page }, testInfo) => {
   expect(problems).toEqual([]);
 });
 
+test('tapping an ingredient opens its detail screen', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  await tab(page, /Basics/).click();
+  await settle(page);
+  await page.getByRole('button', { name: 'Chicken', exact: true }).click();
+  // The recorded product card, so the screen has the supermarket's answer and
+  // not just the ingredient's own name.
+  await expect(page.getByText('AH Biologisch Kipfilet 2 stuks')).toBeVisible();
+  await settle(page);
+  await checkScreen(page, 'ingredient-detail');
+  expect(problems).toEqual([]);
+});
+
 test('raising a quantity in the cart syncs with the supermarket', async ({ page }, testInfo) => {
   const problems = watch(page);
   await openApp(page, testInfo);

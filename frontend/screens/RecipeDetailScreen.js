@@ -155,7 +155,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                 style={{ marginRight: 10 }}
                 onImagePress={(e) => {
                   e.preventDefault();
-                  navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
+                  navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
                 }}
                 title={`${ingredient.name}${warning}`}
                 imageUrl={ingredient.imageUrl}

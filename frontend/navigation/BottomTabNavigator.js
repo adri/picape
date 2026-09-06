@@ -12,6 +12,7 @@ import { AddIngredientScreen } from '../screens/AddIngredientScreen';
 import BasicsScreen from '../screens/BasicsScreen';
 import { EditIngredientScreen } from '../screens/EditIngredientScreen';
 import { EditRecipeScreen } from '../screens/EditRecipeScreen';
+import { IngredientDetailScreen } from '../screens/IngredientDetailScreen';
 import ListScreen from '../screens/ListScreen';
 import { NewRecipeScreen } from '../screens/NewRecipeScreen';
 import PlanScreen from '../screens/PlanScreen';
@@ -65,6 +66,9 @@ export default function PlanStackScreen() {
       <Stack.Screen name="RecipeList" component={RecipeListScreen} />
       <Stack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
       <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
+      {/* No modal preset: opening an ingredient is a step deeper into the list it
+          came from, so it pushes from the right the way a recipe does. */}
+      <Stack.Screen name="IngredientDetail" component={IngredientDetailScreen} />
       <Stack.Screen name="EditRecipe" component={EditRecipeScreen} options={modal} />
       <Stack.Screen name="NewRecipe" component={NewRecipeScreen} options={modal} />
       <Stack.Screen name="AddIngredient" component={AddIngredientScreen} options={modal} />

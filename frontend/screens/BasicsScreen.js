@@ -125,7 +125,7 @@ function BasicsList({ navigation }) {
                 imageUrl={ingredient.imageUrl}
                 onImagePress={(e) => {
                   e.preventDefault();
-                  navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
+                  navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
                 }}
                 subtitle={plannedRecipes
                   .map((planned) => `${planned.quantity}×\u00A0${planned.recipe.title}`)

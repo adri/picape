@@ -176,7 +176,7 @@ export default function ListScreen({ navigation }) {
                   onImagePress={(e) => {
                     e.preventDefault();
                     if (ingredient) {
-                      navigation.navigate('EditIngredient', { ingredientId: ingredient.id });
+                      navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
                     } else {
                       navigation.navigate('AddIngredient', { ingredient: item });
                     }
