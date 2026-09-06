@@ -51,6 +51,11 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(&Resolver.Order.last_ordered/3)
     end
 
+    @desc "Lists ingredients bought in an earlier order, most recently bought first."
+    field :previously_ordered_ingredients, list_of(:ingredient) do
+      resolve(&Resolver.Order.previously_ordered_ingredients/3)
+    end
+
     @desc "Lists all ingredients which are marked as essential."
     field :essentials, list_of(:ingredient) do
       resolve(&Resolver.Recipe.essentials/3)

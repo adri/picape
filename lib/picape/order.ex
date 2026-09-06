@@ -200,6 +200,29 @@ defmodule Picape.Order do
     end
   end
 
+  @doc """
+  Ingredients bought in an earlier order, most recently bought first.
+
+  `order_id` is the live cart, so what sits on it now is not history yet.
+  Every other line id is an order `finish_order/2` archived, including the
+  supermarket's own order numbers from before it minted its own ids, so all of
+  them count as bought. Ordering on when each ingredient was last bought
+  leaves those old ones at the bottom without a rule that names them.
+  """
+  def previously_ordered_ingredients(order_id) do
+    query =
+      from(
+        m in ManualIngredient,
+        join: i in assoc(m, :ingredient),
+        where: m.line_id != ^order_id,
+        group_by: i.id,
+        order_by: [desc: max(m.inserted_at)],
+        select: i
+      )
+
+    {:ok, Repo.all(query)}
+  end
+
   def manual_ingredients(order_id) do
     query =
       from(

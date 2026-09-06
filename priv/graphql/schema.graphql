@@ -22,6 +22,9 @@ type RootQueryType {
   "Lists all recipes that were planned in the last order."
   lastOrderedRecipes: [Recipe]
 
+  "Lists ingredients bought in an earlier order, most recently bought first."
+  previouslyOrderedIngredients: [Ingredient]
+
   "Lists all ingredients which are marked as essential."
   essentials: [Ingredient]
 

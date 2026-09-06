@@ -23,6 +23,10 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     end
   end
 
+  def previously_ordered_ingredients(_parent, _args, _info) do
+    Order.previously_ordered_ingredients(order_id())
+  end
+
   def recipes_planned?(_, recipe_ids) do
     {:ok, planned_ids} = Order.planned_recipes(order_id())
 
