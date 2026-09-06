@@ -214,3 +214,24 @@ test('raising a quantity in the cart syncs with the supermarket', async ({ page 
   await expect(page.getByText('2', { exact: true })).toHaveCount(2);
   expect(problems).toEqual([]);
 });
+
+test('the cart names the ingredient that cannot be delivered', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  await tab(page, /Mandje/).click();
+  await settle(page);
+
+  // A seeded product the supermarket has stopped selling, which is a tenth of
+  // the production ingredients. The label belongs to this screen alone: the
+  // home screen stays mounted underneath and carries the same warning as a
+  // bare ⚠️ on its recipe cards.
+  await expect(page.getByText('Niet leverbaar')).toHaveCount(1);
+
+  // And on that row, not merely somewhere on the screen. A warning that names
+  // the wrong ingredient is worse than no warning. Found by its picture: the
+  // name shares its line with the badges.
+  const row = page.getByRole('button', { name: 'Sinaasappel', exact: true }).locator('xpath=..');
+  await expect(row.getByText('Niet leverbaar')).toHaveCount(1);
+
+  expect(problems).toEqual([]);
+});

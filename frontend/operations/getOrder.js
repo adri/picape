@@ -19,6 +19,9 @@ export const orderFields = gql`
         name
         imageUrl
         nutriscore
+        warning {
+          description
+        }
         isPlanned(inShoppingList: false)
         orderedQuantity
         plannedRecipes(inShoppingList: false) {

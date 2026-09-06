@@ -103,6 +103,9 @@ const lightTheme = {
   // orange-700 that savingsText needs to stay legible as text reads as brown
   // once it is a whole pill.
   promotionBackground: palette['orange-500'],
+  // A product the supermarket has stopped selling. Red rather than the warning
+  // yellow: the row is not a caution, it is an order line that never arrives.
+  unavailableBackground: palette['red-500'],
   skeletonBone: '#E1E9EE',
   skeletonHighlight: '#F2F8FC',
   hairLineBackground: 'rgba(0, 0, 0, 0.1)',
@@ -159,6 +162,7 @@ const darkTheme = {
   secondaryText: '#aeaeae',
   savingsText: palette['orange-300'],
   promotionBackground: palette['orange-500'],
+  unavailableBackground: palette['red-500'],
   skeletonBone: palette['grey-900'],
   skeletonHighlight: palette['grey-700'],
   hairLineBackground: 'rgba(255, 255, 255, 0.15)',

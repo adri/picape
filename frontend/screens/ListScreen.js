@@ -47,6 +47,33 @@ function formatDeliveryDay({ deliveryDate }) {
   return `${weekday} ${day} ${months[month - 1]}`;
 }
 
+// What the row says about the product beside its name. A supermarket that has
+// stopped selling something still lets you plan a recipe with it, and the order
+// line it produces never arrives, so the cart is where that has to show: it is
+// the list you check before the order goes out. It sits on the name's own line
+// rather than under it, because a row that grew a second line here would stop
+// lining up with the rows around it.
+function badgesFor(ingredient) {
+  const graded = hasNutriscore(ingredient?.nutriscore);
+  const warning = ingredient?.warning;
+
+  if (!graded && !warning) return null;
+
+  return (
+    <View style={styles.badges}>
+      {graded && <Nutriscore nutriscore={ingredient.nutriscore} />}
+      {!!warning && (
+        <Badge
+          small
+          style={styles.warningBadge}
+          amount={warning.description}
+          backgroundColor={Colors.unavailableBackground}
+        />
+      )}
+    </View>
+  );
+}
+
 function PlannedRecipes({ navigation }) {
   const {
     loading,
@@ -198,11 +225,7 @@ export default function ListScreen({ navigation }) {
                   ]}
                   title={ingredient?.name || item.name}
                   imageUrl={ingredient?.imageUrl || item.imageUrl}
-                  badges={
-                    hasNutriscore(ingredient?.nutriscore) ? (
-                      <Nutriscore nutriscore={ingredient.nutriscore} />
-                    ) : null
-                  }
+                  badges={badgesFor(ingredient)}
                   onImagePress={(e) => {
                     e.preventDefault();
                     if (ingredient) {
@@ -247,6 +270,15 @@ export default function ListScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  badges: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+  },
+  // A small badge carries no horizontal padding, because the only other one is
+  // a single letter that fills it. This one is a word.
+  warningBadge: {
+    paddingHorizontal: Spacing.sm,
+  },
   // Room for both lines whether or not the order has arrived and whether or not
   // the bonus took anything off, so the heading keeps one height and the basket
   // below it never jumps once the total loads.
