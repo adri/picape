@@ -167,6 +167,46 @@ defmodule Picape.MCP.Tools do
         "Take a recipe off the current order. Its ingredients leave the shopping list unless another " <>
           "planned recipe still needs them.",
       inputSchema: %{type: "object", properties: %{recipe_id: @integer}, required: ["recipe_id"]}
+    },
+    %{
+      name: "mark_recipe_as_cooked",
+      description:
+        "Record that a recipe was cooked, or take that back with cooked=false. This sets the flag the " <>
+          "app's \"Gekookt\" button sets, on the last order that was shopped, not on the order being " <>
+          "planned now. The reply says what the order holds afterwards.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          recipe_id: @integer,
+          cooked: %{type: "boolean", description: "Defaults to true"}
+        },
+        required: ["recipe_id"]
+      }
+    },
+    %{
+      name: "recipe_history",
+      description:
+        "How often every recipe was planned and when it was planned last, most recently planned " <>
+          "first. Only finished orders count, so a recipe planned on the current order is not in " <>
+          "these numbers yet. Recipes nobody ever planned come last, with `times_planned` 0 and no " <>
+          "date. Use it to skip what was just cooked and to find what has gone stale.",
+      inputSchema: %{
+        type: "object",
+        properties: %{limit: %{type: "integer", minimum: 1, description: "How many recipes, at most. Default 100."}}
+      }
+    },
+    %{
+      name: "ingredient_history",
+      description:
+        "How often every ingredient was bought, when it was bought last, and `average_gap_days`, the " <>
+          "mean number of days between two buys. Most bought over the last year first. A cadence on " <>
+          "its own cannot tell an ingredient that is due from one that was dropped: both sit far past " <>
+          "their gap. `times_bought_last_year` tells them apart, so read it before you call anything " <>
+          "overdue. `average_gap_days` is null for an ingredient bought once.",
+      inputSchema: %{
+        type: "object",
+        properties: %{limit: %{type: "integer", minimum: 1, description: "How many ingredients, at most. Default 50."}}
+      }
     }
   ]
 
@@ -298,6 +338,31 @@ defmodule Picape.MCP.Tools do
 
   defp run("unplan_recipe", args), do: plan(args["recipe_id"], true)
 
+  defp run("mark_recipe_as_cooked", args) do
+    order_id = Order.last_order_id()
+
+    with {:ok, recipe} <- fetch_recipe(args["recipe_id"]) do
+      order_id
+      |> Order.mark_recipe_as_cooked(recipe.id, Map.get(args, "cooked", true))
+      |> case do
+        {:ok, _planned} -> {:ok, render_cooked(order_id, recipe)}
+        {:error, changeset} -> {:error, inspect(changeset.errors)}
+      end
+    end
+  end
+
+  defp run("recipe_history", args) do
+    {:ok, history} = Order.recipe_history(@order_id, args["limit"] || 100)
+
+    {:ok, Enum.map(history, &render_recipe_history/1)}
+  end
+
+  defp run("ingredient_history", args) do
+    {:ok, history} = Order.ingredient_history(@order_id, args["limit"] || 50)
+
+    {:ok, Enum.map(history, &render_ingredient_history/1)}
+  end
+
   defp plan(recipe_id, unplan) do
     with {:ok, recipe} <- fetch_recipe(recipe_id),
          {:ok, _line} <- Order.plan_recipe(@order_id, recipe.id, unplan) do
@@ -375,6 +440,46 @@ defmodule Picape.MCP.Tools do
       }
     end)
   end
+
+  # `PlannedRecipe.changeset/2` does not cast `cooked`, so marking a recipe that
+  # was never on that order inserts a row that is planned and not cooked. Report
+  # what the order holds rather than what the call asked for.
+  defp render_cooked(order_id, recipe) do
+    {:ok, cooked_ids} = Order.cooked_recipes(order_id)
+
+    %{recipe_id: recipe.id, title: recipe.title, is_cooked: recipe.id in cooked_ids}
+  end
+
+  defp render_recipe_history(row) do
+    %{
+      recipe_id: row.recipe_id,
+      title: row.title,
+      times_planned: row.times_planned,
+      last_planned_at: render_date(row.last_planned_at),
+      days_since_planned: days_since(row.last_planned_at)
+    }
+  end
+
+  defp render_ingredient_history(row) do
+    %{
+      ingredient_id: row.ingredient_id,
+      name: row.name,
+      times_bought: row.times_bought,
+      times_bought_last_year: row.times_bought_last_year,
+      last_bought_at: render_date(row.last_bought_at),
+      days_since_bought: days_since(row.last_bought_at),
+      average_gap_days: round_gap(row.average_gap_days)
+    }
+  end
+
+  defp render_date(nil), do: nil
+  defp render_date(at), do: at |> NaiveDateTime.to_date() |> Date.to_iso8601()
+
+  defp days_since(nil), do: nil
+  defp days_since(at), do: NaiveDateTime.diff(NaiveDateTime.utc_now(), at, :day)
+
+  defp round_gap(nil), do: nil
+  defp round_gap(days), do: Float.round(days, 1)
 
   defp render_recipe_ingredient(ref) do
     %{ingredient_id: ref.ingredient.id, name: ref.ingredient.name, quantity: ref.quantity}

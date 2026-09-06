@@ -223,6 +223,92 @@ defmodule Picape.Order do
     {:ok, Repo.all(query)}
   end
 
+  @doc """
+  How often each recipe was planned and when it was planned last, most recently
+  planned first.
+
+  Only orders `finish_order/2` archived count, the same way
+  `previously_ordered_ingredients/1` counts them: `order_id` is the live cart,
+  so a recipe on it now is a plan, not a meal. A recipe that was unplanned again
+  never became one either. Recipes nobody ever planned still come back, last,
+  with a count of zero and no date, because those are the ones a planner wants
+  to see.
+  """
+  def recipe_history(order_id, limit) do
+    query =
+      from(
+        r in Recipe.Recipe,
+        left_join: p in PlannedRecipe,
+        on: p.recipe_id == r.id and p.line_id != ^order_id and p.unplanned == false,
+        group_by: r.id,
+        order_by: [desc_nulls_last: max(p.inserted_at)],
+        limit: ^limit,
+        select: %{
+          recipe_id: r.id,
+          title: r.title,
+          times_planned: count(p.id),
+          last_planned_at: max(p.inserted_at)
+        }
+      )
+
+    {:ok, Repo.all(query)}
+  end
+
+  @doc """
+  How often each ingredient was bought, when it was bought last, and the mean
+  number of days between two buys. Most bought over the last year first.
+
+  A row with quantity 0 is an ingredient taken off the list again, so it is not
+  a buy. `times_bought_last_year` is what separates an ingredient that is due
+  from one that was dropped: both are long past their gap, only the dropped one
+  has stopped appearing.
+  """
+  def ingredient_history(order_id, limit) do
+    year_ago = NaiveDateTime.add(NaiveDateTime.utc_now(), -365, :day)
+
+    buys =
+      from(
+        m in ManualIngredient,
+        where: m.line_id != ^order_id and m.quantity > 0,
+        select: %{
+          ingredient_id: m.ingredient_id,
+          inserted_at: m.inserted_at,
+          gap_days:
+            fragment(
+              "cast(extract(epoch from ? - lag(?) over (partition by ? order by ?)) / 86400 as float)",
+              m.inserted_at,
+              m.inserted_at,
+              m.ingredient_id,
+              m.inserted_at
+            )
+        }
+      )
+
+    query =
+      from(
+        b in subquery(buys),
+        join: i in Recipe.Ingredient,
+        on: i.id == b.ingredient_id,
+        group_by: i.id,
+        order_by: [desc: selected_as(:times_bought_last_year), desc: selected_as(:times_bought)],
+        limit: ^limit,
+        select: %{
+          ingredient_id: i.id,
+          name: i.name,
+          times_bought: selected_as(count(b.ingredient_id), :times_bought),
+          times_bought_last_year:
+            selected_as(
+              fragment("count(*) filter (where ? > ?)", b.inserted_at, ^year_ago),
+              :times_bought_last_year
+            ),
+          last_bought_at: max(b.inserted_at),
+          average_gap_days: avg(b.gap_days)
+        }
+      )
+
+    {:ok, Repo.all(query)}
+  end
+
   def manual_ingredients(order_id) do
     query =
       from(

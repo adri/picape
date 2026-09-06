@@ -45,6 +45,9 @@ It is a route in the Phoenix router, so it is up whenever the app is, on the dat
 | `edit_recipe` | Replace a recipe's title, description, image and ingredient list |
 | `plan_recipe` | Plan a recipe for the current order |
 | `unplan_recipe` | Take a recipe off the current order |
+| `mark_recipe_as_cooked` | Record that a recipe from the last order was cooked, like the app's "Gekookt" button |
+| `recipe_history` | How often each recipe was planned, and how long ago that was |
+| `ingredient_history` | How often each ingredient was bought, how long ago, and the days between buys |
 
 Start the app with `bin/phx`, then add it to Claude Code:
 ```
@@ -73,6 +76,9 @@ Notes on the tools:
 - `edit_recipe` replaces the whole ingredient list. Read the recipe first and send back every ingredient you want to keep.
 - `edit_ingredient` is the other way round: it changes only the fields you send and leaves the rest, tags included. When the supermarket drops a product, `search_ingredients` reports a `warning` and `edit_ingredient` moves the ingredient onto a replacement product, which keeps the recipes that use it.
 - There is no delete for recipes or ingredients.
+- The two history tools read finished orders only, nine years of them. The order being planned now is not history yet, an ingredient taken off a list again was never bought, and a recipe that was unplanned again was never cooked, so none of the three count.
+- `ingredient_history` reports `average_gap_days` next to `times_bought_last_year` on purpose. A gap on its own cannot tell an ingredient that is due from one that was dropped: both sit far past it. An ingredient with a ten-day gap, last bought 538 days ago and bought zero times in the last year is not overdue, it is gone.
+- `mark_recipe_as_cooked` writes to the order that was last shopped, the same one the app's "Gekookt" button writes to. A recipe that was not on that order cannot be marked cooked on it; the reply's `is_cooked` reports what the order holds afterwards.
 
 ## Deploy
 Hosted on [Fly.io](https://fly.io/) — config in [fly.toml](fly.toml), image built from the [Dockerfile](Dockerfile).

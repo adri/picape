@@ -10,6 +10,9 @@ defmodule Picape.MCPTest do
   alias Picape.Recipe.IngredientRef
   alias Picape.Repo
 
+  # An order `finish_order/2` archived: history is every line but the live cart.
+  @archived_order "1700000000000000"
+
   describe "protocol" do
     test "initialize announces the tool capability" do
       assert %{"result" => result} = request("initialize")
@@ -33,7 +36,10 @@ defmodule Picape.MCPTest do
                "add_recipe",
                "edit_recipe",
                "plan_recipe",
-               "unplan_recipe"
+               "unplan_recipe",
+               "mark_recipe_as_cooked",
+               "recipe_history",
+               "ingredient_history"
              ]
 
       assert Enum.all?(tools, &(&1["inputSchema"]["type"] == "object"))
@@ -335,6 +341,128 @@ defmodule Picape.MCPTest do
     test "reports an unknown recipe" do
       assert call_error("plan_recipe", %{recipe_id: 999_999}) == "no recipe with id 999999"
     end
+  end
+
+  describe "mark_recipe_as_cooked" do
+    test "marks a recipe from the last order, and takes it back" do
+      recipe = insert!(:recipe, title: "Nasi")
+      plan_in_order(recipe, @archived_order, days_ago(2))
+
+      assert %{"title" => "Nasi", "is_cooked" => true} = call!("mark_recipe_as_cooked", %{recipe_id: recipe.id})
+      assert Order.cooked_recipes(@archived_order) == {:ok, [recipe.id]}
+
+      assert %{"is_cooked" => false} = call!("mark_recipe_as_cooked", %{recipe_id: recipe.id, cooked: false})
+      assert Order.cooked_recipes(@archived_order) == {:ok, []}
+    end
+
+    test "reports that a recipe outside the last order did not become cooked" do
+      plan_in_order(insert!(:recipe, title: "Pizza"), @archived_order, days_ago(2))
+      recipe = insert!(:recipe, title: "Nasi")
+
+      assert %{"is_cooked" => false} = call!("mark_recipe_as_cooked", %{recipe_id: recipe.id})
+    end
+
+    test "reports an unknown recipe" do
+      assert call_error("mark_recipe_as_cooked", %{recipe_id: 999_999}) == "no recipe with id 999999"
+    end
+  end
+
+  describe "recipe_history" do
+    test "counts the orders a recipe was planned on, most recently planned first" do
+      pizza = insert!(:recipe, title: "Pizza")
+      soep = insert!(:recipe, title: "Soep")
+      insert!(:recipe, title: "Bao buns")
+
+      plan_in_order(pizza, @archived_order, days_ago(9))
+      plan_in_order(pizza, "1500000000000000", days_ago(400))
+      plan_in_order(soep, "1500000000000000", days_ago(400))
+
+      assert [
+               %{"title" => "Pizza", "times_planned" => 2, "days_since_planned" => 9},
+               %{"title" => "Soep", "times_planned" => 1, "days_since_planned" => 400},
+               %{"title" => "Bao buns", "times_planned" => 0} = never_planned
+             ] = call!("recipe_history")
+
+      assert never_planned["last_planned_at"] == nil
+      assert never_planned["days_since_planned"] == nil
+      assert Enum.at(call!("recipe_history", %{limit: 1}), 0)["recipe_id"] == pizza.id
+    end
+
+    test "leaves out the order being planned now, and recipes that were unplanned again" do
+      planned_now = insert!(:recipe, title: "Pizza")
+      dropped = insert!(:recipe, title: "Soep")
+
+      insert!(:planned_recipe, recipe_id: planned_now.id, line_id: "1")
+      plan_in_order(dropped, @archived_order, days_ago(9), unplanned: true)
+
+      assert [%{"times_planned" => 0}, %{"times_planned" => 0}] = call!("recipe_history")
+    end
+  end
+
+  describe "ingredient_history" do
+    test "counts the buys, the last year of them, and the days between two buys" do
+      melk = insert!(:ingredient, name: "Melk")
+      bloem = insert!(:ingredient, name: "Bloem")
+
+      buy_in_order(melk, @archived_order, days_ago(2))
+      buy_in_order(melk, "1500000000000000", days_ago(12))
+      buy_in_order(bloem, "1400000000000000", days_ago(400))
+
+      assert [
+               %{
+                 "name" => "Melk",
+                 "times_bought" => 2,
+                 "times_bought_last_year" => 2,
+                 "days_since_bought" => 2,
+                 "average_gap_days" => 10.0
+               },
+               %{"name" => "Bloem", "times_bought" => 1, "times_bought_last_year" => 0} = once
+             ] = call!("ingredient_history")
+
+      # One buy is no cadence at all, so there is no average to report.
+      assert once["average_gap_days"] == nil
+      assert once["days_since_bought"] == 400
+    end
+
+    test "tells an ingredient that is due from one that was dropped" do
+      due = insert!(:ingredient, name: "Melk")
+      dropped = insert!(:ingredient, name: "Kefir")
+
+      Enum.each([30, 20, 10], &buy_in_order(due, "150000000000000#{&1}", days_ago(&1)))
+      Enum.each([420, 410, 400], &buy_in_order(dropped, "140000000000000#{&1}", days_ago(&1)))
+
+      assert [
+               %{"name" => "Melk", "times_bought_last_year" => 3, "average_gap_days" => 10.0},
+               %{"name" => "Kefir", "times_bought_last_year" => 0, "average_gap_days" => 10.0}
+             ] = call!("ingredient_history")
+    end
+
+    test "counts neither the order being planned now nor an ingredient taken off the list" do
+      ingredient = insert!(:ingredient, name: "Melk")
+
+      insert!(:manual_ingredient, ingredient_id: ingredient.id, line_id: "1", quantity: 1)
+      buy_in_order(ingredient, @archived_order, days_ago(2), quantity: 0)
+
+      assert call!("ingredient_history") == []
+    end
+
+    test "returns nothing when nothing was ever bought" do
+      insert!(:ingredient, name: "Melk")
+
+      assert call!("ingredient_history") == []
+    end
+  end
+
+  defp plan_in_order(recipe, line_id, inserted_at, attrs \\ []) do
+    insert!(:planned_recipe, [recipe_id: recipe.id, line_id: line_id, inserted_at: inserted_at] ++ attrs)
+  end
+
+  defp buy_in_order(ingredient, line_id, inserted_at, attrs \\ []) do
+    insert!(:manual_ingredient, [ingredient_id: ingredient.id, line_id: line_id, inserted_at: inserted_at] ++ attrs)
+  end
+
+  defp days_ago(days) do
+    NaiveDateTime.utc_now() |> NaiveDateTime.add(-days, :day) |> NaiveDateTime.truncate(:second)
   end
 
   defp request(method, params \\ %{}) do
