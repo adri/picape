@@ -53,7 +53,19 @@ graded_young_cheese = insert! :ingredient, name: "Graded Young Cheese", supermar
 graded_mozarella = insert! :ingredient, name: "Graded Mozarella", supermarket_product_id: 10762991
 
 # Recipes
-nasi = insert! :recipe, title: "Nasi", image_url: "https://user-images.githubusercontent.com/133832/28996360-3152b366-79ff-11e7-9d0e-01ffb907e32c.jpg", ingredients: [
+#
+# One recipe carries a description. The detail screen splits it on the blank
+# line into the steps you tick off, and without one every seeded recipe rendered
+# a single empty card, so no screenshot ever covered a step. One step names a
+# duration, which is what the screen turns into a timer link.
+nasi_steps = String.trim("""
+Kook de rijst volgens de aanwijzing op de verpakking en laat hem afkoelen.
+
+Bak de kip in de olie tot hij gaar is, en schep de wokgroenten erdoor.
+
+Roer de nasimix en de ketjap erdoor en bak alles nog 5 minuten door.
+""")
+nasi = insert! :recipe, title: "Nasi", description: nasi_steps, image_url: "https://user-images.githubusercontent.com/133832/28996360-3152b366-79ff-11e7-9d0e-01ffb907e32c.jpg", ingredients: [
   chicken,
   rice,
   chinese_veges,
