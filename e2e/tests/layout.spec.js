@@ -143,7 +143,9 @@ test('the cart keeps its recipes off its ingredients', async ({ page }) => {
 
   await tab(page, /Mandje/).click();
   await settle(page);
-  await expect(page.getByText('Chicken', { exact: true }).first()).toBeVisible();
+  // By its picture, not its label: the label now carries a nutriscore badge
+  // inside the same line, so nothing on the row reads as exactly "Chicken".
+  await expect(page.getByRole('button', { name: 'Chicken', exact: true })).toBeVisible();
 
   const gap = await page.evaluate(() => {
     const rows = Array.from(document.querySelectorAll('div')).filter((el) => {

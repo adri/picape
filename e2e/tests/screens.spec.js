@@ -177,8 +177,10 @@ test('raising a quantity in the cart syncs with the supermarket', async ({ page 
   const problems = watch(page);
   await openApp(page, testInfo);
   await tab(page, /Mandje/).click();
+  // Found by its picture, not its label: the label now carries a nutriscore
+  // badge inside the same line, so nothing on the row reads as exactly "Butter".
   const butter = page
-    .getByText('Butter', { exact: true })
+    .getByRole('button', { name: 'Butter', exact: true })
     .locator('xpath=ancestor::div[.//div[text()="1"]][1]');
   await butter.getByText('1', { exact: true }).click();
   // The icon buttons carry a role and a label now, so select the control by
