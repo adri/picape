@@ -26,6 +26,10 @@ defmodule Picape.Recipe.Ingredient do
     {:ok, Supermarket.image_url(ingredient.supermarket_product_raw["productCard"])}
   end
 
+  def fetch(ingredient, :large_image_url) do
+    {:ok, Supermarket.large_image_url(ingredient.supermarket_product_raw["productCard"])}
+  end
+
   def fetch(ingredient, :unit_quantity) do
     {:ok, get_in(ingredient.supermarket_product_raw, ["productCard", "salesUnitSize"]) || ""}
   end

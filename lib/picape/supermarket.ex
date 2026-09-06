@@ -136,6 +136,18 @@ defmodule Picape.Supermarket do
     end
   end
 
+  # A product card carries the same shot at 48, 80, 200, 400 and 800 pixels
+  # square. `image_url/1` picks the 80, which is a row's worth and nothing more,
+  # so a screen that shows the photo full width asks for the biggest instead.
+  # Rows keep the small one: a list of them should not be a list of
+  # full-resolution photos.
+  def large_image_url(item) do
+    case Enum.max_by(item["images"] || [], & &1["width"], fn -> nil end) do
+      nil -> image_url(item)
+      image -> image["url"]
+    end
+  end
+
   # ---
 
   def product_title_by_id(supermarket_id) do

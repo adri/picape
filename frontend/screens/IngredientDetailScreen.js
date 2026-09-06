@@ -20,7 +20,7 @@ const GET_INGREDIENT_DETAIL = gql`
       ... on Ingredient {
         id
         name
-        imageUrl
+        largeImageUrl
         supermarketName
         unitQuantity
         nutriscore
@@ -99,10 +99,10 @@ export function IngredientDetailScreen({
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xxl }}>
-        {!!ingredient.imageUrl && (
+        {!!ingredient.largeImageUrl && (
           <View style={styles.photo}>
             <Image
-              source={{ uri: ingredient.imageUrl }}
+              source={{ uri: ingredient.largeImageUrl }}
               contentFit="contain"
               transition={FADE_IN}
               style={styles.photoImage}

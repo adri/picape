@@ -173,6 +173,9 @@ type Ingredient implements Node {
 
   imageUrl: String
 
+  "The product shot at its full size, for a screen that shows it big. Rows want imageUrl."
+  largeImageUrl: String
+
   supermarketName: String
 
   nutriscore: String

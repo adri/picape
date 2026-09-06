@@ -63,6 +63,10 @@ defmodule PicapeWeb.Graphql.Types do
     field(:is_essential, :boolean)
     field(:tags, list_of(:ingredient_tag))
     field(:image_url, :string, resolve: from_object(:image_url))
+
+    @desc "The product shot at its full size, for a screen that shows it big. Rows want imageUrl."
+    field(:large_image_url, :string, resolve: from_object(:large_image_url))
+
     field(:supermarket_name, :string, resolve: from_object(:original_title))
     field(:nutriscore, :string, resolve: from_object(:nutriscore))
     field(:warning, :ingredient_warning, resolve: from_object(:warning))
