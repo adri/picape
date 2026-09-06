@@ -14,8 +14,9 @@ defmodule Picape.SupermarketSnapshot do
   def run do
     File.mkdir_p!(@dir)
 
-    basket = trim_basket(Supermarket.cart()["basket"])
-    write("basket.json", %{"data" => %{"basket" => basket}})
+    cart = Supermarket.cart()
+    basket = trim_basket(cart["basket"])
+    write("basket.json", %{"data" => %{"basket" => basket, "order" => trim_order(cart["order"])}})
 
     search =
       Supermarket.get!("/mobile-services/product/search/v2?page=0&query=#{@search_query}&sortOn=RELEVANCE").body
@@ -35,6 +36,20 @@ defmodule Picape.SupermarketSnapshot do
     |> Map.update("itemsInList", [], &Enum.take(&1, @items_per_list))
     |> Map.update("externalItems", [], &Enum.take(&1, @items_per_list))
   end
+
+  # The fixtures are committed to a public repository, and the delivery carries
+  # the home address and the order id. Nothing here reads them.
+  defp trim_order(order) when is_map(order) do
+    update_in(order, ["delivery"], fn
+      delivery when is_map(delivery) ->
+        Map.merge(delivery, %{"address" => nil, "id" => nil, "shiftCode" => nil, "pickupLocationId" => nil})
+
+      other ->
+        other
+    end)
+  end
+
+  defp trim_order(order), do: order
 
   defp product_ids(basket) do
     ((basket["itemsInOrder"] || []) ++ (basket["itemsInList"] || []))

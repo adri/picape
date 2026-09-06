@@ -114,6 +114,12 @@ type Order implements Node {
 
   totalDiscount: Int
 
+  deliveryDate: String
+
+  deliveryStartTime: String
+
+  deliveryEndTime: String
+
   items: [OrderItem]
 }
 

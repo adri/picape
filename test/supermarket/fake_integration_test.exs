@@ -23,6 +23,14 @@ defmodule Picape.Supermarket.FakeIntegrationTest do
     assert Enum.all?(line.items, &String.starts_with?(&1.image_url, "https://static.supermarket.test/"))
   end
 
+  test "the current order carries the booked delivery slot" do
+    {:ok, %Line{} = line} = Order.current()
+
+    assert line.delivery_date == "2026-09-09"
+    assert line.delivery_start_time == "08:00:00"
+    assert line.delivery_end_time == "12:00:00"
+  end
+
   test "search keeps only products that are available online" do
     results = Supermarket.search("melk")
 

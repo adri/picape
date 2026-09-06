@@ -17,13 +17,19 @@ defmodule Picape.Order.LineFromSupermarket do
     summary = basket["summary"] || %{}
     price = get_in(summary, ["price", "priceAfterDiscount", "amount"]) || 0
     discount = get_in(summary, ["price", "discount", "amount"]) || 0
+    # Nobody has a slot until they book one, so an order without a delivery is
+    # the normal first-time state and not an error.
+    delivery = get_in(cart, ["order", "delivery"]) || %{}
 
     %Line{
       id: 1,
       items: items,
       total_count: summary["quantity"] || Enum.count(items),
       total_price: cents(price),
-      total_discount: cents(discount)
+      total_discount: cents(discount),
+      delivery_date: delivery["date"],
+      delivery_start_time: delivery["startTime"],
+      delivery_end_time: delivery["endTime"]
     }
   end
 

@@ -8,6 +8,9 @@ defmodule Picape.Order.Line do
     field(:total_count, :integer)
     field(:total_price, :integer)
     field(:total_discount, :integer)
+    field(:delivery_date, :string)
+    field(:delivery_start_time, :string)
+    field(:delivery_end_time, :string)
 
     timestamps()
   end

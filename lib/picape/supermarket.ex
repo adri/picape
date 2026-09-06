@@ -53,7 +53,7 @@ defmodule Picape.Supermarket do
 
   def cart() do
     ConCache.get_or_store(:supermarket, :cart, fn ->
-      %{status_code: 200, body: %{"data" => %{"basket" => basket}}} =
+      %{status_code: 200, body: %{"data" => data = %{"basket" => basket}}} =
         graphql!("FetchMyListBasket", @fetch_my_list_basket, @fetch_my_list_basket_variables)
 
       items =
@@ -61,7 +61,7 @@ defmodule Picape.Supermarket do
           (basket["itemsInList"] || []) ++
           (basket["externalItems"] || [])
 
-      %{"items" => items, "basket" => basket}
+      %{"items" => items, "basket" => basket, "order" => data["order"]}
     end)
   end
 
