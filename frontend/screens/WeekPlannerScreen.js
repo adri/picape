@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client';
 import * as React from 'react';
-import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, FlatList, StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
 
 import { Card } from '../components/Card/Card';
@@ -10,6 +10,7 @@ import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
+import { gridColumns } from '../constants/Layout';
 import { FloatingTop, Gutter, Spacing } from '../constants/Spacing';
 import { GET_RECIPES } from '../operations/getRecipes';
 import { PLAN_RECIPE, optimisticResponse } from '../operations/planRecipe';
@@ -36,6 +37,7 @@ export default function WeekPlannerScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
   const { recipes = [] } = data;
   const insets = useSafeArea();
+  const columns = gridColumns(useWindowDimensions().width);
   const [amount, setAmount] = React.useState(4);
   const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });
 
@@ -65,9 +67,12 @@ export default function WeekPlannerScreen({ navigation }) {
           boneColor={Colors.skeletonBone}
           highlightColor={Colors.skeletonHighlight}
           isLoading={loading && chosenRecipes.length === 0}>
+          {/* FlatList cannot change numColumns in place, so the key remounts it
+              when a rotation changes how many cards fit. */}
           <FlatList
+            key={columns}
             initialNumToRender={3}
-            numColumns={2}
+            numColumns={columns}
             windowSize={3}
             columnWrapperStyle={{ paddingHorizontal: Gutter - Spacing.xs }}
             data={chosenRecipes}
@@ -75,7 +80,7 @@ export default function WeekPlannerScreen({ navigation }) {
             renderItem={({ item: recipe, index }) => {
               return (
                 <ImageCard
-                  style={styles.imageCard}
+                  style={[styles.imageCard, { width: `${100 / columns}%` }]}
                   imageStyle={styles.imageCardStyle}
                   key={recipe.id}
                   title={recipe.title}
@@ -154,7 +159,6 @@ export default function WeekPlannerScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   imageCard: {
-    width: '50%',
     paddingHorizontal: Spacing.xs,
     paddingBottom: Spacing.xl,
   },

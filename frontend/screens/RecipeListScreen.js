@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client';
 import * as React from 'react';
-import { Text, View, FlatList } from 'react-native';
+import { Text, View, FlatList, useWindowDimensions } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
 
 import { ImageCard } from '../components/Card/ImageCard';
@@ -10,16 +10,10 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import { SectionLink } from '../components/Section/SectionLink';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
+import { gridColumns } from '../constants/Layout';
 import { FloatingTop, Gutter, Spacing } from '../constants/Spacing';
 import { GET_RECIPES } from '../operations/getRecipes';
 
-const SKELETON_LAYOUT = Array(6).fill({
-  height: 134,
-  flexBasis: '50%',
-  marginBottom: Spacing.xl,
-});
-
-const CELL_STYLE = { width: '50%', paddingHorizontal: Spacing.xs, paddingBottom: Spacing.xl };
 const CELL_IMAGE_STYLE = { width: '100%' };
 
 // One card, behind a memo boundary. The list renders itself three times while
@@ -28,10 +22,10 @@ const CELL_IMAGE_STYLE = { width: '100%' };
 // every card already on screen re-rendered on each of those passes, and that
 // work lands on the same thread that is drawing the slide.
 //
-// The boundary only holds while the props stay equal, so the styles are module
-// constants and the press handler is bound to the recipe rather than rebuilt
-// by the list on every pass.
-const RecipeCell = React.memo(function RecipeCell({ recipe, navigation }) {
+// The boundary only holds while the props stay equal, so the cell style is
+// memoised on the column count rather than rebuilt per card, and the press
+// handler is bound to the recipe rather than rebuilt by the list on every pass.
+const RecipeCell = React.memo(function RecipeCell({ recipe, navigation, cellStyle }) {
   const openRecipe = React.useCallback(
     (e) => {
       e.preventDefault();
@@ -42,7 +36,7 @@ const RecipeCell = React.memo(function RecipeCell({ recipe, navigation }) {
 
   return (
     <ImageCard
-      style={CELL_STYLE}
+      style={cellStyle}
       imageStyle={CELL_IMAGE_STYLE}
       title={recipe.title}
       imageUrl={recipe.imageUrl}
@@ -57,9 +51,29 @@ export function RecipeListScreen({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
   const { recipes = [] } = data;
   const insets = useSafeArea();
+  const columns = gridColumns(useWindowDimensions().width);
+  const cellStyle = React.useMemo(
+    () => ({
+      width: `${100 / columns}%`,
+      paddingHorizontal: Spacing.xs,
+      paddingBottom: Spacing.xl,
+    }),
+    [columns]
+  );
+  const skeletonLayout = React.useMemo(
+    () =>
+      Array(3 * columns).fill({
+        height: 134,
+        flexBasis: `${100 / columns}%`,
+        marginBottom: Spacing.xl,
+      }),
+    [columns]
+  );
   const renderItem = React.useCallback(
-    ({ item: recipe }) => <RecipeCell recipe={recipe} navigation={navigation} />,
-    [navigation]
+    ({ item: recipe }) => (
+      <RecipeCell recipe={recipe} navigation={navigation} cellStyle={cellStyle} />
+    ),
+    [navigation, cellStyle]
   );
 
   if (error) return `Error! ${error}`;
@@ -85,11 +99,15 @@ export function RecipeListScreen({ navigation }) {
           in a ScrollView made it lay out every recipe at once, because a list
           given unbounded height has no window to virtualise against, which
           quietly turned initialNumToRender and windowSize into no-ops. */}
-      {/* Each cell takes exactly half the row and pads itself, rather than
-          flexing to fill it. A flexed item is alone on the last row whenever
-          the count is odd, and it then stretches to full width. */}
+      {/* Each cell takes exactly its share of the row and pads itself, rather
+          than flexing to fill it. A flexed item is alone on the last row
+          whenever the count does not divide, and it then stretches to full
+          width. */}
+      {/* FlatList cannot change numColumns in place, so the key remounts it
+          when a rotation changes how many cards fit. */}
       <FlatList
-        numColumns={2}
+        key={columns}
+        numColumns={columns}
         data={recipes}
         keyExtractor={(recipe) => recipe.id}
         initialNumToRender={6}
@@ -100,7 +118,7 @@ export function RecipeListScreen({ navigation }) {
         ListEmptyComponent={
           loading && recipes.length === 0 ? (
             <SkeletonContent
-              layout={SKELETON_LAYOUT}
+              layout={skeletonLayout}
               containerStyle={{
                 flexDirection: 'row',
                 flexWrap: 'wrap',
