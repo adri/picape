@@ -33,6 +33,9 @@ Supermarket (the code and docs say "supermarket", never the chain's name):
 - `SUPERMARKET_REFRESH=0 bin/phx` — hands out the stored access token but never refreshes it. Refresh tokens rotate on every use, so a local refresh with a copy of production's row logs production out. Use this whenever `supermarket_login` holds production's current token; live calls then work until the access token expires. All three dev-only overrides live in [config/runtime.exs](config/runtime.exs).
 - Capturing traffic, comparing Picape with the supermarket's iOS app, and extracting a fresh refresh token: use the `proxyman-capture` skill in [.claude/skills/proxyman-capture/SKILL.md](.claude/skills/proxyman-capture/SKILL.md). Its `scripts/capture.sh` wraps `proxyman-cli` and prints summaries without headers or bodies.
 
+MCP server:
+- `POST http://localhost:4010/mcp` — mounted in the router, so it is up whenever Phoenix is, on that process's database and supermarket. Add it with `claude mcp add --transport http picape http://localhost:4010/mcp`; see [the README](README.md#mcp-server) for the tool list. To poke at it by hand: `curl -s localhost:4010/mcp -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`. There is no stdio transport any more, so no `bin/mcp`, no `mix mcp` and no `PICAPE_MCP` flag.
+
 Other:
 - `mix ecto.reset` — drop, create, migrate and seed. `PICAPE_DB=picape_e2e` targets the e2e database.
 - `mix test path/to/file.exs:LINE` — single test. Tests start the supermarket fake on :4021 in `test/test_helper.exs`.
@@ -80,6 +83,17 @@ Supervision tree lives in [lib/picape/application.ex](lib/picape/application.ex)
 - Subscriptions (`order_changed`, `recipe_planned`, `recipe_unplanned`) are triggered off mutations and broadcast on topic `"*"`. They rely on `Absinthe.Subscription` being in the supervision tree.
 - The REST-ish `/shortcut/*` endpoints in [router.ex](lib/picape_web/router.ex) exist for Apple Shortcuts integration and bypass GraphQL entirely.
 - `priv/graphql/schema.graphql` is the committed SDL. `test/graphql/schema_sdl_test.exs` keeps it in sync and `frontend/scripts/check-operations.js` validates the client's operations against it.
+
+### MCP server (`lib/picape/mcp.ex`, `lib/picape/mcp/tools.ex`)
+
+Three files, no MCP dependency. The protocol subset a tool-only server needs is `initialize`, `tools/list` and `tools/call`, so [mcp.ex](lib/picape/mcp.ex) frames JSON-RPC itself and [mcp/tools.ex](lib/picape/mcp/tools.ex) holds the eleven tools. [mcp_controller.ex](lib/picape_web/controllers/mcp_controller.ex) is the transport, mounted at `POST /mcp`. `anubis_mcp` (formerly `hermes_mcp`) is the maintained Elixir SDK if this ever needs resources, prompts or sampling; it is LGPL-3.0 and wants a module per tool.
+
+- The tools call the `Picape.*` contexts, never Absinthe, and use plain database IDs. They hardcode order id `"1"` the way `PicapeWeb.Graphql.Resolver.Order` does.
+- `Picape.MCP.Tools.call/2` rescues everything, so a bad argument ends one tool call instead of the request. Domain failures come back as `{:error, message}` and reach the client as an MCP tool error, not a JSON-RPC error.
+- **Stateless, and that is the whole design.** Streamable HTTP revision `2026-07-28` dropped protocol sessions and the `initialize` handshake outright; `2025-11-25`, which Claude Code still speaks, only ever made `Mcp-Session-Id` a server **MAY**. So the endpoint never mints a session id, holds no per-connection process and needs no cleanup, and a redeploy or a second machine costs nothing. Do not add a session store.
+- No SSE. A request gets one JSON object back, a notification gets `202`, and GET or DELETE on `/mcp` gets `405`, which is what the spec asks of a server that offers no stream. The `match(:*, "/mcp", ...)` route in [router.ex](lib/picape_web/router.ex) exists for that `405`; Phoenix would otherwise 404.
+- `initialize` answers with protocol version `2025-11-25`. Bump it in `Picape.MCP` when the client you care about negotiates something else.
+- The controller rejects any request that carries an `Origin` header, with `403`. The spec makes Origin validation mandatory against DNS rebinding, and MCP clients are not browsers and send no Origin, so "any Origin is invalid" needs no list of hosts. It is not authentication: the endpoint is as open to a non-browser caller as `/graphql` already is.
 
 ### Frontend
 

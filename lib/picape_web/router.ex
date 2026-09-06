@@ -18,6 +18,9 @@ defmodule PicapeWeb.Router do
     interface: :playground
   )
 
+  post("/mcp", PicapeWeb.MCPController, :handle)
+  match(:*, "/mcp", PicapeWeb.MCPController, :not_allowed)
+
   post("/shortcut/ingredient/search", PicapeWeb.ShortcutController, :search_ingredient)
   post("/shortcut/ingredient/add", PicapeWeb.ShortcutController, :add_ingredient)
   post("/shortcut/ingredient/add_by_id", PicapeWeb.ShortcutController, :add_ingredient_by_id)
