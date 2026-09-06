@@ -73,14 +73,8 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
     variables: { recipeId: params.id },
     returnPartialData: true,
   });
-  if (error) return `Error! ${error}`;
-  const { recipe = params.recipe } = data;
   const insets = useSafeAreaInsets();
   const columnInset = contentInset(useWindowDimensions().width);
-  const { videoId, description } = takeYoutubeLink(recipe.description);
-  // A step the link was the whole of leaves an empty paragraph behind, and a
-  // recipe with no description at all was already rendering one blank card.
-  const steps = description.split('\n\n').filter((step) => step.trim());
   const [stepChecked, setStepsChecked] = React.useState([]);
   const [markRecipeAsCooked] = useMutation(MARK_RECIPE_AS_COOKED, {
     onCompleted: () => {
@@ -90,6 +84,16 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
       alert(error.message);
     },
   });
+
+  // Below every hook: an early return above one changes how many hooks this
+  // screen calls between renders, which React ends the whole page over.
+  if (error) return `Error! ${error}`;
+
+  const { recipe = params.recipe } = data;
+  const { videoId, description } = takeYoutubeLink(recipe.description);
+  // A step the link was the whole of leaves an empty paragraph behind, and a
+  // recipe with no description at all was already rendering one blank card.
+  const steps = description.split('\n\n').filter((step) => step.trim());
 
   return (
     <View style={{ flex: 1 }}>
