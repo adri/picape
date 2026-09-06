@@ -65,6 +65,11 @@ export function ListItem({
           gap: Spacing.md,
           marginBottom: Spacing.sm,
           padding: Spacing.sm,
+          // A trailing control is a small circle floating in space, where the
+          // leading tile is a filled block that reads to its own edge. It gets
+          // more room so the two sides balance, and so every control lands in
+          // the same place whichever one the row happens to be showing.
+          paddingRight: children ? Spacing.lg : Spacing.sm,
           backgroundColor: colors.cardBackground,
           borderRadius: Radius.md,
         },
@@ -72,7 +77,7 @@ export function ListItem({
       ]}>
       {image}
       <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Text numberOfLines={2} style={[Type.body, { color: colors.cardText }, textStyle]}>
+        <Text numberOfLines={2} style={[Type.row, { color: colors.cardText }, textStyle]}>
           {title}
           {!!badges && <View style={{ marginLeft: Spacing.xs }}>{badges}</View>}
         </Text>

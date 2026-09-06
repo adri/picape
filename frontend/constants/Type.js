@@ -19,8 +19,11 @@ export default {
   },
   // The tappable word beside a section title.
   sectionLink: iOSUIKit.subheadObject,
-  // Running text and list rows.
+  // Running text.
   body: human.bodyObject,
+  // A list row's own name. A step down from body: a screen of these at full
+  // body size reads as a wall rather than a list.
+  row: human.subheadObject,
   // A row's supporting line.
   subtitle: human.footnoteObject,
   // The smallest supporting text.

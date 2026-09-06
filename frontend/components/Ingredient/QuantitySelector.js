@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 
 import Colors from '../../constants/Colors';
+import { Spacing } from '../../constants/Spacing';
 import { Badge } from '../Badge/Badge';
 import { PlusIcon, MinusIcon } from '../Icon';
 
@@ -23,7 +24,6 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity, onCh
   if (orderedQuantity === 0) {
     return (
       <PlusIcon
-        style={{ margin: 10 }}
         onPress={(e) => {
           e.preventDefault();
           onChange(id, 1);
@@ -37,10 +37,10 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity, onCh
       <View
         style={{
           flexDirection: 'row',
-          alignContent: 'flex-end',
+          alignItems: 'center',
+          gap: Spacing.md,
         }}>
         <MinusIcon
-          style={{ margin: 10 }}
           onPress={(e) => {
             e.preventDefault();
             onChange(id, orderedQuantity - 1);
@@ -52,7 +52,6 @@ export const QuantitySelector = React.memo(function ({ id, orderedQuantity, onCh
         </View>
 
         <PlusIcon
-          style={{ margin: 10 }}
           onPress={(e) => {
             e.preventDefault();
             onChange(id, orderedQuantity + 1);
