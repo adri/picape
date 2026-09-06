@@ -17,6 +17,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout, { CONTENT_MAX_WIDTH, contentColumn, contentInset } from '../constants/Layout';
+import { Duration, Easing } from '../constants/Motion';
 import { Gutter, Spacing } from '../constants/Spacing';
 import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
 
@@ -200,6 +201,15 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: Spacing.md,
+                // Ticking a step is the one thing you do with wet hands while
+                // reading the next line, and the only answer the screen gives
+                // is that this card goes dim. Snapped, that reads as the page
+                // having changed under you; faded, it reads as this step
+                // settling behind you. Opacity only, so nothing moves and the
+                // step you are about to read does not shift.
+                transitionProperty: ['opacity'],
+                transitionDuration: Duration.fast,
+                transitionTimingFunction: Easing.enter,
               }}>
               <Hyperlink
                 linkify={linkify}
@@ -216,6 +226,11 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
                 <Text
                   style={{
                     color: stepChecked[index] ? Colors.secondaryText : Colors.text,
+                    // On the card's clock, or the card dims over 200ms while
+                    // the words inside it jump grey in one frame.
+                    transitionProperty: ['color'],
+                    transitionDuration: Duration.fast,
+                    transitionTimingFunction: Easing.enter,
                   }}>
                   {stepWithTimerLinks(step)}
                 </Text>
