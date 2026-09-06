@@ -197,15 +197,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Gutter,
     paddingBottom: Spacing.sm,
   },
-  // Product shots are cut-outs on white, so the tile behind one stays light in
-  // both themes. The picture is contained rather than cropped: half a packet is
-  // not a picture of the packet.
+  // Product shots are cut-outs on white, so the tile behind one is white in both
+  // themes. In dark mode that is the point: on a dark tile the packet's own
+  // white edges read as a cut-out pasted onto the page. In light mode the tile
+  // matches the page and the photo simply sits on it. The picture is contained
+  // rather than cropped: half a packet is not a picture of the packet.
   photo: {
     height: PHOTO_HEIGHT,
     marginHorizontal: Gutter,
     marginBottom: Spacing.lg,
     padding: Spacing.md,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#ffffff',
     borderRadius: Radius.md,
   },
   photoImage: {
