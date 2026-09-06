@@ -5,6 +5,7 @@ export const orderFields = gql`
     id
     totalCount
     totalPrice
+    totalDiscount
     items {
       id
       name

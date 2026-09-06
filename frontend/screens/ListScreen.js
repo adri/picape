@@ -20,6 +20,12 @@ import { GET_ORDER_COUNT } from '../operations/getOrderCount';
 import { GET_RECIPES } from '../operations/getRecipes';
 import { START_SHOPPING } from '../operations/startShopping';
 
+const euros = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
+
+function formatEuros(cents) {
+  return euros.format(cents / 100);
+}
+
 function PlannedRecipes({ navigation }) {
   const {
     loading,
@@ -116,7 +122,18 @@ export default function ListScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
-        <SectionHeader title="Je mandje" large />
+        <SectionHeader title="Je mandje" large>
+          <View style={styles.orderTotal}>
+            <Text style={[Type.row, { color: Colors.text }]}>
+              {currentOrder.totalPrice > 0 ? formatEuros(currentOrder.totalPrice) : ''}
+            </Text>
+            {currentOrder.totalDiscount > 0 && (
+              <Text style={[Type.subtitle, { color: Colors.savingsText }]}>
+                {formatEuros(currentOrder.totalDiscount)} bespaard
+              </Text>
+            )}
+          </View>
+        </SectionHeader>
 
         <PlannedRecipes navigation={navigation} />
 
@@ -200,6 +217,14 @@ export default function ListScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  // Room for both lines whether or not the order has arrived and whether or not
+  // the bonus took anything off, so the heading keeps one height and the basket
+  // below it never jumps once the total loads.
+  orderTotal: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    minHeight: Type.row.lineHeight + Type.subtitle.lineHeight,
+  },
   fadeIn: {
     ...Platform.select({
       web: {

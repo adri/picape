@@ -40,6 +40,9 @@ const palette = {
   // avoid overpowering your primary colors. Use them when you need an element
   // to stand out, or to reinforce things like error states or positive trends
   // with the appropriate semantic color.
+  'orange-300': '#F6AD55',
+  'orange-700': '#C05621',
+
   'purple-050': '#EAE2F8',
   'purple-100': '#CFBCF2',
   'purple-200': '#A081D9',
@@ -90,6 +93,9 @@ const lightTheme = {
   noticeText: '#fff',
   checkboxSelected: tintColor,
   secondaryText: '#aeaeae',
+  // What the bonus took off the order. Green is the app's own accent and reads
+  // as "done", so money saved gets the one orange in the palette instead.
+  savingsText: palette['orange-700'],
   skeletonBone: '#E1E9EE',
   skeletonHighlight: '#F2F8FC',
   hairLineBackground: 'rgba(0, 0, 0, 0.1)',
@@ -144,6 +150,7 @@ const darkTheme = {
   noticeText: '#fff',
   checkboxSelected: tintColor,
   secondaryText: '#aeaeae',
+  savingsText: palette['orange-300'],
   skeletonBone: palette['grey-900'],
   skeletonHighlight: palette['grey-700'],
   hairLineBackground: 'rgba(255, 255, 255, 0.15)',

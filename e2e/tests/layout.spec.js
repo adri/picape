@@ -76,6 +76,32 @@ test('planning a recipe does not move the page', async ({ page }) => {
 
 });
 
+test('the cart heading is as tall without a saving as with one', async ({ page }) => {
+  await openApp(page);
+  await tab(page, /Mandje/).click();
+  await settle(page);
+
+  // "Je mandje" carries the order total, and under it the bonus when the order
+  // saved anything. Both arrive after the first paint and the bonus is there
+  // only some weeks, so a heading sized to whatever happens to be in it grows
+  // the moment a saving turns up and shoves the whole basket down.
+  //
+  // The fake basket always has a bonus on it, so the only way to see the
+  // heading without one is to take the line out of the page and measure again.
+  const savings = page.getByText(/bespaard/).first();
+  await expect(savings).toBeVisible();
+
+  const heading = page.getByRole('heading', { name: 'Je mandje' }).first();
+  const before = await boxOf(heading.locator('xpath=..'));
+
+  await savings.evaluate((el) => {
+    el.style.display = 'none';
+  });
+
+  const after = await boxOf(heading.locator('xpath=..'));
+  expect(after.height, 'the heading shrinks when nothing is saved').toBe(before.height);
+});
+
 test('a recipe strip shows its labels in full', async ({ page }) => {
   await openApp(page);
 
