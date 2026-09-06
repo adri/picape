@@ -41,6 +41,7 @@ const palette = {
   // to stand out, or to reinforce things like error states or positive trends
   // with the appropriate semantic color.
   'orange-300': '#F6AD55',
+  'orange-500': '#DD6B20',
   'orange-700': '#C05621',
 
   'purple-050': '#EAE2F8',
@@ -96,6 +97,12 @@ const lightTheme = {
   // What the bonus took off the order. Green is the app's own accent and reads
   // as "done", so money saved gets the one orange in the palette instead.
   savingsText: palette['orange-700'],
+  // The bonus the supermarket puts on a product, as a filled pill. It is a
+  // surface with white on it rather than text on the page, so it takes the same
+  // orange in both themes the way the other badge fills do: the darker
+  // orange-700 that savingsText needs to stay legible as text reads as brown
+  // once it is a whole pill.
+  promotionBackground: palette['orange-500'],
   skeletonBone: '#E1E9EE',
   skeletonHighlight: '#F2F8FC',
   hairLineBackground: 'rgba(0, 0, 0, 0.1)',
@@ -151,6 +158,7 @@ const darkTheme = {
   checkboxSelected: tintColor,
   secondaryText: '#aeaeae',
   savingsText: palette['orange-300'],
+  promotionBackground: palette['orange-500'],
   skeletonBone: palette['grey-900'],
   skeletonHighlight: palette['grey-700'],
   hairLineBackground: 'rgba(255, 255, 255, 0.15)',

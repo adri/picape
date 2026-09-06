@@ -125,7 +125,10 @@ export function IngredientDetailScreen({
               </Text>
             )}
             {!!ingredient.bonusMechanism && (
-              <Badge amount={ingredient.bonusMechanism} backgroundColor={colors.savingsText} />
+              <Badge
+                amount={ingredient.bonusMechanism}
+                backgroundColor={colors.promotionBackground}
+              />
             )}
           </View>
 
