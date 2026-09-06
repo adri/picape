@@ -40,7 +40,7 @@ defmodule Picape.MCPTest do
                "mark_recipe_as_cooked",
                "recipe_history",
                "ingredient_history",
-               "seasonal_produce"
+               "seasonal_produce",
                "list_bonus_offers",
                "activate_bonus_offer"
              ]

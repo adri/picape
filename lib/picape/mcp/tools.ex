@@ -229,6 +229,9 @@ defmodule Picape.MCP.Tools do
             description: "Month number, 1 for January. Defaults to the current month."
           }
         }
+      }
+    },
+    %{
       name: "list_bonus_offers",
       description:
         "List the supermarket's personal bonus offers for the week the current order is delivered in, " <>
@@ -405,6 +408,8 @@ defmodule Picape.MCP.Tools do
 
   defp run("seasonal_produce", args) do
     {:ok, Seasonal.overview(args["month"] || Date.utc_today().month)}
+  end
+
   defp run("list_bonus_offers", _args), do: {:ok, render_bonus(Bonus.offers())}
 
   defp run("activate_bonus_offer", args) do
