@@ -205,9 +205,11 @@ test('the home screen opens every recipe', async ({ page }, testInfo) => {
   expect(problems).toEqual([]);
 });
 
-test('the home screen opens what was bought before', async ({ page }, testInfo) => {
+test('the basics screen opens what was bought before', async ({ page }, testInfo) => {
   const problems = watch(page);
   await openApp(page, testInfo);
+  await tab(page, /Basics/).click();
+  await settle(page);
   // By role: the screen it opens carries the same words as its own heading, and
   // detachPreviousScreen keeps this link in the DOM behind that screen.
   await page.getByRole('link', { name: 'Eerder gekocht' }).click();

@@ -206,6 +206,8 @@ test('the cart keeps its recipes off its ingredients', async ({ page }) => {
 
 test('ordering from the bought-before list leaves the row where it was', async ({ page }) => {
   await openApp(page);
+  await tab(page, /Basics/).click();
+  await settle(page);
   await page.getByRole('link', { name: 'Eerder gekocht' }).click();
 
   // The list is everything bought on an earlier order, and it deliberately

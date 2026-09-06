@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
+import { SectionLink } from '../components/Section/SectionLink';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout, { CONTENT_MAX_WIDTH, contentColumn } from '../constants/Layout';
@@ -86,7 +87,18 @@ function BasicsList({ navigation }) {
   const { basics: { edges = [] } = {} } = data;
   return (
     <View>
-      <SectionHeader title="Altijd in huis" large />
+      {/* What you always keep in and what you have bought before are the same
+          question asked twice, so the way to the second sits beside the first
+          rather than on a screen about recipes. */}
+      <SectionHeader title="Altijd in huis" large>
+        <SectionLink
+          title="Eerder gekocht"
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.navigate('PreviouslyOrdered');
+          }}
+        />
+      </SectionHeader>
       <SkeletonContent
         layout={Array(5).fill({
           width: Math.min(Dimensions.get('window').width, CONTENT_MAX_WIDTH) - 40,
