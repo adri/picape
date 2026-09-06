@@ -99,7 +99,9 @@ defmodule Picape.MCPTest do
     test "returns the cart and links items to known ingredients" do
       insert!(:ingredient, name: "Roomboter", supermarket_product_id: 10_567_923)
 
-      assert %{"total_count" => 4, "total_price" => 12, "items" => items} = call!("get_shopping_list")
+      # In cents. The supermarket sends euros as floats and the cart used to
+      # truncate them, so this was 12 for a basket of 12.86.
+      assert %{"total_count" => 4, "total_price" => 1286, "items" => items} = call!("get_shopping_list")
 
       assert %{"name" => "Roomboter ongezouten", "quantity" => 1, "ingredient" => %{"name" => "Roomboter"}} =
                Enum.find(items, &(&1["name"] == "Roomboter ongezouten"))

@@ -10,7 +10,8 @@ defmodule Picape.Supermarket.FakeIntegrationTest do
 
     assert length(line.items) == 3
     assert line.total_count == 4
-    assert line.total_price == 12
+    assert line.total_price == 1286
+    assert line.total_discount == 150
     assert Enum.map(line.items, & &1.name) == ["Roomboter ongezouten", "Kipfilet", "Zilvervliesrijst"]
     assert Enum.all?(line.items, &String.starts_with?(&1.image_url, "https://static.supermarket.test/"))
   end

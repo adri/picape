@@ -109,6 +109,8 @@ type Order implements Node {
 
   totalPrice: Int
 
+  totalDiscount: Int
+
   items: [OrderItem]
 }
 

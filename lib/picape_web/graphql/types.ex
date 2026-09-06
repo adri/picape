@@ -8,6 +8,7 @@ defmodule PicapeWeb.Graphql.Types do
   node object(:order) do
     field(:total_count, :integer)
     field(:total_price, :integer)
+    field(:total_discount, :integer)
     field(:items, list_of(:order_item))
   end
 

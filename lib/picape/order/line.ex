@@ -7,6 +7,7 @@ defmodule Picape.Order.Line do
     has_many(:items, Picape.Order.Item)
     field(:total_count, :integer)
     field(:total_price, :integer)
+    field(:total_discount, :integer)
 
     timestamps()
   end

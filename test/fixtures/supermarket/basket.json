@@ -237,7 +237,7 @@
           "__typename": "BasketPrice",
           "discount": {
             "__typename": "Money",
-            "amount": 0
+            "amount": 1.5
           },
           "totalPrice": {
             "__typename": "Money",
@@ -249,7 +249,7 @@
           },
           "priceBeforeDiscount": {
             "__typename": "Money",
-            "amount": 12.86
+            "amount": 14.36
           }
         }
       }

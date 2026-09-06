@@ -6,7 +6,8 @@ defmodule Picape.Order.LineFromDb do
     id: 1,
     items: [],
     total_count: 0,
-    total_price: 0
+    total_price: 0,
+    total_discount: 0
   }
 
   def convert(nil), do: @empty
@@ -20,7 +21,8 @@ defmodule Picape.Order.LineFromDb do
           convert_item(item)
         end),
       total_count: map_size(cart),
-      total_price: 0
+      total_price: 0,
+      total_discount: 0
     }
   end
 

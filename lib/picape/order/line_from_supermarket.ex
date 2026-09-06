@@ -7,7 +7,8 @@ defmodule Picape.Order.LineFromSupermarket do
       id: 1,
       items: [],
       total_count: 0,
-      total_price: 0
+      total_price: 0,
+      total_discount: 0
     }
   end
 
@@ -15,12 +16,14 @@ defmodule Picape.Order.LineFromSupermarket do
     items = Enum.map(cart["items"], &convert_item/1)
     summary = basket["summary"] || %{}
     price = get_in(summary, ["price", "priceAfterDiscount", "amount"]) || 0
+    discount = get_in(summary, ["price", "discount", "amount"]) || 0
 
     %Line{
       id: 1,
       items: items,
       total_count: summary["quantity"] || Enum.count(items),
-      total_price: trunc(price)
+      total_price: cents(price),
+      total_discount: cents(discount)
     }
   end
 
@@ -31,7 +34,8 @@ defmodule Picape.Order.LineFromSupermarket do
       id: 1,
       items: items,
       total_count: Enum.count(items),
-      total_price: 0
+      total_price: 0,
+      total_discount: 0
     }
   end
 
@@ -45,4 +49,8 @@ defmodule Picape.Order.LineFromSupermarket do
       quantity: item["quantity"]
     }
   end
+
+  # The supermarket reports money in euros with a fractional part. Truncating
+  # that to whole euros dropped the cents the cart heading has to show.
+  defp cents(amount), do: round(amount * 100)
 end
