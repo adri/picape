@@ -7,6 +7,7 @@ import { StyleSheet, useColorScheme } from 'react-native';
 import { ListCountBadge } from '../components/Badge/ListCountBadge';
 import TabBarIcon from '../components/TabBarIcon';
 import Colors, { useTheme } from '../constants/Colors';
+import { contentColumn } from '../constants/Layout';
 import { Hairline } from '../constants/Spacing';
 import { AddIngredientScreen } from '../screens/AddIngredientScreen';
 import BasicsScreen from '../screens/BasicsScreen';
@@ -96,6 +97,10 @@ function BottomTabNavigator() {
           // The separator is drawn on the BlurView below instead, so it lands
           // above the blur rather than inside it.
           borderTopWidth: 0,
+          // The blur still spans the display, but the four icons cluster in the
+          // middle of it. Spread over a 13" tablet they end up a hand's travel
+          // apart, and the one you want is never where you last left it.
+          ...contentColumn,
         },
       }}>
       <BottomTab.Screen
