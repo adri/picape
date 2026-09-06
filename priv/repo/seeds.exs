@@ -86,3 +86,11 @@ insert! :recipe, title: "Pizza", image_url: "https://user-images.githubuserconte
 finished_order = "1700000000000000"
 insert! :planned_recipe, line_id: finished_order, recipe_id: nasi.id
 insert! :planned_recipe, line_id: finished_order, recipe_id: shoarma.id, cooked: true
+
+# supermarket_product_raw is what carries an ingredient's picture, its price,
+# its nutriscore and the supermarket's description of it, and only the nightly
+# job fills it. Until it runs, a seeded database has none of that and every
+# screen built on it looks broken. This is that job, run once, against whatever
+# supermarket the seed run points at: the fake for `bin/phx --fake`. It rescues
+# its own failures, so a run without a supermarket still finishes.
+Picape.Ingredients.match_supermarket_products()
