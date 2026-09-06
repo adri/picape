@@ -1,4 +1,5 @@
 import { useQuery, gql } from '@apollo/client';
+import { Image } from 'expo-image';
 import * as React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -19,6 +20,7 @@ const GET_INGREDIENT_DETAIL = gql`
       ... on Ingredient {
         id
         name
+        imageUrl
         supermarketName
         unitQuantity
         nutriscore
@@ -38,6 +40,14 @@ const GET_INGREDIENT_DETAIL = gql`
 `;
 
 const euros = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
+
+// The picture arrives over the network, so it fades in over its tile the way a
+// recipe card's does rather than snapping into place.
+const FADE_IN = { duration: 260, effect: 'cross-dissolve', timing: 'ease-out' };
+
+// Enough of the screen to read the packet by, and little enough that the price
+// is still on the first screenful.
+const PHOTO_HEIGHT = 200;
 
 function formatEuros(cents) {
   return euros.format(cents / 100);
@@ -89,6 +99,17 @@ export function IngredientDetailScreen({
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xxl }}>
+        {!!ingredient.imageUrl && (
+          <View style={styles.photo}>
+            <Image
+              source={{ uri: ingredient.imageUrl }}
+              contentFit="contain"
+              transition={FADE_IN}
+              style={styles.photoImage}
+            />
+          </View>
+        )}
+
         <SectionHeader title={ingredient.name} large />
 
         <View style={styles.block}>
@@ -172,6 +193,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Gutter,
     paddingBottom: Spacing.sm,
+  },
+  // Product shots are cut-outs on white, so the tile behind one stays light in
+  // both themes. The picture is contained rather than cropped: half a packet is
+  // not a picture of the packet.
+  photo: {
+    height: PHOTO_HEIGHT,
+    marginHorizontal: Gutter,
+    marginBottom: Spacing.lg,
+    padding: Spacing.md,
+    backgroundColor: '#f2f2f2',
+    borderRadius: Radius.md,
+  },
+  photoImage: {
+    width: '100%',
+    height: '100%',
   },
   block: {
     marginHorizontal: Gutter,
