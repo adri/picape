@@ -132,6 +132,9 @@ test.beforeEach(async ({ page, request }, testInfo) => {
   // otherwise leave it planned for everything after it.
   await request.post('http://localhost:4010/dev/reset-plan');
   await request.post('http://localhost:4010/dev/invalidate-cart');
+  // Activating an offer is a write the fake remembers and Phoenix caches, so
+  // both sides have to go back to the fixture between tests.
+  await request.post('http://localhost:4010/dev/invalidate-bonus');
   await page.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
   if (testInfo.project.name === 'iphone-standalone') {
     await emulateStandalone(page, STANDALONE_INSETS);
@@ -243,6 +246,39 @@ test('the basics screen opens what was bought before', async ({ page }, testInfo
   ).toHaveCount(1);
   await settle(page);
   await checkScreen(page, 'previously-ordered');
+  expect(problems).toEqual([]);
+});
+
+test('the basics screen opens the personal bonus offers', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  await tab(page, /Basics/).click();
+  await settle(page);
+  await page.getByRole('link', { name: 'Bonus' }).click();
+  // The heading, not the link: the link says only "Bonus" and
+  // detachPreviousScreen keeps it mounted behind this screen.
+  await expect(page.getByText('Persoonlijke bonus')).toHaveCount(1);
+  // The point of the screen. Two seeded ingredients sit behind one offer, and
+  // no other screen names them together.
+  await expect(page.getByText('Flour, Yeast')).toHaveCount(1);
+  await settle(page);
+  await checkScreen(page, 'bonus');
+  expect(problems).toEqual([]);
+});
+
+test('activating an offer spends one of the ten', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  await tab(page, /Basics/).click();
+  await settle(page);
+  await page.getByRole('link', { name: 'Bonus' }).click();
+  await expect(page.getByText('0/10', { exact: true })).toHaveCount(1);
+
+  // Named after its own offer, so the press cannot land on another row.
+  await page.getByRole('button', { name: 'Activeer AH Nectarines schaal 1 kilo' }).click();
+
+  await expect(page.getByText('1/10', { exact: true })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Geactiveerd' })).toHaveCount(1);
   expect(problems).toEqual([]);
 });
 

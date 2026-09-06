@@ -1,10 +1,22 @@
 defmodule PicapeWeb.DevController do
   use PicapeWeb, :controller
 
-  alias Picape.{Order, Supermarket}
+  alias Picape.{Bonus, Order, Supermarket}
 
   def invalidate_cart(conn, _params) do
     Supermarket.invalidate_cart()
+    send_resp(conn, 204, "")
+  end
+
+  @doc """
+  Drops the cached bonus offers.
+
+  Activating one is a write the fake remembers, and Picape caches the offers for
+  five hours, so a test that activates leaves both sides out of step with the
+  fixture the next test expects.
+  """
+  def invalidate_bonus(conn, _params) do
+    Bonus.invalidate()
     send_resp(conn, 204, "")
   end
 
