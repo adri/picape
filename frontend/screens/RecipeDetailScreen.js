@@ -15,7 +15,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
-import { Spacing } from '../constants/Spacing';
+import { Gutter, Spacing } from '../constants/Spacing';
 import { MARK_RECIPE_AS_COOKED } from '../operations/markRecipeAsCooked';
 
 const linkify = require('linkify-it')();
@@ -168,18 +168,25 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
           return (
             <View
               key={`step-${index}`}
+              // The tick used to carry a margin of its own on top of the card's
+              // padding, so it sat lower than the line it belongs to and left
+              // the card with twice as much room under the step as above it.
+              // The gap holds it off the text instead, and centring lines the
+              // ring up with the step whether the step runs to one line or four.
               style={{
-                marginHorizontal: 20,
-                marginBottom: 20,
-                padding: 10,
+                marginHorizontal: Gutter,
+                marginBottom: Spacing.lg,
+                padding: Spacing.md,
                 borderRadius: Layout.borderRadius,
                 opacity: stepChecked[index] ? 0.7 : 1,
                 backgroundColor: Colors.cardBackground,
                 flexDirection: 'row',
+                alignItems: 'center',
+                gap: Spacing.md,
               }}>
               <Hyperlink
                 linkify={linkify}
-                style={{ flex: 1, alignSelf: 'stretch' }}
+                style={{ flex: 1 }}
                 linkDefault={!stepChecked[index]}
                 linkStyle={{ color: Colors.link }}
                 linkText={(url) => {
@@ -203,7 +210,6 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
 
               {stepChecked[index] ? (
                 <CheckIcon
-                  style={{ margin: 10 }}
                   onPress={(e) => {
                     e.preventDefault();
                     const newChecked = [...stepChecked];
@@ -214,7 +220,6 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
               ) : (
                 <Badge
                   outline
-                  style={{ margin: 10 }}
                   onPress={(e) => {
                     e.preventDefault();
                     const newChecked = [...stepChecked];
