@@ -50,19 +50,28 @@ describe('prefersReducedMotion', () => {
 // The sweep is the app's only looping motion: it starts on its own, repeats for
 // as long as the query takes, and travels across content the reader is trying
 // to read. A reader who asked for less motion gets the bone standing still.
+//
+// Counted by the class react-native-web emits for animationKeyframes, not by
+// the word "animation" appearing somewhere: an animation-duration with no
+// keyframes renders as a style that reads like an animation and does nothing,
+// which is exactly the bug this sweep sat on. That class exists only where the
+// compiler wrote a real @keyframes rule.
 describe('SkeletonContent', () => {
+  const bone = <SkeletonContent isLoading layout={[{ width: 100, height: 20 }]} />;
+  const sweeps = (container) => container.querySelectorAll('[class*="r-animationKeyframes-"]');
+
   afterEach(() => prefersReducedMotion.mockReturnValue(false));
 
   it('sweeps a highlight across the bone by default', () => {
-    const container = render(<SkeletonContent isLoading layout={[{ width: 100, height: 20 }]} />);
-    expect(container.innerHTML).toContain('animation');
+    const container = render(bone);
+    expect(sweeps(container)).toHaveLength(1);
     container.remove();
   });
 
   it('leaves the bone still when the reader asked for less motion', () => {
     prefersReducedMotion.mockReturnValue(true);
-    const container = render(<SkeletonContent isLoading layout={[{ width: 100, height: 20 }]} />);
-    expect(container.innerHTML).not.toContain('animation');
+    const container = render(bone);
+    expect(sweeps(container)).toHaveLength(0);
     // And it is still a placeholder, not an empty box.
     expect(container.querySelector('div')).not.toBeNull();
     container.remove();

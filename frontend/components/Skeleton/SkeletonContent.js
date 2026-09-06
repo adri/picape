@@ -23,10 +23,6 @@ const BORDER_RADIUS = 4;
 const DURATION = 1200;
 
 function Bone({ layout, boneColor, highlightColor }) {
-  // Percentage widths cannot drive a translation, so sweep across the bone's
-  // own box in that case.
-  const distance = typeof layout.width === 'number' ? layout.width : 200;
-
   return (
     <View
       style={[
@@ -36,34 +32,13 @@ function Bone({ layout, boneColor, highlightColor }) {
         // accidentally reveal the gradient outside the bone.
         { overflow: 'hidden', backgroundColor: layout.backgroundColor || boneColor },
       ]}>
-      {/* The sweep is the one thing in the app that travels and never stops:
+      {/* The sweep is the only thing in the app that travels and never stops:
           it starts on its own, repeats for as long as the query takes, and
-          runs beside content the reader is trying to read. That is what the
-          reduced-motion preference is about, so a reader who set it gets the
-          bone standing still. It still says the same thing, because the bone
-          itself is the placeholder. */}
+          runs beside content the reader is trying to read. So a reader who
+          asked for less motion gets the bone standing still. It still says
+          what it said, because the bone is the placeholder. */}
       {prefersReducedMotion() ? null : (
-        <View
-          style={[
-            styles.gradient,
-            {
-              // A CSS animation rather than Animated. react-native-web has no
-              // native driver, so Animated would step this transform from
-              // JavaScript on every frame, for every bone on the screen at once,
-              // on the same thread that is rendering the screen underneath. A
-              // keyframed transform runs on the compositor and costs the main
-              // thread nothing.
-              animationKeyframes: [
-                {
-                  '0%': { transform: [{ translateX: -distance }] },
-                  '100%': { transform: [{ translateX: distance }] },
-                },
-              ],
-              animationDuration: `${DURATION}ms`,
-              animationIterationCount: 'infinite',
-              animationTimingFunction: 'cubic-bezier(0.5, 0, 0.25, 1)',
-            },
-          ]}>
+        <View style={styles.sweep}>
           <LinearGradient
             colors={[boneColor, highlightColor, boneColor]}
             start={{ x: 0, y: 0 }}
@@ -101,10 +76,34 @@ function SkeletonContent({
 }
 
 const styles = StyleSheet.create({
-  gradient: {
+  // A CSS animation rather than Animated. react-native-web has no native
+  // driver, so Animated would step this transform from JavaScript on every
+  // frame, for every bone on the screen at once, on the same thread that is
+  // rendering the screen underneath. A keyframed transform runs on the
+  // compositor and costs the main thread nothing.
+  //
+  // It has to live in StyleSheet.create. react-native-web builds an @keyframes
+  // rule from animationKeyframes only here; its inline path drops the property
+  // outright, and for a long time this bone reached the browser with a duration
+  // and animation-name: none, and never swept at all.
+  //
+  // The travel is a percentage of the bone rather than its measured width, so
+  // one rule serves every bone. That is what makes it hoistable, and it also
+  // sweeps the bones whose width is a percentage, which used to fall back to a
+  // fixed 200px and undershoot or overshoot.
+  sweep: {
     position: 'absolute',
     height: '100%',
     width: '100%',
+    animationKeyframes: [
+      {
+        '0%': { transform: 'translateX(-100%)' },
+        '100%': { transform: 'translateX(100%)' },
+      },
+    ],
+    animationDuration: `${DURATION}ms`,
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'cubic-bezier(0.5, 0, 0.25, 1)',
   },
   gradientChild: {
     flex: 1,
