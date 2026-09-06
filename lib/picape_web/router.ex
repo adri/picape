@@ -25,5 +25,6 @@ defmodule PicapeWeb.Router do
 
   if Mix.env() == :dev do
     post("/dev/invalidate-cart", PicapeWeb.DevController, :invalidate_cart)
+    post("/dev/reset-plan", PicapeWeb.DevController, :reset_plan)
   end
 end
