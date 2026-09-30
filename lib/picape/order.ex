@@ -6,10 +6,11 @@ defmodule Picape.Order do
     LineFromDb,
     PlannedRecipe,
     ManualIngredient,
+    PlacedOrder,
     Sync
   }
 
-  alias Picape.{Repo, Supermarket, Recipe, Shopping}
+  alias Picape.{Repo, Supermarket, Recipe, Shopping, Ingredients}
 
   defmodule(Product, do: defstruct([:id, :quantity]))
 
@@ -17,7 +18,8 @@ defmodule Picape.Order do
   Returns the currently active cart.
   """
   def current() do
-    {:ok, LineFromSupermarket.convert(Supermarket.cart())}
+    line = LineFromSupermarket.convert(Supermarket.cart())
+    {:ok, %{line | is_placed: order_placed?()}}
   end
 
   def last() do
@@ -130,20 +132,33 @@ defmodule Picape.Order do
 
   @doc """
   Synchronizes planned ingredients with the cart on Supermarket.
+
+  While the supermarket is processing a paid order the basket answers for the
+  next order, so Picape freezes instead of pushing its plan into it: it writes
+  nothing and archives the plan that produced the paid order exactly once.
+  After delivery the freeze lifts and whatever accumulated on `order_id` is
+  the new order.
   """
   def sync_supermarket(order_id) do
     ensure_order_is_current(order_id)
 
-    with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
-         {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
-         {:ok, manual} <- manual_ingredients(order_id),
-         {:ok, existing} <- ordered_item_quantities(order_id),
-         {:ok, changes} <- Sync.changes(planned, manual, existing) do
-      Supermarket.apply_changes(changes)
-
+    if order_placed?() do
+      archive_placed_order(order_id)
       current()
     else
-      _ -> current()
+      with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
+           {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
+           {:ok, manual} <- manual_ingredients(order_id),
+           {:ok, line} <- current(),
+           {:ok, existing} <- ordered_item_quantities(line),
+           {:ok, changes} <-
+             Sync.changes(substitute(planned, line), substitute(manual, line), existing) do
+        Supermarket.apply_changes(changes)
+
+        current()
+      else
+        _ -> current()
+      end
     end
   end
 
@@ -176,8 +191,9 @@ defmodule Picape.Order do
     end
   end
 
-  def ingredients_ordered_quantity(order_id, ingredient_ids) do
-    with {:ok, items} <- ordered_item_quantities(order_id),
+  def ingredients_ordered_quantity(_order_id, ingredient_ids) do
+    with {:ok, line} <- current(),
+         {:ok, items} <- ordered_item_quantities(line),
          {:ok, items_map} <- Recipe.ingredients_by_item_ids_reverse(Map.keys(items)) do
       {:ok, Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
     end
@@ -309,6 +325,32 @@ defmodule Picape.Order do
     {:ok, Repo.all(query)}
   end
 
+  @doc """
+  The products in the cart that stand in for a wanted-but-unavailable
+  ingredient: `%{replacement product id => original ingredient}`. A product
+  nobody mapped to an ingredient can never be a stand-in.
+  """
+  def substitutions(order_id) do
+    {:ok, line} = current()
+    {:ok, recipe_quantities} = recipe_ingredient_quantities(order_id)
+    {:ok, planned} = Recipe.item_quantities(recipe_quantities)
+    {:ok, manual} = manual_ingredients(order_id)
+    wanted = Map.merge(planned, manual, fn _id, _q1, q2 -> q2 end)
+
+    {:ok, wanted_ingredients} = Recipe.ingredients_by_item_ids(Map.keys(wanted))
+    unavailable = unavailable_product_ids(line, wanted_ingredients)
+    in_cart = MapSet.new(Enum.map(line.items, & &1.id))
+
+    for {product_id, ingredient} <- wanted_ingredients,
+        MapSet.member?(unavailable, product_id),
+        %{replacement_ingredient_id: rid} when not is_nil(rid) <- [ingredient],
+        {:ok, %{^rid => replacement}} <- [Ingredients.ingredients_by_ids([rid])],
+        MapSet.member?(in_cart, replacement.supermarket_product_id),
+        into: %{} do
+      {replacement.supermarket_product_id, ingredient}
+    end
+  end
+
   def manual_ingredients(order_id) do
     query =
       from(
@@ -349,7 +391,7 @@ defmodule Picape.Order do
   # --- private
 
   defp ensure_order_is_current(order_id) do
-    with latest_order_id <- last_order_id(),
+    with latest_order_id when not is_nil(latest_order_id) <- last_order_id(),
          false <- planned_items_in_order?(latest_order_id) do
       finish_order(order_id, latest_order_id)
     end
@@ -390,14 +432,74 @@ defmodule Picape.Order do
     {:ok, Enum.into(Repo.all(query), %{})}
   end
 
-  defp ordered_item_quantities(_order_id) do
-    {:ok, order} = current()
+  defp ordered_item_quantities(line) do
+    {:ok,
+     Enum.reduce(line.items, %{}, fn item, acc ->
+       Map.update(acc, item.id, item.quantity, &(&1 + 2))
+     end)}
+  end
 
-    existing =
-      Enum.reduce(order.items, %{}, fn item, acc ->
-        Map.update(acc, item.id, item.quantity, &(&1 + 2))
-      end)
+  defp order_placed?() do
+    Supermarket.placed_order_id() != nil
+  end
 
-    {:ok, existing}
+  # The supermarket's order number names the archived line, the same way the
+  # order numbers from before Picape minted its own ids do. Archiving is
+  # once-only and the marker lives in `order_placed`: a `order_id` seen before
+  # means the freeze is not new, and rows planned on `order_id` since then
+  # belong to the next order.
+  defp archive_placed_order(order_id) do
+    placed_id = to_string(Supermarket.placed_order_id())
+
+    unless Repo.exists?(from(p in PlacedOrder, where: p.order_id == ^placed_id)) do
+      Repo.insert!(%PlacedOrder{order_id: placed_id})
+
+      if planned_items_in_order?(order_id) do
+        finish_order(order_id, placed_id)
+      end
+    end
+  end
+
+  # A product the supermarket cannot deliver is swapped for the product behind
+  # the ingredient's replacement, when it names one. The cart then holds the
+  # replacement and the row flags it as `substituted_for`.
+  defp substitute(quantities, line) do
+    {:ok, by_product} = Recipe.ingredients_by_item_ids(Map.keys(quantities))
+    unavailable = unavailable_product_ids(line, by_product)
+
+    Enum.reduce(quantities, %{}, fn {product_id, quantity}, acc ->
+      product_id = substitute_product_id(product_id, unavailable, by_product[product_id])
+      Map.update(acc, product_id, quantity, &(&1 + quantity))
+    end)
+  end
+
+  defp substitute_product_id(product_id, unavailable, %{
+         replacement_ingredient_id: replacement_id
+       })
+       when not is_nil(replacement_id) do
+    if MapSet.member?(unavailable, product_id) do
+      case Ingredients.ingredients_by_ids([replacement_id]) do
+        {:ok, %{^replacement_id => %{supermarket_product_id: id}}} when not is_nil(id) -> id
+        _ -> product_id
+      end
+    else
+      product_id
+    end
+  end
+
+  defp substitute_product_id(product_id, _unavailable, _ingredient), do: product_id
+
+  # Live basket availability covers what is in the cart; the productCard the
+  # nightly matcher stores covers what is only planned. A product nobody
+  # mapped to an ingredient can only be judged by the live read.
+  defp unavailable_product_ids(line, by_product) do
+    from_cart = for item <- line.items, not item.is_orderable, do: item.id
+
+    from_card =
+      for {product_id, ingredient} <- by_product,
+          match?({:ok, _}, Recipe.Ingredient.fetch(ingredient, :warning)),
+          do: product_id
+
+    MapSet.new(from_cart ++ from_card)
   end
 end

@@ -130,6 +130,9 @@ type Order implements Node {
   deliveryEndTime: String
 
   items: [OrderItem]
+
+  "The supermarket is processing a paid order, so Picape froze its side of the basket."
+  isPlaced: Boolean
 }
 
 "Item that is part of an order"
@@ -142,6 +145,15 @@ type OrderItem implements Node {
   imageUrl: String
 
   quantity: String
+
+  "The supermarket can deliver this product right now."
+  isOrderable: Boolean
+
+  "The supermarket's own wording when it cannot, for example \"Tijdelijk uitverkocht\"."
+  availabilityLabel: String
+
+  "The name of the ingredient this product stands in for, when it is a replacement."
+  substitutedFor: String
 
   ingredient: Ingredient
 }

@@ -12,6 +12,7 @@ defmodule Picape.SupermarketFake do
   @dir Path.expand("../fixtures/supermarket", __DIR__)
   @state __MODULE__.State
   @activations __MODULE__.Activations
+  @orders __MODULE__.Orders
 
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
   plug(:match)
@@ -20,6 +21,7 @@ defmodule Picape.SupermarketFake do
   def start(port) do
     {:ok, _} = Agent.start_link(fn -> fixture("basket.json") end, name: @state)
     {:ok, _} = Agent.start_link(fn -> MapSet.new() end, name: @activations)
+    {:ok, _} = Agent.start_link(fn -> fixture("orders.json") end, name: @orders)
     Plug.Cowboy.http(__MODULE__, [], port: port)
   end
 
@@ -28,12 +30,14 @@ defmodule Picape.SupermarketFake do
   def reset do
     reset_basket()
     Picape.Supermarket.invalidate_cart()
+    Picape.Supermarket.invalidate_orders()
     Picape.Bonus.invalidate()
   end
 
   def reset_basket do
     Agent.update(@state, fn _ -> fixture("basket.json") end)
     Agent.update(@activations, fn _ -> MapSet.new() end)
+    Agent.update(@orders, fn _ -> fixture("orders.json") end)
   end
 
   post "/graphql" do
@@ -65,6 +69,23 @@ defmodule Picape.SupermarketFake do
   post "/__reset" do
     reset_basket()
     send_resp(conn, 204, "")
+  end
+
+  # Pretends the order in the basket was paid: the summaries endpoint starts
+  # reporting it as processing, so Picape freezes its side of the basket.
+  post "/__place_order" do
+    Agent.update(@orders, fn _ -> fixture("orders_placed.json") end)
+    send_resp(conn, 204, "")
+  end
+
+  # Pretends that order was delivered: processing ends and Picape may sync again.
+  post "/__deliver_order" do
+    Agent.update(@orders, fn _ -> fixture("orders.json") end)
+    send_resp(conn, 204, "")
+  end
+
+  get "/mobile-services/v4/order/summaries" do
+    json(conn, Agent.get(@orders, & &1))
   end
 
   get "/mobile-services/product/search/v2" do

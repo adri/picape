@@ -92,11 +92,11 @@
             "shopType": "SUPERMARKET",
             "availability": {
               "__typename": "ProductAvailability",
-              "availabilityLabel": null,
-              "isOrderable": true,
+              "availabilityLabel": "Tijdelijk uitverkocht",
+              "isOrderable": false,
               "online": {
                 "__typename": "ProductAvailabilityStatus",
-                "status": "AVAILABLE"
+                "status": "UNAVAILABLE"
               },
               "offline": {
                 "__typename": "ProductAvailabilityStatus",

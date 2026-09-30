@@ -13,6 +13,9 @@ defmodule PicapeWeb.Graphql.Types do
     field(:delivery_start_time, :string)
     field(:delivery_end_time, :string)
     field(:items, list_of(:order_item))
+
+    @desc "The supermarket is processing a paid order, so Picape froze its side of the basket."
+    field(:is_placed, :boolean)
   end
 
   @desc "Item that is part of an order"
@@ -20,6 +23,15 @@ defmodule PicapeWeb.Graphql.Types do
     field(:name, :string)
     field(:image_url, :string)
     field(:quantity, :string)
+
+    @desc "The supermarket can deliver this product right now."
+    field(:is_orderable, :boolean)
+
+    @desc "The supermarket's own wording when it cannot, for example \"Tijdelijk uitverkocht\"."
+    field(:availability_label, :string)
+
+    @desc "The name of the ingredient this product stands in for, when it is a replacement."
+    field(:substituted_for, :string, resolve: batched({Resolver.Order, :substitutions_for_items}))
 
     field(
       :ingredient,

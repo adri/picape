@@ -49,8 +49,20 @@ defmodule Picape.MCP.Tools do
       description:
         "Read the current order: every item in the supermarket cart with its quantity, plus the total " <>
           "item count and price in cents. Items that map to a Picape ingredient carry that ingredient " <>
-          "and the recipes that asked for it.",
-      inputSchema: %{type: "object", properties: %{}}
+          "and the recipes that asked for it. `is_orderable` false marks products the supermarket " <>
+          "cannot deliver right now; `substituted_for` names the ingredient a product replaced. " <>
+          "Pass `only_unavailable` to get just the problem items. `is_placed` tells you the order " <>
+          "was paid: Picape then freezes its side until delivery, so set_ingredient_quantity and " <>
+          "plan_recipe queue without reaching the supermarket.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          only_unavailable: %{
+            type: "boolean",
+            description: "Keep only items the supermarket cannot deliver right now"
+          }
+        }
+      }
     },
     %{
       name: "set_ingredient_quantity",
@@ -105,6 +117,25 @@ defmodule Picape.MCP.Tools do
           }
         },
         required: ["ingredient_id"]
+      }
+    },
+    %{
+      name: "set_ingredient_replacement",
+      description:
+        "Name the ingredient Picape orders instead when the supermarket cannot deliver this one. " <>
+          "The replacement is ordered automatically at the next sync and the cart row flags it as " <>
+          "a substitute. Pass `replacement_ingredient_id` null to clear the mapping. Find candidates " <>
+          "with search_ingredients.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          ingredient_id: @integer,
+          replacement_ingredient_id: %{
+            type: ["integer", "null"],
+            description: "The ingredient to order instead, or null to clear"
+          }
+        },
+        required: ["ingredient_id", "replacement_ingredient_id"]
       }
     },
     %{
@@ -288,21 +319,33 @@ defmodule Picape.MCP.Tools do
     {:ok, products}
   end
 
-  defp run("get_shopping_list", _args) do
+  defp run("get_shopping_list", args) do
     {:ok, line} = Order.current()
     {:ok, ingredients} = Recipe.ingredients_by_item_ids(Enum.map(line.items, & &1.id))
     {:ok, recipes} = Order.recipes_planned_for_ingredient_ids(@order_id, Enum.map(Map.values(ingredients), & &1.id))
+    substitutions = Order.substitutions(@order_id)
 
     items =
-      Enum.map(line.items, fn item ->
+      line.items
+      |> Enum.reject(&(&1.is_orderable && args["only_unavailable"]))
+      |> Enum.map(fn item ->
         %{
           name: item.name,
           quantity: item.quantity,
+          is_orderable: item.is_orderable,
+          availability_label: item.availability_label,
+          substituted_for: get_in(substitutions, [item.id, Access.key(:name)]),
           ingredient: render_list_ingredient(ingredients[item.id], recipes)
         }
       end)
 
-    {:ok, %{total_count: line.total_count, total_price: line.total_price, items: items}}
+    {:ok,
+     %{
+       total_count: line.total_count,
+       total_price: line.total_price,
+       is_placed: line.is_placed,
+       items: items
+     }}
   end
 
   defp run("set_ingredient_quantity", args) do
@@ -329,6 +372,18 @@ defmodule Picape.MCP.Tools do
     with {:ok, ingredient} <- fetch_ingredient(args["ingredient_id"]) do
       @ingredient_fields
       |> Enum.reduce(%{ingredient_id: ingredient.id}, &copy_argument(&2, args, &1))
+      |> Ingredients.edit_ingredient()
+      |> case do
+        {:ok, edited} -> {:ok, List.first(render_ingredients([edited]))}
+        {:error, changeset} -> {:error, inspect(changeset.errors)}
+      end
+    end
+  end
+
+  defp run("set_ingredient_replacement", args) do
+    with {:ok, ingredient} <- fetch_ingredient(args["ingredient_id"]),
+         {:ok, replacement} <- fetch_replacement(args["replacement_ingredient_id"], ingredient.id) do
+      %{ingredient_id: ingredient.id, replacement_ingredient_id: replacement}
       |> Ingredients.edit_ingredient()
       |> case do
         {:ok, edited} -> {:ok, List.first(render_ingredients([edited]))}
@@ -439,6 +494,17 @@ defmodule Picape.MCP.Tools do
     end
   end
 
+  defp fetch_replacement(nil, _id), do: {:ok, nil}
+
+  defp fetch_replacement(id, id), do: {:error, "an ingredient cannot replace itself"}
+
+  defp fetch_replacement(id, _id) do
+    case fetch_ingredient(id) do
+      {:ok, %{id: replacement_id}} -> {:ok, replacement_id}
+      error -> error
+    end
+  end
+
   # An argument the caller left out never reaches the changeset, so the
   # ingredient keeps the value it already has.
   defp copy_argument(params, args, field) do
@@ -461,6 +527,7 @@ defmodule Picape.MCP.Tools do
         name: ingredient.name,
         is_essential: ingredient.is_essential,
         supermarket_product_id: ingredient.supermarket_product_id,
+        replacement_ingredient_id: ingredient.replacement_ingredient_id,
         unit_quantity: ingredient[:unit_quantity],
         nutriscore: ingredient[:nutriscore],
         warning: warning_description(ingredient),

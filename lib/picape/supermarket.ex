@@ -191,6 +191,15 @@ defmodule Picape.Supermarket do
     ConCache.delete(:supermarket, :orders)
   end
 
+  @doc """
+  The order number the supermarket is currently processing, that is the order
+  that was paid but not delivered yet. While it exists the basket answers for
+  the *next* order and Picape leaves it alone.
+  """
+  def placed_order_id() do
+    get_in(orders(), ["current_orders", Access.at(0), "order_id"])
+  end
+
   def latest_order_id(orders) do
     try do
       # before delivering, the latest order is in "current_orders"

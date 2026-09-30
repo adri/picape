@@ -11,6 +11,7 @@ defmodule Picape.Order.Line do
     field(:delivery_date, :string)
     field(:delivery_start_time, :string)
     field(:delivery_end_time, :string)
+    field(:is_placed, :boolean, default: false)
 
     timestamps()
   end
