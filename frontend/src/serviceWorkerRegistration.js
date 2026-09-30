@@ -14,12 +14,17 @@
 // worker URL would be the literal string "undefined/service-worker.js".
 const PUBLIC_URL = '';
 
+// Service workers are a browser API. Expo's dev runtime polyfills
+// window.location, but a release bundle on a phone has no window at all, so
+// this must survive the module loading where one does not exist.
 const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
-    // [::1] is the IPv6 localhost address.
-    window.location.hostname === '[::1]' ||
-    // 127.0.0.0/8 are considered localhost for IPv4.
-    window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
+  typeof window !== 'undefined' &&
+    window.location &&
+    (window.location.hostname === 'localhost' ||
+      // [::1] is the IPv6 localhost address.
+      window.location.hostname === '[::1]' ||
+      // 127.0.0.0/8 are considered localhost for IPv4.
+      window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/))
 );
 
 export function register(config) {

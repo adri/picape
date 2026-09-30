@@ -1,0 +1,92 @@
+diff --git a/node_modules/@react-navigation/stack/lib/module/utils/gestureActivationCriteria.js b/node_modules/@react-navigation/stack/lib/module/utils/gestureActivationCriteria.js
+index b0488bd..32aa83c 100644
+--- a/node_modules/@react-navigation/stack/lib/module/utils/gestureActivationCriteria.js
++++ b/node_modules/@react-navigation/stack/lib/module/utils/gestureActivationCriteria.js
+@@ -17,8 +17,8 @@ export const gestureActivationCriteria = ({
+   const distance = gestureResponseDistance !== undefined ? gestureResponseDistance : gestureDirection === 'vertical' || gestureDirection === 'vertical-inverted' ? GESTURE_RESPONSE_DISTANCE_VERTICAL : GESTURE_RESPONSE_DISTANCE_HORIZONTAL;
+   if (gestureDirection === 'vertical') {
+     return {
+-      maxDeltaX: 15,
+-      minOffsetY: 5,
++      failOffsetX: [-15, 15],
++      activeOffsetY: 5,
+       hitSlop: {
+         bottom: -layout.height + distance
+       },
+@@ -26,8 +26,8 @@ export const gestureActivationCriteria = ({
+     };
+   } else if (gestureDirection === 'vertical-inverted') {
+     return {
+-      maxDeltaX: 15,
+-      minOffsetY: -5,
++      failOffsetX: [-15, 15],
++      activeOffsetY: -5,
+       hitSlop: {
+         top: -layout.height + distance
+       },
+@@ -38,8 +38,8 @@ export const gestureActivationCriteria = ({
+     const invertedMultiplier = getInvertedMultiplier(gestureDirection, direction === 'rtl');
+     if (invertedMultiplier === 1) {
+       return {
+-        minOffsetX: 5,
+-        maxDeltaY: 20,
++        activeOffsetX: 5,
++        failOffsetY: [-20, 20],
+         hitSlop: {
+           right: hitSlop
+         },
+@@ -47,8 +47,8 @@ export const gestureActivationCriteria = ({
+       };
+     } else {
+       return {
+-        minOffsetX: -5,
+-        maxDeltaY: 20,
++        activeOffsetX: -5,
++        failOffsetY: [-20, 20],
+         hitSlop: {
+           left: hitSlop
+         },
+diff --git a/node_modules/@react-navigation/stack/src/utils/gestureActivationCriteria.tsx b/node_modules/@react-navigation/stack/src/utils/gestureActivationCriteria.tsx
+index 968c5b3..67562e8 100644
+--- a/node_modules/@react-navigation/stack/src/utils/gestureActivationCriteria.tsx
++++ b/node_modules/@react-navigation/stack/src/utils/gestureActivationCriteria.tsx
+@@ -32,15 +32,15 @@ export const gestureActivationCriteria = ({
+ 
+   if (gestureDirection === 'vertical') {
+     return {
+-      maxDeltaX: 15,
+-      minOffsetY: 5,
++      failOffsetX: [-15, 15],
++      activeOffsetY: 5,
+       hitSlop: { bottom: -layout.height + distance },
+       enableTrackpadTwoFingerGesture,
+     };
+   } else if (gestureDirection === 'vertical-inverted') {
+     return {
+-      maxDeltaX: 15,
+-      minOffsetY: -5,
++      failOffsetX: [-15, 15],
++      activeOffsetY: -5,
+       hitSlop: { top: -layout.height + distance },
+       enableTrackpadTwoFingerGesture,
+     };
+@@ -53,15 +53,15 @@ export const gestureActivationCriteria = ({
+ 
+     if (invertedMultiplier === 1) {
+       return {
+-        minOffsetX: 5,
+-        maxDeltaY: 20,
++        activeOffsetX: 5,
++        failOffsetY: [-20, 20],
+         hitSlop: { right: hitSlop },
+         enableTrackpadTwoFingerGesture,
+       };
+     } else {
+       return {
+-        minOffsetX: -5,
+-        maxDeltaY: 20,
++        activeOffsetX: -5,
++        failOffsetY: [-20, 20],
+         hitSlop: { left: hitSlop },
+         enableTrackpadTwoFingerGesture,
+       };

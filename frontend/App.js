@@ -1,9 +1,10 @@
 import { ApolloClient, ApolloProvider, InMemoryCache, ApolloLink } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { isDevice } from 'expo-device';
 import * as SplashScreen from 'expo-splash-screen';
 import * as React from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import Sentry from './Sentry';
@@ -22,7 +23,12 @@ const onErrorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.log(`[Network error]:`, networkError);
 });
 
-const host = __DEV__ ? 'ws://localhost:4010/socket' : 'wss://picape.whybug.com/socket';
+// Simulator and web talk to the local Phoenix; a physical phone always talks to
+// production, also in the dev client.
+const host =
+  __DEV__ && (Platform.OS === 'web' || !isDevice)
+    ? 'ws://localhost:4010/socket'
+    : 'wss://picape.whybug.com/socket';
 const link = ApolloLink.from([onErrorLink, createAbsintheSocketLink(host)]);
 
 const cache = new InMemoryCache();

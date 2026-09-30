@@ -1,4 +1,5 @@
 import { createBottomTabNavigator, BottomTabBar } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   createStackNavigator,
   CardStyleInterpolators,
@@ -6,7 +7,7 @@ import {
 } from '@react-navigation/stack';
 import { BlurView } from 'expo-blur';
 import * as React from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { Dimensions, Platform, StyleSheet, useColorScheme } from 'react-native';
 
 import { ListCountBadge } from '../components/Badge/ListCountBadge';
 import TabBarIcon from '../components/TabBarIcon';
@@ -15,22 +16,21 @@ import { contentColumn } from '../constants/Layout';
 import { prefersReducedMotion } from '../constants/Motion';
 import { Hairline } from '../constants/Spacing';
 import { AddIngredientScreen } from '../screens/AddIngredientScreen';
-import BasicsScreen from '../screens/BasicsScreen';
 import { BonusScreen } from '../screens/BonusScreen';
 import { EditIngredientScreen } from '../screens/EditIngredientScreen';
 import { EditRecipeScreen } from '../screens/EditRecipeScreen';
 import { IngredientDetailScreen } from '../screens/IngredientDetailScreen';
-import ListScreen from '../screens/ListScreen';
 import { NewRecipeScreen } from '../screens/NewRecipeScreen';
-import PlanScreen from '../screens/PlanScreen';
 import { PreviouslyOrderedScreen } from '../screens/PreviouslyOrderedScreen';
 import RecipeDetailScreen from '../screens/RecipeDetailScreen';
 import { RecipeListScreen } from '../screens/RecipeListScreen';
-import SearchScreen from '../screens/SearchScreen';
 import WeekPlannerScreen from '../screens/WeekPlannerScreen';
+import NativeTabNavigator from './NativeTabNavigator';
+import { INITIAL_ROUTE_NAME, TABS } from './tabs';
 
-const INITIAL_ROUTE_NAME = 'plan';
-
+// On web the tab bar is a blur strip pinned to the bottom edge. On iOS the
+// native UITabBarController provides the bar, so this component is only used
+// by the web build.
 function TabBar(props) {
   const colorScheme = useColorScheme();
   const colors = useTheme();
@@ -45,7 +45,12 @@ function TabBar(props) {
   );
 }
 
-const Stack = createStackNavigator();
+// Web keeps the JS stack: the native stack is UIViewController-backed and does
+// not render in a browser. On iOS the native stack gives the four form routes a
+// real page-sheet with UIKit's interactive pull-to-dismiss, which the JS card
+// gesture can only approximate.
+const isWeb = Platform.OS === 'web';
+const Stack = isWeb ? createStackNavigator() : createNativeStackNavigator();
 
 // A card slides in from the right and a modal rises from the bottom, which is
 // exactly the axis travel a reader who asked for less motion is asking not to
@@ -55,14 +60,37 @@ const Stack = createStackNavigator();
 // cross-fades over the one behind it instead of sliding across it.
 const reduceMotion = () =>
   prefersReducedMotion()
-    ? { cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }
+    ? isWeb
+      ? { cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }
+      : { animation: 'fade' }
     : null;
 
 const modal = () => ({
-  animationEnabled: true,
-  ...TransitionPresets.ModalPresentationIOS,
+  ...(isWeb
+    ? {
+        ...TransitionPresets.ModalPresentationIOS,
+        gestureResponseDistance: Dimensions.get('window').height,
+      }
+    : { presentation: 'modal' }),
   ...reduceMotion(),
 });
+
+// The routes both stacks share. A detail screen pushes from the right — an
+// ingredient opens a step deeper into the list it came from — while the
+// forms present as sheets from the bottom.
+const routes = [
+  { name: 'PlanScreen', component: BottomTabNavigator },
+  { name: 'RecipeList', component: RecipeListScreen },
+  { name: 'PreviouslyOrdered', component: PreviouslyOrderedScreen },
+  { name: 'Bonus', component: BonusScreen },
+  { name: 'WeekPlanner', component: WeekPlannerScreen },
+  { name: 'RecipeDetail', component: RecipeDetailScreen },
+  { name: 'IngredientDetail', component: IngredientDetailScreen },
+  { name: 'EditRecipe', component: EditRecipeScreen, modal: true },
+  { name: 'NewRecipe', component: NewRecipeScreen, modal: true },
+  { name: 'AddIngredient', component: AddIngredientScreen, modal: true },
+  { name: 'EditIngredient', component: EditIngredientScreen, modal: true },
+];
 
 export default function PlanStackScreen() {
   return (
@@ -74,37 +102,36 @@ export default function PlanStackScreen() {
         // is a standalone PWA with no address bar, and that mode carries the
         // pinned back buttons and footers away with the content. 'float' keeps
         // each card at viewport height, so its own ScrollView scrolls instead.
-        headerMode: 'float',
-        animationEnabled: true,
-        // Web detaches every card but the top one, so an edge swipe back
+        //
+        // Web also detaches every card but the top one, so an edge swipe back
         // remounts the screen it reveals and shows one blank frame first.
         // Keeping it attached means it is already painted when the swipe starts.
-        detachPreviousScreen: false,
-        ...TransitionPresets.SlideFromRightIOS,
+        ...(isWeb
+          ? {
+              headerMode: 'float',
+              detachPreviousScreen: false,
+              ...TransitionPresets.SlideFromRightIOS,
+            }
+          : null),
         ...reduceMotion(),
       })}>
-      <Stack.Screen name="PlanScreen" component={BottomTabNavigator} />
-      <Stack.Screen name="RecipeList" component={RecipeListScreen} />
-      <Stack.Screen name="PreviouslyOrdered" component={PreviouslyOrderedScreen} />
-      <Stack.Screen name="Bonus" component={BonusScreen} />
-      <Stack.Screen name="WeekPlanner" component={WeekPlannerScreen} />
-      <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
-      {/* No modal preset: opening an ingredient is a step deeper into the list it
-          came from, so it pushes from the right the way a recipe does. */}
-      <Stack.Screen name="IngredientDetail" component={IngredientDetailScreen} />
-      <Stack.Screen name="EditRecipe" component={EditRecipeScreen} options={modal} />
-      <Stack.Screen name="NewRecipe" component={NewRecipeScreen} options={modal} />
-      <Stack.Screen name="AddIngredient" component={AddIngredientScreen} options={modal} />
-      <Stack.Screen name="EditIngredient" component={EditIngredientScreen} options={modal} />
+      {routes.map(({ name, component, modal: isModal }) => (
+        <Stack.Screen
+          key={name}
+          name={name}
+          component={component}
+          options={isModal ? modal : undefined}
+        />
+      ))}
     </Stack.Navigator>
   );
 }
 
-const BottomTab = createBottomTabNavigator();
+const WebTab = createBottomTabNavigator();
 
-function BottomTabNavigator() {
+function WebTabNavigator() {
   return (
-    <BottomTab.Navigator
+    <WebTab.Navigator
       initialRouteName={INITIAL_ROUTE_NAME}
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
@@ -123,50 +150,30 @@ function BottomTabNavigator() {
           ...contentColumn,
         },
       }}>
-      <BottomTab.Screen
-        name="plan"
-        component={PlanScreen}
-        options={{
-          title: 'Recepten',
-          tabBarAccessibilityLabel: 'Recepten',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="restaurant" />,
-        }}
-      />
-      <BottomTab.Screen
-        name="search"
-        component={SearchScreen}
-        options={{
-          title: 'Zoeken',
-          tabBarAccessibilityLabel: 'Zoeken',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
-        }}
-      />
-      <BottomTab.Screen
-        name="basics"
-        component={BasicsScreen}
-        options={{
-          title: 'Basics',
-          tabBarAccessibilityLabel: 'Basics',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
-        }}
-      />
-      <BottomTab.Screen
-        name="shop"
-        component={ListScreen}
-        options={{
-          title: 'Mandje',
-          tabBarAccessibilityLabel: 'Mandje',
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon
-              focused={focused}
-              badge={<ListCountBadge focused={focused} />}
-              name="cart"
-            />
-          ),
-        }}
-      />
-    </BottomTab.Navigator>
+      {TABS.map(({ name, title, component, icon, badge }) => (
+        <WebTab.Screen
+          key={name}
+          name={name}
+          component={component}
+          options={{
+            title,
+            tabBarAccessibilityLabel: title,
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon
+                focused={focused}
+                badge={badge ? <ListCountBadge focused={focused} /> : undefined}
+                name={icon}
+              />
+            ),
+          }}
+        />
+      ))}
+    </WebTab.Navigator>
   );
+}
+
+function BottomTabNavigator() {
+  return isWeb ? <WebTabNavigator /> : <NativeTabNavigator />;
 }
 
 const styles = StyleSheet.create({

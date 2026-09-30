@@ -4,3 +4,4 @@ web-build
 package-lock.json
 yarn.lock
 dist
+ios

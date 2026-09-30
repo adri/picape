@@ -1,0 +1,128 @@
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+
+require 'json'
+podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
+
+def ccache_enabled?(podfile_properties)
+  # Environment variable takes precedence
+  return ENV['USE_CCACHE'] == '1' if ENV['USE_CCACHE']
+
+  # Fall back to Podfile properties
+  podfile_properties['apple.ccacheEnabled'] == 'true'
+end
+
+ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] ||= podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
+ENV['RCT_USE_RN_DEP'] ||= podfile_properties['ios.buildReactNativeFromSource'] == 'true' ? '0' : '1'
+ENV['RCT_USE_PREBUILT_RNCORE'] ||= podfile_properties['ios.buildReactNativeFromSource'] == 'true' ? '0' : '1'
+ENV['RCT_HERMES_V1_ENABLED'] ||= '0' if podfile_properties['expo.useHermesV1'] == 'false'
+# An explicit `ios.usePrecompiledModules: false` must win even when the env var is already set
+# (e.g. EXPO_USE_PRECOMPILED_MODULES exported by EAS Build), so force-disable here before the default.
+ENV['EXPO_USE_PRECOMPILED_MODULES'] = '0' if podfile_properties['EXPO_USE_PRECOMPILED_MODULES'] == 'false'
+ENV['EXPO_USE_PRECOMPILED_MODULES'] ||= '1'
+platform :ios, podfile_properties['ios.deploymentTarget'] || '16.4'
+
+prepare_react_native_project!
+
+target 'Picape' do
+  use_expo_modules!
+
+  if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
+    config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
+  else
+    config_command = [
+      'node',
+      '--no-warnings',
+      '--eval',
+      'require(\'expo/bin/autolinking\')',
+      'expo-modules-autolinking',
+      'react-native-config',
+      '--json',
+      '--platform',
+      'ios'
+    ]
+  end
+
+  config = use_native_modules!(config_command)
+
+  use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
+  use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => podfile_properties['expo.jsEngine'] == nil || podfile_properties['expo.jsEngine'] == 'hermes',
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
+  )
+
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      :ccache_enabled => ccache_enabled?(podfile_properties),
+    )
+
+    # ExpoModulesCore sets swift_version 6.0; under the Swift 6.2 compiler in
+    # Xcode 26.3 its nonisolated(unsafe) captures in EventEmitter.swift become
+    # hard "sending risks causing data races" errors. Building the pod in
+    # Swift 5 mode demotes them to warnings.
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'ExpoModulesCore'
+      target.build_configurations.each do |config|
+        config.build_settings['SWIFT_VERSION'] = '5.0'
+      end
+    end
+  end
+
+  # The Sentry pod ships a PrivacyInfo.xcprivacy that collides with the app
+  # target's own manifest ("Multiple commands produce PrivacyInfo.xcprivacy").
+  # The integrate step writes the copy phase's input/output paths, so the
+  # pod-side copy has to be stripped here, not in post_install.
+  post_integrate do |installer|
+    resources_script = File.join(__dir__, 'Pods', 'Target Support Files', 'Pods-Picape', 'Pods-Picape-resources.sh')
+    if File.exist?(resources_script)
+      content = File.read(resources_script)
+      stripped = content.gsub(/^\s*install_resource ".*PrivacyInfo\.xcprivacy".*\n/, '')
+      File.write(resources_script, stripped) if stripped != content
+    end
+
+    installer.aggregate_targets.each do |aggregate_target|
+      aggregate_target.user_targets.each do |user_target|
+        user_target.shell_script_build_phases.each do |phase|
+          next unless phase.name && phase.name.include?('[CP] Copy Pods Resources')
+          changed = false
+          [phase.input_paths, phase.output_paths].each do |paths|
+            next unless paths
+            filtered = paths.reject { |p| p.include?('PrivacyInfo.xcprivacy') }
+            changed ||= filtered.length != paths.length
+            paths.replace(filtered)
+          end
+          aggregate_target.user_project.save if changed
+        end
+      end
+    end
+
+    # Sentry declares std::vector<const ThreadHandleMetadataPair>, which the
+    # libc++ in Xcode 26 rejects ("std::allocator does not support const
+    # types"). Upstream removed the const in 8.58.x; do the same on 8.41.
+    cache_header = File.join(__dir__, 'Pods', 'Sentry', 'Sources', 'Sentry', 'include', 'SentryThreadMetadataCache.hpp')
+    if File.exist?(cache_header)
+      content = File.read(cache_header)
+      fixed = content.gsub(/std::vector<const ([A-Za-z_:]+)>/, 'std::vector<\1>')
+      File.write(cache_header, fixed) if fixed != content
+    end
+
+    # RN 0.86's Hermes no longer exposes enableSamplingProfiler and friends on
+    # HermesRuntime, so RNSentry's profiling block cannot compile. Nothing here
+    # calls startProfiling/stopProfiling, so disable the block instead.
+    rn_sentry = File.join(__dir__, '..', 'node_modules', 'sentry-expo', 'node_modules', '@sentry', 'react-native', 'ios', 'RNSentry.mm')
+    if File.exist?(rn_sentry)
+      content = File.read(rn_sentry)
+      fixed = content.sub('#if __has_include(<hermes/hermes.h>) && SENTRY_PROFILING_SUPPORTED',
+                          '#if 0 // RN 0.86 removed HermesRuntime sampling-profiler statics')
+      File.write(rn_sentry, fixed) if fixed != content
+    end
+  end
+end

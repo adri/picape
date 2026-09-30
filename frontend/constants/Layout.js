@@ -1,4 +1,5 @@
-import { Dimensions } from 'react-native';
+import { Platform, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -46,6 +47,20 @@ export function gridColumns(available) {
   return Math.max(2, Math.floor(available / GRID_COLUMN_WIDTH));
 }
 
+// Room to leave at the bottom of a scroll view so its last row clears the
+// bottom bar. On web the blur bar sits outside the safe area, so the padding
+// is explicit. On iOS the UITabBarController folds the tab bar into the
+// bottom safe-area inset itself, and a pushed screen that hides the bar keeps
+// only the home-indicator inset.
+// What the web tab bar covers above the bottom edge. Only used on web — on
+// iOS the native tab bar reports itself through the bottom safe-area inset.
+const WEB_TAB_BAR_HEIGHT = 50;
+
+export function useBottomBarInset() {
+  const insets = useSafeAreaInsets();
+  return Platform.OS === 'web' ? WEB_TAB_BAR_HEIGHT : insets.bottom;
+}
+
 export default {
   window: {
     width,
@@ -53,7 +68,5 @@ export default {
   },
   isSmallDevice: width < 375,
   borderRadius: 10,
-  // What the tab bar covers above the bottom safe-area inset. A tab screen
-  // adds it to its scroll padding so its last row is not left under the bar.
-  tabBarHeight: 50,
+  tabBarHeight: WEB_TAB_BAR_HEIGHT,
 };
