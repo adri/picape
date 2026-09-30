@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# iOS dev harness: Metro on :8083, launches the Picape dev client on the booted
+# simulator. Needs `bin/phx --fake` (or --live) on :4010 for data; this script
+# warns when it is down.
+#
+# Port 8083 because 8081 belongs to the local LanguageTool server and 8082 to its
+# caddy proxy. No --localhost flag: that binds ::1 only, while the manifest hands
+# Expo Go a 127.0.0.1 bundle URL, which then fails with "Could not connect to the
+# server". LAN mode binds *:8083 and advertises the en0 address instead.
+set -euo pipefail
+source "$(cd "$(dirname "$0")" && pwd)/_toolchain"
+cd "$(dirname "$0")/.."
+
+PORT=8083
+
+if ! lsof -iTCP:4010 -sTCP:LISTEN -P >/dev/null 2>&1; then
+  echo "warning: phoenix is not on :4010, the app will load without data" >&2
+  echo "         run bin/phx --fake in another shell" >&2
+fi
+
+if ! xcrun simctl list devices | grep -q '(Booted)'; then
+  DEVICE=$(xcrun simctl list devices available | grep -o 'iPhone [^(]*' | head -1 | sed 's/ *$//')
+  echo "booting $DEVICE"
+  xcrun simctl boot "$DEVICE"
+fi
+open -a Simulator >/dev/null 2>&1 || true
+
+cd frontend
+
+# Wait for Metro, then launch the dev client. It discovers this Metro instance
+# itself on the launcher screen. Built with `npx expo run:ios`; install it once
+# by hand if missing.
+(
+  for _ in $(seq 1 90); do
+    if curl -sf "http://localhost:$PORT/status" | grep -q running; then
+      sleep 2
+      xcrun simctl launch booted com.adri.picape || true
+      break
+    fi
+    sleep 1
+  done
+) &
+
+exec npx expo start --dev-client --port "$PORT"

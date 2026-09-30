@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { useScrollToTop } from '@react-navigation/native';
 import * as React from 'react';
-import { View, FlatList, Text, Dimensions, Platform, StyleSheet } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { View, FlatList, Text, Dimensions, Platform, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IngredientDetailScreen } from './IngredientDetailScreen';
+import { ErrorState } from '../components/ErrorState';
 import { Badge } from '../components/Badge/Badge';
 import { ImageCard } from '../components/Card/ImageCard';
 import { Nutriscore, hasNutriscore } from '../components/Ingredient/Nutriscore';
@@ -15,7 +15,7 @@ import { ListItem } from '../components/ListItem/ListItem';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import Layout, { CONTENT_MAX_WIDTH, contentColumn } from '../constants/Layout';
+import { CONTENT_MAX_WIDTH, contentColumn, useBottomBarInset } from '../constants/Layout';
 import { Duration, Easing } from '../constants/Motion';
 import { Gutter, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
@@ -56,20 +56,33 @@ function formatDeliveryDay({ deliveryDate }) {
 // the list you check before the order goes out. It sits on the name's own line
 // rather than under it, because a row that grew a second line here would stop
 // lining up with the rows around it.
-function badgesFor(ingredient) {
+function badgesFor(ingredient, item) {
   const graded = hasNutriscore(ingredient?.nutriscore);
   const warning = ingredient?.warning;
 
-  if (!graded && !warning) return null;
+  // The basket's own read is fresher than the product card the nightly
+  // matcher stored, so the row trusts it over the ingredient's warning.
+  const unavailable = item?.isOrderable === false;
+  const replacedBy = item?.substitutedFor;
+
+  if (!graded && !warning && !unavailable && !replacedBy) return null;
 
   return (
     <View style={styles.badges}>
       {graded && <Nutriscore nutriscore={ingredient.nutriscore} />}
-      {!!warning && (
+      {(unavailable || !!warning) && (
         <Badge
           small
           style={styles.warningBadge}
-          amount={warning.description}
+          amount={item?.availabilityLabel || warning?.description || 'Niet leverbaar'}
+          backgroundColor={Colors.unavailableBackground}
+        />
+      )}
+      {!!replacedBy && (
+        <Badge
+          small
+          style={styles.warningBadge}
+          amount={`Vervanging voor ${replacedBy}`}
           backgroundColor={Colors.unavailableBackground}
         />
       )}
@@ -86,7 +99,7 @@ function PlannedRecipes({ navigation }) {
     fetchPolicy: 'cache-only',
   });
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { recipes: allRecipes = [] } = data;
   const recipes = allRecipes.filter((recipe) => recipe.isPlanned);
@@ -151,6 +164,7 @@ export default function ListScreen({ navigation }) {
   const scrollRef = React.useRef(null);
   useScrollToTop(scrollRef);
   const { wide, selected, open, clear } = useSelection('IngredientDetail');
+  const bottomInset = useBottomBarInset();
 
   // idea: use the count of order items to know how many skeletons to render
   const { data: countData } = useQuery(GET_ORDER_COUNT, {
@@ -168,18 +182,21 @@ export default function ListScreen({ navigation }) {
     refetchQueries: ['BasicsList', 'OrderList', 'RecipeList', 'LastOrderedRecipes'],
   });
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { currentOrder: currentOrderQuery = {} } = data;
   const { currentOrder: currentOrderSubscription } = subscription;
   const currentOrder = currentOrderSubscription || currentOrderQuery;
-  const deliveryDay = formatDeliveryDay(currentOrder);
+  // A paid order is the supermarket's, not the basket's: while it is being
+  // processed Picape freezes, so the heading says so rather than naming the
+  // day the basket's next delivery is booked for.
+  const deliveryDay = currentOrder.isPlaced ? 'Besteld' : formatDeliveryDay(currentOrder);
 
   const list = (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={[contentColumn, { paddingBottom: Layout.tabBarHeight }]}>
+        contentContainerStyle={[contentColumn, { paddingBottom: bottomInset }]}>
         <SectionHeader title="Je mandje" large>
           <View style={styles.orderTotal}>
             <View style={styles.orderTotalLine}>
@@ -211,15 +228,16 @@ export default function ListScreen({ navigation }) {
           highlightColor={Colors.skeletonHighlight}
           containerStyle={{}}
           isLoading={loading && (currentOrder.items || []).length === 0}>
-          <FlatList
-            style={{ paddingHorizontal: 20, marginBottom: 50 }}
-            data={currentOrder.items}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
+          {/* A basket is tens of rows, so a mapped view inside the screen's
+              ScrollView does the job. A vertical FlatList here would nest a
+              virtualized list in a plain ScrollView, which breaks windowing. */}
+          <View style={{ paddingHorizontal: 20, marginBottom: 50 }}>
+            {(currentOrder.items || []).map((item) => {
               const ingredient = item.ingredient;
               const plannedRecipes = ingredient?.plannedRecipes || [];
               return (
                 <ListItem
+                  key={item.id}
                   style={[
                     styles.fadeIn,
                     {
@@ -230,7 +248,7 @@ export default function ListScreen({ navigation }) {
                   ]}
                   title={ingredient?.name || item.name}
                   imageUrl={ingredient?.imageUrl || item.imageUrl}
-                  badges={badgesFor(ingredient)}
+                  badges={badgesFor(ingredient, item)}
                   selected={wide ? selected?.ingredientId === ingredient?.id : undefined}
                   onImagePress={(e) => {
                     e.preventDefault();
@@ -252,8 +270,8 @@ export default function ListScreen({ navigation }) {
                   />
                 </ListItem>
               );
-            }}
-          />
+            })}
+          </View>
         </SkeletonContent>
         {currentOrder.items && (
           <Text

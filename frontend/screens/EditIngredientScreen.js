@@ -13,6 +13,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors, { useTheme } from '../constants/Colors';
 import Layout from '../constants/Layout';
 import { FloatingTop, Spacing } from '../constants/Spacing';
+import { useSheetGesture } from '../navigation/useSheetGesture';
 
 const EDIT_INGREDIENT = gql`
   mutation EditIngredient($input: EditIngredientInput!) {
@@ -68,6 +69,7 @@ export function EditIngredientScreen({
 }) {
   const insets = useSafeAreaInsets();
   const colors = useTheme();
+  const onSheetScroll = useSheetGesture(navigation);
   const [editIngredient] = useMutation(EDIT_INGREDIENT, {
     refetchQueries: ['GetRecipe', 'RecipeList'],
     onCompleted: () => {
@@ -105,6 +107,8 @@ export function EditIngredientScreen({
     <View style={{ flex: 1 }}>
       <ScrollView
         style={{ flex: 1 }}
+        onScroll={onSheetScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
         <SectionHeader title="Bewerk ingrediënt" large />
@@ -154,6 +158,7 @@ export function EditIngredientScreen({
           <Text style={[styles.label, { color: colors.text }]}>Supermarket</Text>
           <SearchIngredients
             autoFocus={false}
+            embedded
             supermarketOnly
             placeholder={form.supermarketName || ingredient.supermarketName}
             customRenderItem={({ item: ingredient, searchRef }) => (

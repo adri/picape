@@ -3,6 +3,7 @@ import * as React from 'react';
 import { View, FlatList, Dimensions, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ErrorState } from '../components/ErrorState';
 import { Badge } from '../components/Badge/Badge';
 import { BackIcon, CheckIcon, PlusIcon } from '../components/Icon';
 import { ListItem } from '../components/ListItem/ListItem';
@@ -73,7 +74,7 @@ export function BonusScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const columnInset = contentInset(useWindowDimensions().width);
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { bonus = {} } = data;
   const { offers = [], activatedCount = 0, maximumActivations = 0 } = bonus;

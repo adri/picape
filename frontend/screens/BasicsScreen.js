@@ -1,11 +1,11 @@
 import { useQuery, useSubscription, gql } from '@apollo/client';
 import { useScrollToTop } from '@react-navigation/native';
 import * as React from 'react';
-import { View, FlatList, Dimensions } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { View, Dimensions, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IngredientDetailScreen } from './IngredientDetailScreen';
+import { ErrorState } from '../components/ErrorState';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { SplitView, useSelection } from '../components/Layout/SplitView';
 import { ListItem } from '../components/ListItem/ListItem';
@@ -13,7 +13,7 @@ import { SectionHeader } from '../components/Section/SectionHeader';
 import { SectionLink } from '../components/Section/SectionLink';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import Layout, { CONTENT_MAX_WIDTH, contentColumn } from '../constants/Layout';
+import { CONTENT_MAX_WIDTH, contentColumn, useBottomBarInset } from '../constants/Layout';
 
 const GET_BASICS = gql`
   query BasicsList {
@@ -81,7 +81,7 @@ function BasicsList({ navigation, open, selectedId, inPane }) {
   useSubscription(SUBSCRIBE_PLANNED_RECIPES);
   useSubscription(SUBSCRIBE_UNPLANNED_RECIPES);
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { basics: { edges = [] } = {} } = data;
   return (
@@ -118,49 +118,48 @@ function BasicsList({ navigation, open, selectedId, inPane }) {
         highlightColor={Colors.skeletonHighlight}
         containerStyle={{ flex: 1 }}
         isLoading={loading && edges.length === 0}>
-        <FlatList
-          style={{ paddingHorizontal: 20 }}
-          data={edges}
-          windowSize={6}
-          removeClippedSubviews
-          keyExtractor={({ ingredient }) => ingredient.id}
-          renderItem={({ item: { ingredient } }) => {
-            const plannedRecipes = ingredient.plannedRecipes || [];
-            return (
-              <ListItem
-                style={{
-                  // No entrance animation. `animationKeyframes` in an inline
-                  // style is dropped by react-native-web's compiler, which only
-                  // emits an @keyframes rule from StyleSheet.create, so these
-                  // rows carried the cart's `200 + 100 * index` duration
-                  // against `animation-name: none` and never faded at all.
-                  // The state transition below is the part that worked.
-                  transitionProperty: ['background-color', 'opacity'],
-                  transitionDuration: '200ms',
-                  transitionTimingFunction: 'ease-in',
-                  backgroundColor: ingredient.isPlanned
-                    ? Colors.cardHighlightBackground
-                    : Colors.cardBackground,
-                }}
-                title={ingredient.name}
-                imageUrl={ingredient.imageUrl}
-                selected={inPane ? selectedId === ingredient.id : undefined}
-                onImagePress={(e) => {
-                  e.preventDefault();
-                  open({ ingredientId: ingredient.id });
-                }}
-                subtitle={plannedRecipes
-                  .map((planned) => `${planned.quantity}×\u00A0${planned.recipe.title}`)
-                  .join(', ')}>
-                <OrderQuantity
-                  id={ingredient.id}
-                  orderedQuantity={ingredient.orderedQuantity}
-                  isPlanned={ingredient.isPlanned}
-                />
-              </ListItem>
-            );
-          }}
-        />
+        {/* The list is short enough that rows mount at once — it always did,
+            since a FlatList inside the screen's ScrollView rendered every row
+            and warned about the wasted windowing. Mapping keeps that shape
+            without the warning. */}
+        {edges.map(({ ingredient }) => {
+          const plannedRecipes = ingredient.plannedRecipes || [];
+          return (
+            <ListItem
+              key={ingredient.id}
+              style={{
+                // No entrance animation. `animationKeyframes` in an inline
+                // style is dropped by react-native-web's compiler, which only
+                // emits an @keyframes rule from StyleSheet.create, so these
+                // rows carried the cart's `200 + 100 * index` duration
+                // against `animation-name: none` and never faded at all.
+                // The state transition below is the part that worked.
+                transitionProperty: ['background-color', 'opacity'],
+                transitionDuration: '200ms',
+                transitionTimingFunction: 'ease-in',
+                marginHorizontal: 20,
+                backgroundColor: ingredient.isPlanned
+                  ? Colors.cardHighlightBackground
+                  : Colors.cardBackground,
+              }}
+              title={ingredient.name}
+              imageUrl={ingredient.imageUrl}
+              selected={inPane ? selectedId === ingredient.id : undefined}
+              onImagePress={(e) => {
+                e.preventDefault();
+                open({ ingredientId: ingredient.id });
+              }}
+              subtitle={plannedRecipes
+                .map((planned) => `${planned.quantity}×\u00A0${planned.recipe.title}`)
+                .join(', ')}>
+              <OrderQuantity
+                id={ingredient.id}
+                orderedQuantity={ingredient.orderedQuantity}
+                isPlanned={ingredient.isPlanned}
+              />
+            </ListItem>
+          );
+        })}
       </SkeletonContent>
     </View>
   );
@@ -170,12 +169,13 @@ export default function PlanScreen({ navigation }) {
   const scrollRef = React.useRef(null);
   useScrollToTop(scrollRef);
   const { wide, selected, open, clear } = useSelection('IngredientDetail');
+  const bottomInset = useBottomBarInset();
 
   const list = (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={[contentColumn, { paddingBottom: Layout.tabBarHeight }]}>
+        contentContainerStyle={[contentColumn, { paddingBottom: bottomInset }]}>
         <BasicsList
           navigation={navigation}
           open={open}

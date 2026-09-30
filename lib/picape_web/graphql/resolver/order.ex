@@ -63,6 +63,15 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.recipes_planned_for_ingredient_ids(Order.last_order_id(), ingredient_ids)
   end
 
+  def substitutions_for_items(_, product_ids) do
+    substitutions = Order.substitutions(order_id())
+
+    {:ok,
+     Map.new(product_ids, fn id ->
+       {id, get_in(substitutions, [id, Access.key(:name)])}
+     end)}
+  end
+
   # Mutations
 
   def plan_recipe(attributes, _info) do

@@ -1,11 +1,11 @@
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { ImageBackground } from 'expo-image';
 import * as React from 'react';
-import { Text, FlatList, View, Dimensions, useWindowDimensions } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { Text, FlatList, View, Dimensions, useWindowDimensions, ScrollView } from 'react-native';
 import Hyperlink from 'react-native-hyperlink';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ErrorState } from '../components/ErrorState';
 import { Badge } from '../components/Badge/Badge';
 import { BackIcon, CheckIcon } from '../components/Icon';
 import { EditIcon } from '../components/Icon/EditIcon';
@@ -88,7 +88,7 @@ export default function RecipeDetailScreen({ route: { params }, navigation }) {
 
   // Below every hook: an early return above one changes how many hooks this
   // screen calls between renders, which React ends the whole page over.
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { recipe = params.recipe } = data;
   const { videoId, description } = takeYoutubeLink(recipe.description);

@@ -11,6 +11,7 @@ import { SectionLink } from '../components/Section/SectionLink';
 import Colors, { useTheme } from '../constants/Colors';
 import { FloatingTop, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
+import { useSheetGesture } from '../navigation/useSheetGesture';
 
 const ADD_RECIPE = gql`
   mutation NewIngredient($title: String!) {
@@ -23,6 +24,7 @@ const ADD_RECIPE = gql`
 export function NewRecipeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const colors = useTheme();
+  const onSheetScroll = useSheetGesture(navigation);
   const [form, changeForm] = useState({
     title: '',
   });
@@ -39,6 +41,8 @@ export function NewRecipeScreen({ navigation }) {
     <View style={{ flex: 1 }}>
       <ScrollView
         style={{ flex: 1 }}
+        onScroll={onSheetScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="">
           <SectionLink

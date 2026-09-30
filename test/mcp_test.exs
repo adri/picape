@@ -31,6 +31,7 @@ defmodule Picape.MCPTest do
                "set_ingredient_quantity",
                "add_ingredient",
                "edit_ingredient",
+               "set_ingredient_replacement",
                "list_recipes",
                "get_recipe",
                "add_recipe",
@@ -117,6 +118,18 @@ defmodule Picape.MCPTest do
                Enum.find(items, &(&1["name"] == "Roomboter ongezouten"))
 
       assert Enum.find(items, &(&1["name"] == "Kipfilet"))["ingredient"] == nil
+    end
+
+    test "flags the products the supermarket cannot deliver, and filters on them" do
+      list = call!("get_shopping_list")
+      kipfilet = Enum.find(list["items"], &(&1["name"] == "Kipfilet"))
+
+      assert kipfilet["is_orderable"] == false
+      assert kipfilet["availability_label"] == "Tijdelijk uitverkocht"
+      assert list["is_placed"] == false
+
+      assert [%{"name" => "Kipfilet"}] =
+               call!("get_shopping_list", %{only_unavailable: true})["items"]
     end
 
     test "names the recipes that asked for an item" do
@@ -251,6 +264,42 @@ defmodule Picape.MCPTest do
 
       assert call_error("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 238_913}) =~
                "has already been taken"
+    end
+  end
+
+  describe "set_ingredient_replacement" do
+    test "names the ingredient Picape orders instead, and clears it again" do
+      kip = insert!(:ingredient, name: "Kipfilet", supermarket_product_id: 10_291_994)
+      tahoe = insert!(:ingredient, name: "Kiptahoe", supermarket_product_id: 519_017)
+
+      assert %{"replacement_ingredient_id" => rid} =
+               call!("set_ingredient_replacement", %{
+                 ingredient_id: kip.id,
+                 replacement_ingredient_id: tahoe.id
+               })
+
+      assert rid == tahoe.id
+      assert Repo.get!(Ingredient, kip.id).replacement_ingredient_id == tahoe.id
+
+      assert %{"replacement_ingredient_id" => nil} =
+               call!("set_ingredient_replacement", %{
+                 ingredient_id: kip.id,
+                 replacement_ingredient_id: nil
+               })
+    end
+
+    test "refuses an ingredient as its own replacement and reports unknown ids" do
+      ingredient = insert!(:ingredient, name: "Kipfilet", supermarket_product_id: 10_291_994)
+
+      assert call_error("set_ingredient_replacement", %{
+               ingredient_id: ingredient.id,
+               replacement_ingredient_id: ingredient.id
+             }) =~ "cannot replace itself"
+
+      assert call_error("set_ingredient_replacement", %{
+               ingredient_id: ingredient.id,
+               replacement_ingredient_id: 999_999
+             }) =~ "no ingredient with id 999999"
     end
   end
 

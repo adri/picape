@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ErrorState } from '../components/ErrorState';
 import { CloseIcon } from '../components/Icon';
 import { QuantitySelector } from '../components/Ingredient/QuantitySelector';
 import { InputText } from '../components/Input/InputText';
@@ -13,6 +14,7 @@ import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors, { useTheme } from '../constants/Colors';
 import { FloatingTop, Spacing } from '../constants/Spacing';
+import { useSheetGesture } from '../navigation/useSheetGesture';
 import { EDIT_RECIPE } from '../operations/editRecipe';
 import { GET_RECIPE } from '../operations/getRecipe';
 
@@ -68,6 +70,7 @@ export function EditRecipeScreen({
   const insets = useSafeAreaInsets();
   const colors = useTheme();
   const [form, changeForm] = useState(null);
+  const onSheetScroll = useSheetGesture(navigation);
 
   // The query answers a render later than the first whenever the cache is
   // cold, so the form cannot be seeded from its initial value. Seeding it in an
@@ -89,13 +92,15 @@ export function EditRecipeScreen({
     );
   }, [recipe]);
 
-  if (error) return `Error! ${error}`;
-  if (!form) return 'Loading...';
+  if (error) return <ErrorState error={error} />;
+  if (!form) return null;
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
         style={{ flex: 1 }}
+        onScroll={onSheetScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
         <SectionHeader title="Bewerk recept" large />
@@ -176,6 +181,7 @@ export function EditRecipeScreen({
         <View style={[styles.searchContainer]}>
           <SearchIngredients
             autoFocus={false}
+            embedded
             placeholder="Igrediënt toevoegen..."
             customRenderItem={({ item: ingredient, supermarket, searchRef }) => (
               <ListItem

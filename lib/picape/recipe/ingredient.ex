@@ -12,6 +12,8 @@ defmodule Picape.Recipe.Ingredient do
     field(:supermarket_product_id, :integer)
     field(:supermarket_product_raw, :map)
 
+    belongs_to(:replacement, Picape.Recipe.Ingredient, foreign_key: :replacement_ingredient_id)
+
     many_to_many(
       :tags,
       Picape.Recipe.IngredientTag,
@@ -124,7 +126,8 @@ defmodule Picape.Recipe.Ingredient do
       :seasonal_name,
       :is_essential,
       :supermarket_product_id,
-      :supermarket_product_raw
+      :supermarket_product_raw,
+      :replacement_ingredient_id
     ])
     |> validate_required([:name, :is_essential])
     |> unique_constraint(:supermarket_product_id)
@@ -137,7 +140,8 @@ defmodule Picape.Recipe.Ingredient do
       :name,
       :is_essential,
       :supermarket_product_id,
-      :supermarket_product_raw
+      :supermarket_product_raw,
+      :replacement_ingredient_id
     ])
     |> validate_required([:name, :is_essential, :supermarket_product_id])
     |> unique_constraint(:supermarket_product_id)

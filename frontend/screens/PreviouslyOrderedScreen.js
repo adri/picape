@@ -4,6 +4,7 @@ import { View, FlatList, Dimensions, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IngredientDetailScreen } from './IngredientDetailScreen';
+import { ErrorState } from '../components/ErrorState';
 import { BackIcon } from '../components/Icon';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { SplitView, useSelection } from '../components/Layout/SplitView';
@@ -37,7 +38,7 @@ export function PreviouslyOrderedScreen({ navigation }) {
   const { wide, selected, open, clear } = useSelection('IngredientDetail');
   const columnInset = contentInset(useWindowDimensions().width - (wide ? DETAIL_PANE_WIDTH : 0));
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { ingredients = [] } = data;
 

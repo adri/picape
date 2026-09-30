@@ -47,14 +47,23 @@ defmodule Picape.Order.LineFromSupermarket do
 
   def convert_item(item = %{"product" => %{"id" => _}}) do
     product = item["product"]
+    availability = product["availability"] || %{}
 
     %Item{
       id: product["id"],
       name: product["title"],
       image_url: Supermarket.image_url(product),
-      quantity: item["quantity"]
+      quantity: item["quantity"],
+      is_orderable: orderable?(availability),
+      availability_label: availability["availabilityLabel"]
     }
   end
+
+  # `isOrderable` is the supermarket's own verdict; the online status is the
+  # fallback for products whose payload leaves it out.
+  defp orderable?(%{"isOrderable" => false}), do: false
+  defp orderable?(%{"online" => %{"status" => status}}), do: status == "AVAILABLE"
+  defp orderable?(_), do: true
 
   # The supermarket reports money in euros with a fractional part. Truncating
   # that to whole euros dropped the cents the cart heading has to show.

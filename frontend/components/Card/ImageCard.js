@@ -1,8 +1,9 @@
 import { ImageBackground } from 'expo-image';
 import * as React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Animated, Platform, Pressable, View, Text, StyleSheet } from 'react-native';
 
 import { useTheme } from '../../constants/Colors';
+import { FADE_IN, prefersReducedMotion } from '../../constants/Motion';
 import { Radius, Spacing } from '../../constants/Spacing';
 import Type from '../../constants/Type';
 
@@ -10,8 +11,6 @@ import Type from '../../constants/Type';
 // row scrolls. The 3:2 crop is what the photos are shot at.
 export const CARD_WIDTH = 200;
 export const CARD_HEIGHT = 134;
-
-const FADE_IN = { duration: 260, effect: 'cross-dissolve', timing: 'ease-out' };
 
 // What marks the card whose recipe the pane is showing.
 const RING = 2;
@@ -43,8 +42,21 @@ export function ImageCard({
 }) {
   const colors = useTheme();
 
+  // The card answers a touch by shrinking a little, the way a physical card
+  // gives under a finger. A reader who asked for less motion gets no movement.
+  const scale = React.useRef(new Animated.Value(1)).current;
+  const pressTo = (value) => {
+    if (prefersReducedMotion()) return;
+    Animated.spring(scale, {
+      toValue: value,
+      useNativeDriver: Platform.OS !== 'web',
+      speed: 40,
+      bounciness: 4,
+    }).start();
+  };
+
   return (
-    <View style={style}>
+    <Animated.View style={[style, { transform: [{ scale }] }]}>
       <ImageBackground
         source={{ uri: imageUrl }}
         contentFit="cover"
@@ -76,13 +88,14 @@ export function ImageCard({
             around it, so the two stay separate targets and the markup stays
             valid. Both are positioned against the picture, so a long title
             below cannot drag the control off the corner. */}
-        <TouchableOpacity
+        <Pressable
           style={StyleSheet.absoluteFill}
           onPress={onPress}
-          activeOpacity={0.85}
+          onPressIn={() => pressTo(0.96)}
+          onPressOut={() => pressTo(1)}
           accessibilityRole="button"
           accessibilityLabel={title}
-          delayPressIn={100}
+          unstable_pressDelay={100}
         />
         {!!children && (
           <View
@@ -113,6 +126,6 @@ export function ImageCard({
         </Text>
         {badges}
       </View>
-    </View>
+    </Animated.View>
   );
 }

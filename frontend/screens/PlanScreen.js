@@ -1,10 +1,10 @@
 import { useQuery } from '@apollo/client';
 import { useScrollToTop } from '@react-navigation/native';
 import * as React from 'react';
-import { Text, View, FlatList } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { Text, View, FlatList, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ErrorState } from '../components/ErrorState';
 import { Badge } from '../components/Badge/Badge';
 import { CARD_WIDTH, ImageCard } from '../components/Card/ImageCard';
 import { PlanRecipe } from '../components/Recipe/PlanRecipe';
@@ -13,7 +13,7 @@ import { SectionLink } from '../components/Section/SectionLink';
 import { Separator } from '../components/Section/Separator';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
 import Colors from '../constants/Colors';
-import Layout from '../constants/Layout';
+import { useBottomBarInset } from '../constants/Layout';
 import { Gutter, Spacing } from '../constants/Spacing';
 import { GET_LAST_RECIPES } from '../operations/getLastRecipes';
 import { GET_RECIPES } from '../operations/getRecipes';
@@ -21,7 +21,7 @@ import { GET_RECIPES } from '../operations/getRecipes';
 function LastRecipesList({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_LAST_RECIPES);
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { recipes = [] } = data;
 
@@ -197,7 +197,7 @@ const SHELVES = [
 function RecipeList({ navigation }) {
   const { loading, error, data = {} } = useQuery(GET_RECIPES);
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { recipes = [] } = data;
   const shelves = SHELVES.map((shelf) => ({ ...shelf, recipes: shelf.pick(recipes) })).filter(
@@ -224,10 +224,11 @@ function RecipeList({ navigation }) {
 export default function PlanScreen({ navigation }) {
   const scrollRef = React.useRef(null);
   useScrollToTop(scrollRef);
+  const bottomInset = useBottomBarInset();
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: Layout.tabBarHeight }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: bottomInset }}>
         <SectionHeader title="Recepten" large>
           <SectionLink
             title="Planner"

@@ -135,6 +135,7 @@ test.beforeEach(async ({ page, request }, testInfo) => {
   // Activating an offer is a write the fake remembers and Phoenix caches, so
   // both sides have to go back to the fixture between tests.
   await request.post('http://localhost:4010/dev/invalidate-bonus');
+  await request.post('http://localhost:4010/dev/invalidate-orders');
   await page.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
   if (testInfo.project.name === 'iphone-standalone') {
     await emulateStandalone(page, STANDALONE_INSETS);
@@ -329,4 +330,92 @@ test('the cart names the ingredient that cannot be delivered', async ({ page }, 
   await expect(row.getByText('Niet leverbaar')).toHaveCount(1);
 
   expect(problems).toEqual([]);
+});
+
+test('the cart flags what the supermarket cannot deliver right now', async ({ page }, testInfo) => {
+  const problems = watch(page);
+  await openApp(page, testInfo);
+  await tab(page, /Mandje/).click();
+  await settle(page);
+
+  // The basket's own availability read: the fixture's Kipfilet is
+  // "Tijdelijk uitverkocht", which is what the row has to say rather than the
+  // generic warning the stored product card carries. The row reads the
+  // ingredient name, Chicken.
+  const row = page.getByRole('button', { name: 'Chicken', exact: true }).locator('xpath=..');
+  await expect(row.getByText('Tijdelijk uitverkocht')).toHaveCount(1);
+
+  expect(problems).toEqual([]);
+});
+
+// MCP is the only channel that manages replacements: there is no GraphQL
+// mutation for them and the MCP endpoint lives on the same Phoenix the app
+// reads. The calls seed exactly what the MCP tool promises: Chicken replaced
+// by Sinaasappel, then Chicken wanted once.
+async function mcp(request, name, args) {
+  const response = await request.post('http://localhost:4010/mcp', {
+    data: {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'tools/call',
+      params: { name, arguments: args },
+    },
+  });
+  const body = await response.json();
+  if (body.result?.isError) throw new Error(`mcp ${name}: ${JSON.stringify(body.result)}`);
+  return JSON.parse(body.result.content[0].text);
+}
+
+test('the cart names the ingredient a replacement stands in for', async ({ page, request }, testInfo) => {
+  const problems = watch(page);
+  const found = await mcp(request, 'search_ingredients', { query: 'Chicken' });
+  const chicken = found.find((i) => i.name === 'Chicken');
+  const sinaas = (await mcp(request, 'search_ingredients', { query: 'Sinaasappel' })).find(
+    (i) => i.name === 'Sinaasappel'
+  );
+
+  await mcp(request, 'set_ingredient_replacement', {
+    ingredient_id: chicken.id,
+    replacement_ingredient_id: sinaas.id,
+  });
+  await mcp(request, 'set_ingredient_quantity', { ingredient_id: chicken.id, quantity: 1 });
+
+  try {
+    await openApp(page, testInfo);
+    await tab(page, /Mandje/).click();
+    await settle(page);
+
+    // The wanted Chicken cannot be delivered, so the basket keeps the
+    // sinaasappelen and the row has to say what it stands in for. The row
+    // reads the ingredient name, Sinaasappel.
+    const row = page.getByRole('button', { name: 'Sinaasappel', exact: true }).locator('xpath=..');
+    await expect(row.getByText('Vervanging voor Chicken')).toHaveCount(1);
+    expect(problems).toEqual([]);
+  } finally {
+    await mcp(request, 'set_ingredient_quantity', { ingredient_id: chicken.id, quantity: 0 });
+    await mcp(request, 'set_ingredient_replacement', {
+      ingredient_id: chicken.id,
+      replacement_ingredient_id: null,
+    });
+  }
+});
+
+test('a paid order freezes the cart as Besteld', async ({ page, request }, testInfo) => {
+  const problems = watch(page);
+  await request.post('http://localhost:4020/__place_order');
+  await request.post('http://localhost:4010/dev/invalidate-orders');
+
+  try {
+    await openApp(page, testInfo);
+    await tab(page, /Mandje/).click();
+    await settle(page);
+
+    // The delivery heading is where the screen says what state the order is
+    // in; while the supermarket processes the paid order it reads "Besteld".
+    await expect(page.getByText('Besteld', { exact: true })).toHaveCount(1);
+    expect(problems).toEqual([]);
+  } finally {
+    await request.post('http://localhost:4020/__deliver_order');
+    await request.post('http://localhost:4010/dev/invalidate-orders');
+  }
 });

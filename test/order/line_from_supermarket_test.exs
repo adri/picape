@@ -36,4 +36,46 @@ defmodule Picape.Order.LineFromSupermarketTest do
 
     assert line.delivery_date == nil
   end
+
+  test "it flags a product the supermarket cannot deliver" do
+    item = %{
+      "quantity" => 1,
+      "product" => %{
+        "id" => 1,
+        "title" => "Kipfilet",
+        "availability" => %{
+          "isOrderable" => false,
+          "availabilityLabel" => "Tijdelijk uitverkocht"
+        }
+      }
+    }
+
+    [converted] = LineFromSupermarket.convert(%{@cart | "items" => [item]}).items
+
+    refute converted.is_orderable
+    assert converted.availability_label == "Tijdelijk uitverkocht"
+  end
+
+  test "it flags a product the online status alone marks unavailable" do
+    item = %{
+      "quantity" => 1,
+      "product" => %{
+        "id" => 1,
+        "title" => "Kipfilet",
+        "availability" => %{"online" => %{"status" => "UNAVAILABLE"}}
+      }
+    }
+
+    [converted] = LineFromSupermarket.convert(%{@cart | "items" => [item]}).items
+
+    refute converted.is_orderable
+  end
+
+  test "a product without availability data counts as orderable" do
+    item = %{"quantity" => 1, "product" => %{"id" => 1, "title" => "Kipfilet"}}
+
+    [converted] = LineFromSupermarket.convert(%{@cart | "items" => [item]}).items
+
+    assert converted.is_orderable
+  end
 end

@@ -71,6 +71,9 @@ test.beforeEach(async ({ page, request }) => {
   // otherwise leave it planned for everything after it.
   await request.post('http://localhost:4010/dev/reset-plan');
   await request.post('http://localhost:4010/dev/invalidate-cart');
+  // The fake can pretend an order was paid or delivered, and Phoenix caches
+  // the summaries, so both sides have to go back to the fixture between tests.
+  await request.post('http://localhost:4010/dev/invalidate-orders');
   await page.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
 });
 
@@ -545,22 +548,33 @@ test('tapping the tab you are already on scrolls that screen to the top', async 
 });
 
 // Watches how far anything travels, and whether anything cross-fades, over the
-// frames that follow. React Navigation animates a card on web by writing the
-// transform and the opacity straight onto the element, so reading the inline
-// style costs no layout and catches every frame the browser paints.
+// frames that follow. React Navigation animates a card on web through the Web
+// Animations API, which never writes the moving frames onto the inline style:
+// the computed transform of each running animation's target carries them. The
+// inline-style read stays for anything still driven frame by frame.
 async function watchMotion(page) {
   await page.addInitScript(() => {
     window.__motion = { travelled: 0, crossFaded: false };
+    const measure = (x, opacity) => {
+      window.__motion.travelled = Math.max(window.__motion.travelled, Math.abs(x));
+      if (opacity > 0.001 && opacity < 0.999) {
+        window.__motion.crossFaded = true;
+      }
+    };
     const tick = () => {
       for (const el of document.querySelectorAll('div[style]')) {
         const moved = /translateX\((-?[\d.]+)px\)/.exec(el.style.transform || '');
-        if (moved) {
-          window.__motion.travelled = Math.max(window.__motion.travelled, Math.abs(+moved[1]));
+        if (moved || el.style.opacity !== '') {
+          measure(moved ? +moved[1] : 0, +el.style.opacity);
         }
-        const opacity = el.style.opacity;
-        if (opacity !== '' && +opacity > 0.001 && +opacity < 0.999) {
-          window.__motion.crossFaded = true;
-        }
+      }
+      for (const animation of document.getAnimations()) {
+        const el = animation.effect && animation.effect.target;
+        if (!el) continue;
+        const style = getComputedStyle(el);
+        // translateX shows in the computed matrix as the fifth of six values.
+        const matrix = /matrix\([^,]+,[^,]+,[^,]+,[^,]+,\s*(-?[\d.]+)/.exec(style.transform);
+        measure(matrix ? +matrix[1] : 0, +style.opacity);
       }
       requestAnimationFrame(tick);
     };

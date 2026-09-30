@@ -9,11 +9,15 @@ export const orderFields = gql`
     deliveryDate
     deliveryStartTime
     deliveryEndTime
+    isPlaced
     items {
       id
       name
       quantity
       imageUrl
+      isOrderable
+      availabilityLabel
+      substitutedFor
       ingredient {
         id
         name
