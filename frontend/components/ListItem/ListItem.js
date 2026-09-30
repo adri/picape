@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 
 import { Subtitle } from './Subtitle';
 import { useTheme } from '../../constants/Colors';
+import { FADE_IN } from '../../constants/Motion';
 import { Radius, Spacing } from '../../constants/Spacing';
 import Type from '../../constants/Type';
 
@@ -39,10 +40,10 @@ export function ListItem({
         justifyContent: 'center',
         alignItems: 'center',
         padding: Spacing.xs,
-        // Product shots come as cut-outs on white, so the tile stays light in
-        // both themes. It is a shade off pure white so an image that fails to
-        // load reads as an empty tile rather than a hole punched in the row.
-        backgroundColor: '#f2f2f2',
+        // Product shots come as cut-outs on pure white, so the tile is the
+        // same white in both themes: a shade off reads as a border around the
+        // picture once it loads.
+        backgroundColor: '#ffffff',
         borderRadius: Radius.sm,
         width: THUMB + Spacing.sm,
         height: THUMB + Spacing.sm,
@@ -50,6 +51,7 @@ export function ListItem({
       <Image
         source={{ uri: imageUrl }}
         contentFit="contain"
+        transition={FADE_IN}
         style={{ width: THUMB, height: THUMB }}
       />
     </View>
@@ -94,7 +96,18 @@ export function ListItem({
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <Text numberOfLines={2} style={[Type.row, { color: colors.cardText }, textStyle]}>
           {title}
-          {!!badges && <View style={{ marginLeft: Spacing.xs }}>{badges}</View>}
+          {!!badges && (
+            <View
+              style={{
+                marginLeft: Spacing.md,
+                // Inline views sit on the text's baseline, which puts a 16pt
+                // circle high against the letters. Two points down lands it on
+                // the optical middle of the row's name.
+                transform: [{ translateY: 2 }],
+              }}>
+              {badges}
+            </View>
+          )}
         </Text>
         {!!subtitle && <Subtitle subtitle={subtitle} textStyle={textStyle} />}
       </View>

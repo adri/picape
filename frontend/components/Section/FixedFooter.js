@@ -5,8 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../constants/Colors';
 import Layout from '../../constants/Layout';
-import { Spacing } from '../../constants/Spacing';
+import { Radius, Spacing } from '../../constants/Spacing';
 import Type from '../../constants/Type';
+import { Glass, glassAvailable } from '../Glass/Glass';
 
 // What the footer's button occupies above the bottom safe-area inset: its own
 // padding, one line of text and the room below it. A screen adds this to its
@@ -50,24 +51,31 @@ export function FixedFooter({ buttonText, onPress, disabled }) {
         locations={[0, 0.55, 1]}
         style={StyleSheet.absoluteFill}
       />
-      <Text
-        disabled={disabled}
-        onPress={(e) => !disabled && onPress(e)}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: !!disabled }}
-        style={[
-          Type.sectionLink,
-          {
-            color: colors.text,
-            paddingVertical: Spacing.md,
-            paddingHorizontal: Spacing.xxl,
-            backgroundColor: disabled ? colors.iconDefault : colors.iconSelected,
-            borderRadius: Layout.borderRadius,
-            overflow: 'hidden',
-          },
-        ]}>
-        {buttonText}
-      </Text>
+      <Glass
+        interactive={!disabled}
+        tintColor={disabled ? colors.iconDefault : colors.iconSelected}
+        style={glassAvailable && { borderRadius: Radius.pill }}>
+        <Text
+          disabled={disabled}
+          onPress={(e) => !disabled && onPress(e)}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !!disabled }}
+          style={[
+            Type.sectionLink,
+            {
+              color: colors.text,
+              paddingVertical: Spacing.md,
+              paddingHorizontal: Spacing.xxl,
+            },
+            !glassAvailable && {
+              backgroundColor: disabled ? colors.iconDefault : colors.iconSelected,
+              borderRadius: Layout.borderRadius,
+              overflow: 'hidden',
+            },
+          ]}>
+          {buttonText}
+        </Text>
+      </Glass>
     </View>
   );
 }

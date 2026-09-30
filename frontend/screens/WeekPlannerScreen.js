@@ -1,8 +1,9 @@
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useApolloClient } from '@apollo/client';
 import * as React from 'react';
-import { View, Text, ScrollView, FlatList, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
 
+import { ErrorState } from '../components/ErrorState';
 import { Card } from '../components/Card/Card';
 import { ImageCard } from '../components/Card/ImageCard';
 import { BackIcon, RefreshIcon, MinusIcon, PlusIcon } from '../components/Icon';
@@ -39,11 +40,11 @@ export default function WeekPlannerScreen({ navigation }) {
   const insets = useSafeArea();
   const columns = gridColumns(useWindowDimensions().width);
   const [amount, setAmount] = React.useState(4);
-  const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });
+  const client = useApolloClient();
 
   const [chosenRecipes, setRecipes] = React.useState(getRandom(recipes, amount));
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   return (
     <View style={{ flex: 1 }}>
@@ -53,6 +54,9 @@ export default function WeekPlannerScreen({ navigation }) {
           paddingTop: insets.top,
           paddingBottom: insets.bottom + FOOTER_HEIGHT + 20,
         }}>
+        {/* An empty row under the notch, so the floating back button has
+            somewhere to sit that is not on top of the title. */}
+        <SectionHeader title="" />
         <SectionHeader title="Week planner" large />
 
         <SkeletonContent
@@ -67,48 +71,40 @@ export default function WeekPlannerScreen({ navigation }) {
           boneColor={Colors.skeletonBone}
           highlightColor={Colors.skeletonHighlight}
           isLoading={loading && chosenRecipes.length === 0}>
-          {/* FlatList cannot change numColumns in place, so the key remounts it
-              when a rotation changes how many cards fit. */}
-          <FlatList
-            key={columns}
-            initialNumToRender={3}
-            numColumns={columns}
-            windowSize={3}
-            columnWrapperStyle={{ paddingHorizontal: Gutter - Spacing.xs }}
-            data={chosenRecipes}
-            keyExtractor={(recipe) => recipe.id}
-            renderItem={({ item: recipe, index }) => {
-              return (
-                <ImageCard
-                  style={[styles.imageCard, { width: `${100 / columns}%` }]}
-                  imageStyle={styles.imageCardStyle}
-                  key={recipe.id}
-                  title={recipe.title}
-                  imageUrl={recipe.imageUrl}
-                  badges={recipe.warning && <Text>⚠️</Text>}
+          {/* A plan is a handful of cards, so a wrapping row does the job a
+              FlatList did. A virtualized list here sat inside the screen's
+              ScrollView on the same axis, which broke its windowing. */}
+          <View style={styles.grid}>
+            {chosenRecipes.map((recipe, index) => (
+              <ImageCard
+                style={[styles.imageCard, { width: `${100 / columns}%` }]}
+                imageStyle={styles.imageCardStyle}
+                key={recipe.id}
+                title={recipe.title}
+                imageUrl={recipe.imageUrl}
+                badges={recipe.warning && <Text>⚠️</Text>}
+                onPress={(e) => {
+                  e.preventDefault();
+                  navigation.navigate('RecipeDetail', {
+                    id: recipe.id,
+                    recipe,
+                  });
+                }}>
+                <RefreshIcon
                   onPress={(e) => {
                     e.preventDefault();
-                    navigation.navigate('RecipeDetail', {
-                      id: recipe.id,
-                      recipe,
-                    });
-                  }}>
-                  <RefreshIcon
-                    onPress={(e) => {
-                      e.preventDefault();
-                      setRecipes(replaceRecipe(chosenRecipes, index, getRandom(recipes, 1)[0]));
-                    }}
-                  />
-                  <MinusIcon
-                    onPress={(e) => {
-                      e.preventDefault();
-                      setRecipes(removeRecipe(chosenRecipes, index));
-                    }}
-                  />
-                </ImageCard>
-              );
-            }}
-          />
+                    setRecipes(replaceRecipe(chosenRecipes, index, getRandom(recipes, 1)[0]));
+                  }}
+                />
+                <MinusIcon
+                  onPress={(e) => {
+                    e.preventDefault();
+                    setRecipes(removeRecipe(chosenRecipes, index));
+                  }}
+                />
+              </ImageCard>
+            ))}
+          </View>
           <Card
             style={{ flexBasis: '100%', marginTop: 10 }}
             cardStyle={styles.cardStyle}
@@ -145,7 +141,8 @@ export default function WeekPlannerScreen({ navigation }) {
         onPress={(e) => {
           e.preventDefault();
           chosenRecipes.map(({ id }) =>
-            planRecipe({
+            client.mutate({
+              mutation: PLAN_RECIPE,
               variables: { recipeId: id },
               optimisticResponse: optimisticResponse('planRecipe', id, true),
             })
@@ -158,6 +155,12 @@ export default function WeekPlannerScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '100%',
+    paddingHorizontal: Gutter - Spacing.xs,
+  },
   imageCard: {
     paddingHorizontal: Spacing.xs,
     paddingBottom: Spacing.xl,

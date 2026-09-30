@@ -10,6 +10,7 @@ import { FixedFooter, FOOTER_HEIGHT } from '../components/Section/FixedFooter';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import Colors, { useTheme } from '../constants/Colors';
 import { FloatingTop, Spacing } from '../constants/Spacing';
+import { useSheetGesture } from '../navigation/useSheetGesture';
 
 const ADD_INGREDIENT = gql`
   mutation AddIngredient($name: String!, $isEssential: Boolean!, $supermarketProductId: String!) {
@@ -41,6 +42,7 @@ export function AddIngredientScreen({
   });
   const insets = useSafeAreaInsets();
   const colors = useTheme();
+  const onSheetScroll = useSheetGesture(navigation);
   const [addIngredient] = useMutation(ADD_INGREDIENT, {
     onCompleted: () => {
       navigation.goBack();
@@ -54,6 +56,8 @@ export function AddIngredientScreen({
     <View style={{ flex: 1 }}>
       <ScrollView
         style={{ flex: 1 }}
+        onScroll={onSheetScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_HEIGHT + 20 }}>
         <SectionHeader title="" />
         <SectionHeader title="Ingredient toevogen" large />

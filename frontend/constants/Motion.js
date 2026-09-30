@@ -13,6 +13,11 @@ export const Easing = {
   enter: 'ease-out',
 };
 
+// An image arriving over the network cross-dissolves over its placeholder:
+// the card filling in reads as loading, a hard swap reads as a glitch. Expo's
+// `transition` prop takes this shape.
+export const FADE_IN = { duration: 260, effect: 'cross-dissolve', timing: 'ease-out' };
+
 // react-native-web 0.21 compiles no `@media` rule from StyleSheet.create, so
 // `prefers-reduced-motion` has to be read in JavaScript. AccessibilityInfo
 // wraps the same media query but answers with a promise, and it resolves true
@@ -23,6 +28,8 @@ export const Easing = {
 // listener updates. Callers ask for it during render, so nothing subscribes and
 // nothing re-renders: a list that is already re-render bound cannot afford a
 // hook per row.
+import { AccessibilityInfo } from 'react-native';
+
 const query =
   typeof window !== 'undefined' && typeof window.matchMedia === 'function'
     ? window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -33,6 +40,18 @@ let reduced = query ? query.matches : false;
 if (query && query.addEventListener) {
   query.addEventListener('change', (event) => {
     reduced = event.matches;
+  });
+}
+
+if (!query) {
+  // iOS and Android have no matchMedia; AccessibilityInfo carries the same
+  // setting there. It answers asynchronously, so a reader in the first frame
+  // after a settings change can still see the old value.
+  AccessibilityInfo.isReduceMotionEnabled().then((value) => {
+    reduced = value;
+  });
+  AccessibilityInfo.addEventListener('reduceMotionChanged', (value) => {
+    reduced = value;
   });
 }
 

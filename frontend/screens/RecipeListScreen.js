@@ -4,6 +4,7 @@ import { Text, View, FlatList, useWindowDimensions } from 'react-native';
 import { useSafeArea } from 'react-native-safe-area-context';
 
 import RecipeDetailScreen from './RecipeDetailScreen';
+import { ErrorState } from '../components/ErrorState';
 import { ImageCard } from '../components/Card/ImageCard';
 import { BackIcon } from '../components/Icon';
 import { SplitView, useSelection } from '../components/Layout/SplitView';
@@ -87,7 +88,7 @@ export function RecipeListScreen({ navigation }) {
     [open, wide, selected, cellStyle]
   );
 
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const header = (
     <View>

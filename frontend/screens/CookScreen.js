@@ -1,8 +1,9 @@
 import { useQuery } from '@apollo/client';
 import * as React from 'react';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ErrorState } from '../components/ErrorState';
 import { ImageCard } from '../components/Card/ImageCard';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import SkeletonContent from '../components/Skeleton/SkeletonContent';
@@ -17,7 +18,7 @@ export default function CookScreen({ navigation }) {
   } = useQuery(GET_LAST_RECIPES, {
     fetchPolicy: 'cache-and-network',
   });
-  if (error) return `Error! ${error}`;
+  if (error) return <ErrorState error={error} />;
 
   const { recipes = [] } = data;
 

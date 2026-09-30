@@ -153,15 +153,7 @@ class SearchBar extends Component {
                 />
               )}
               {rightIcon && rightIcon}
-              {!isEmpty && (
-                <Icon
-                  {...{
-                    ...defaultClearIcon,
-                    key: 'cancel',
-                    onPress: this.clear,
-                  }}
-                />
-              )}
+              {!isEmpty && <Icon key="cancel" {...defaultClearIcon} onPress={this.clear} />}
             </View>
           }
           rightIconContainerStyle={StyleSheet.flatten([

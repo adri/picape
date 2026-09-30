@@ -1,8 +1,7 @@
 import { useQuery, gql } from '@apollo/client';
 import { Image } from 'expo-image';
 import * as React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge } from '../components/Badge/Badge';
@@ -12,7 +11,8 @@ import { useDetailPane } from '../components/Layout/SplitView';
 import { SectionHeader } from '../components/Section/SectionHeader';
 import { Separator } from '../components/Section/Separator';
 import { useTheme } from '../constants/Colors';
-import Layout, { contentColumn } from '../constants/Layout';
+import { contentColumn, useBottomBarInset } from '../constants/Layout';
+import { FADE_IN } from '../constants/Motion';
 import { Gutter, Radius, Spacing } from '../constants/Spacing';
 import Type from '../constants/Type';
 
@@ -43,10 +43,6 @@ const GET_INGREDIENT_DETAIL = gql`
 
 const euros = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
 
-// The picture arrives over the network, so it fades in over its tile the way a
-// recipe card's does rather than snapping into place.
-const FADE_IN = { duration: 260, effect: 'cross-dissolve', timing: 'ease-out' };
-
 // Enough of the screen to read the packet by, and little enough that the price
 // is still on the first screenful.
 const PHOTO_HEIGHT = 200;
@@ -68,6 +64,7 @@ export function IngredientDetailScreen({
   },
 }) {
   const insets = useSafeAreaInsets();
+  const bottomInset = useBottomBarInset();
   const colors = useTheme();
   // Beside the list rather than pushed over it: the list never left, so there
   // is nothing to go back to and no button offering it.
@@ -119,7 +116,7 @@ export function IngredientDetailScreen({
           {
             // The tab bar spans the display, so in a pane it crosses this
             // column too and the last line would end up under it.
-            paddingBottom: insets.bottom + Spacing.xxl + (inPane ? Layout.tabBarHeight : 0),
+            paddingBottom: Spacing.xxl + (inPane ? bottomInset : insets.bottom),
           },
         ]}>
         {!!ingredient.largeImageUrl && (

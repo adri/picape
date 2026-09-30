@@ -1,19 +1,21 @@
-import { useMutation } from '@apollo/client';
+import { useApolloClient } from '@apollo/client';
 import * as React from 'react';
 
 import { PLAN_RECIPE, UNPLAN_RECIPE, optimisticResponse } from '../../operations/planRecipe';
 import { PlusIcon, CheckIcon } from '../Icon';
 
 export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
-  const [planRecipe] = useMutation(PLAN_RECIPE, { ignoreResults: true });
-  const [unplanRecipe] = useMutation(UNPLAN_RECIPE, { ignoreResults: true });
+  // client.mutate rather than useMutation: nothing here reads the mutation's
+  // result state, and useMutation warns when it is told to ignore it.
+  const client = useApolloClient();
 
   if (isPlanned) {
     return (
       <CheckIcon
         onPress={(e) => {
           e.preventDefault();
-          unplanRecipe({
+          client.mutate({
+            mutation: UNPLAN_RECIPE,
             variables: { recipeId: id },
             optimisticResponse: optimisticResponse('unplanRecipe', id, false),
           });
@@ -26,7 +28,8 @@ export const PlanRecipe = React.memo(function ({ id, isPlanned }) {
     <PlusIcon
       onPress={(e) => {
         e.preventDefault();
-        planRecipe({
+        client.mutate({
+          mutation: PLAN_RECIPE,
           variables: { recipeId: id },
           optimisticResponse: optimisticResponse('planRecipe', id, true),
         });
