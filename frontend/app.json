@@ -16,11 +16,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.adri.picape",
-      "icon": {
-        "light": "./assets/images/icon.png",
-        "dark": "./assets/images/icon-dark.png",
-        "tinted": "./assets/images/icon-tinted.png"
-      }
+      "icon": "./assets/app.icon"
     },
     "plugins": [
       "sentry-expo",

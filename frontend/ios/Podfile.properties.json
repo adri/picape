@@ -4,7 +4,7 @@
   "expo.inlineModules.watchedDirectories": "[]",
   "expo.inlineModules.xcodeProjectTargets": "{\"mainTarget\":\"Picape\",\"targets\":[]}",
   "ios.forceStaticLinking": "[]",
-  "apple.privacyManifestAggregationEnabled": "false",
+  "apple.privacyManifestAggregationEnabled": "true",
   "ios.buildReactNativeFromSource": "true",
   "EXPO_USE_PRECOMPILED_MODULES": "true"
 }

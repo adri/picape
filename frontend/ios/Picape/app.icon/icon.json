@@ -1,0 +1,106 @@
+{
+  "fill": {
+    "solid": "srgb:0.60000,0.33000,0.23000,1.00000"
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "details.svg",
+          "name": "details"
+        },
+        {
+          "image-name-specializations": [
+            {
+              "value": "tomatoes.svg"
+            },
+            {
+              "appearance": "tinted",
+              "value": "tomatoes-tinted.svg"
+            }
+          ],
+          "name": "tomatoes"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.0
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name-specializations": [
+            {
+              "value": "eggplant.svg"
+            },
+            {
+              "appearance": "tinted",
+              "value": "eggplant-tinted.svg"
+            }
+          ],
+          "name": "eggplant"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.0
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "onions.svg",
+          "name": "onions"
+        },
+        {
+          "image-name": "spaghetti.svg",
+          "name": "spaghetti"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.0
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name-specializations": [
+            {
+              "value": "wood.svg"
+            },
+            {
+              "appearance": "dark",
+              "value": "wood-dark.svg"
+            }
+          ],
+          "name": "wood",
+          "glass": false,
+          "hidden-specializations": [
+            {
+              "appearance": "tinted",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "lighting": "individual"
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}
