@@ -15,7 +15,12 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "bundleIdentifier": "com.adri.picape"
+      "bundleIdentifier": "com.adri.picape",
+      "icon": {
+        "light": "./assets/images/icon.png",
+        "dark": "./assets/images/icon-dark.png",
+        "tinted": "./assets/images/icon-tinted.png"
+      }
     },
     "plugins": [
       "sentry-expo",
@@ -29,6 +34,14 @@
           "resizeMode": "cover",
           "backgroundColor": "#000000",
           "enableFullScreenImage_legacy": true
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "buildReactNativeFromSource": true
+          }
         }
       ]
     ],
