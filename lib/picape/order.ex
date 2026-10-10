@@ -1,6 +1,8 @@
 defmodule Picape.Order do
   import Ecto.Query
 
+  require Logger
+
   alias Picape.Order.{
     LineFromSupermarket,
     LineFromDb,
@@ -146,6 +148,10 @@ defmodule Picape.Order do
       archive_placed_order(order_id)
       current()
     else
+      # The basket is cached for five hours. Deciding from a copy taken while
+      # the product was still orderable misses "Tijdelijk uitverkocht".
+      Supermarket.invalidate_cart()
+
       with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
            {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
            {:ok, manual} <- manual_ingredients(order_id),
@@ -153,12 +159,21 @@ defmodule Picape.Order do
            {:ok, existing} <- ordered_item_quantities(line),
            {:ok, changes} <-
              Sync.changes(substitute(planned, line), substitute(manual, line), existing) do
-        Supermarket.apply_changes(changes)
-
+        push_cart(changes)
         current()
       else
         _ -> current()
       end
+    end
+  end
+
+  defp push_cart(changes) do
+    case Supermarket.apply_changes(changes) do
+      {:ok, _} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning("supermarket cart sync failed: #{inspect(reason, limit: 5)}")
     end
   end
 

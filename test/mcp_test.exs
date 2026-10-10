@@ -4,7 +4,7 @@ defmodule Picape.MCPTest do
   import Ecto.Query
   import Picape.Factory
 
-  alias Picape.Order
+  alias Picape.{Order, Supermarket}
   alias Picape.Recipe
   alias Picape.Recipe.Ingredient
   alias Picape.Recipe.IngredientRef
@@ -286,6 +286,36 @@ defmodule Picape.MCPTest do
                  ingredient_id: kip.id,
                  replacement_ingredient_id: nil
                })
+    end
+
+    test "orders the replacement when the basket already cannot deliver the product" do
+      kip =
+        insert!(:ingredient,
+          name: "Kipfilet",
+          supermarket_product_id: 10_291_994,
+          supermarket_product_raw: %{
+            "productCard" => %{"orderAvailabilityStatus" => "IN_ASSORTMENT"}
+          }
+        )
+
+      tahoe = insert!(:ingredient, name: "Kiptahoe", supermarket_product_id: 519_017)
+      insert!(:manual_ingredient, ingredient_id: kip.id, quantity: 2)
+
+      assert %{"replacement_ingredient_id" => rid} =
+               call!("set_ingredient_replacement", %{
+                 ingredient_id: kip.id,
+                 replacement_ingredient_id: tahoe.id
+               })
+
+      assert rid == tahoe.id
+
+      Supermarket.invalidate_cart()
+      cart = Supermarket.cart()
+      assert product_quantity(cart, 519_017) == 2
+      assert product_quantity(cart, 10_291_994) == 2
+
+      assert %{"substituted_for" => "Kipfilet"} =
+               Enum.find(call!("get_shopping_list")["items"], &(&1["name"] == "Handsinaasappelen"))
     end
 
     test "refuses an ingredient as its own replacement and reports unknown ids" do
@@ -593,6 +623,13 @@ defmodule Picape.MCPTest do
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.put_assoc(:tags, [tag])
     |> Repo.update!()
+  end
+
+  defp product_quantity(cart, product_id) do
+    Enum.find_value(cart["items"], fn
+      %{"product" => %{"id" => ^product_id}, "quantity" => quantity} -> quantity
+      _ -> nil
+    end)
   end
 
   defp content(result) do

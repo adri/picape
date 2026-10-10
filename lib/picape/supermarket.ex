@@ -49,7 +49,11 @@ defmodule Picape.Supermarket do
     ConCache.delete(:supermarket, "product-#{product_id}")
   end
 
-  def apply_changes(changes) do
+  # A 400 or a conflict used to be retried when the cart was a REST resource.
+  # The GraphQL mutation answers 200 with a status instead, and a single
+  # refusal drops the whole diff, replacement included. Drop the cached basket
+  # and try the same diff again before giving up.
+  def apply_changes(changes, attempt \\ 1) do
     cart = cart()
     items = CartItems.apply_changes(changes, cart)
 
@@ -61,7 +65,12 @@ defmodule Picape.Supermarket do
         invalidate_cart()
         {:ok, :synced}
 
+      _other when attempt < 3 ->
+        invalidate_cart()
+        apply_changes(changes, attempt + 1)
+
       other ->
+        invalidate_cart()
         {:error, other}
     end
   end
