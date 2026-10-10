@@ -43,6 +43,36 @@ defmodule Picape.Order.SyncSupermarketTest do
     assert Order.substitutions("1") == %{}
   end
 
+  # "Tijdelijk uitverkocht" is a basket verdict. The product card the nightly
+  # matcher stores still says IN_ASSORTMENT, so `warning` is nil. The swap has
+  # to come from the live basket, including on the daily sync that runs after
+  # the replacement was named.
+  test "a temporarily sold out cart product is swapped even when its product card is in assortment" do
+    kip =
+      insert!(:ingredient,
+        name: "Kipfilet",
+        supermarket_product_id: 10_291_994,
+        supermarket_product_raw: product_card_fixture(10_291_994)
+      )
+
+    sinaas = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+    replace(kip, sinaas)
+
+    assert :error = Ingredient.fetch(Repo.reload!(kip), :warning)
+
+    # The quantity was saved earlier. This is the midnight job: the row is
+    # already there and the basket already says the product cannot be delivered.
+    insert!(:manual_ingredient, ingredient_id: kip.id, quantity: 2)
+
+    assert {:ok, _line} = Order.sync_supermarket("1")
+
+    Supermarket.invalidate_cart()
+    cart = Supermarket.cart()
+    assert product_quantity(cart, 519_017) == 2
+    assert product_quantity(cart, 10_291_994) == 2
+    assert %{519_017 => %Ingredient{name: "Kipfilet"}} = Order.substitutions("1")
+  end
+
   test "a paid order freezes Picape: it archives the plan once and writes nothing" do
     rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
     recipe = insert!(:recipe, title: "Nasi", ingredients: [rijst])
@@ -104,6 +134,12 @@ defmodule Picape.Order.SyncSupermarketTest do
     ingredient
     |> Ecto.Changeset.change(replacement_ingredient_id: replacement.id)
     |> Repo.update!()
+  end
+
+  defp product_card_fixture(product_id) do
+    Path.join([__DIR__, "..", "fixtures", "supermarket", "product_#{product_id}.json"])
+    |> File.read!()
+    |> Jason.decode!()
   end
 
   defp product_in_cart?(cart, product_id) do

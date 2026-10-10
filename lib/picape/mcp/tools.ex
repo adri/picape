@@ -123,9 +123,10 @@ defmodule Picape.MCP.Tools do
       name: "set_ingredient_replacement",
       description:
         "Name the ingredient Picape orders instead when the supermarket cannot deliver this one. " <>
-          "The replacement is ordered automatically at the next sync and the cart row flags it as " <>
-          "a substitute. Pass `replacement_ingredient_id` null to clear the mapping. Find candidates " <>
-          "with search_ingredients.",
+          "Saving the mapping syncs immediately: if the basket already says this product cannot be " <>
+          "delivered, the replacement is ordered now and the cart row flags it as a substitute. A " <>
+          "product that sells out later is swapped on the next sync. Pass `replacement_ingredient_id` " <>
+          "null to clear the mapping. Find candidates with search_ingredients.",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -386,8 +387,15 @@ defmodule Picape.MCP.Tools do
       %{ingredient_id: ingredient.id, replacement_ingredient_id: replacement}
       |> Ingredients.edit_ingredient()
       |> case do
-        {:ok, edited} -> {:ok, List.first(render_ingredients([edited]))}
-        {:error, changeset} -> {:error, inspect(changeset.errors)}
+        {:ok, edited} ->
+          # The quantity sync that put this product on the list may already
+          # have run, before the mapping existed. Sync again now, or an
+          # unavailable product waits for the midnight job.
+          Order.sync_supermarket(@order_id)
+          {:ok, List.first(render_ingredients([edited]))}
+
+        {:error, changeset} ->
+          {:error, inspect(changeset.errors)}
       end
     end
   end
