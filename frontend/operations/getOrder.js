@@ -11,6 +11,7 @@ export const orderFields = gql`
     deliveryEndTime
     isPlaced
     mode
+    supermarketReachable
     items {
       id
       name

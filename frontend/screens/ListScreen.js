@@ -192,7 +192,10 @@ export default function ListScreen({ navigation }) {
   const { currentOrder: currentOrderQuery = {} } = data;
   const { currentOrder: currentOrderSubscription } = subscription;
   const currentOrder = currentOrderSubscription || currentOrderQuery;
-  const checklistMode = currentOrder.mode === 'checklist';
+  // An unreachable supermarket serves the same computed list the checklist
+  // mode does, so the screen treats both the same: ticks on, prices off.
+  const supermarketDown = currentOrder.supermarketReachable === false;
+  const checklistMode = currentOrder.mode === 'checklist' || supermarketDown;
   // A paid order is the supermarket's, not the basket's: while it is being
   // processed Picape freezes, so the heading says so rather than naming the
   // day the basket's next delivery is booked for.
@@ -230,6 +233,12 @@ export default function ListScreen({ navigation }) {
             )}
           </View>
         </SectionHeader>
+
+        {supermarketDown && (
+          <Text style={[Type.subtitle, styles.supermarketDown]}>
+            De supermarkt is onbereikbaar. Je ziet je checklist.
+          </Text>
+        )}
 
         <PlannedRecipes navigation={navigation} />
 
@@ -350,6 +359,11 @@ const styles = StyleSheet.create({
   checkedText: {
     color: Colors.secondaryText,
     textDecorationLine: 'line-through',
+  },
+  supermarketDown: {
+    color: Colors.secondaryText,
+    paddingHorizontal: Gutter,
+    paddingBottom: Spacing.lg,
   },
   // Room for both lines whether or not the order has arrived and whether or not
   // the bonus took anything off, so the heading keeps one height and the basket
