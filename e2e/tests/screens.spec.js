@@ -439,6 +439,45 @@ test('checklist mode ticks items while the supermarket is down', async ({ page, 
   }
 });
 
+// The mode switch is not the only way in: an ah order whose supermarket stops
+// answering is served as the checklist too, flagged by the notice. Nobody
+// should have to find the toggle before the cart works again.
+test('a down supermarket falls back to the checklist in ah mode', async ({ page, request }) => {
+  const problems = watch(page);
+  const found = await mcp(request, 'search_ingredients', { query: 'Chicken' });
+  const chicken = found.find((i) => i.name === 'Chicken');
+
+  await mcp(request, 'set_ingredient_quantity', { ingredient_id: chicken.id, quantity: 1 });
+  await request.post('http://localhost:4020/__down');
+  // Syncing the quantity above refilled the cart and order caches; drop them
+  // again or the app keeps reading the answer the fake gave while it was up.
+  await request.post('http://localhost:4010/dev/invalidate-cart');
+  await request.post('http://localhost:4010/dev/invalidate-orders');
+
+  try {
+    await page.goto('/');
+    await settle(page);
+    await tab(page, /Mandje/).click();
+    await settle(page);
+
+    // The heading says "lijstje", the notice says why, and the tick works.
+    await expect(page.getByText('Je lijstje', { exact: true })).toHaveCount(1);
+    await expect(page.getByText(/supermarkt is onbereikbaar/i)).toHaveCount(1);
+    const tick = page.getByRole('button', { name: 'Vink af' });
+    await expect(tick).toHaveCount(1);
+    await tick.click();
+    await expect(page.getByRole('button', { name: 'Afgevinkt' })).toHaveCount(1);
+
+    const list = await mcp(request, 'get_shopping_list', {});
+    expect(list.mode).toBe('ah');
+    expect(list.supermarket_reachable).toBe(false);
+
+    expect(problems).toEqual([]);
+  } finally {
+    await request.post('http://localhost:4020/__up');
+  }
+});
+
 test('a paid order freezes the cart as Besteld', async ({ page, request }, testInfo) => {
   const problems = watch(page);
   await request.post('http://localhost:4020/__place_order');

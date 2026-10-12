@@ -89,13 +89,61 @@ defmodule Picape.ChecklistModeTest do
     supermarket_down()
 
     assert {:ok, %{mode: "ah", pushed_to_supermarket: false, error: error}} = Order.set_mode("ah")
-    assert error =~ "503"
+    assert error =~ "unreachable"
     assert Settings.mode() == "ah"
   end
 
   test "an unknown mode is an error and changes nothing" do
     assert {:error, _} = Order.set_mode("floef")
     assert Settings.mode() == "ah"
+  end
+
+  test "an ah order falls back to the checklist while the supermarket is down" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+
+    supermarket_down()
+
+    assert {:ok, line} = Order.current()
+    assert line.supermarket_reachable == false
+    assert [%{name: "Rijst", quantity: 2, checked: false}] = line.items
+    assert line.is_placed == false
+  end
+
+  test "planning and ordering in ah mode keep working while the supermarket is down" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    recipe = insert!(:recipe, title: "Nasi", ingredients: [rijst])
+    melk = insert!(:ingredient, name: "Melk", supermarket_product_id: 999_999)
+
+    supermarket_down()
+
+    assert {:ok, line} = Order.plan_recipe("1", recipe.id)
+    assert line.supermarket_reachable == false
+    assert {:ok, _} = Order.order_ingredient("1", melk.id, 3)
+
+    assert {:ok, line} = Order.current()
+    assert Enum.map(line.items, & &1.name) |> Enum.sort() == ["Melk", "Rijst"]
+  end
+
+  test "items tick off while the supermarket is down in ah mode" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 1)
+
+    supermarket_down()
+
+    assert {:ok, _} = Checklist.check(rijst.id, true)
+    assert {:ok, line} = Order.current()
+    assert [%{name: "Rijst", checked: true}] = line.items
+  end
+
+  test "the live basket comes back when the supermarket does" do
+    supermarket_down()
+    assert {:ok, %{supermarket_reachable: false}} = Order.current()
+
+    HTTPoison.post!(@fake <> "/__up", "")
+
+    assert {:ok, %{supermarket_reachable: true} = line} = Order.current()
+    refute Enum.empty?(line.items)
   end
 
   test "a non-JSON answer is a clear error" do

@@ -140,6 +140,9 @@ type Order implements Node {
   "The supermarket is processing a paid order, so Picape froze its side of the basket."
   isPlaced: Boolean
 
+  "False while the supermarket does not answer and this order is served as the checklist instead. Only set while the order lives in the supermarket basket."
+  supermarketReachable: Boolean
+
   "Where the order lives: the supermarket basket or Picape's own checklist."
   mode: String
 }

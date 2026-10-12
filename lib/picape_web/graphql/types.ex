@@ -17,6 +17,9 @@ defmodule PicapeWeb.Graphql.Types do
     @desc "The supermarket is processing a paid order, so Picape froze its side of the basket."
     field(:is_placed, :boolean)
 
+    @desc "False while the supermarket does not answer and this order is served as the checklist instead. Only set while the order lives in the supermarket basket."
+    field(:supermarket_reachable, :boolean)
+
     @desc "Where the order lives: the supermarket basket or Picape's own checklist."
     field(:mode, :string, resolve: fn _parent, _args, _ctx -> {:ok, Picape.Settings.mode()} end)
   end
