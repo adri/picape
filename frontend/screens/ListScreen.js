@@ -8,6 +8,7 @@ import { IngredientDetailScreen } from './IngredientDetailScreen';
 import { ErrorState } from '../components/ErrorState';
 import { Badge } from '../components/Badge/Badge';
 import { ImageCard } from '../components/Card/ImageCard';
+import { CheckItem } from '../components/Ingredient/CheckItem';
 import { Nutriscore, hasNutriscore } from '../components/Ingredient/Nutriscore';
 import { OrderQuantity } from '../components/Ingredient/OrderQuantity';
 import { SplitView, useSelection } from '../components/Layout/SplitView';
@@ -22,6 +23,7 @@ import Type from '../constants/Type';
 import { SUBSCRIBE_ORDER, GET_ORDER } from '../operations/getOrder';
 import { GET_ORDER_COUNT } from '../operations/getOrderCount';
 import { GET_RECIPES } from '../operations/getRecipes';
+import { SET_MODE } from '../operations/setMode';
 import { START_SHOPPING } from '../operations/startShopping';
 
 const euros = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
@@ -181,12 +183,16 @@ export default function ListScreen({ navigation }) {
   const [startShopping] = useMutation(START_SHOPPING, {
     refetchQueries: ['BasicsList', 'OrderList', 'RecipeList', 'LastOrderedRecipes'],
   });
+  const [setMode] = useMutation(SET_MODE, {
+    refetchQueries: ['OrderList'],
+  });
 
   if (error) return <ErrorState error={error} />;
 
   const { currentOrder: currentOrderQuery = {} } = data;
   const { currentOrder: currentOrderSubscription } = subscription;
   const currentOrder = currentOrderSubscription || currentOrderQuery;
+  const checklistMode = currentOrder.mode === 'checklist';
   // A paid order is the supermarket's, not the basket's: while it is being
   // processed Picape freezes, so the heading says so rather than naming the
   // day the basket's next delivery is booked for.
@@ -197,7 +203,7 @@ export default function ListScreen({ navigation }) {
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={[contentColumn, { paddingBottom: bottomInset }]}>
-        <SectionHeader title="Je mandje" large>
+        <SectionHeader title={checklistMode ? 'Je lijstje' : 'Je mandje'} large>
           <View style={styles.orderTotal}>
             <View style={styles.orderTotalLine}>
               {deliveryDay && (
@@ -207,6 +213,16 @@ export default function ListScreen({ navigation }) {
                 {currentOrder.totalPrice > 0 ? formatEuros(currentOrder.totalPrice) : ''}
               </Text>
             </View>
+            {currentOrder.mode && (
+              <Text
+                style={[Type.subtitle, { color: Colors.secondaryText }]}
+                onPress={(e) => {
+                  e.preventDefault();
+                  setMode({ variables: { mode: checklistMode ? 'ah' : 'checklist' } });
+                }}>
+                {checklistMode ? 'Naar supermarkt' : 'Naar checklist'}
+              </Text>
+            )}
             {currentOrder.totalDiscount > 0 && (
               <Text style={[Type.subtitle, { color: Colors.savingsText }]}>
                 {formatEuros(currentOrder.totalDiscount)} bespaard
@@ -246,7 +262,13 @@ export default function ListScreen({ navigation }) {
                         : Colors.cardBackground,
                     },
                   ]}
+                  leading={
+                    checklistMode && ingredient ? (
+                      <CheckItem id={ingredient.id} checked={item.checked} />
+                    ) : null
+                  }
                   title={ingredient?.name || item.name}
+                  textStyle={item.checked ? styles.checkedText : undefined}
                   imageUrl={ingredient?.imageUrl || item.imageUrl}
                   badges={badgesFor(ingredient, item)}
                   selected={wide ? selected?.ingredientId === ingredient?.id : undefined}
@@ -288,7 +310,7 @@ export default function ListScreen({ navigation }) {
               e.preventDefault();
               startShopping({});
             }}>
-            Bestelling ontvangen
+            {checklistMode ? 'Boodschappen gedaan' : 'Bestelling ontvangen'}
           </Text>
         )}
       </ScrollView>
@@ -325,13 +347,17 @@ const styles = StyleSheet.create({
   warningBadge: {
     paddingHorizontal: Spacing.sm,
   },
+  checkedText: {
+    color: Colors.secondaryText,
+    textDecorationLine: 'line-through',
+  },
   // Room for both lines whether or not the order has arrived and whether or not
   // the bonus took anything off, so the heading keeps one height and the basket
   // below it never jumps once the total loads.
   orderTotal: {
     alignItems: 'flex-end',
     justifyContent: 'center',
-    minHeight: Type.row.lineHeight + Type.subtitle.lineHeight,
+    minHeight: Type.row.lineHeight + Type.subtitle.lineHeight * 2,
   },
   // The delivery day rides on the total's line rather than taking one of its
   // own. It is a short label and the heading already reserves two lines, so a

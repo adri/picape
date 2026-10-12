@@ -10,6 +10,7 @@ export const orderFields = gql`
     deliveryStartTime
     deliveryEndTime
     isPlaced
+    mode
     items {
       id
       name
@@ -18,6 +19,7 @@ export const orderFields = gql`
       isOrderable
       availabilityLabel
       substitutedFor
+      checked
       ingredient {
         id
         name
