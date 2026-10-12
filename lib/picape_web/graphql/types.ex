@@ -16,6 +16,9 @@ defmodule PicapeWeb.Graphql.Types do
 
     @desc "The supermarket is processing a paid order, so Picape froze its side of the basket."
     field(:is_placed, :boolean)
+
+    @desc "Where the order lives: the supermarket basket or Picape's own checklist."
+    field(:mode, :string, resolve: fn _parent, _args, _ctx -> {:ok, Picape.Settings.mode()} end)
   end
 
   @desc "Item that is part of an order"
@@ -32,6 +35,9 @@ defmodule PicapeWeb.Graphql.Types do
 
     @desc "The name of the ingredient this product stands in for, when it is a replacement."
     field(:substituted_for, :string, resolve: batched({Resolver.Order, :substitutions_for_items}))
+
+    @desc "Ticked off the checklist. Only set in checklist mode."
+    field(:checked, :boolean)
 
     field(
       :ingredient,

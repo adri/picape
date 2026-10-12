@@ -1,5 +1,5 @@
 defmodule PicapeWeb.Graphql.Resolver.Order do
-  alias Picape.{Supermarket, Order, Recipe}
+  alias Picape.{Supermarket, Order, Recipe, Ingredients, Checklist}
   alias PicapeWeb.Graphql.Resolver
 
   defp order_id() do
@@ -107,6 +107,31 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
 
   def stop_shopping(_attributes, _info) do
     Order.stop_shopping(order_id())
+  end
+
+  def check_item(attributes, _info) do
+    ingredient_id = String.to_integer(attributes[:ingredient_id])
+
+    with {:ok, %{^ingredient_id => _}} <- Ingredients.ingredients_by_ids([ingredient_id]),
+         {:ok, _} <- Checklist.check(ingredient_id, attributes[:checked]) do
+      Order.current()
+    else
+      {:ok, _} -> {:error, "no ingredient with id #{ingredient_id}"}
+      error -> error
+    end
+  end
+
+  def set_mode(attributes, _info) do
+    case Order.set_mode(attributes[:mode]) do
+      {:ok, %{pushed_to_supermarket: false, error: error}} ->
+        {:error, "switched to 'ah' but pushing the list to the supermarket failed: #{error}"}
+
+      {:ok, _result} ->
+        Order.current()
+
+      error ->
+        error
+    end
   end
 
   def order_ingredient(attributes, _info) do
