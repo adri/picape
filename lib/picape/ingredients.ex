@@ -89,15 +89,11 @@ defmodule Picape.Ingredients do
   end
 
   def add_ingredient(params) do
-    %Ingredient{}
-    |> Ingredient.add_changeset(
-      Map.put(
-        params,
-        :supermarket_product_raw,
-        Supermarket.products_by_id(params[:supermarket_product_id])
-      )
-    )
-    |> Repo.insert()
+    with {:ok, params} <- fetch_product_raw(params, params[:supermarket_product_id]) do
+      %Ingredient{}
+      |> Ingredient.add_changeset(params)
+      |> Repo.insert()
+    end
   end
 
   @doc "The ingredients behind a set of supermarket product ids, keyed by that id."
@@ -117,18 +113,35 @@ defmodule Picape.Ingredients do
   another supermarket product needs to send nothing else.
   """
   def edit_ingredient(params) do
-    Repo.get(Ingredient, params[:ingredient_id])
-    |> Repo.preload(:tags)
-    |> Ingredient.edit_changeset(put_product_raw(params))
-    |> put_tags(params)
-    |> Repo.update()
+    ingredient = Repo.get(Ingredient, params[:ingredient_id]) |> Repo.preload(:tags)
+
+    with {:ok, params} <- put_product_raw(params, ingredient) do
+      ingredient
+      |> Ingredient.edit_changeset(params)
+      |> put_tags(params)
+      |> Repo.update()
+    end
   end
 
-  defp put_product_raw(%{supermarket_product_id: product_id} = params) when not is_nil(product_id) do
-    Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(product_id))
+  # A move to another product needs that product's card; an edit that keeps
+  # the id keeps the card it already has, so it works while the supermarket
+  # is down.
+  defp put_product_raw(%{supermarket_product_id: product_id} = params, ingredient)
+       when not is_nil(product_id) do
+    if to_string(product_id) == to_string(ingredient.supermarket_product_id) do
+      {:ok, params}
+    else
+      fetch_product_raw(params, product_id)
+    end
   end
 
-  defp put_product_raw(params), do: params
+  defp put_product_raw(params, _ingredient), do: {:ok, params}
+
+  defp fetch_product_raw(params, product_id) do
+    {:ok, Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(product_id))}
+  rescue
+    _ -> {:error, "the supermarket is unreachable"}
+  end
 
   defp put_tags(changeset, %{tag_ids: tag_ids}) when is_list(tag_ids) do
     Ecto.Changeset.put_assoc(changeset, :tags, Repo.all(from(t in IngredientTag, where: t.id in ^tag_ids)))

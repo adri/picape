@@ -1,5 +1,6 @@
 defmodule Picape.Order do
   import Ecto.Query
+  require Logger
 
   alias Picape.Order.{
     LineFromSupermarket,
@@ -17,14 +18,21 @@ defmodule Picape.Order do
   @doc """
   Returns the currently active cart. In checklist mode that is the list Picape
   computed, with the ticked-off state overlaid — no supermarket call happens.
+  An `ah` order whose supermarket does not answer is served the same way,
+  flagged `supermarket_reachable: false`, so a dead API does not take the
+  list down with it.
   """
   def current() do
     if Settings.checklist?() do
       {:ok, cart} = cart("1")
       {:ok, checklist_line(LineFromDb.convert(cart))}
     else
-      line = LineFromSupermarket.convert(Supermarket.cart())
-      {:ok, %{line | is_placed: order_placed?()}}
+      try do
+        line = LineFromSupermarket.convert(Supermarket.cart())
+        {:ok, %{line | is_placed: order_placed?(), supermarket_reachable: true}}
+      rescue
+        error -> fallback_line(error)
+      end
     end
   end
 
@@ -166,8 +174,7 @@ defmodule Picape.Order do
              {:ok, existing} <- ordered_item_quantities(line),
              {:ok, changes} <-
                Sync.changes(substitute(planned, line), substitute(manual, line), existing) do
-          Supermarket.apply_changes(changes)
-
+          push(changes, line)
           current()
         else
           _ -> current()
@@ -187,8 +194,13 @@ defmodule Picape.Order do
 
     if mode == "ah" and was_checklist do
       try do
-        {:ok, _line} = sync_supermarket("1")
-        {:ok, %{mode: mode, pushed_to_supermarket: true}}
+        {:ok, line} = sync_supermarket("1")
+
+        if line.supermarket_reachable == false do
+          {:ok, %{mode: mode, pushed_to_supermarket: false, error: "the supermarket is unreachable"}}
+        else
+          {:ok, %{mode: mode, pushed_to_supermarket: true}}
+        end
       rescue
         error ->
           {:ok, %{mode: mode, pushed_to_supermarket: false, error: Exception.message(error)}}
@@ -434,6 +446,26 @@ defmodule Picape.Order do
     %{line | items: Enum.map(line.items, &%{&1 | checked: MapSet.member?(checked, &1.ingredient_id)})}
   end
 
+  # The computed list stands in for a basket the supermarket will not answer.
+  # It is flagged so the caller can say where the list came from.
+  defp fallback_line(error) do
+    Logger.warning("serving the checklist, the supermarket is unreachable: #{Exception.message(error)}")
+
+    {:ok, cart} = cart("1")
+    {:ok, checklist_line(%{LineFromDb.convert(cart) | supermarket_reachable: false})}
+  end
+
+  # A line served from the fallback produced no changes to push, and a dead
+  # supermarket answers none. The plan rows are already written, so the next
+  # sync that reaches the supermarket pushes them.
+  defp push(_changes, %{supermarket_reachable: false}), do: :ok
+
+  defp push(changes, _line) do
+    Supermarket.apply_changes(changes)
+  rescue
+    error -> Logger.warning("pushing the list to the supermarket failed: #{Exception.message(error)}")
+  end
+
   defp ensure_order_is_current(order_id) do
     with latest_order_id when not is_nil(latest_order_id) <- last_order_id(),
          false <- planned_items_in_order?(latest_order_id) do
@@ -487,6 +519,10 @@ defmodule Picape.Order do
 
   defp order_placed?() do
     Supermarket.placed_order_id() != nil
+  rescue
+    # The order summaries share the supermarket's fate: unreachable means not
+    # placed, so Picape keeps working instead of freezing on a guess.
+    _ -> false
   end
 
   # The supermarket's order number names the archived line, the same way the

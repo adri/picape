@@ -50,13 +50,14 @@ defmodule Picape.MCP.Tools do
         "Read the current order: every item with its quantity, plus the total item count and price " <>
           "in cents. `mode` says where the list lives: 'ah' (the supermarket basket) or 'checklist' " <>
           "(Picape's own list — see set_mode). In checklist mode `checked` marks the items ticked " <>
-          "off and the availability fields keep their defaults. Items that map to a Picape " <>
-          "ingredient carry that ingredient and the recipes that asked for it. `is_orderable` " <>
-          "false marks products the supermarket cannot deliver right now; `substituted_for` names " <>
-          "the ingredient a product replaced. Pass `only_unavailable` to get just the problem " <>
-          "items. `is_placed` tells you the order was paid: Picape then freezes its side until " <>
-          "delivery, so set_ingredient_quantity and plan_recipe queue without reaching the " <>
-          "supermarket.",
+          "off and the availability fields keep their defaults. While the supermarket is " <>
+          "unreachable an 'ah' order is served as the checklist too, with `supermarket_reachable` " <>
+          "false. Items that map to a Picape ingredient carry that ingredient and the recipes " <>
+          "that asked for it. `is_orderable` false marks products the supermarket cannot deliver " <>
+          "right now; `substituted_for` names the ingredient a product replaced. Pass " <>
+          "`only_unavailable` to get just the problem items. `is_placed` tells you the order was " <>
+          "paid: Picape then freezes its side until delivery, so set_ingredient_quantity and " <>
+          "plan_recipe queue without reaching the supermarket.",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -305,8 +306,9 @@ defmodule Picape.MCP.Tools do
     %{
       name: "check_item",
       description:
-        "Tick an item off the checklist, or untick it with checked=false. Only works in checklist " <>
-          "mode; see set_mode.",
+        "Tick an item off the checklist, or untick it with checked=false. Works in checklist " <>
+          "mode, and while the supermarket is unreachable and the order is served as the " <>
+          "checklist; see set_mode.",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -377,6 +379,7 @@ defmodule Picape.MCP.Tools do
     {:ok,
      %{
        mode: Settings.mode(),
+       supermarket_reachable: line.supermarket_reachable,
        total_count: line.total_count,
        total_price: line.total_price,
        is_placed: line.is_placed,
@@ -400,7 +403,7 @@ defmodule Picape.MCP.Tools do
     |> Ingredients.add_ingredient()
     |> case do
       {:ok, ingredient} -> {:ok, List.first(render_ingredients([ingredient]))}
-      {:error, changeset} -> {:error, inspect(changeset.errors)}
+      {:error, reason} -> render_error(reason)
     end
   end
 
@@ -411,7 +414,7 @@ defmodule Picape.MCP.Tools do
       |> Ingredients.edit_ingredient()
       |> case do
         {:ok, edited} -> {:ok, List.first(render_ingredients([edited]))}
-        {:error, changeset} -> {:error, inspect(changeset.errors)}
+        {:error, reason} -> render_error(reason)
       end
     end
   end
@@ -423,7 +426,7 @@ defmodule Picape.MCP.Tools do
       |> Ingredients.edit_ingredient()
       |> case do
         {:ok, edited} -> {:ok, List.first(render_ingredients([edited]))}
-        {:error, changeset} -> {:error, inspect(changeset.errors)}
+        {:error, reason} -> render_error(reason)
       end
     end
   end
@@ -686,6 +689,9 @@ defmodule Picape.MCP.Tools do
       ingredients: Enum.map(offer.ingredients, &%{id: &1.id, name: &1.name})
     }
   end
+
+  defp render_error(%Ecto.Changeset{} = changeset), do: {:error, inspect(changeset.errors)}
+  defp render_error(message), do: {:error, message}
 
   defp warning_description(ingredient) do
     case ingredient[:warning] do

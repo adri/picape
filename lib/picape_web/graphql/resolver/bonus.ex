@@ -3,6 +3,8 @@ defmodule PicapeWeb.Graphql.Resolver.Bonus do
 
   def offers(_parent, _args, _info) do
     {:ok, Bonus.offers()}
+  rescue
+    _ -> {:error, "the supermarket is unreachable"}
   end
 
   def activate(attributes, _info) do

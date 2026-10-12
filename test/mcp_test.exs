@@ -549,17 +549,23 @@ defmodule Picape.MCPTest do
       assert %{"mode" => "ah", "pushed_to_supermarket" => false, "error" => error} =
                call!("set_mode", %{mode: "ah"})
 
-      assert error =~ "503"
+      assert error =~ "unreachable"
     end
 
     test "an unknown mode is an error" do
       assert call_error("set_mode", %{mode: "floef"}) =~ "unknown mode"
     end
 
-    test "a down supermarket answers as a tool error, not a crash" do
+    test "a down supermarket serves the checklist, flagged unreachable" do
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: rijst.id, line_id: "1", quantity: 2)
+
       supermarket_down()
 
-      assert call_error("get_shopping_list", %{}) =~ "non-JSON"
+      list = call!("get_shopping_list", %{})
+      assert list["mode"] == "ah"
+      assert list["supermarket_reachable"] == false
+      assert [%{"name" => "Rijst", "quantity" => 2}] = list["items"]
     end
   end
 

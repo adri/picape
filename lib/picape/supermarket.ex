@@ -81,6 +81,17 @@ defmodule Picape.Supermarket do
   end
 
   @doc """
+  Whether the supermarket answers right now. Probes the cart, which is cached:
+  one request while the cache is cold, free while it is warm.
+  """
+  def reachable?() do
+    _ = cart()
+    true
+  rescue
+    _ -> false
+  end
+
+  @doc """
   The personal bonus offers for one period, with how many of them may be
   activated. Dates are ISO 8601, the way the supermarket wants them.
   """
