@@ -43,7 +43,9 @@ defmodule Picape.MCPTest do
                "ingredient_history",
                "seasonal_produce",
                "list_bonus_offers",
-               "activate_bonus_offer"
+               "activate_bonus_offer",
+               "set_mode",
+               "check_item"
              ]
 
       assert Enum.all?(tools, &(&1["inputSchema"]["type"] == "object"))
@@ -503,6 +505,68 @@ defmodule Picape.MCPTest do
 
       assert call!("ingredient_history") == []
     end
+  end
+
+  describe "set_mode and check_item" do
+    test "checklist mode keeps the list working while the supermarket is down" do
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+
+      call!("set_ingredient_quantity", %{ingredient_id: rijst.id, quantity: 2})
+      assert %{"mode" => "checklist"} = call!("set_mode", %{mode: "checklist"})
+
+      supermarket_down()
+
+      list = call!("get_shopping_list")
+      assert list["mode"] == "checklist"
+      assert [%{"name" => "Rijst", "quantity" => 2, "checked" => false}] = list["items"]
+
+      assert %{"ingredient_id" => id, "checked" => true} =
+               call!("check_item", %{ingredient_id: rijst.id})
+
+      assert id == rijst.id
+      assert [%{"checked" => true}] = call!("get_shopping_list")["items"]
+    end
+
+    test "check_item refuses while the list lives in the supermarket" do
+      rijst = insert!(:ingredient, name: "Rijst")
+
+      assert call_error("check_item", %{ingredient_id: rijst.id}) =~ "checklist"
+    end
+
+    test "switching back pushes the list, and reports a supermarket still down" do
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+
+      call!("set_mode", %{mode: "checklist"})
+      call!("set_ingredient_quantity", %{ingredient_id: rijst.id, quantity: 2})
+
+      assert %{"mode" => "ah", "pushed_to_supermarket" => true} = call!("set_mode", %{mode: "ah"})
+    end
+
+    test "switching back to a supermarket still down still switches" do
+      call!("set_mode", %{mode: "checklist"})
+      supermarket_down()
+
+      assert %{"mode" => "ah", "pushed_to_supermarket" => false, "error" => error} =
+               call!("set_mode", %{mode: "ah"})
+
+      assert error =~ "503"
+    end
+
+    test "an unknown mode is an error" do
+      assert call_error("set_mode", %{mode: "floef"}) =~ "unknown mode"
+    end
+
+    test "a down supermarket answers as a tool error, not a crash" do
+      supermarket_down()
+
+      assert call_error("get_shopping_list", %{}) =~ "non-JSON"
+    end
+  end
+
+  defp supermarket_down() do
+    HTTPoison.post!("http://localhost:4021/__down", "")
+    Picape.Supermarket.invalidate_cart()
+    Picape.Supermarket.invalidate_orders()
   end
 
   defp plan_in_order(recipe, line_id, inserted_at, attrs \\ []) do

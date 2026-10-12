@@ -7,7 +7,7 @@ defmodule Picape.MCP.Tools do
   GraphQL API hands out.
   """
 
-  alias Picape.{Bonus, Ingredients, Order, Recipe, Seasonal, Supermarket}
+  alias Picape.{Bonus, Checklist, Ingredients, Order, Recipe, Seasonal, Settings, Supermarket}
 
   # The GraphQL resolvers hardcode the same order id: there is one open order.
   @order_id "1"
@@ -47,13 +47,16 @@ defmodule Picape.MCP.Tools do
     %{
       name: "get_shopping_list",
       description:
-        "Read the current order: every item in the supermarket cart with its quantity, plus the total " <>
-          "item count and price in cents. Items that map to a Picape ingredient carry that ingredient " <>
-          "and the recipes that asked for it. `is_orderable` false marks products the supermarket " <>
-          "cannot deliver right now; `substituted_for` names the ingredient a product replaced. " <>
-          "Pass `only_unavailable` to get just the problem items. `is_placed` tells you the order " <>
-          "was paid: Picape then freezes its side until delivery, so set_ingredient_quantity and " <>
-          "plan_recipe queue without reaching the supermarket.",
+        "Read the current order: every item with its quantity, plus the total item count and price " <>
+          "in cents. `mode` says where the list lives: 'ah' (the supermarket basket) or 'checklist' " <>
+          "(Picape's own list — see set_mode). In checklist mode `checked` marks the items ticked " <>
+          "off and the availability fields keep their defaults. Items that map to a Picape " <>
+          "ingredient carry that ingredient and the recipes that asked for it. `is_orderable` " <>
+          "false marks products the supermarket cannot deliver right now; `substituted_for` names " <>
+          "the ingredient a product replaced. Pass `only_unavailable` to get just the problem " <>
+          "items. `is_placed` tells you the order was paid: Picape then freezes its side until " <>
+          "delivery, so set_ingredient_quantity and plan_recipe queue without reaching the " <>
+          "supermarket.",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -281,6 +284,37 @@ defmodule Picape.MCP.Tools do
         properties: %{offer_id: %{type: "string", description: "The `id` from a list_bonus_offers result"}},
         required: ["offer_id"]
       }
+    },
+    %{
+      name: "set_mode",
+      description:
+        "Switch where the shopping list lives. 'ah' is the supermarket basket: the app orders from it " <>
+          "and syncs the plan into it. 'checklist' is a self-managed list inside Picape's own database, " <>
+          "for when the supermarket API is unreachable: plan_recipe, set_ingredient_quantity and " <>
+          "get_shopping_list keep working, and items can be ticked off with check_item. Switching back " <>
+          "to 'ah' pushes the accumulated list into the supermarket basket; if the supermarket is " <>
+          "still down the switch still happens and the reply says the push failed.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          mode: %{type: "string", enum: ["ah", "checklist"]}
+        },
+        required: ["mode"]
+      }
+    },
+    %{
+      name: "check_item",
+      description:
+        "Tick an item off the checklist, or untick it with checked=false. Only works in checklist " <>
+          "mode; see set_mode.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          ingredient_id: @integer,
+          checked: %{type: "boolean", description: "Defaults to true"}
+        },
+        required: ["ingredient_id"]
+      }
     }
   ]
 
@@ -335,12 +369,14 @@ defmodule Picape.MCP.Tools do
           is_orderable: item.is_orderable,
           availability_label: item.availability_label,
           substituted_for: get_in(substitutions, [item.id, Access.key(:name)]),
+          checked: item.checked,
           ingredient: render_list_ingredient(ingredients[item.id], recipes)
         }
       end)
 
     {:ok,
      %{
+       mode: Settings.mode(),
        total_count: line.total_count,
        total_price: line.total_price,
        is_placed: line.is_placed,
@@ -471,6 +507,30 @@ defmodule Picape.MCP.Tools do
     with {:ok, bonus} <- Bonus.activate(args["offer_id"]) do
       {:ok, render_bonus(bonus)}
     end
+  end
+
+  defp run("set_mode", args) do
+    with {:ok, result} <- Order.set_mode(args["mode"]) do
+      publish_order_changed()
+      {:ok, result}
+    end
+  end
+
+  defp run("check_item", args) do
+    checked = Map.get(args, "checked", true)
+
+    with {:ok, ingredient} <- fetch_ingredient(args["ingredient_id"]),
+         {:ok, _item} <- Checklist.check(ingredient.id, checked) do
+      publish_order_changed()
+      {:ok, %{ingredient_id: ingredient.id, name: ingredient.name, checked: checked}}
+    end
+  end
+
+  # Ticks and mode switches made through MCP change the list, so any open app
+  # gets the new state the same way a mutation in the app would deliver it. The
+  # value is a placeholder: the subscription re-resolves the order itself.
+  defp publish_order_changed() do
+    Absinthe.Subscription.publish(PicapeWeb.Endpoint, :ok, order_changed: "*")
   end
 
   defp plan(recipe_id, unplan) do
