@@ -23,6 +23,10 @@ export function ListItem({
   badges,
   subtitle,
   children,
+  // Sits ahead of the picture, the way a Reminders row opens on its check
+  // circle. Lists without something to put there pass nothing and the row is
+  // unchanged.
+  leading,
   imageUrl,
   textStyle,
   onImagePress,
@@ -92,6 +96,7 @@ export function ListItem({
         },
         style,
       ]}>
+      {leading}
       {image}
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <Text numberOfLines={2} style={[Type.row, { color: colors.cardText }, textStyle]}>

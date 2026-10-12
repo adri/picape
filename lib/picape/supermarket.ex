@@ -259,16 +259,19 @@ defmodule Picape.Supermarket do
 
   def process_response_body(body) do
     case Poison.decode(body) do
-      {:ok, value} ->
-        value
+      {:ok, value} -> value
+      {:error, _} -> body
+    end
+  end
 
-      {:error, :invalid, pos} ->
-        IO.inspect(body)
-        raise Poison.SyntaxError, pos: pos
-
-      {:error, {:invalid, token, pos}} ->
-        IO.inspect(body)
-        raise Poison.SyntaxError, token: token, pos: pos
+  def process_response(%HTTPoison.Response{body: body, status_code: status_code} = response) do
+    if is_binary(body) do
+      raise Picape.Supermarket.Error,
+        message:
+          "the supermarket answered HTTP #{status_code} with a non-JSON body: " <>
+            String.slice(body, 0, 200)
+    else
+      response
     end
   end
 

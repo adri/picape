@@ -37,6 +37,8 @@ It is a route in the Phoenix router, so it is up whenever the app is, on the dat
 | `search_supermarket` | Search the supermarket's product catalogue |
 | `get_shopping_list` | Read the current order: items, quantities, totals, availability and the freeze state |
 | `set_ingredient_quantity` | Put an ingredient on the list, change it, or remove it with quantity 0 |
+| `set_mode` | Switch where the list lives: the supermarket basket or Picape's own checklist |
+| `check_item` | Tick an item off the checklist, or untick it |
 | `add_ingredient` | Teach Picape an ingredient, backed by a supermarket product ID |
 | `edit_ingredient` | Change an ingredient, for example onto another supermarket product |
 | `set_ingredient_replacement` | Name the ingredient Picape orders instead when the supermarket cannot deliver this one |
@@ -81,6 +83,7 @@ Notes on the tools:
 - `edit_ingredient` is the other way round: it changes only the fields you send and leaves the rest, tags included. When the supermarket drops a product, `search_ingredients` reports a `warning` and `edit_ingredient` moves the ingredient onto a replacement product, which keeps the recipes that use it.
 - `set_ingredient_replacement` is different from repointing an ingredient: the ingredient keeps its product, and sync orders the replacement's product only while the wanted one cannot be delivered. The cart row then says what it stands in for (`substituted_for`).
 - `get_shopping_list` marks products the supermarket cannot deliver right now with `is_orderable: false`; `only_unavailable: true` returns just those. While the supermarket processes a paid order the answer's `is_placed` is true and Picape freezes: `set_ingredient_quantity` and `plan_recipe` still record the intent, but nothing reaches the supermarket until the order is delivered.
+- `get_shopping_list` also reports `mode`. `ah` means the list lives in the supermarket basket; `checklist` means it lives in Picape's own database and planning, ordering and ticking work without the supermarket. Switch with `set_mode`; switching back to `ah` pushes the accumulated list into the basket and the reply's `pushed_to_supermarket` says whether that worked. `check_item` ticks items only in checklist mode.
 - There is no delete for recipes or ingredients.
 - The two history tools read finished orders only, nine years of them. The order being planned now is not history yet, an ingredient taken off a list again was never bought, and a recipe that was unplanned again was never cooked, so none of the three count.
 - `ingredient_history` reports `average_gap_days` next to `times_bought_last_year` on purpose. A gap on its own cannot tell an ingredient that is due from one that was dropped: both sit far past it. An ingredient with a ten-day gap, last bought 538 days ago and bought zero times in the last year is not overdue, it is gone.

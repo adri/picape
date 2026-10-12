@@ -72,6 +72,12 @@ type RootMutationType {
   "Stops shopping"
   stopShopping: Order
 
+  "Tick an item off the checklist, or untick it. Checklist mode only."
+  checkItem(ingredientId: ID!, checked: Boolean): Order
+
+  "Switch where the current order lives: the supermarket basket (ah) or Picape's own checklist."
+  setMode(mode: String!): Order
+
   "Buy ingredient"
   buyIngredient(ingredientId: ID!, undo: Boolean): Ingredient
 
@@ -133,6 +139,9 @@ type Order implements Node {
 
   "The supermarket is processing a paid order, so Picape froze its side of the basket."
   isPlaced: Boolean
+
+  "Where the order lives: the supermarket basket or Picape's own checklist."
+  mode: String
 }
 
 "Item that is part of an order"
@@ -154,6 +163,9 @@ type OrderItem implements Node {
 
   "The name of the ingredient this product stands in for, when it is a replacement."
   substitutedFor: String
+
+  "Ticked off the checklist. Only set in checklist mode."
+  checked: Boolean
 
   ingredient: Ingredient
 }

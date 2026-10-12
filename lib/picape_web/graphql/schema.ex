@@ -143,6 +143,19 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(handle_errors(&Resolver.Order.stop_shopping/2))
     end
 
+    @desc "Tick an item off the checklist, or untick it. Checklist mode only."
+    field :check_item, :order do
+      arg(:ingredient_id, non_null(:id))
+      arg(:checked, :boolean, default_value: true)
+      resolve(handle_errors(&Resolver.Order.check_item/2))
+    end
+
+    @desc "Switch where the current order lives: the supermarket basket (ah) or Picape's own checklist."
+    field :set_mode, :order do
+      arg(:mode, non_null(:string))
+      resolve(handle_errors(&Resolver.Order.set_mode/2))
+    end
+
     @desc "Buy ingredient"
     field :buy_ingredient, :ingredient do
       arg(:ingredient_id, non_null(:id))
@@ -212,6 +225,8 @@ defmodule PicapeWeb.Graphql.Schema do
       trigger(:order_ingredient, topic: fn _ingredient -> "*" end)
       trigger(:plan_recipe, topic: fn _recipe -> "*" end)
       trigger(:unplan_recipe, topic: fn _recipe -> "*" end)
+      trigger(:check_item, topic: fn _order -> "*" end)
+      trigger(:set_mode, topic: fn _order -> "*" end)
       resolve(&Resolver.Order.current/3)
     end
 

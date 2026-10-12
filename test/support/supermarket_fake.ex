@@ -13,8 +13,10 @@ defmodule Picape.SupermarketFake do
   @state __MODULE__.State
   @activations __MODULE__.Activations
   @orders __MODULE__.Orders
+  @down __MODULE__.Down
 
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
+  plug(:maybe_down)
   plug(:match)
   plug(:dispatch)
 
@@ -22,6 +24,7 @@ defmodule Picape.SupermarketFake do
     {:ok, _} = Agent.start_link(fn -> fixture("basket.json") end, name: @state)
     {:ok, _} = Agent.start_link(fn -> MapSet.new() end, name: @activations)
     {:ok, _} = Agent.start_link(fn -> fixture("orders.json") end, name: @orders)
+    {:ok, _} = Agent.start_link(fn -> false end, name: @down)
     Plug.Cowboy.http(__MODULE__, [], port: port)
   end
 
@@ -38,6 +41,17 @@ defmodule Picape.SupermarketFake do
     Agent.update(@state, fn _ -> fixture("basket.json") end)
     Agent.update(@activations, fn _ -> MapSet.new() end)
     Agent.update(@orders, fn _ -> fixture("orders.json") end)
+    Agent.update(@down, fn _ -> false end)
+  end
+
+  defp maybe_down(conn, _opts) do
+    if Agent.get(@down, & &1) and not String.starts_with?(conn.request_path, "/__") do
+      conn
+      |> send_resp(503, "<html><body><h1>503 Service Unavailable</h1></body></html>")
+      |> halt()
+    else
+      conn
+    end
   end
 
   post "/graphql" do
@@ -81,6 +95,19 @@ defmodule Picape.SupermarketFake do
   # Pretends that order was delivered: processing ends and Picape may sync again.
   post "/__deliver_order" do
     Agent.update(@orders, fn _ -> fixture("orders.json") end)
+    send_resp(conn, 204, "")
+  end
+
+  # Pretends the whole API is down: every endpoint answers the HTML error page
+  # a dead service returns, until /__up or /__reset. The __-routes stay up so a
+  # test can always get the fake back.
+  post "/__down" do
+    Agent.update(@down, fn _ -> true end)
+    send_resp(conn, 204, "")
+  end
+
+  post "/__up" do
+    Agent.update(@down, fn _ -> false end)
     send_resp(conn, 204, "")
   end
 

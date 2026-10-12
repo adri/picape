@@ -9,6 +9,7 @@ defmodule Picape.Order.Item do
     field(:quantity, :integer)
     field(:is_orderable, :boolean, default: true)
     field(:availability_label, :string)
+    field(:checked, :boolean, virtual: true, default: false)
     field(:recipe_ids, {:array, :integer})
     field(:line_id, :id)
     field(:ingredient_id, :id)

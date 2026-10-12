@@ -400,6 +400,45 @@ test('the cart names the ingredient a replacement stands in for', async ({ page,
   }
 });
 
+// The mode exists for the supermarket being unreachable, so the test puts the
+// fake into its outage state: the list, the tick and the switch have to work
+// with every call to it failing.
+test('checklist mode ticks items while the supermarket is down', async ({ page, request }, testInfo) => {
+  const problems = watch(page);
+  const found = await mcp(request, 'search_ingredients', { query: 'Chicken' });
+  const chicken = found.find((i) => i.name === 'Chicken');
+
+  await mcp(request, 'set_mode', { mode: 'checklist' });
+  await mcp(request, 'set_ingredient_quantity', { ingredient_id: chicken.id, quantity: 1 });
+  await request.post('http://localhost:4020/__down');
+
+  try {
+    await page.goto('/');
+    await settle(page);
+    await tab(page, /Mandje/).click();
+    await settle(page);
+
+    // The heading names the mode, and the row carries an unticked circle.
+    await expect(page.getByText('Je lijstje', { exact: true })).toHaveCount(1);
+    const tick = page.getByRole('button', { name: 'Vink af' });
+    await expect(tick).toHaveCount(1);
+    await tick.click();
+    await expect(page.getByRole('button', { name: 'Afgevinkt' })).toHaveCount(1);
+
+    // And the same state answers over MCP.
+    const list = await mcp(request, 'get_shopping_list', {});
+    expect(list.mode).toBe('checklist');
+    expect(list.items.find((i) => i.ingredient && i.ingredient.id === chicken.id).checked).toBe(
+      true
+    );
+
+    expect(problems).toEqual([]);
+  } finally {
+    await request.post('http://localhost:4020/__up');
+    // The next test's beforeEach reset-plan restores ah mode and clears ticks.
+  }
+});
+
 test('a paid order freezes the cart as Besteld', async ({ page, request }, testInfo) => {
   const problems = watch(page);
   await request.post('http://localhost:4020/__place_order');
