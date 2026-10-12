@@ -10,16 +10,22 @@ defmodule Picape.Order do
     Sync
   }
 
-  alias Picape.{Repo, Supermarket, Recipe, Shopping, Ingredients}
+  alias Picape.{Repo, Supermarket, Recipe, Shopping, Ingredients, Settings, Checklist}
 
   defmodule(Product, do: defstruct([:id, :quantity]))
 
   @doc """
-  Returns the currently active cart.
+  Returns the currently active cart. In checklist mode that is the list Picape
+  computed, with the ticked-off state overlaid — no supermarket call happens.
   """
   def current() do
-    line = LineFromSupermarket.convert(Supermarket.cart())
-    {:ok, %{line | is_placed: order_placed?()}}
+    if Settings.checklist?() do
+      {:ok, cart} = cart("1")
+      {:ok, checklist_line(LineFromDb.convert(cart))}
+    else
+      line = LineFromSupermarket.convert(Supermarket.cart())
+      {:ok, %{line | is_placed: order_placed?()}}
+    end
   end
 
   def last() do
@@ -80,15 +86,17 @@ defmodule Picape.Order do
       {:ok, ingredients} = Recipe.ingredients_by_item_ids(Map.keys(merged))
 
       cart =
-        Enum.map(merged, fn {id, quantity} ->
+        for {id, quantity} <- merged,
+            ingredient = ingredients[id],
+            not is_nil(ingredient),
+            into: %{} do
           {id,
            %{
              id: id,
-             ingredient: ingredients[id],
+             ingredient: ingredient,
              quantity: quantity
            }}
-        end)
-        |> Enum.into(%{})
+        end
 
       {:ok, cart}
     end
@@ -142,25 +150,55 @@ defmodule Picape.Order do
   def sync_supermarket(order_id) do
     ensure_order_is_current(order_id)
 
-    if order_placed?() do
-      archive_placed_order(order_id)
-      current()
-    else
-      with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
-           {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
-           {:ok, manual} <- manual_ingredients(order_id),
-           {:ok, line} <- current(),
-           {:ok, existing} <- ordered_item_quantities(line),
-           {:ok, changes} <-
-             Sync.changes(substitute(planned, line), substitute(manual, line), existing) do
-        Supermarket.apply_changes(changes)
-
+    cond do
+      Settings.checklist?() ->
         current()
-      else
-        _ -> current()
-      end
+
+      order_placed?() ->
+        archive_placed_order(order_id)
+        current()
+
+      true ->
+        with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
+             {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
+             {:ok, manual} <- manual_ingredients(order_id),
+             {:ok, line} <- current(),
+             {:ok, existing} <- ordered_item_quantities(line),
+             {:ok, changes} <-
+               Sync.changes(substitute(planned, line), substitute(manual, line), existing) do
+          Supermarket.apply_changes(changes)
+
+          current()
+        else
+          _ -> current()
+        end
     end
   end
+
+  @doc """
+  Switches between the supermarket basket ("ah") and Picape's own checklist
+  ("checklist"). Switching back to "ah" pushes the list that accumulated while
+  the supermarket was away into the basket; a supermarket that is still
+  unreachable does not block the switch, the next sync retries.
+  """
+  def set_mode(mode) when mode in ["ah", "checklist"] do
+    was_checklist = Settings.checklist?()
+    {:ok, _} = Settings.set("mode", mode)
+
+    if mode == "ah" and was_checklist do
+      try do
+        {:ok, _line} = sync_supermarket("1")
+        {:ok, %{mode: mode, pushed_to_supermarket: true}}
+      rescue
+        error ->
+          {:ok, %{mode: mode, pushed_to_supermarket: false, error: Exception.message(error)}}
+      end
+    else
+      {:ok, %{mode: mode}}
+    end
+  end
+
+  def set_mode(mode), do: {:error, "unknown mode #{inspect(mode)}"}
 
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
@@ -390,6 +428,12 @@ defmodule Picape.Order do
 
   # --- private
 
+  defp checklist_line(line) do
+    checked = Checklist.checked_ids()
+
+    %{line | items: Enum.map(line.items, &%{&1 | checked: MapSet.member?(checked, &1.ingredient_id)})}
+  end
+
   defp ensure_order_is_current(order_id) do
     with latest_order_id when not is_nil(latest_order_id) <- last_order_id(),
          false <- planned_items_in_order?(latest_order_id) do
@@ -403,6 +447,8 @@ defmodule Picape.Order do
 
     from(i in ManualIngredient, where: i.line_id == ^order_id)
     |> Repo.update_all(set: [line_id: latest_order_id])
+
+    Checklist.clear()
   end
 
   defp planned_items_in_order?(order_id) do
