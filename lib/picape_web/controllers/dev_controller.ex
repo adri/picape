@@ -3,8 +3,9 @@ defmodule PicapeWeb.DevController do
 
   import Ecto.Query
 
-  alias Picape.{Bonus, Order, Repo, Supermarket}
+  alias Picape.{Bonus, Checklist, Order, Repo, Supermarket}
   alias Picape.Order.{ManualIngredient, PlannedRecipe}
+  alias Picape.Settings.Setting
 
   def invalidate_cart(conn, _params) do
     Supermarket.invalidate_cart()
@@ -42,6 +43,8 @@ defmodule PicapeWeb.DevController do
   depends on the order its files happen to run in.
   """
   def reset_plan(conn, _params) do
+    Repo.delete_all(from(s in Setting, where: s.key == "mode"))
+    Checklist.clear()
     {:ok, recipe_ids} = Order.planned_recipes("1")
     Enum.each(recipe_ids, &Order.plan_recipe("1", &1, true))
     Repo.delete_all(from(m in ManualIngredient, where: m.line_id == "1"))
