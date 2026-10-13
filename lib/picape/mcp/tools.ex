@@ -69,6 +69,14 @@ defmodule Picape.MCP.Tools do
       }
     },
     %{
+      name: "get_previous_orders",
+      description:
+        "List closed orders, most recent first. Each order shows its id, when it closed, and every " <>
+          "item that was really ordered — including products added in the supermarket's own app, which " <>
+          "carry no ingredient. Orders from before this tracking began contain only what Picape planned.",
+      inputSchema: %{type: "object", properties: %{}}
+    },
+    %{
       name: "set_ingredient_quantity",
       description:
         "Put an ingredient on the shopping list, change how many are on it, or take it off. Quantity 0 " <>
@@ -385,6 +393,28 @@ defmodule Picape.MCP.Tools do
        is_placed: line.is_placed,
        items: items
      }}
+  end
+
+  defp run("get_previous_orders", _args) do
+    orders =
+      Enum.map(Order.previous_orders(), fn line ->
+        %{
+          id: to_string(line.id),
+          closed_at: line.closed_at,
+          items:
+            Enum.map(line.items, fn item ->
+              %{
+                name: item.name,
+                quantity: item.quantity,
+                product_id: item.product_id,
+                ingredient_id: item.ingredient_id,
+                external: is_nil(item.ingredient_id)
+              }
+            end)
+        }
+      end)
+
+    {:ok, %{orders: orders}}
   end
 
   defp run("set_ingredient_quantity", args) do

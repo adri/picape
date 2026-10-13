@@ -13,6 +13,7 @@ defmodule Picape.Order.Line do
     field(:delivery_end_time, :string)
     field(:is_placed, :boolean, default: false)
     field(:supermarket_reachable, :boolean)
+    field(:closed_at, :naive_datetime, virtual: true)
 
     timestamps()
   end

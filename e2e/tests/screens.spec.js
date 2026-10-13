@@ -497,3 +497,36 @@ test('a paid order freezes the cart as Besteld', async ({ page, request }, testI
     await request.post('http://localhost:4010/dev/invalidate-orders');
   }
 });
+
+test('a closed order lists what was ordered, products added in the supermarket app included', async ({
+  page,
+  request,
+}, testInfo) => {
+  const problems = watch(page);
+  const chicken = (await mcp(request, 'search_ingredients', { query: 'Chicken' })).find(
+    (i) => i.name === 'Chicken'
+  );
+
+  // Paying at the supermarket freezes Picape's side. The first sync in that
+  // state archives the order and snapshots its real contents.
+  await request.post('http://localhost:4020/__place_order');
+  await request.post('http://localhost:4010/dev/invalidate-orders');
+  await mcp(request, 'set_ingredient_quantity', { ingredient_id: chicken.id, quantity: 1 });
+  await request.post('http://localhost:4020/__deliver_order');
+  await request.post('http://localhost:4010/dev/invalidate-orders');
+
+  try {
+    await openApp(page, testInfo);
+    await tab(page, /Basics/).click();
+    await page.getByText('Bestellingen').click();
+    await settle(page);
+
+    await expect(page.getByText(/^Bestelling 12345678/)).toHaveCount(1);
+    // Roomboter sits in the paid order but maps to no ingredient: it was added
+    // on the supermarket side.
+    await expect(page.getByText('Roomboter ongezouten')).toHaveCount(1);
+    expect(problems).toEqual([]);
+  } finally {
+    await mcp(request, 'set_ingredient_quantity', { ingredient_id: chicken.id, quantity: 0 });
+  }
+});

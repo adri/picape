@@ -79,6 +79,11 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(&Resolver.Order.last/3)
     end
 
+    @desc "All closed orders, most recently closed first. Items added in the supermarket's own app appear with no ingredient."
+    field :previous_orders, list_of(:order) do
+      resolve(&Resolver.Order.previous_orders/3)
+    end
+
     @desc "The personal bonus offers for the period the current order is delivered in."
     field :bonus, :bonus do
       resolve(&Resolver.Bonus.offers/3)

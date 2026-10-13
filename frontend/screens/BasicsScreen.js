@@ -106,6 +106,13 @@ function BasicsList({ navigation, open, selectedId, inPane }) {
             navigation.navigate('PreviouslyOrdered');
           }}
         />
+        <SectionLink
+          title="Bestellingen"
+          onPress={(e) => {
+            e.preventDefault();
+            navigation.navigate('Orders');
+          }}
+        />
       </SectionHeader>
       <SkeletonContent
         layout={Array(5).fill({

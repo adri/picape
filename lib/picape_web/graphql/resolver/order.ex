@@ -16,6 +16,10 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
     Order.last()
   end
 
+  def previous_orders(_parent, _args, _info) do
+    {:ok, Order.previous_orders()}
+  end
+
   def last_ordered(_parent, _args, _info) do
     with {:ok, recipe_ids} <- Order.planned_recipes(Order.last_order_id()),
          {:ok, recipe_map} <- Recipe.recipes_by_ids(recipe_ids) do

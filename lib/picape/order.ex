@@ -3,6 +3,8 @@ defmodule Picape.Order do
   require Logger
 
   alias Picape.Order.{
+    Line,
+    Item,
     LineFromSupermarket,
     LineFromDb,
     PlannedRecipe,
@@ -39,6 +41,31 @@ defmodule Picape.Order do
   def last() do
     {:ok, cart} = cart(last_order_id())
     {:ok, LineFromDb.convert(cart, last_order_id())}
+  end
+
+  @doc """
+  Every closed order, most recently closed first.
+
+  Orders archived after snapshots were added return the basket contents as the
+  supermarket reported them, so products added in the supermarket's own app
+  appear too — they show up as items with no `ingredient`. Older orders fall
+  back to what Picape tracked in its plan and manual rows.
+  """
+  def previous_orders() do
+    snapshot_ids = Repo.all(from(i in Item, select: i.line_id, distinct: true))
+
+    plan_ids =
+      Repo.all(from(p in PlannedRecipe, select: p.line_id, distinct: true)) ++
+        Repo.all(from(m in ManualIngredient, select: m.line_id, distinct: true))
+
+    (snapshot_ids ++ plan_ids)
+    |> Enum.uniq()
+    |> Enum.reject(&(&1 == "1"))
+    |> Enum.map(&{&1, closed_at(&1)})
+    |> Enum.sort_by(&elem(&1, 1), {:desc, NaiveDateTime})
+    |> Enum.map(fn {order_id, closed_at} ->
+      %{previous_order(order_id) | closed_at: closed_at}
+    end)
   end
 
   def by_id(order_id) do
@@ -215,6 +242,7 @@ defmodule Picape.Order do
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
     finish_order(order_id, new_order_id)
+    snapshot_order(new_order_id, supermarket_items())
 
     last()
   end
@@ -466,6 +494,35 @@ defmodule Picape.Order do
     error -> Logger.warning("pushing the list to the supermarket failed: #{Exception.message(error)}")
   end
 
+  # The moment an order closed, as the newest row it left behind. `nil` means
+  # only plan rows exist; they sort below any snapshotted order.
+  defp closed_at(order_id) do
+    [
+      Repo.one(from(i in Item, where: i.line_id == ^order_id, select: max(i.inserted_at))),
+      Repo.one(from(p in PlannedRecipe, where: p.line_id == ^order_id, select: max(p.inserted_at))),
+      Repo.one(from(m in ManualIngredient, where: m.line_id == ^order_id, select: max(m.inserted_at)))
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.max(NaiveDateTime, fn -> ~N[1970-01-01 00:00:00] end)
+  end
+
+  defp previous_order(order_id) do
+    case Repo.all(from(i in Item, where: i.line_id == ^order_id, order_by: i.name)) do
+      [] ->
+        {:ok, cart} = cart(order_id)
+        LineFromDb.convert(cart, order_id)
+
+      rows ->
+        %Line{
+          id: order_id,
+          items: Enum.map(rows, fn %Item{} = row -> %Item{row | id: row.product_id} end),
+          total_count: length(rows),
+          total_price: 0,
+          total_discount: 0
+        }
+    end
+  end
+
   defp ensure_order_is_current(order_id) do
     with latest_order_id when not is_nil(latest_order_id) <- last_order_id(),
          false <- planned_items_in_order?(latest_order_id) do
@@ -535,11 +592,52 @@ defmodule Picape.Order do
 
     unless Repo.exists?(from(p in PlacedOrder, where: p.order_id == ^placed_id)) do
       Repo.insert!(%PlacedOrder{order_id: placed_id})
+      snapshot_order(placed_id, get_in(Supermarket.cart(), ["basket", "itemsInOrder"]) || [])
 
       if planned_items_in_order?(order_id) do
         finish_order(order_id, placed_id)
       end
     end
+  end
+
+  # In checklist mode or with the supermarket down there is no basket to
+  # snapshot; the plan rows alone record the order then, like before snapshots.
+  defp supermarket_items() do
+    Supermarket.cart()["items"] || []
+  rescue
+    _ -> []
+  end
+
+  # Stores the basket contents as the order's permanent record: what was really
+  # ordered, including products added in the supermarket's own app that Picape
+  # never knew. Such items keep nil `ingredient_id`, which marks them external.
+  defp snapshot_order(_order_id, []), do: :ok
+
+  defp snapshot_order(order_id, items) do
+    product_ids = Enum.map(items, & &1["product"]["id"])
+    {:ok, by_product} = Recipe.ingredients_by_item_ids(product_ids)
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    rows =
+      Enum.map(items, fn %{"product" => product} = item ->
+        %{
+          line_id: order_id,
+          product_id: product["id"],
+          name: product["title"],
+          image_url: Supermarket.image_url(product),
+          quantity: item["quantity"],
+          ingredient_id:
+            case by_product[product["id"]] do
+              nil -> nil
+              ingredient -> ingredient.id
+            end,
+          recipe_ids: [],
+          inserted_at: now,
+          updated_at: now
+        }
+      end)
+
+    Repo.insert_all(Item, rows)
   end
 
   # A product the supermarket cannot deliver is swapped for the product behind

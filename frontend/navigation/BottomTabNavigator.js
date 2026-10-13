@@ -21,6 +21,7 @@ import { EditIngredientScreen } from '../screens/EditIngredientScreen';
 import { EditRecipeScreen } from '../screens/EditRecipeScreen';
 import { IngredientDetailScreen } from '../screens/IngredientDetailScreen';
 import { NewRecipeScreen } from '../screens/NewRecipeScreen';
+import { OrdersScreen } from '../screens/OrdersScreen';
 import { PreviouslyOrderedScreen } from '../screens/PreviouslyOrderedScreen';
 import RecipeDetailScreen from '../screens/RecipeDetailScreen';
 import { RecipeListScreen } from '../screens/RecipeListScreen';
@@ -82,6 +83,7 @@ const routes = [
   { name: 'PlanScreen', component: BottomTabNavigator },
   { name: 'RecipeList', component: RecipeListScreen },
   { name: 'PreviouslyOrdered', component: PreviouslyOrderedScreen },
+  { name: 'Orders', component: OrdersScreen },
   { name: 'Bonus', component: BonusScreen },
   { name: 'WeekPlanner', component: WeekPlannerScreen },
   { name: 'RecipeDetail', component: RecipeDetailScreen },
