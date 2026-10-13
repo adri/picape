@@ -4,7 +4,7 @@ defmodule PicapeWeb.DevController do
   import Ecto.Query
 
   alias Picape.{Bonus, Checklist, Order, Repo, Supermarket}
-  alias Picape.Order.{ManualIngredient, PlannedRecipe}
+  alias Picape.Order.{Item, ManualIngredient, PlannedRecipe, PlacedOrder}
   alias Picape.Settings.Setting
 
   def invalidate_cart(conn, _params) do
@@ -47,8 +47,11 @@ defmodule PicapeWeb.DevController do
     Checklist.clear()
     {:ok, recipe_ids} = Order.planned_recipes("1")
     Enum.each(recipe_ids, &Order.plan_recipe("1", &1, true))
-    Repo.delete_all(from(m in ManualIngredient, where: m.line_id == "1"))
-    Repo.delete_all(from(p in PlannedRecipe, where: p.line_id == "1"))
+    placed_ids = Repo.all(from(p in PlacedOrder, select: p.order_id))
+    Repo.delete_all(from(m in ManualIngredient, where: m.line_id == "1" or m.line_id in ^placed_ids))
+    Repo.delete_all(from(p in PlannedRecipe, where: p.line_id == "1" or p.line_id in ^placed_ids))
+    Repo.delete_all(from(i in Item))
+    Repo.delete_all(from(p in PlacedOrder))
     Supermarket.invalidate_cart()
     send_resp(conn, 204, "")
   end

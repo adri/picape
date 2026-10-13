@@ -51,6 +51,7 @@ defmodule Picape.Order.LineFromSupermarket do
 
     %Item{
       id: product["id"],
+      product_id: product["id"],
       name: product["title"],
       image_url: Supermarket.image_url(product),
       quantity: item["quantity"],

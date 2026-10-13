@@ -28,6 +28,7 @@ defmodule Picape.MCPTest do
                "search_ingredients",
                "search_supermarket",
                "get_shopping_list",
+               "get_previous_orders",
                "set_ingredient_quantity",
                "add_ingredient",
                "edit_ingredient",
@@ -302,6 +303,39 @@ defmodule Picape.MCPTest do
                ingredient_id: ingredient.id,
                replacement_ingredient_id: 999_999
              }) =~ "no ingredient with id 999999"
+    end
+  end
+
+  describe "get_previous_orders" do
+    test "lists closed orders with their items, external products flagged" do
+      ingredient = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+
+      Repo.insert!(%Picape.Order.Item{
+        line_id: "12345678",
+        product_id: 519_017,
+        name: "Handsinaasappelen",
+        quantity: 1,
+        ingredient_id: ingredient.id,
+        recipe_ids: []
+      })
+
+      Repo.insert!(%Picape.Order.Item{
+        line_id: "12345678",
+        product_id: 10_567_923,
+        name: "Roomboter ongezouten",
+        quantity: 1,
+        recipe_ids: []
+      })
+
+      assert %{"orders" => [order]} = call!("get_previous_orders", %{})
+
+      assert order["id"] == "12345678"
+
+      assert [
+               %{"name" => "Handsinaasappelen", "external" => false},
+               %{"name" => "Roomboter ongezouten", "external" => true}
+             ] =
+               Enum.sort_by(order["items"], & &1["name"])
     end
   end
 

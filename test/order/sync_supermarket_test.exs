@@ -90,6 +90,47 @@ defmodule Picape.Order.SyncSupermarketTest do
     assert product_quantity(Supermarket.cart(), 999_999) == 2
   end
 
+  test "closing an order snapshots the basket, products added in the supermarket app included" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    sinaas = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+    recipe = insert!(:recipe, title: "Nasi", ingredients: [rijst])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+
+    place_order()
+
+    assert {:ok, _line} = Order.sync_supermarket("1")
+
+    [order] = Order.previous_orders()
+    assert order.id == "12345678"
+    assert order.closed_at
+
+    # Handsinaasappelen maps to an ingredient; the other three are products
+    # added on the supermarket side — nil ingredient_id marks them external.
+    assert [
+             %{name: "Handsinaasappelen", ingredient_id: sinaas_id, quantity: 1},
+             %{name: "Kipfilet", ingredient_id: nil, quantity: 2},
+             %{name: "Parmigiano reggiano", ingredient_id: nil, quantity: 1},
+             %{name: "Roomboter ongezouten", ingredient_id: nil, quantity: 1}
+           ] = sorted(order.items)
+
+    assert sinaas_id == sinaas.id
+  end
+
+  test "previous orders without a snapshot keep the rebuilt plan items" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, line_id: "42", ingredient_id: rijst.id, quantity: 3)
+
+    [order] = Order.previous_orders()
+    assert order.id == "42"
+    assert [%{name: "Rijst", quantity: 3}] = sorted(order.items)
+  end
+
+  defp sorted(items) do
+    items
+    |> Enum.map(&Map.take(&1, [:name, :quantity, :ingredient_id]))
+    |> Enum.sort_by(& &1.name)
+  end
+
   defp place_order do
     HTTPoison.post!(@fake <> "/__place_order", "")
     Supermarket.invalidate_orders()

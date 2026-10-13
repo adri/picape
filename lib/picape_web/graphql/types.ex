@@ -22,6 +22,18 @@ defmodule PicapeWeb.Graphql.Types do
 
     @desc "Where the order lives: the supermarket basket or Picape's own checklist."
     field(:mode, :string, resolve: fn _parent, _args, _ctx -> {:ok, Picape.Settings.mode()} end)
+
+    @desc "When the order closed. Only set on previous orders."
+    field :closed_at, :string do
+      resolve(fn line, _args, _ctx ->
+        {:ok, line.closed_at && NaiveDateTime.to_iso8601(line.closed_at)}
+      end)
+    end
+
+    @desc "The supermarket's order number, or Picape's own order id for orders it closed itself."
+    field :number, :string do
+      resolve(fn line, _args, _ctx -> {:ok, to_string(line.id)} end)
+    end
   end
 
   @desc "Item that is part of an order"

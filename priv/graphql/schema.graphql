@@ -37,6 +37,9 @@ type RootQueryType {
   "The last order including total price and ordered items."
   lastOrder: Order
 
+  "All closed orders, most recently closed first. Items added in the supermarket's own app appear with no ingredient."
+  previousOrders: [Order]
+
   "The personal bonus offers for the period the current order is delivered in."
   bonus: Bonus
 
@@ -145,6 +148,12 @@ type Order implements Node {
 
   "Where the order lives: the supermarket basket or Picape's own checklist."
   mode: String
+
+  "When the order closed. Only set on previous orders."
+  closedAt: String
+
+  "The supermarket's order number, or Picape's own order id for orders it closed itself."
+  number: String
 }
 
 "Item that is part of an order"
