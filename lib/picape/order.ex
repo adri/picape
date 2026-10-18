@@ -6,6 +6,7 @@ defmodule Picape.Order do
     Line,
     Item,
     LineFromSupermarket,
+    LineFromPicnic,
     LineFromDb,
     PlannedRecipe,
     ManualIngredient,
@@ -13,28 +14,39 @@ defmodule Picape.Order do
     Sync
   }
 
-  alias Picape.{Repo, Supermarket, Recipe, Shopping, Ingredients, Settings, Checklist}
+  alias Picape.{Repo, Supermarket, Picnic, Recipe, Shopping, Ingredients, Settings, Checklist}
 
   defmodule(Product, do: defstruct([:id, :quantity]))
 
   @doc """
   Returns the currently active cart. In checklist mode that is the list Picape
   computed, with the ticked-off state overlaid — no supermarket call happens.
-  An `ah` order whose supermarket does not answer is served the same way,
-  flagged `supermarket_reachable: false`, so a dead API does not take the
-  list down with it.
+  In picnic mode it is the Picnic cart plus the planned items that have no
+  Picnic mapping, which stay on the checklist. An `ah` or `picnic` order whose
+  supermarket does not answer is served the same way, flagged
+  `supermarket_reachable: false`, so a dead API does not take the list down
+  with it.
   """
   def current() do
-    if Settings.checklist?() do
-      {:ok, cart} = cart("1")
-      {:ok, checklist_line(LineFromDb.convert(cart))}
-    else
-      try do
-        line = LineFromSupermarket.convert(Supermarket.cart())
-        {:ok, %{line | is_placed: order_placed?(), supermarket_reachable: true}}
-      rescue
-        error -> fallback_line(error)
-      end
+    cond do
+      Settings.checklist?() ->
+        {:ok, cart} = cart("1")
+        {:ok, checklist_line(LineFromDb.convert(cart))}
+
+      Settings.picnic?() ->
+        try do
+          {:ok, picnic_line(Picnic.cart())}
+        rescue
+          error -> fallback_line(error)
+        end
+
+      true ->
+        try do
+          line = LineFromSupermarket.convert(Supermarket.cart())
+          {:ok, %{line | is_placed: order_placed?(), supermarket_reachable: true}}
+        rescue
+          error -> fallback_line(error)
+        end
     end
   end
 
@@ -189,6 +201,9 @@ defmodule Picape.Order do
       Settings.checklist?() ->
         current()
 
+      Settings.picnic?() ->
+        sync_picnic(order_id)
+
       order_placed?() ->
         archive_placed_order(order_id)
         current()
@@ -210,16 +225,17 @@ defmodule Picape.Order do
   end
 
   @doc """
-  Switches between the supermarket basket ("ah") and Picape's own checklist
-  ("checklist"). Switching back to "ah" pushes the list that accumulated while
-  the supermarket was away into the basket; a supermarket that is still
-  unreachable does not block the switch, the next sync retries.
+  Switches where the current order lives: the supermarket basket ("ah"), the
+  Picnic cart ("picnic") or Picape's own checklist ("checklist"). Switching to
+  "ah" or "picnic" pushes the list that accumulated while the supermarket was
+  away into that basket; a supermarket that is still unreachable does not
+  block the switch, the next sync retries.
   """
-  def set_mode(mode) when mode in ["ah", "checklist"] do
-    was_checklist = Settings.checklist?()
+  def set_mode(mode) when mode in ["ah", "checklist", "picnic"] do
+    previous = Settings.mode()
     {:ok, _} = Settings.set("mode", mode)
 
-    if mode == "ah" and was_checklist do
+    if mode != previous and mode in ["ah", "picnic"] do
       try do
         {:ok, line} = sync_supermarket("1")
 
@@ -272,7 +288,7 @@ defmodule Picape.Order do
   def ingredients_ordered_quantity(_order_id, ingredient_ids) do
     with {:ok, line} <- current(),
          {:ok, items} <- ordered_item_quantities(line),
-         {:ok, items_map} <- Recipe.ingredients_by_item_ids_reverse(Map.keys(items)) do
+         {:ok, items_map} <- item_ingredient_ids(Map.keys(items)) do
       {:ok, Map.new(ingredient_ids, fn id -> {id, items[items_map[id]] || 0} end)}
     end
   end
@@ -468,6 +484,137 @@ defmodule Picape.Order do
 
   # --- private
 
+  # The Picnic cart plus the planned ingredients that have no Picnic mapping,
+  # which fall back to the checklist. Products added in the Picnic app itself
+  # carry no ingredient, like the supermarket's external items.
+  defp picnic_line(cart) do
+    line = LineFromPicnic.convert(cart)
+    {:ok, by_product} = Ingredients.by_picnic_product_ids(Enum.map(line.items, & &1.id))
+    {:ok, db_cart} = cart("1")
+    checked = Checklist.checked_ids()
+
+    unmapped =
+      db_cart
+      |> Map.values()
+      |> Enum.filter(&is_nil(&1.ingredient.picnic_product_id))
+      |> Enum.map(&LineFromDb.convert_item/1)
+
+    items =
+      Enum.map(line.items, fn item ->
+        %{item | ingredient_id: get_in(by_product, [item.id, Access.key(:id)])}
+      end)
+
+    items = Enum.map(items ++ unmapped, &%{&1 | checked: MapSet.member?(checked, &1.ingredient_id)})
+
+    %{
+      line
+      | items: items,
+        total_count: line.total_count + length(unmapped),
+        supermarket_reachable: true
+    }
+  end
+
+  # Pushes what the plan wants into the Picnic cart. Only the Picnic cart rows
+  # (`store == "picnic"`) count as existing; checklist items and products the
+  # Picnic app added itself are left alone — the diff only names mapped ids.
+  defp sync_picnic(order_id) do
+    try do
+      {:ok, wanted} = planned_picnic_quantities(order_id)
+      {:ok, manual} = manual_ingredient_quantities(order_id)
+      {:ok, manual_by_id} = Ingredients.ingredients_by_ids(Map.keys(manual))
+      {:ok, line} = current()
+
+      # A manual row wins over the plan, including quantity 0: it takes the
+      # product out of the Picnic cart the same way it empties the AH basket.
+      manual =
+        for {ingredient_id, quantity} <- manual,
+            ingredient = manual_by_id[ingredient_id],
+            not is_nil(ingredient) and not is_nil(ingredient.picnic_product_id),
+            into: %{},
+            do: {ingredient.picnic_product_id, quantity}
+
+      existing = picnic_quantities(line)
+
+      with {:ok, changes} <- Sync.changes(wanted, manual, existing) do
+        push_picnic(changes, existing, line)
+      end
+    rescue
+      error -> Logger.warning("syncing the Picnic cart failed: #{Exception.message(error)}")
+    end
+
+    current()
+  end
+
+  # What the plan wants in the Picnic cart, keyed by selling unit id. Keyed on
+  # the ingredient, not the AH product id, so a picnic-only ingredient syncs too.
+  defp planned_picnic_quantities(order_id) do
+    query =
+      from(
+        p in PlannedRecipe,
+        join: r in Recipe.IngredientRef,
+        on: r.recipe_id == p.recipe_id,
+        join: i in assoc(r, :ingredient),
+        where:
+          p.line_id == ^order_id and p.unplanned == false and i.is_essential == false and
+            not is_nil(i.picnic_product_id),
+        select: {i.picnic_product_id, p.quantity * r.quantity}
+      )
+
+    wanted =
+      query
+      |> Repo.all()
+      |> Enum.reduce(%{}, fn {product_id, quantity}, acc ->
+        Map.update(acc, product_id, quantity, &(&1 + quantity))
+      end)
+
+    {:ok, wanted}
+  end
+
+  defp manual_ingredient_quantities(order_id) do
+    query =
+      from(
+        m in ManualIngredient,
+        where: m.line_id == ^order_id,
+        select: {m.ingredient_id, m.quantity}
+      )
+
+    {:ok, Enum.into(Repo.all(query), %{})}
+  end
+
+  defp picnic_quantities(line) do
+    for item <- line.items, item.store == "picnic", into: %{}, do: {item.id, item.quantity}
+  end
+
+  # A line served from the fallback produced no changes to push, and a dead
+  # Picnic answers none. The plan rows are already written, so the next sync
+  # that reaches Picnic pushes them.
+  defp push_picnic(_changes, _existing, %{supermarket_reachable: false}), do: :ok
+
+  defp push_picnic(changes, existing, _line) do
+    Picnic.apply_changes(changes, existing)
+  rescue
+    error -> Logger.warning("pushing the list to Picnic failed: #{Exception.message(error)}")
+  end
+
+  # The cart rows carry different keys per mode: a supermarket product id in
+  # ah, a Picnic selling unit id in picnic, the ingredient id itself on the
+  # checklist. Returns `ingredient_id => item id`.
+  defp item_ingredient_ids(item_ids) do
+    if Settings.picnic?() do
+      {:ok, by_product} = Ingredients.by_picnic_product_ids(item_ids)
+
+      items_map =
+        Map.merge(
+          Map.new(item_ids, &{&1, &1}),
+          Map.new(by_product, fn {product_id, ingredient} -> {ingredient.id, product_id} end)
+        )
+
+      {:ok, items_map}
+    else
+      Recipe.ingredients_by_item_ids_reverse(item_ids)
+    end
+  end
+
   defp checklist_line(line) do
     checked = Checklist.checked_ids()
 
@@ -602,8 +749,14 @@ defmodule Picape.Order do
 
   # In checklist mode or with the supermarket down there is no basket to
   # snapshot; the plan rows alone record the order then, like before snapshots.
+  # A picnic order keeps its plan rows too: `order_item.product_id` is numeric
+  # and Picnic's selling unit ids are strings, so they cannot be stored yet.
   defp supermarket_items() do
-    Supermarket.cart()["items"] || []
+    if Settings.picnic?() do
+      []
+    else
+      Supermarket.cart()["items"] || []
+    end
   rescue
     _ -> []
   end

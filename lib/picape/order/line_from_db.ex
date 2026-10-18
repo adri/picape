@@ -32,7 +32,8 @@ defmodule Picape.Order.LineFromDb do
       name: item.ingredient.name,
       image_url: Supermarket.image_url(item.ingredient.supermarket_product_raw),
       quantity: item.quantity,
-      ingredient_id: item.ingredient.id
+      ingredient_id: item.ingredient.id,
+      store: "checklist"
     }
   end
 end

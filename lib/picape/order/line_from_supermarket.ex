@@ -56,7 +56,8 @@ defmodule Picape.Order.LineFromSupermarket do
       image_url: Supermarket.image_url(product),
       quantity: item["quantity"],
       is_orderable: orderable?(availability),
-      availability_label: availability["availabilityLabel"]
+      availability_label: availability["availabilityLabel"],
+      store: "ah"
     }
   end
 
