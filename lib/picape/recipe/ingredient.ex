@@ -136,7 +136,7 @@ defmodule Picape.Recipe.Ingredient do
     |> validate_required([:name, :is_essential])
     |> validate_format(:picnic_product_id, ~r/^s\d+$/)
     |> unique_constraint(:supermarket_product_id)
-    |> unique_constraint(:picnic_product_id)
+    |> unique_constraint(:picnic_product_id, name: :recipe_ingredient_picnic_selling_unit_index)
   end
 
   @doc false
@@ -155,7 +155,7 @@ defmodule Picape.Recipe.Ingredient do
     |> validate_product_id()
     |> validate_format(:picnic_product_id, ~r/^s\d+$/)
     |> unique_constraint(:supermarket_product_id)
-    |> unique_constraint(:picnic_product_id)
+    |> unique_constraint(:picnic_product_id, name: :recipe_ingredient_picnic_selling_unit_index)
   end
 
   # An ingredient needs a product at one of the stores or it can never be
