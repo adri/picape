@@ -267,6 +267,44 @@ defmodule Picape.PicnicModeTest do
     assert quantities[gist.id] == 1
   end
 
+  test "an unavailable mapped product falls back to its replacement" do
+    avocado_regular =
+      insert!(:ingredient,
+        name: "Avocado",
+        supermarket_product_id: 10_583_837,
+        picnic_product_id: "s2002"
+      )
+
+    avocado =
+      insert!(:ingredient,
+        name: "Avocado bio",
+        supermarket_product_id: 519_017,
+        picnic_product_id: "s2001",
+        replacement_ingredient_id: avocado_regular.id
+      )
+
+    insert!(:manual_ingredient, ingredient_id: avocado.id, quantity: 2)
+
+    HTTPoison.post!(
+      "http://localhost:4021/__picnic_unavailable",
+      Jason.encode!(%{product_id: "s2001"}),
+      [{"content-type", "application/json"}]
+    )
+
+    assert {:ok, %{mode: "picnic", pushed_to_supermarket: true}} = Order.set_mode("picnic")
+
+    # The replacement takes the wanted quantity; the unavailable product stays
+    # in the cart flagged, the way the supermarket basket keeps its own.
+    assert picnic_quantity(Picnic.cart(), "s2002") == 2
+
+    assert {:ok, line} = Order.current()
+    avocado_item = Enum.find(line.items, &(&1.id == "s2001"))
+    assert avocado_item.is_orderable == false
+
+    assert %{"s2002" => %{id: substituted_for}} = Order.substitutions("1")
+    assert substituted_for == avocado.id
+  end
+
   defp supermarket_down() do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()

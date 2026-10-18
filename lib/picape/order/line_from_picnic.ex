@@ -28,13 +28,23 @@ defmodule Picape.Order.LineFromPicnic do
   end
 
   defp convert_item(item = %{}) do
+    unavailability = unavailability(item)
+
     %Item{
       id: item["id"],
       name: item["name"],
       image_url: Picnic.image_url(List.first(item["image_ids"] || [])),
       quantity: quantity(item),
+      is_orderable: is_nil(unavailability),
+      availability_label: unavailability["text"] || unavailability["reason"],
       store: "picnic"
     }
+  end
+
+  # An ORDER_ARTICLE the store cannot sell right now carries an UNAVAILABLE
+  # decorator — Picnic's own verdict, like isOrderable on the supermarket side.
+  defp unavailability(item) do
+    Enum.find(item["decorators"] || [], &(&1["type"] == "UNAVAILABLE"))
   end
 
   # The article's quantity sits in a QUANTITY decorator, the same spot the
