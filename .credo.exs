@@ -143,7 +143,7 @@
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.ExpensiveEmptyEnumCheck, []},
           {Credo.Check.Warning.IExPry, []},
-          {Credo.Check.Warning.IoInspect, [files: %{excluded: ["lib/picape/supermarket.ex", "lib/picape/picnic.ex"]}]},
+          {Credo.Check.Warning.IoInspect, [files: %{excluded: ["lib/picape/supermarket.ex"]}]},
           {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig, []},
           {Credo.Check.Warning.OperationOnSameValues, []},
           {Credo.Check.Warning.OperationWithConstantResult, []},

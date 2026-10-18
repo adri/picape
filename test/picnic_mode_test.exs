@@ -37,6 +37,37 @@ defmodule Picape.PicnicModeTest do
     assert picnic_quantity(Picnic.cart(), "s2001") == 1
   end
 
+  test "unplanning a recipe takes its products out of the Picnic cart" do
+    melk = insert!(:ingredient, name: "Melk", picnic_product_id: "s2002")
+    recipe = insert!(:recipe, title: "Nasi", ingredients: [melk])
+
+    {:ok, _} = Order.set_mode("picnic")
+    assert {:ok, _} = Order.plan_recipe("1", recipe.id)
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+
+    assert {:ok, _} = Order.plan_recipe("1", recipe.id, true)
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+  end
+
+  test "a rejected Picnic auth key falls back to the checklist" do
+    rijst =
+      insert!(:ingredient,
+        name: "Rijst",
+        supermarket_product_id: 10_583_837,
+        picnic_product_id: "s2002"
+      )
+
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+
+    HTTPoison.post!("http://localhost:4021/__picnic_auth_error", "")
+
+    assert {:ok, %{mode: "picnic", pushed_to_supermarket: false}} = Order.set_mode("picnic")
+
+    assert {:ok, line} = Order.current()
+    assert line.supermarket_reachable == false
+    assert [%{name: "Rijst", quantity: 2, store: "checklist"}] = line.items
+  end
+
   test "quantity 0 takes the product out of the Picnic cart" do
     brood = insert!(:ingredient, name: "Brood", picnic_product_id: "s2001")
     insert!(:manual_ingredient, ingredient_id: brood.id, quantity: 1)

@@ -522,6 +522,9 @@ defmodule Picape.Order do
       {:ok, wanted} = planned_picnic_quantities(order_id)
       {:ok, manual} = manual_ingredient_quantities(order_id)
       {:ok, manual_by_id} = Ingredients.ingredients_by_ids(Map.keys(manual))
+      # The cached cart can be five hours old; the diff is only as correct as
+      # the cart it is computed against, so sync reads a fresh one.
+      Picnic.invalidate_cart()
       {:ok, line} = current()
 
       # A manual row wins over the plan, including quantity 0: it takes the
@@ -547,6 +550,9 @@ defmodule Picape.Order do
 
   # What the plan wants in the Picnic cart, keyed by selling unit id. Keyed on
   # the ingredient, not the AH product id, so a picnic-only ingredient syncs too.
+  # Unplanned recipes come back at quantity 0, the same way
+  # recipe_ingredient_quantities/1 works: a sync after an unplan then removes
+  # the products instead of leaving them in the cart.
   defp planned_picnic_quantities(order_id) do
     query =
       from(
@@ -555,9 +561,9 @@ defmodule Picape.Order do
         on: r.recipe_id == p.recipe_id,
         join: i in assoc(r, :ingredient),
         where:
-          p.line_id == ^order_id and p.unplanned == false and i.is_essential == false and
+          p.line_id == ^order_id and i.is_essential == false and
             not is_nil(i.picnic_product_id),
-        select: {i.picnic_product_id, p.quantity * r.quantity}
+        select: {i.picnic_product_id, fragment("? * ? * Cast(NOT ? as integer)", p.quantity, r.quantity, p.unplanned)}
       )
 
     wanted =

@@ -17,15 +17,20 @@ defmodule Picape.Picnic do
   alias Picape.Picnic.SearchResult
 
   @default_base_url "https://storefront-prod.nl.picnicinternational.com/api/15"
+  @default_agent "30100;1.15.77-10293"
 
   def search(""), do: []
 
   def search(query) do
-    get!("/pages/search-page-results?search_term=#{Plug.Conn.Query.encode(query)}").body
+    auth_key!()
+
+    get!("/pages/search-page-results?#{URI.encode_query(%{"search_term" => query})}").body
     |> SearchResult.from_result()
   end
 
   def cart() do
+    auth_key!()
+
     ConCache.get_or_store(:supermarket, :picnic_cart, fn ->
       get!("/cart").body
     end)
@@ -96,6 +101,7 @@ defmodule Picape.Picnic do
   # ---
 
   defp post_cart(body, path) do
+    auth_key!()
     cart = post!(path, body, "Content-Type": "application/json").body
     ConCache.put(:supermarket, :picnic_cart, cart)
     cart
@@ -105,12 +111,8 @@ defmodule Picape.Picnic do
     (config(:base_url) || @default_base_url) |> String.replace(~r|/api/.*$|, "")
   end
 
-  def process_response_status_code(status_code) do
-    status_code |> IO.inspect(label: "129")
-  end
-
   def process_request_url(url) do
-    ((config(:base_url) || @default_base_url) <> url) |> IO.inspect(label: "133")
+    (config(:base_url) || @default_base_url) <> url
   end
 
   def process_response_body(body) do
@@ -121,13 +123,23 @@ defmodule Picape.Picnic do
   end
 
   def process_response(%HTTPoison.Response{body: body, status_code: status_code} = response) do
-    if is_binary(body) do
-      raise Picape.Supermarket.Error,
-        message:
-          "Picnic answered HTTP #{status_code} with a non-JSON body: " <>
-            String.slice(body, 0, 200)
-    else
-      response
+    cond do
+      is_binary(body) ->
+        raise Picape.Supermarket.Error,
+          message:
+            "Picnic answered HTTP #{status_code} with a non-JSON body: " <>
+              String.slice(body, 0, 200)
+
+      status_code not in 200..299 ->
+        raise Picape.Supermarket.Error,
+          message: "Picnic answered HTTP #{status_code}: " <> String.slice(inspect(body), 0, 200)
+
+      is_map(body) and Map.has_key?(body, "error") ->
+        raise Picape.Supermarket.Error,
+          message: "Picnic answered an error: " <> String.slice(inspect(body["error"]), 0, 200)
+
+      true ->
+        response
     end
   end
 
@@ -136,8 +148,9 @@ defmodule Picape.Picnic do
     |> Keyword.put_new(:Accept, "*/*")
     |> Keyword.put_new(:"Accept-Language", "nl-NL")
     |> Keyword.put_new(:"User-Agent", config(:user_agent) || "Picape")
-    |> Keyword.put_new(:"x-picnic-agent", config(:agent) || "")
-    |> Keyword.put_new(:"x-picnic-did", config(:did) || "")
+    |> Keyword.put_new(:"x-picnic-agent", config(:agent) || @default_agent)
+    |> Keyword.put_new(:"x-picnic-did", config(:did) || default_did())
+    |> Keyword.put_new(:"x-picnic-country", "NL")
     |> put_auth_key()
   end
 
@@ -145,6 +158,28 @@ defmodule Picape.Picnic do
     case config(:auth_key) do
       nil -> headers
       auth_key -> Keyword.put(headers, :"x-picnic-auth", auth_key)
+    end
+  end
+
+  defp auth_key!() do
+    config(:auth_key) ||
+      raise(Picape.Supermarket.Error,
+        message: "the Picnic auth key is not configured; set PICNIC_AUTH_KEY"
+      )
+  end
+
+  # The device id identifies this installation to Picnic, the way the app's own
+  # does. It is generated once per boot so a caller that does not configure one
+  # still sends a stable value.
+  defp default_did() do
+    case :persistent_term.get({__MODULE__, :did}, nil) do
+      nil ->
+        did = Ecto.UUID.generate()
+        :persistent_term.put({__MODULE__, :did}, did)
+        did
+
+      did ->
+        did
     end
   end
 
@@ -159,6 +194,9 @@ defmodule Picape.Picnic do
   end
 
   defp config(key) do
-    Application.get_env(:picape, __MODULE__, [])[key]
+    case Application.get_env(:picape, __MODULE__, [])[key] do
+      "" -> nil
+      value -> value
+    end
   end
 end

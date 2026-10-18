@@ -15,9 +15,13 @@ defmodule Picape.SupermarketFake do
   @orders __MODULE__.Orders
   @picnic __MODULE__.Picnic
   @down __MODULE__.Down
+  @picnic_auth_error __MODULE__.PicnicAuthError
+  @requests __MODULE__.Requests
 
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
   plug(:maybe_down)
+  plug(:maybe_picnic_auth_error)
+  plug(:log_request)
   plug(:match)
   plug(:dispatch)
 
@@ -27,6 +31,8 @@ defmodule Picape.SupermarketFake do
     {:ok, _} = Agent.start_link(fn -> fixture("orders.json") end, name: @orders)
     {:ok, _} = Agent.start_link(fn -> fixture("picnic_cart.json") end, name: @picnic)
     {:ok, _} = Agent.start_link(fn -> false end, name: @down)
+    {:ok, _} = Agent.start_link(fn -> false end, name: @picnic_auth_error)
+    {:ok, _} = Agent.start_link(fn -> [] end, name: @requests)
     Plug.Cowboy.http(__MODULE__, [], port: port)
   end
 
@@ -45,8 +51,13 @@ defmodule Picape.SupermarketFake do
     Agent.update(@orders, fn _ -> fixture("orders.json") end)
     Agent.update(@picnic, fn _ -> fixture("picnic_cart.json") end)
     Agent.update(@down, fn _ -> false end)
+    Agent.update(@picnic_auth_error, fn _ -> false end)
+    Agent.update(@requests, fn _ -> [] end)
     Picape.Picnic.invalidate_cart()
   end
+
+  @doc "Every request the fake answered, oldest first: method, path, query, body and headers."
+  def requests(), do: Agent.get(@requests, &Enum.reverse/1)
 
   defp maybe_down(conn, _opts) do
     if Agent.get(@down, & &1) and not String.starts_with?(conn.request_path, "/__") do
@@ -56,6 +67,42 @@ defmodule Picape.SupermarketFake do
     else
       conn
     end
+  end
+
+  # Picnic rejects a request whose auth key it does not know with a 401 and an
+  # error body; /__picnic_auth_error makes the api routes do that until reset.
+  defp maybe_picnic_auth_error(conn, _opts) do
+    if Agent.get(@picnic_auth_error, & &1) and String.starts_with?(conn.request_path, "/api/15/") do
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(401, Jason.encode!(%{"error" => %{"code" => "AUTH_ERROR"}}))
+      |> halt()
+    else
+      conn
+    end
+  end
+
+  defp log_request(conn, _opts) do
+    body =
+      case conn.body_params do
+        %Plug.Conn.Unfetched{} -> nil
+        params -> params
+      end
+
+    Agent.update(@requests, fn requests ->
+      [
+        %{
+          method: conn.method,
+          path: conn.request_path,
+          query: conn.query_string,
+          body: body,
+          headers: Map.new(conn.req_headers)
+        }
+        | requests
+      ]
+    end)
+
+    conn
   end
 
   post "/graphql" do
@@ -110,6 +157,13 @@ defmodule Picape.SupermarketFake do
     send_resp(conn, 204, "")
   end
 
+  # Pretends the Picnic auth key was rejected: every api/15 endpoint answers
+  # 401 with an AUTH_ERROR body, until /__reset.
+  post "/__picnic_auth_error" do
+    Agent.update(@picnic_auth_error, fn _ -> true end)
+    send_resp(conn, 204, "")
+  end
+
   post "/__up" do
     Agent.update(@down, fn _ -> false end)
     send_resp(conn, 204, "")
@@ -133,7 +187,10 @@ defmodule Picape.SupermarketFake do
   end
 
   get "/api/15/pages/search-page-results" do
-    json(conn, fixture("picnic_search.json"))
+    case conn.params["search_term"] do
+      term when is_binary(term) and term != "" -> json(conn, fixture("picnic_search.json"))
+      _ -> send_resp(conn, 400, "search_term is required")
+    end
   end
 
   post "/api/15/user/login" do
