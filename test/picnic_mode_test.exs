@@ -305,6 +305,68 @@ defmodule Picape.PicnicModeTest do
     assert substituted_for == avocado.id
   end
 
+  test "a manual quantity on an unavailable product adds onto the planned replacement" do
+    avocado_regular =
+      insert!(:ingredient,
+        name: "Avocado",
+        supermarket_product_id: 10_583_837,
+        picnic_product_id: "s2002"
+      )
+
+    avocado =
+      insert!(:ingredient,
+        name: "Avocado bio",
+        supermarket_product_id: 519_017,
+        picnic_product_id: "s2001",
+        replacement_ingredient_id: avocado_regular.id
+      )
+
+    recipe = insert!(:recipe, title: "Guacamole", ingredients: [avocado_regular])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+    insert!(:manual_ingredient, ingredient_id: avocado.id, quantity: 2)
+
+    HTTPoison.post!(
+      "http://localhost:4021/__picnic_unavailable",
+      Jason.encode!(%{product_id: "s2001"}),
+      [{"content-type", "application/json"}]
+    )
+
+    assert {:ok, %{mode: "picnic", pushed_to_supermarket: true}} = Order.set_mode("picnic")
+
+    assert picnic_quantity(Picnic.cart(), "s2002") == 3
+  end
+
+  test "a manual 0 on an unavailable product keeps the planned replacement" do
+    avocado_regular =
+      insert!(:ingredient,
+        name: "Avocado",
+        supermarket_product_id: 10_583_837,
+        picnic_product_id: "s2002"
+      )
+
+    avocado =
+      insert!(:ingredient,
+        name: "Avocado bio",
+        supermarket_product_id: 519_017,
+        picnic_product_id: "s2001",
+        replacement_ingredient_id: avocado_regular.id
+      )
+
+    recipe = insert!(:recipe, title: "Guacamole", ingredients: [avocado_regular])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+    insert!(:manual_ingredient, ingredient_id: avocado.id, quantity: 0)
+
+    HTTPoison.post!(
+      "http://localhost:4021/__picnic_unavailable",
+      Jason.encode!(%{product_id: "s2001"}),
+      [{"content-type", "application/json"}]
+    )
+
+    assert {:ok, %{mode: "picnic", pushed_to_supermarket: true}} = Order.set_mode("picnic")
+
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+  end
+
   defp supermarket_down() do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()

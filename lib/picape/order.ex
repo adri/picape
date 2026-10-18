@@ -219,8 +219,9 @@ defmodule Picape.Order do
              {:ok, manual} <- manual_ingredients(order_id),
              {:ok, line} <- current(),
              {:ok, existing} <- ordered_item_quantities(line),
+             wanted <- merge_wanted(planned, manual),
              {:ok, changes} <-
-               Sync.changes(substitute(planned, line), substitute(manual, line), existing) do
+               Sync.changes(substitute(wanted, line), %{}, existing) do
           push(changes, line)
           current()
         else
@@ -558,17 +559,19 @@ defmodule Picape.Order do
   # Picnic app added itself are left alone — the diff only names mapped ids.
   defp sync_picnic(order_id) do
     try do
-      {:ok, wanted} = planned_picnic_quantities(order_id)
+      {:ok, wanted} = wanted_picnic_quantities(order_id)
       # The cached cart can be five hours old; the diff is only as correct as
       # the cart it is computed against, so sync reads a fresh one.
       Picnic.invalidate_cart()
       {:ok, line} = current()
-      {:ok, manual} = manual_picnic_quantities(order_id)
 
       existing = picnic_quantities(line)
 
+      # Substitution runs after the planned/manual merge so two quantities
+      # landing on the same replacement add up instead of one overwriting
+      # the other.
       with {:ok, changes} <-
-             Sync.changes(substitute_picnic(wanted, line), substitute_picnic(manual, line), existing) do
+             Sync.changes(substitute_picnic(wanted, line), %{}, existing) do
         push_picnic(changes, existing, line)
       end
     rescue
@@ -873,6 +876,12 @@ defmodule Picape.Order do
     unavailable = unavailable_product_ids(line, by_product)
 
     substitute(quantities, by_product, unavailable, :supermarket_product_id)
+  end
+
+  # The merge happens before substitution so a manual row wins per original
+  # product while two quantities landing on the same replacement add up.
+  defp merge_wanted(planned, manual) do
+    Map.merge(planned, manual, fn _id, _planned_quantity, manual_quantity -> manual_quantity end)
   end
 
   # The Picnic version swaps on selling unit ids: an ORDER_ARTICLE flagged
