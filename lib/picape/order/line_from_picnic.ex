@@ -7,14 +7,17 @@ defmodule Picape.Order.LineFromPicnic do
   alias Picape.Order.{Line, Item}
   alias Picape.Picnic
 
-  def convert(%{"items" => groups} = cart) when is_list(groups) do
-    items = groups |> Enum.flat_map(&(&1["items"] || [])) |> Enum.map(&convert_item/1)
+  def convert(%{"items" => groups} = _cart) when is_list(groups) do
+    articles = Enum.flat_map(groups, &(&1["items"] || []))
+    items = Enum.map(articles, &convert_item/1)
 
+    # The totals come from the articles themselves, not the cart's stored
+    # totals: a cached cart can hold a total that no longer matches its items.
     %Line{
       id: 1,
       items: items,
-      total_count: cart["total_count"] || Enum.count(items),
-      total_price: cart["total_price"] || 0,
+      total_count: Enum.sum(Enum.map(items, & &1.quantity)),
+      total_price: Enum.sum(Enum.map(articles, &((&1["price"] || 0) * quantity(&1)))),
       total_discount: 0,
       is_placed: false
     }

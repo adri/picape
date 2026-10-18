@@ -89,7 +89,10 @@ defmodule Picape.MCP.Tools do
       name: "get_shopping_list",
       description:
         "Read the current order: every item with its quantity, plus the total item count and price " <>
-          "in cents. `mode` says where the list lives: 'ah' (the supermarket basket), 'picnic' " <>
+          "in cents. `total_price` is the sum over the listed items that carry a price — in picnic " <>
+          "mode that is the Picnic cart rows only; 'checklist' items have no price and count " <>
+          "towards `total_count` but not `total_price`. `mode` says where the list lives: 'ah' " <>
+          "(the supermarket basket), 'picnic' " <>
           "(the Picnic cart) or 'checklist' (Picape's own list — see set_mode). `store` says per " <>
           "item which of the three it comes from; in picnic mode an ingredient without a Picnic " <>
           "mapping shows up as a 'checklist' item. In checklist mode `checked` marks the items " <>

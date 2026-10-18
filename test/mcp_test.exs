@@ -244,6 +244,23 @@ defmodule Picape.MCPTest do
                %{"quantity" => 1, "recipe_id" => recipe.id, "title" => "Nasi"}
              ]
     end
+
+    test "in picnic mode total_price sums the listed items, not the cart's stored total" do
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+
+      call!("set_mode", %{mode: "picnic"})
+
+      # A cart whose stored total does not match its contents, like one read
+      # while the cache was stale.
+      cart = Picape.Picnic.cart() |> Map.put("total_price", 1855)
+      ConCache.put(:supermarket, :picnic_cart, cart)
+
+      list = call!("get_shopping_list")
+
+      # s2001 at 189 cents is the only priced item; checklist rows carry none.
+      assert list["total_price"] == 189
+    end
   end
 
   describe "set_ingredient_quantity" do
