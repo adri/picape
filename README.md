@@ -35,10 +35,12 @@ It is a route in the Phoenix router, so it is up whenever the app is, on the dat
 | --- | --- |
 | `search_ingredients` | Search the ingredients Picape knows, by name |
 | `search_supermarket` | Search the supermarket's product catalogue |
+| `search_picnic` | Search the Picnic product catalogue |
+| `map_ingredient_picnic` | Set or clear the Picnic product behind an ingredient |
 | `get_shopping_list` | Read the current order: items, quantities, totals, availability and the freeze state |
 | `get_previous_orders` | Read closed orders: items, quantities and when each closed, including products added in the supermarket's own app |
 | `set_ingredient_quantity` | Put an ingredient on the list, change it, or remove it with quantity 0 |
-| `set_mode` | Switch where the list lives: the supermarket basket or Picape's own checklist |
+| `set_mode` | Switch where the list lives: the supermarket basket, the Picnic cart or Picape's own checklist |
 | `check_item` | Tick an item off the checklist, or untick it |
 | `add_ingredient` | Teach Picape an ingredient, backed by a supermarket product ID |
 | `edit_ingredient` | Change an ingredient, for example onto another supermarket product |
@@ -84,7 +86,8 @@ Notes on the tools:
 - `edit_ingredient` is the other way round: it changes only the fields you send and leaves the rest, tags included. When the supermarket drops a product, `search_ingredients` reports a `warning` and `edit_ingredient` moves the ingredient onto a replacement product, which keeps the recipes that use it.
 - `set_ingredient_replacement` is different from repointing an ingredient: the ingredient keeps its product, and sync orders the replacement's product only while the wanted one cannot be delivered. The cart row then says what it stands in for (`substituted_for`).
 - `get_shopping_list` marks products the supermarket cannot deliver right now with `is_orderable: false`; `only_unavailable: true` returns just those. While the supermarket processes a paid order the answer's `is_placed` is true and Picape freezes: `set_ingredient_quantity` and `plan_recipe` still record the intent, but nothing reaches the supermarket until the order is delivered.
-- `get_shopping_list` also reports `mode`. `ah` means the list lives in the supermarket basket; `checklist` means it lives in Picape's own database and planning, ordering and ticking work without the supermarket. Switch with `set_mode`; switching back to `ah` pushes the accumulated list into the basket and the reply's `pushed_to_supermarket` says whether that worked. `check_item` ticks items only in checklist mode.
+- `get_shopping_list` also reports `mode`, and `store` per item. `ah` means the list lives in the supermarket basket; `picnic` means it lives in the Picnic cart; `checklist` means it lives in Picape's own database and planning, ordering and ticking work without a supermarket. In picnic mode an ingredient without a Picnic mapping shows up as a `checklist` item. Switch with `set_mode`; switching to `ah` or `picnic` pushes the accumulated list into that basket and the reply's `pushed_to_supermarket` says whether that worked. `check_item` ticks items in checklist and picnic mode.
+- Picnic mode syncs the plan into the Picnic cart for every ingredient that has a `picnic_product_id` (set with `map_ingredient_picnic`, found with `search_picnic`). Picape never checks out, pays or picks a delivery slot at Picnic. Ordering finishes in the Picnic app. Picnic mode needs `PICNIC_AUTH_KEY` in the environment (`PICNIC_BASE_URL`, `PICNIC_AGENT`, `PICNIC_DID` and `PICNIC_USER_AGENT` have defaults); `Picape.Picnic.login/2` trades username and password for the key by hand.
 - `get_previous_orders` reads the basket contents Picape snapshot at the moment each order closed, so products that were added in the supermarket's own app appear with `ingredient_id: null` and `external: true`. Orders closed before snapshots existed fall back to what Picape's plan rows recorded, so their external items are lost.
 - There is no delete for recipes or ingredients.
 - The two history tools read finished orders only, nine years of them. The order being planned now is not history yet, an ingredient taken off a list again was never bought, and a recipe that was unplanned again was never cooked, so none of the three count.

@@ -43,7 +43,7 @@ Other:
 - `mix graphql.schema` — writes the schema SDL to `priv/graphql/schema.graphql`. A test fails when that file is stale, and the frontend GraphQL check reads it, so run this after every schema change and commit the result.
 - `bin/setup` — first-time bootstrap.
 
-Credentials live in `config/dev.secret.exs` (gitignored, optional: the fake stack boots without it) and `config/runtime.exs` via env vars (`NEW_RELIC_LICENSE_KEY`, `SENTRY_DSN`, supermarket auth). Don't commit those.
+Credentials live in `config/dev.secret.exs` (gitignored, optional: the fake stack boots without it) and `config/runtime.exs` via env vars (`NEW_RELIC_LICENSE_KEY`, `SENTRY_DSN`, supermarket auth, `PICNIC_AUTH_KEY` plus optional `PICNIC_BASE_URL`/`PICNIC_AGENT`/`PICNIC_DID`/`PICNIC_USER_AGENT` for picnic mode). Don't commit those.
 
 ## Deploy
 
