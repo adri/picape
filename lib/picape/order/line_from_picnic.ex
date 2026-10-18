@@ -13,11 +13,17 @@ defmodule Picape.Order.LineFromPicnic do
 
     # The totals come from the articles themselves, not the cart's stored
     # totals: a cached cart can hold a total that no longer matches its items.
+    # An ORDER_ARTICLE's price is per unit; one Picnic cannot sell right now
+    # adds nothing to what the order would cost.
     %Line{
       id: 1,
       items: items,
       total_count: Enum.sum(Enum.map(items, & &1.quantity)),
-      total_price: Enum.sum(Enum.map(articles, &((&1["price"] || 0) * quantity(&1)))),
+      total_price:
+        articles
+        |> Enum.reject(&unavailability/1)
+        |> Enum.map(&((&1["price"] || 0) * quantity(&1)))
+        |> Enum.sum(),
       total_discount: 0,
       is_placed: false
     }

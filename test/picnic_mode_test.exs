@@ -403,6 +403,37 @@ defmodule Picape.PicnicModeTest do
              Repo.get_by(Order.ManualIngredient, line_id: "1", ingredient_id: gist.id)
   end
 
+  test "the total price counts every unit of a Picnic cart item" do
+    brood =
+      insert!(:ingredient,
+        name: "Brood",
+        supermarket_product_id: 519_017,
+        picnic_product_id: "s2001"
+      )
+
+    insert!(:manual_ingredient, ingredient_id: brood.id, quantity: 2)
+
+    {:ok, _} = Order.set_mode("picnic")
+
+    assert {:ok, line} = Order.current()
+    assert line.total_price == 2 * 189
+  end
+
+  test "an unavailable Picnic product adds nothing to the total price" do
+    {:ok, _} = Order.set_mode("picnic")
+
+    HTTPoison.post!(
+      "http://localhost:4021/__picnic_unavailable",
+      Jason.encode!(%{product_id: "s2001"}),
+      [{"content-type", "application/json"}]
+    )
+
+    Picnic.invalidate_cart()
+
+    assert {:ok, line} = Order.current()
+    assert line.total_price == 0
+  end
+
   defp supermarket_down() do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()
