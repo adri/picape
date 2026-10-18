@@ -41,6 +41,9 @@ const GET_INGREDIENT = gql`
         isEssential
         supermarketProductId
         supermarketName
+        picnicProductId
+        picnicName
+        picnicImageUrl
         tags {
           id
           name
@@ -50,6 +53,9 @@ const GET_INGREDIENT = gql`
           description
         }
       }
+    }
+    currentOrder {
+      mode
     }
     ingredients(first: 1000) {
       tags {
@@ -84,18 +90,25 @@ export function EditIngredientScreen({
     name: '',
     isEssential: false,
     supermarketProductId: '',
+    picnicProductId: null,
+    picnicName: '',
   });
 
-  const { data: { node: ingredient } = {}, loading } = useQuery(GET_INGREDIENT, {
-    variables: { ingredientId },
-    onCompleted: (data) => {
-      changeForm({
-        name: data.node.name,
-        isEssential: data.node.isEssential,
-        supermarketProductId: data.node.supermarketProductId,
-      });
-    },
-  });
+  const { data: { node: ingredient, currentOrder: { mode } = {} } = {}, loading } = useQuery(
+    GET_INGREDIENT,
+    {
+      variables: { ingredientId },
+      onCompleted: (data) => {
+        changeForm({
+          name: data.node.name,
+          isEssential: data.node.isEssential,
+          supermarketProductId: data.node.supermarketProductId,
+          picnicProductId: data.node.picnicProductId,
+        });
+      },
+    }
+  );
+  const picnic = mode === 'picnic';
 
   if (loading) return null;
   if (!loading && !ingredient) {
@@ -155,30 +168,53 @@ export function EditIngredientScreen({
         </View>
 
         <View style={[styles.searchContainer]}>
-          <Text style={[styles.label, { color: colors.text }]}>Supermarket</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {picnic ? 'Picnic' : 'Supermarket'}
+          </Text>
           <SearchIngredients
             autoFocus={false}
             embedded
             supermarketOnly
-            placeholder={form.supermarketName || ingredient.supermarketName}
-            customRenderItem={({ item: ingredient, searchRef }) => (
-              <ListItem autoFocus={false} title={ingredient.name} imageUrl={ingredient.imageUrl}>
+            placeholder={
+              picnic
+                ? form.picnicName || ingredient.picnicName || 'Zoek in Picnic'
+                : form.supermarketName || ingredient.supermarketName
+            }
+            customRenderItem={({ item: product, searchRef }) => (
+              <ListItem autoFocus={false} title={product.name} imageUrl={product.imageUrl}>
                 <PlusIcon
                   style={{ margin: 10 }}
                   onPress={(e) => {
                     e.preventDefault();
                     searchRef.current.clear();
-                    console.log(ingredient);
-                    return changeForm({
-                      ...form,
-                      supermarketProductId: ingredient.id,
-                      supermarketName: ingredient.name,
-                    });
+                    return changeForm(
+                      picnic
+                        ? {
+                            ...form,
+                            picnicProductId: product.id,
+                            picnicName: product.name,
+                          }
+                        : {
+                            ...form,
+                            supermarketProductId: product.id,
+                            supermarketName: product.name,
+                          }
+                    );
                   }}
                 />
               </ListItem>
             )}
           />
+          {picnic && form.picnicProductId && (
+            <ListItem
+              title={form.picnicName || ingredient.picnicName || 'Picnic product'}
+              imageUrl={ingredient.picnicImageUrl}
+              chevron={false}
+              onPress={() =>
+                changeForm({ ...form, picnicProductId: null, picnicName: '(geen Picnic product)' })
+              }
+            />
+          )}
         </View>
       </ScrollView>
 
@@ -199,6 +235,7 @@ export function EditIngredientScreen({
                 ingredientId,
                 name: form.name,
                 supermarketProductId: form.supermarketProductId,
+                picnicProductId: form.picnicProductId,
                 isEssential: form.isEssential,
                 tagIds: ingredient.tags.map((tag) => tag.id),
               },

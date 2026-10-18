@@ -27,6 +27,8 @@ defmodule Picape.MCPTest do
       assert Enum.map(tools, & &1["name"]) == [
                "search_ingredients",
                "search_supermarket",
+               "search_picnic",
+               "map_ingredient_picnic",
                "get_shopping_list",
                "get_previous_orders",
                "set_ingredient_quantity",
@@ -109,6 +111,51 @@ defmodule Picape.MCPTest do
     end
   end
 
+  describe "search_picnic and map_ingredient_picnic" do
+    test "search_picnic returns selling units from the Picnic catalogue" do
+      assert [%{"id" => "s2001", "name" => "Volkoren brood", "price" => 189} | _] =
+               call!("search_picnic", %{query: "brood"})
+    end
+
+    test "map_ingredient_picnic stores and clears the mapping, keeping the AH one" do
+      ingredient = insert!(:ingredient, name: "Brood", supermarket_product_id: 519_017)
+
+      assert %{"picnic_product_id" => "s2001", "supermarket_product_id" => 519_017} =
+               call!("map_ingredient_picnic", %{
+                 ingredient_id: ingredient.id,
+                 picnic_product_id: "s2001",
+                 name: "Volkoren brood",
+                 unit_quantity: "800 g",
+                 image_id: "fake0000fake0000fake0000fake0000fake0000fake0000fake0000fake0001",
+                 price: 189
+               })
+
+      saved = Repo.get!(Ingredient, ingredient.id)
+      assert saved.picnic_product_id == "s2001"
+      assert saved.picnic_product_raw["name"] == "Volkoren brood"
+      assert saved.supermarket_product_id == 519_017
+
+      assert %{"picnic_product_id" => nil} =
+               call!("map_ingredient_picnic", %{
+                 ingredient_id: ingredient.id,
+                 picnic_product_id: nil
+               })
+
+      assert Repo.get!(Ingredient, ingredient.id).picnic_product_raw == nil
+    end
+
+    test "map_ingredient_picnic reports an unknown ingredient and a taken product" do
+      assert call_error("map_ingredient_picnic", %{ingredient_id: 999_999, picnic_product_id: "s2001"}) ==
+               "no ingredient with id 999999"
+
+      insert!(:ingredient, name: "Brood", picnic_product_id: "s2001")
+      ingredient = insert!(:ingredient, name: "Melk")
+
+      assert call_error("map_ingredient_picnic", %{ingredient_id: ingredient.id, picnic_product_id: "s2001"}) =~
+               "has already been taken"
+    end
+  end
+
   describe "get_shopping_list" do
     test "returns the cart and links items to known ingredients" do
       insert!(:ingredient, name: "Roomboter", supermarket_product_id: 10_567_923)
@@ -186,6 +233,26 @@ defmodule Picape.MCPTest do
 
       assert get_in(ingredient.supermarket_product_raw, ["productCard", "title"]) ==
                "Flower Farm Bakken zonder palm"
+    end
+
+    test "accepts a Picnic product without a supermarket product" do
+      assert %{"name" => "Wasabinoten", "picnic_product_id" => "s2002"} =
+               call!("add_ingredient", %{
+                 name: "Wasabinoten",
+                 picnic_product_id: "s2002",
+                 unit_quantity: "100 g",
+                 price: 349
+               })
+
+      ingredient = Repo.get_by!(Ingredient, name: "Wasabinoten")
+
+      assert ingredient.supermarket_product_id == nil
+      assert ingredient.picnic_product_id == "s2002"
+      assert ingredient.picnic_product_raw["display_price"] == 349
+    end
+
+    test "refuses an ingredient with no product at either store" do
+      assert call_error("add_ingredient", %{name: "Blaar"}) =~ "supermarket_product_id"
     end
 
     test "refuses a supermarket product that is already an ingredient" do
@@ -588,6 +655,37 @@ defmodule Picape.MCPTest do
 
     test "an unknown mode is an error" do
       assert call_error("set_mode", %{mode: "floef"}) =~ "unknown mode"
+    end
+
+    test "picnic mode serves the Picnic cart and the checklist for unmapped items" do
+      brood = insert!(:ingredient, name: "Brood", picnic_product_id: "s2001")
+      insert!(:manual_ingredient, ingredient_id: brood.id, quantity: 1)
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+
+      assert %{"mode" => "picnic"} = call!("set_mode", %{mode: "picnic"})
+
+      list = call!("get_shopping_list")
+      assert list["mode"] == "picnic"
+
+      brood_item = Enum.find(list["items"], &(&1["name"] == "Volkoren brood"))
+      assert brood_item["store"] == "picnic"
+      assert brood_item["ingredient"]["name"] == "Brood"
+
+      rijst_item = Enum.find(list["items"], &(&1["name"] == "Rijst"))
+      assert rijst_item["store"] == "checklist"
+      assert rijst_item["ingredient"]["name"] == "Rijst"
+      assert rijst_item["checked"] == false
+
+      assert %{"checked" => true} = call!("check_item", %{ingredient_id: rijst.id})
+      assert Enum.find(call!("get_shopping_list")["items"], &(&1["name"] == "Rijst"))["checked"]
+    end
+
+    test "in ah mode every item names the supermarket as its store" do
+      list = call!("get_shopping_list")
+
+      assert list["mode"] == "ah"
+      assert Enum.all?(list["items"], &(&1["store"] == "ah"))
     end
 
     test "a down supermarket serves the checklist, flagged unreachable" do

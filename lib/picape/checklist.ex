@@ -16,11 +16,13 @@ defmodule Picape.Checklist do
   @doc """
   Ticks an ingredient on the checklist (`checked` true) or unticks it.
   Only writes while the order reads as a checklist — the mode says so, or the
-  supermarket is down and the order falls back to it. Ticking a basket the
-  supermarket owns would record a state nothing reads.
+  supermarket is down and the order falls back to it. In picnic mode ticking
+  is always allowed: the items Picnic does not carry live on the checklist,
+  and a tick on a cart item just marks it bought while shopping. Ticking a
+  basket the supermarket owns would record a state nothing reads.
   """
   def check(ingredient_id, checked \\ true) do
-    if Settings.checklist?() or not Supermarket.reachable?() do
+    if Settings.checklist?() or Settings.picnic?() or not Supermarket.reachable?() do
       %Item{}
       |> Item.changeset(%{ingredient_id: ingredient_id, checked: checked})
       |> Repo.insert(

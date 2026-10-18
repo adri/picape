@@ -13,11 +13,17 @@ import { FloatingTop, Spacing } from '../constants/Spacing';
 import { useSheetGesture } from '../navigation/useSheetGesture';
 
 const ADD_INGREDIENT = gql`
-  mutation AddIngredient($name: String!, $isEssential: Boolean!, $supermarketProductId: String!) {
+  mutation AddIngredient(
+    $name: String!
+    $isEssential: Boolean!
+    $supermarketProductId: String
+    $picnicProductId: String
+  ) {
     addIngredient(
       name: $name
       isEssential: $isEssential
       supermarketProductId: $supermarketProductId
+      picnicProductId: $picnicProductId
     ) {
       id
       name
@@ -29,6 +35,10 @@ const ADD_INGREDIENT = gql`
   }
 `;
 
+// A Picnic selling unit id looks like "s2001"; those go in picnicProductId,
+// never in supermarketProductId.
+const isPicnicId = (id) => /^s\d+$/.test(String(id || ''));
+
 export function AddIngredientScreen({
   navigation,
   route: {
@@ -38,7 +48,8 @@ export function AddIngredientScreen({
   const [form, changeForm] = useState({
     name: ingredient.name,
     isEssential: false,
-    supermarketProductId: ingredient.id,
+    supermarketProductId: isPicnicId(ingredient.id) ? null : ingredient.id,
+    picnicProductId: isPicnicId(ingredient.id) ? ingredient.id : null,
   });
   const insets = useSafeAreaInsets();
   const colors = useTheme();
@@ -107,6 +118,7 @@ export function AddIngredientScreen({
             variables: {
               name: form.name,
               supermarketProductId: form.supermarketProductId,
+              picnicProductId: form.picnicProductId,
               isEssential: form.isEssential,
             },
           });

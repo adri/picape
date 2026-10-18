@@ -1,0 +1,25 @@
+{
+  "type": "ORDER",
+  "id": "shopping_cart",
+  "items": [
+    {
+      "type": "ORDER_LINE",
+      "id": "10_11",
+      "items": [
+        {
+          "type": "ORDER_ARTICLE",
+          "id": "s2001",
+          "name": "Volkoren brood",
+          "price": 189,
+          "image_ids": ["fake0000fake0000fake0000fake0000fake0000fake0000fake0000fake0001"],
+          "decorators": [{ "type": "QUANTITY", "quantity": 1 }],
+          "max_count": 50,
+          "unit_quantity": "800 g"
+        }
+      ],
+      "price": 189
+    }
+  ],
+  "total_count": 1,
+  "total_price": 189
+}

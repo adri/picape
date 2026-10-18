@@ -95,6 +95,12 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(&Resolver.Supermarket.search/3)
     end
 
+    @desc "Search Picnic products using a query string."
+    field :search_picnic, list_of(:supermarket_search_result) do
+      arg(:query, non_null(:string))
+      resolve(&Resolver.Supermarket.search_picnic/3)
+    end
+
     @desc """
     Search ingredients using a query string, excluding of
     ingredient ids possible.
@@ -148,14 +154,14 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(handle_errors(&Resolver.Order.stop_shopping/2))
     end
 
-    @desc "Tick an item off the checklist, or untick it. Checklist mode only."
+    @desc "Tick an item off the checklist, or untick it. Checklist and picnic mode only."
     field :check_item, :order do
       arg(:ingredient_id, non_null(:id))
       arg(:checked, :boolean, default_value: true)
       resolve(handle_errors(&Resolver.Order.check_item/2))
     end
 
-    @desc "Switch where the current order lives: the supermarket basket (ah) or Picape's own checklist."
+    @desc "Switch where the current order lives: the supermarket basket (ah), the Picnic cart (picnic) or Picape's own checklist."
     field :set_mode, :order do
       arg(:mode, non_null(:string))
       resolve(handle_errors(&Resolver.Order.set_mode/2))
@@ -184,11 +190,12 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(handle_errors(&Resolver.Bonus.activate/2))
     end
 
-    @desc "Add a new ingredient."
+    @desc "Add a new ingredient, backed by a supermarket product, a Picnic product, or both."
     field :add_ingredient, :ingredient do
       arg(:name, non_null(:string))
       arg(:is_essential, non_null(:boolean))
-      arg(:supermarket_product_id, non_null(:string))
+      arg(:supermarket_product_id, :string)
+      arg(:picnic_product_id, :string)
       resolve(handle_errors(&Resolver.Recipe.add_ingredient/3))
     end
 

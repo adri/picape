@@ -21,6 +21,7 @@ export const orderFields = gql`
       availabilityLabel
       substitutedFor
       checked
+      store
       ingredient {
         id
         name

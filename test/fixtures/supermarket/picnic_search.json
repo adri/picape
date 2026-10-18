@@ -1,0 +1,52 @@
+{
+  "body": {
+    "child": {
+      "type": "CONTAINER",
+      "id": "search-page",
+      "children": [
+        {
+          "type": "STACK",
+          "id": "results",
+          "children": [
+            {
+              "type": "SELLING_UNIT_TILE",
+              "id": "tile-s2001",
+              "content": {
+                "type": "SELLING_UNIT_TILE",
+                "sellingUnit": {
+                  "type": "SELLING_UNIT",
+                  "id": "s2001",
+                  "name": "Volkoren brood",
+                  "image_id": "fake0000fake0000fake0000fake0000fake0000fake0000fake0000fake0001",
+                  "display_price": 189,
+                  "unit_quantity": "800 g",
+                  "max_count": 50,
+                  "decorators": [],
+                  "price_ranges": null
+                }
+              }
+            },
+            {
+              "type": "SELLING_UNIT_TILE",
+              "id": "tile-s2002",
+              "content": {
+                "type": "SELLING_UNIT_TILE",
+                "sellingUnit": {
+                  "type": "SELLING_UNIT",
+                  "id": "s2002",
+                  "name": "Halfvolle melk",
+                  "image_id": "fake0000fake0000fake0000fake0000fake0000fake0000fake0000fake0002",
+                  "display_price": 119,
+                  "unit_quantity": "1 l",
+                  "max_count": 30,
+                  "decorators": [{ "type": "UNIT_QUANTITY", "unit_quantity_text": "1 l" }],
+                  "price_ranges": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

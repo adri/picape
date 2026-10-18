@@ -11,6 +11,7 @@ defmodule Picape.Order.Item do
     field(:is_orderable, :boolean, default: true, virtual: true)
     field(:availability_label, :string, virtual: true)
     field(:checked, :boolean, virtual: true, default: false)
+    field(:store, :string, virtual: true)
     field(:recipe_ids, {:array, :integer})
     field(:line_id, :string)
     field(:ingredient_id, :id)

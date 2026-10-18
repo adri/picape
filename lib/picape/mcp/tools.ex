@@ -7,7 +7,7 @@ defmodule Picape.MCP.Tools do
   GraphQL API hands out.
   """
 
-  alias Picape.{Bonus, Checklist, Ingredients, Order, Recipe, Seasonal, Settings, Supermarket}
+  alias Picape.{Bonus, Checklist, Ingredients, Order, Picnic, Recipe, Seasonal, Settings, Supermarket}
 
   # The GraphQL resolvers hardcode the same order id: there is one open order.
   @order_id "1"
@@ -36,8 +36,9 @@ defmodule Picape.MCP.Tools do
     %{
       name: "search_supermarket",
       description:
-        "Search the supermarket's product catalogue for products Picape does not know yet. The `id` " <>
-          "in the result is a supermarket product ID, not a Picape ingredient ID; pass it to add_ingredient.",
+        "Search the active store's product catalogue for products Picape does not know yet: the " <>
+          "supermarket's catalogue, or Picnic's in picnic mode (see set_mode). The `id` in the " <>
+          "result is a store product ID, not a Picape ingredient ID; pass it to add_ingredient.",
       inputSchema: %{
         type: "object",
         properties: %{query: %{type: "string", description: "Part of a product name, in Dutch"}},
@@ -45,19 +46,62 @@ defmodule Picape.MCP.Tools do
       }
     },
     %{
+      name: "search_picnic",
+      description:
+        "Search the Picnic product catalogue for products Picape does not know yet. The `id` " <>
+          "in the result is a Picnic selling unit id like \"s1016186\", not a Picape ingredient ID; " <>
+          "pass it to map_ingredient_picnic, together with name, unit_quantity, image_id and price " <>
+          "so the ingredient keeps them cached. `price` is in cents.",
+      inputSchema: %{
+        type: "object",
+        properties: %{query: %{type: "string", description: "Part of a product name, in Dutch"}},
+        required: ["query"]
+      }
+    },
+    %{
+      name: "map_ingredient_picnic",
+      description:
+        "Set or clear the Picnic product behind an ingredient. In picnic mode (see set_mode) an " <>
+          "ingredient with a Picnic product syncs into the Picnic cart; without one it stays on " <>
+          "the checklist. Pass `picnic_product_id` null to clear the mapping. Copy `name`, " <>
+          "`unit_quantity`, `image_id` and `price` from a search_picnic result so the shopping " <>
+          "list shows them without another lookup. This only writes the mapping; it never places, " <>
+          "confirms or checks out a Picnic order.",
+      inputSchema: %{
+        type: "object",
+        properties: %{
+          ingredient_id: @integer,
+          picnic_product_id: %{
+            type: ["string", "null"],
+            description: "The `id` from a search_picnic result, or null to clear"
+          },
+          name: %{type: "string", description: "The product name from the search result"},
+          unit_quantity: %{type: "string", description: "The unit size from the search result"},
+          image_id: %{type: "string", description: "The image id from the search result"},
+          price: %{type: "integer", description: "The price in cents from the search result"}
+        },
+        required: ["ingredient_id", "picnic_product_id"]
+      }
+    },
+    %{
       name: "get_shopping_list",
       description:
         "Read the current order: every item with its quantity, plus the total item count and price " <>
-          "in cents. `mode` says where the list lives: 'ah' (the supermarket basket) or 'checklist' " <>
-          "(Picape's own list — see set_mode). In checklist mode `checked` marks the items ticked " <>
-          "off and the availability fields keep their defaults. While the supermarket is " <>
-          "unreachable an 'ah' order is served as the checklist too, with `supermarket_reachable` " <>
-          "false. Items that map to a Picape ingredient carry that ingredient and the recipes " <>
-          "that asked for it. `is_orderable` false marks products the supermarket cannot deliver " <>
-          "right now; `substituted_for` names the ingredient a product replaced. Pass " <>
-          "`only_unavailable` to get just the problem items. `is_placed` tells you the order was " <>
-          "paid: Picape then freezes its side until delivery, so set_ingredient_quantity and " <>
-          "plan_recipe queue without reaching the supermarket.",
+          "in cents. `mode` says where the list lives: 'ah' (the supermarket basket), 'picnic' " <>
+          "(the Picnic cart) or 'checklist' (Picape's own list — see set_mode). `store` says per " <>
+          "item which of the three it comes from; in picnic mode an ingredient without a Picnic " <>
+          "mapping shows up as a 'checklist' item. In checklist mode `checked` marks the items " <>
+          "ticked off and the availability fields keep their defaults. While the supermarket is " <>
+          "unreachable an 'ah' or 'picnic' order is served as the checklist too, with " <>
+          "`supermarket_reachable` false. Items that map to a Picape ingredient carry that " <>
+          "ingredient and the recipes that asked for it. `is_orderable` false marks products the " <>
+          "supermarket cannot deliver right now; `substituted_for` names the ingredient a product " <>
+          "replaced. Pass `only_unavailable` to get just the problem items. `is_placed` tells you " <>
+          "the order was paid: Picape then freezes its side until delivery, so " <>
+          "set_ingredient_quantity and plan_recipe queue without reaching the supermarket. In " <>
+          "picnic mode `is_placed` stays false: Picape cannot see a Picnic checkout, so after " <>
+          "checking out in the Picnic app the order is closed by tapping \"Bestelling ontvangen\" " <>
+          "in Picape (start_shopping, or the button in the app).",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -93,20 +137,28 @@ defmodule Picape.MCP.Tools do
     %{
       name: "add_ingredient",
       description:
-        "Teach Picape a new ingredient, backed by a supermarket product. Find the product with " <>
-          "search_supermarket first and pass its `id`. Adding an ingredient does not put it on the " <>
-          "shopping list; use set_ingredient_quantity for that.",
+        "Teach Picape a new ingredient, backed by a product at one of the stores. Find the product " <>
+          "with search_supermarket or search_picnic first and pass its `id`; you can pass both. " <>
+          "Adding an ingredient does not put it on the shopping list; use set_ingredient_quantity " <>
+          "for that.",
       inputSchema: %{
         type: "object",
         properties: %{
           name: %{type: "string", description: "The name Picape shows, in Dutch"},
           supermarket_product_id: %{type: "integer", description: "The `id` from a search_supermarket result"},
+          picnic_product_id: %{
+            type: "string",
+            description: "The `id` from a search_picnic result, like \"s1016186\""
+          },
+          unit_quantity: %{type: "string", description: "The unit size from a search_picnic result"},
+          image_id: %{type: "string", description: "The image id from a search_picnic result"},
+          price: %{type: "integer", description: "The price in cents from a search_picnic result"},
           is_essential: %{
             type: "boolean",
             description: "Essentials are staples you always have; they are left out of recipe totals"
           }
         },
-        required: ["name", "supermarket_product_id"]
+        required: ["name"]
       }
     },
     %{
@@ -298,15 +350,20 @@ defmodule Picape.MCP.Tools do
       name: "set_mode",
       description:
         "Switch where the shopping list lives. 'ah' is the supermarket basket: the app orders from it " <>
-          "and syncs the plan into it. 'checklist' is a self-managed list inside Picape's own database, " <>
-          "for when the supermarket API is unreachable: plan_recipe, set_ingredient_quantity and " <>
-          "get_shopping_list keep working, and items can be ticked off with check_item. Switching back " <>
-          "to 'ah' pushes the accumulated list into the supermarket basket; if the supermarket is " <>
-          "still down the switch still happens and the reply says the push failed.",
+          "and syncs the plan into it. 'picnic' is the Picnic cart: the plan syncs into it for every " <>
+          "ingredient that has a Picnic product (see map_ingredient_picnic); the rest stay on the " <>
+          "checklist. Picape never checks out or pays at Picnic — ordering finishes in the Picnic " <>
+          "app. 'checklist' is a self-managed list inside Picape's own database, for when the " <>
+          "supermarket API is unreachable: plan_recipe, set_ingredient_quantity and " <>
+          "get_shopping_list keep working, and items can be ticked off with check_item. Switching " <>
+          "to 'ah' or 'picnic' pushes the accumulated list into that basket; if it is still down " <>
+          "the switch still happens and the reply says the push failed. In picnic mode Picape " <>
+          "never checks out: after checking out in the Picnic app, the order is closed by tapping " <>
+          "\"Bestelling ontvangen\" in Picape (start_shopping, or the button in the app).",
       inputSchema: %{
         type: "object",
         properties: %{
-          mode: %{type: "string", enum: ["ah", "checklist"]}
+          mode: %{type: "string", enum: ["ah", "checklist", "picnic"]}
         },
         required: ["mode"]
       }
@@ -315,8 +372,8 @@ defmodule Picape.MCP.Tools do
       name: "check_item",
       description:
         "Tick an item off the checklist, or untick it with checked=false. Works in checklist " <>
-          "mode, and while the supermarket is unreachable and the order is served as the " <>
-          "checklist; see set_mode.",
+          "and picnic mode, and while the supermarket is unreachable and the order is served as " <>
+          "the checklist; see set_mode.",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -355,18 +412,55 @@ defmodule Picape.MCP.Tools do
   end
 
   defp run("search_supermarket", args) do
+    if Settings.picnic?() do
+      run("search_picnic", args)
+    else
+      products =
+        args["query"]
+        |> Supermarket.search()
+        |> Enum.map(&%{id: &1.id, name: &1.name, price: &1.price, unit_quantity: &1.unit_quantity})
+
+      {:ok, products}
+    end
+  end
+
+  defp run("search_picnic", args) do
     products =
       args["query"]
-      |> Supermarket.search()
-      |> Enum.map(&%{id: &1.id, name: &1.name, price: &1.price, unit_quantity: &1.unit_quantity})
+      |> Picnic.search()
+      |> Enum.map(
+        &%{
+          id: &1.id,
+          name: &1.name,
+          price: &1.price,
+          unit_quantity: &1.unit_quantity,
+          image_id: &1.image_id
+        }
+      )
 
     {:ok, products}
   end
 
+  defp run("map_ingredient_picnic", args) do
+    with {:ok, ingredient} <- fetch_ingredient(args["ingredient_id"]) do
+      %{
+        ingredient_id: ingredient.id,
+        picnic_product_id: args["picnic_product_id"],
+        picnic_product_raw: picnic_raw(args)
+      }
+      |> Ingredients.edit_ingredient()
+      |> case do
+        {:ok, edited} -> {:ok, List.first(render_ingredients([edited]))}
+        {:error, reason} -> render_error(reason)
+      end
+    end
+  end
+
   defp run("get_shopping_list", args) do
     {:ok, line} = Order.current()
-    {:ok, ingredients} = Recipe.ingredients_by_item_ids(Enum.map(line.items, & &1.id))
-    {:ok, recipes} = Order.recipes_planned_for_ingredient_ids(@order_id, Enum.map(Map.values(ingredients), & &1.id))
+    {:ok, ingredients} = list_ingredients(line)
+    ingredient_ids = ingredients |> Map.values() |> Enum.reject(&is_nil/1) |> Enum.map(& &1.id)
+    {:ok, recipes} = Order.recipes_planned_for_ingredient_ids(@order_id, ingredient_ids)
     substitutions = Order.substitutions(@order_id)
 
     items =
@@ -376,11 +470,12 @@ defmodule Picape.MCP.Tools do
         %{
           name: item.name,
           quantity: item.quantity,
+          store: item.store,
           is_orderable: item.is_orderable,
           availability_label: item.availability_label,
           substituted_for: get_in(substitutions, [item.id, Access.key(:name)]),
           checked: item.checked,
-          ingredient: render_list_ingredient(ingredients[item.id], recipes)
+          ingredient: render_list_ingredient(ingredients[item.id] || ingredients[item.ingredient_id], recipes)
         }
       end)
 
@@ -428,6 +523,8 @@ defmodule Picape.MCP.Tools do
     %{
       name: args["name"],
       supermarket_product_id: args["supermarket_product_id"],
+      picnic_product_id: args["picnic_product_id"],
+      picnic_product_raw: picnic_raw(args),
       is_essential: args["is_essential"] || false
     }
     |> Ingredients.add_ingredient()
@@ -607,6 +704,35 @@ defmodule Picape.MCP.Tools do
     end
   end
 
+  # Maps each cart row's id to the ingredient behind it. In picnic mode cart
+  # rows are keyed by selling unit id and checklist rows by ingredient id, so
+  # both lookups run and the maps merge — the two key spaces never collide.
+  defp list_ingredients(line) do
+    if Settings.picnic?() do
+      {:ok, by_product} = Ingredients.by_picnic_product_ids(Enum.map(line.items, & &1.id))
+      ingredient_ids = line.items |> Enum.map(& &1.ingredient_id) |> Enum.reject(&is_nil/1)
+      {:ok, by_id} = Ingredients.ingredients_by_ids(ingredient_ids)
+
+      {:ok, Map.merge(by_product, by_id)}
+    else
+      Recipe.ingredients_by_item_ids(Enum.map(line.items, & &1.id))
+    end
+  end
+
+  defp picnic_raw(%{"picnic_product_id" => nil}), do: nil
+
+  defp picnic_raw(args) do
+    %{
+      "id" => args["picnic_product_id"],
+      "name" => args["name"],
+      "unit_quantity" => args["unit_quantity"],
+      "image_id" => args["image_id"],
+      "display_price" => args["price"]
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Map.new()
+  end
+
   defp title_matches?(recipe, query) do
     String.contains?(String.downcase(recipe.title), String.downcase(query))
   end
@@ -620,6 +746,7 @@ defmodule Picape.MCP.Tools do
         name: ingredient.name,
         is_essential: ingredient.is_essential,
         supermarket_product_id: ingredient.supermarket_product_id,
+        picnic_product_id: ingredient.picnic_product_id,
         replacement_ingredient_id: ingredient.replacement_ingredient_id,
         unit_quantity: ingredient[:unit_quantity],
         nutriscore: ingredient[:nutriscore],
@@ -637,7 +764,12 @@ defmodule Picape.MCP.Tools do
         %{quantity: ref.quantity, recipe_id: ref.recipe.id, title: ref.recipe.title}
       end)
 
-    %{id: ingredient.id, name: ingredient.name, planned_recipes: planned}
+    %{
+      id: ingredient.id,
+      name: ingredient.name,
+      picnic_product_id: ingredient.picnic_product_id,
+      planned_recipes: planned
+    }
   end
 
   defp render_recipes(recipes) do

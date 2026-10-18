@@ -128,7 +128,7 @@ defmodule PicapeWeb.Graphql.Resolver.Order do
   def set_mode(attributes, _info) do
     case Order.set_mode(attributes[:mode]) do
       {:ok, %{pushed_to_supermarket: false, error: error}} ->
-        {:error, "switched to 'ah' but pushing the list to the supermarket failed: #{error}"}
+        {:error, "switched to '#{attributes[:mode]}' but pushing the list to the supermarket failed: #{error}"}
 
       {:ok, _result} ->
         Order.current()

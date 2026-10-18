@@ -13,10 +13,15 @@ defmodule Picape.SupermarketFake do
   @state __MODULE__.State
   @activations __MODULE__.Activations
   @orders __MODULE__.Orders
+  @picnic __MODULE__.Picnic
   @down __MODULE__.Down
+  @picnic_auth_error __MODULE__.PicnicAuthError
+  @requests __MODULE__.Requests
 
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
   plug(:maybe_down)
+  plug(:maybe_picnic_auth_error)
+  plug(:log_request)
   plug(:match)
   plug(:dispatch)
 
@@ -24,7 +29,10 @@ defmodule Picape.SupermarketFake do
     {:ok, _} = Agent.start_link(fn -> fixture("basket.json") end, name: @state)
     {:ok, _} = Agent.start_link(fn -> MapSet.new() end, name: @activations)
     {:ok, _} = Agent.start_link(fn -> fixture("orders.json") end, name: @orders)
+    {:ok, _} = Agent.start_link(fn -> fixture("picnic_cart.json") end, name: @picnic)
     {:ok, _} = Agent.start_link(fn -> false end, name: @down)
+    {:ok, _} = Agent.start_link(fn -> false end, name: @picnic_auth_error)
+    {:ok, _} = Agent.start_link(fn -> [] end, name: @requests)
     Plug.Cowboy.http(__MODULE__, [], port: port)
   end
 
@@ -41,8 +49,15 @@ defmodule Picape.SupermarketFake do
     Agent.update(@state, fn _ -> fixture("basket.json") end)
     Agent.update(@activations, fn _ -> MapSet.new() end)
     Agent.update(@orders, fn _ -> fixture("orders.json") end)
+    Agent.update(@picnic, fn _ -> fixture("picnic_cart.json") end)
     Agent.update(@down, fn _ -> false end)
+    Agent.update(@picnic_auth_error, fn _ -> false end)
+    Agent.update(@requests, fn _ -> [] end)
+    Picape.Picnic.invalidate_cart()
   end
+
+  @doc "Every request the fake answered, oldest first: method, path, query, body and headers."
+  def requests(), do: Agent.get(@requests, &Enum.reverse/1)
 
   defp maybe_down(conn, _opts) do
     if Agent.get(@down, & &1) and not String.starts_with?(conn.request_path, "/__") do
@@ -52,6 +67,42 @@ defmodule Picape.SupermarketFake do
     else
       conn
     end
+  end
+
+  # Picnic rejects a request whose auth key it does not know with a 401 and an
+  # error body; /__picnic_auth_error makes the api routes do that until reset.
+  defp maybe_picnic_auth_error(conn, _opts) do
+    if Agent.get(@picnic_auth_error, & &1) and String.starts_with?(conn.request_path, "/api/15/") do
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(401, Jason.encode!(%{"error" => %{"code" => "AUTH_ERROR"}}))
+      |> halt()
+    else
+      conn
+    end
+  end
+
+  defp log_request(conn, _opts) do
+    body =
+      case conn.body_params do
+        %Plug.Conn.Unfetched{} -> nil
+        params -> params
+      end
+
+    Agent.update(@requests, fn requests ->
+      [
+        %{
+          method: conn.method,
+          path: conn.request_path,
+          query: conn.query_string,
+          body: body,
+          headers: Map.new(conn.req_headers)
+        }
+        | requests
+      ]
+    end)
+
+    conn
   end
 
   post "/graphql" do
@@ -106,9 +157,40 @@ defmodule Picape.SupermarketFake do
     send_resp(conn, 204, "")
   end
 
+  # Pretends the Picnic auth key was rejected: every api/15 endpoint answers
+  # 401 with an AUTH_ERROR body, until /__reset.
+  post "/__picnic_auth_error" do
+    Agent.update(@picnic_auth_error, fn _ -> true end)
+    send_resp(conn, 204, "")
+  end
+
   post "/__up" do
     Agent.update(@down, fn _ -> false end)
     send_resp(conn, 204, "")
+  end
+
+  # The Picnic api/15 endpoints picnic mode uses. `add_product` and
+  # `remove_product` keep a basket the same way the basket fixture does:
+  # product ids are selling unit ids like "s2001".
+  get "/api/15/cart" do
+    json(conn, Agent.get(@picnic, & &1))
+  end
+
+  post "/api/15/cart/add_product" do
+    %{"product_id" => product_id, "count" => count} = conn.body_params
+    json(conn, Agent.get_and_update(@picnic, &picnic_cart(&1, product_id, count)))
+  end
+
+  post "/api/15/cart/remove_product" do
+    %{"product_id" => product_id, "count" => count} = conn.body_params
+    json(conn, Agent.get_and_update(@picnic, &picnic_cart(&1, product_id, -count)))
+  end
+
+  get "/api/15/pages/search-page-results" do
+    case conn.params["search_term"] do
+      term when is_binary(term) and term != "" -> json(conn, fixture("picnic_search.json"))
+      _ -> send_resp(conn, 400, "search_term is required")
+    end
   end
 
   get "/mobile-services/v4/order/summaries" do
@@ -177,6 +259,94 @@ defmodule Picape.SupermarketFake do
   defp no_products(id) do
     %{"data" => %{"bonusPromotions" => [%{"__typename" => "Promotion", "id" => id, "products" => []}]}}
   end
+
+  # Picnic's cart is a list of ORDER_LINE groups, each holding ORDER_ARTICLEs
+  # whose quantity lives in a QUANTITY decorator. A positive delta bumps or
+  # appends, a negative one lowers and empties groups drop out.
+  defp picnic_cart(cart, product_id, delta) do
+    groups =
+      cart["items"]
+      |> Enum.map(&picnic_group_articles(&1, product_id, delta))
+      |> Enum.reject(&(&1["items"] == []))
+
+    groups =
+      if delta > 0 and is_nil(picnic_article(cart, product_id)) do
+        groups ++ [picnic_group(product_id, delta)]
+      else
+        groups
+      end
+
+    articles = Enum.flat_map(groups, & &1["items"])
+
+    cart
+    |> Map.put("items", groups)
+    |> Map.put("total_count", articles |> Enum.map(&picnic_quantity/1) |> Enum.sum())
+    |> Map.put("total_price", articles |> Enum.map(&(&1["price"] * picnic_quantity(&1))) |> Enum.sum())
+    |> then(&{&1, &1})
+  end
+
+  defp picnic_group_articles(group, product_id, delta) do
+    articles =
+      Enum.flat_map(group["items"], fn
+        %{"id" => ^product_id} = article ->
+          quantity = picnic_quantity(article) + delta
+          if quantity > 0, do: [picnic_quantity(article, quantity)], else: []
+
+        article ->
+          [article]
+      end)
+
+    %{group | "items" => articles}
+  end
+
+  defp picnic_article(cart, product_id) do
+    cart["items"] |> Enum.flat_map(& &1["items"]) |> Enum.find(&(&1["id"] == product_id))
+  end
+
+  defp picnic_quantity(article) do
+    Enum.find(article["decorators"], %{"quantity" => 0}, &(&1["type"] == "QUANTITY"))["quantity"]
+  end
+
+  defp picnic_quantity(article, quantity) do
+    put_in(article["decorators"], [%{"type" => "QUANTITY", "quantity" => quantity}])
+  end
+
+  defp picnic_group(product_id, count) do
+    unit =
+      fixture("picnic_search.json")
+      |> picnic_selling_units()
+      |> Enum.find(&(&1["id"] == product_id)) || %{"id" => product_id, "name" => "Product #{product_id}"}
+
+    %{
+      "type" => "ORDER_LINE",
+      "id" => "group_#{product_id}",
+      "items" => [
+        %{
+          "type" => "ORDER_ARTICLE",
+          "id" => product_id,
+          "name" => unit["name"],
+          "price" => unit["display_price"] || 0,
+          "image_ids" => List.wrap(unit["image_id"]),
+          "decorators" => [%{"type" => "QUANTITY", "quantity" => count}],
+          "max_count" => unit["max_count"] || 50,
+          "unit_quantity" => unit["unit_quantity"] || ""
+        }
+      ],
+      "price" => (unit["display_price"] || 0) * count
+    }
+  end
+
+  defp picnic_selling_units(node) when is_map(node) do
+    Enum.flat_map(node, fn
+      {"sellingUnit", %{} = unit} -> [unit | picnic_selling_units(unit)]
+      {_key, value} -> picnic_selling_units(value)
+    end)
+  end
+
+  defp picnic_selling_units(list) when is_list(list),
+    do: Enum.flat_map(list, &picnic_selling_units/1)
+
+  defp picnic_selling_units(_), do: []
 
   defp update_basket(response, items) do
     update_in(response, ["data", "basket"], fn basket ->

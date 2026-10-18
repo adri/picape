@@ -46,6 +46,9 @@ type RootQueryType {
   "Search Supermarket products using a query string."
   searchSupermarket(query: String!): [SupermarketSearchResult]
 
+  "Search Picnic products using a query string."
+  searchPicnic(query: String!): [SupermarketSearchResult]
+
   """
   Search ingredients using a query string, excluding of
   ingredient ids possible.
@@ -75,10 +78,10 @@ type RootMutationType {
   "Stops shopping"
   stopShopping: Order
 
-  "Tick an item off the checklist, or untick it. Checklist mode only."
+  "Tick an item off the checklist, or untick it. Checklist and picnic mode only."
   checkItem(ingredientId: ID!, checked: Boolean): Order
 
-  "Switch where the current order lives: the supermarket basket (ah) or Picape's own checklist."
+  "Switch where the current order lives: the supermarket basket (ah), the Picnic cart (picnic) or Picape's own checklist."
   setMode(mode: String!): Order
 
   "Buy ingredient"
@@ -93,8 +96,8 @@ type RootMutationType {
   """
   activateBonusOffer(offerId: String!): Bonus
 
-  "Add a new ingredient."
-  addIngredient(name: String!, isEssential: Boolean!, supermarketProductId: String!): Ingredient
+  "Add a new ingredient, backed by a supermarket product, a Picnic product, or both."
+  addIngredient(name: String!, isEssential: Boolean!, supermarketProductId: String, picnicProductId: String): Ingredient
 
   "Edit an new ingredient."
   editIngredient(input: EditIngredientInput!): Ingredient
@@ -146,7 +149,7 @@ type Order implements Node {
   "False while the supermarket does not answer and this order is served as the checklist instead. Only set while the order lives in the supermarket basket."
   supermarketReachable: Boolean
 
-  "Where the order lives: the supermarket basket or Picape's own checklist."
+  "Where the order lives: the supermarket basket, the Picnic cart or Picape's own checklist."
   mode: String
 
   "When the order closed. Only set on previous orders."
@@ -176,8 +179,11 @@ type OrderItem implements Node {
   "The name of the ingredient this product stands in for, when it is a replacement."
   substitutedFor: String
 
-  "Ticked off the checklist. Only set in checklist mode."
+  "Ticked off the checklist. Only set in checklist and picnic mode."
   checked: Boolean
+
+  "Where the item lives: the supermarket basket (ah), the Picnic cart (picnic) or Picape's own checklist."
+  store: String
 
   ingredient: Ingredient
 }
@@ -211,6 +217,14 @@ type Ingredient implements Node {
   seasonalName: String
 
   supermarketProductId: String
+
+  picnicProductId: String
+
+  "The Picnic product's name, cached when the mapping was made."
+  picnicName: String
+
+  "The Picnic product's image, built from the image id cached at mapping time."
+  picnicImageUrl: String
 
   isEssential: Boolean
 
@@ -304,7 +318,8 @@ enum OrderDirection {
 "Edit an ingredient"
 input EditIngredientInput {
   ingredientId: ID!
-  supermarketProductId: String!
+  supermarketProductId: String
+  picnicProductId: String
   name: String!
   seasonalName: String
   isEssential: Boolean!

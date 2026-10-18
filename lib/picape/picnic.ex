@@ -1,0 +1,189 @@
+defmodule Picape.Picnic do
+  @moduledoc """
+  HTTP client for Picnic's `api/15` endpoints. Covers only what picnic mode
+  needs: search, the cart, and adding or removing products in it.
+
+  There is no checkout, payment or delivery-slot endpoint here on purpose.
+  Orders are always finished in the Picnic app itself; Picape only keeps the
+  cart in step with the plan.
+
+  Auth is an auth key sent as the `x-picnic-auth` header on every request.
+  The key is the one the Picnic app's own session carries; it is long-lived
+  and the storefront api never refreshes it. It is configured with
+  `PICNIC_AUTH_KEY`, the same way the supermarket's secrets come from env
+  vars.
+  """
+  use HTTPoison.Base
+
+  alias Picape.Picnic.SearchResult
+
+  @default_base_url "https://storefront-prod.nl.picnicinternational.com/api/15"
+  @default_agent "30100;1.15.77-10293"
+
+  def search(""), do: []
+
+  def search(query) do
+    auth_key!()
+
+    get!("/pages/search-page-results?#{URI.encode_query(%{"search_term" => query})}").body
+    |> SearchResult.from_result()
+  end
+
+  def cart() do
+    auth_key!()
+
+    ConCache.get_or_store(:supermarket, :picnic_cart, fn ->
+      get!("/cart").body
+    end)
+  end
+
+  @doc """
+  Adds `count` of a selling unit to the cart. The answer is the whole cart,
+  so it refreshes the cached copy instead of needing another read.
+  """
+  def add_product(product_id, count \\ 1) do
+    %{"product_id" => product_id, "count" => count}
+    |> post_cart("/cart/add_product")
+  end
+
+  @doc "Removes `count` of a selling unit from the cart."
+  def remove_product(product_id, count \\ 1) do
+    %{"product_id" => product_id, "count" => count}
+    |> post_cart("/cart/remove_product")
+  end
+
+  @doc """
+  Pushes an `Order.Sync.Changes` diff into the Picnic cart. `existing` maps
+  each Picnic product id to its current cart quantity: Picnic's mutations are
+  deltas, not absolute quantities, so each change becomes an add or remove of
+  the difference. Products in the cart that the diff does not name are left
+  alone.
+  """
+  def apply_changes(changes, existing) do
+    Enum.each(changes.remove, fn %{id: id, quantity: quantity} ->
+      remove_product(id, (existing[id] || 0) - quantity)
+    end)
+
+    Enum.each(changes.add, fn %{id: id, quantity: quantity} ->
+      add_product(id, quantity - (existing[id] || 0))
+    end)
+
+    {:ok, :synced}
+  end
+
+  def invalidate_cart() do
+    ConCache.delete(:supermarket, :picnic_cart)
+  end
+
+  def image_url(image_id) when is_binary(image_id) do
+    static_base_url() <> "/static/images/" <> image_id <> "/small.png"
+  end
+
+  def image_url(_), do: "http://placekitten.com/64/64"
+
+  # ---
+
+  defp post_cart(body, path) do
+    auth_key!()
+    cart = post!(path, body, "Content-Type": "application/json").body
+    ConCache.put(:supermarket, :picnic_cart, cart)
+    cart
+  end
+
+  defp static_base_url() do
+    (config(:base_url) || @default_base_url) |> String.replace(~r|/api/.*$|, "")
+  end
+
+  def process_request_url(url) do
+    (config(:base_url) || @default_base_url) <> url
+  end
+
+  # Picnic answers some mutations with an empty 200.
+  def process_response_body(""), do: %{}
+
+  def process_response_body(body) do
+    case Poison.decode(body) do
+      {:ok, value} -> value
+      _ -> body
+    end
+  end
+
+  def process_response(%HTTPoison.Response{body: body, status_code: status_code} = response) do
+    cond do
+      is_binary(body) ->
+        raise Picape.Supermarket.Error,
+          message:
+            "Picnic answered HTTP #{status_code} with a non-JSON body: " <>
+              String.slice(body, 0, 200)
+
+      status_code not in 200..299 ->
+        raise Picape.Supermarket.Error,
+          message: "Picnic answered HTTP #{status_code}: " <> String.slice(inspect(body), 0, 200)
+
+      is_map(body) and Map.has_key?(body, "error") ->
+        raise Picape.Supermarket.Error,
+          message: "Picnic answered an error: " <> String.slice(inspect(body["error"]), 0, 200)
+
+      true ->
+        response
+    end
+  end
+
+  def process_request_headers(headers) do
+    headers
+    |> Keyword.put_new(:Accept, "*/*")
+    |> Keyword.put_new(:"Accept-Language", "nl-NL")
+    |> Keyword.put_new(:"User-Agent", config(:user_agent) || "Picape")
+    |> Keyword.put_new(:"x-picnic-agent", config(:agent) || @default_agent)
+    |> Keyword.put_new(:"x-picnic-did", config(:did) || default_did())
+    |> Keyword.put_new(:"x-picnic-country", "NL")
+    |> put_auth_key()
+  end
+
+  defp put_auth_key(headers) do
+    if auth_key = config(:auth_key) do
+      Keyword.put(headers, :"x-picnic-auth", auth_key)
+    else
+      headers
+    end
+  end
+
+  defp auth_key!() do
+    config(:auth_key) ||
+      raise(Picape.Supermarket.Error,
+        message: "the Picnic auth key is not configured; set PICNIC_AUTH_KEY"
+      )
+  end
+
+  # The device id identifies this installation to Picnic, the way the app's own
+  # does. It is generated once per boot so a caller that does not configure one
+  # still sends a stable value.
+  defp default_did() do
+    case :persistent_term.get({__MODULE__, :did}, nil) do
+      nil ->
+        did = Ecto.UUID.generate()
+        :persistent_term.put({__MODULE__, :did}, did)
+        did
+
+      did ->
+        did
+    end
+  end
+
+  def process_request_body(""), do: ""
+
+  def process_request_body(body) do
+    Poison.encode!(body)
+  end
+
+  def process_request_options(options) do
+    Keyword.merge(options, hackney: config(:hackney) || [])
+  end
+
+  defp config(key) do
+    case Application.get_env(:picape, __MODULE__, [])[key] do
+      "" -> nil
+      value -> value
+    end
+  end
+end

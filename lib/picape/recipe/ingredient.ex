@@ -11,6 +11,8 @@ defmodule Picape.Recipe.Ingredient do
     field(:seasonal_name, :string)
     field(:supermarket_product_id, :integer)
     field(:supermarket_product_raw, :map)
+    field(:picnic_product_id, :string)
+    field(:picnic_product_raw, :map)
 
     belongs_to(:replacement, Picape.Recipe.Ingredient, foreign_key: :replacement_ingredient_id)
 
@@ -127,10 +129,14 @@ defmodule Picape.Recipe.Ingredient do
       :is_essential,
       :supermarket_product_id,
       :supermarket_product_raw,
+      :picnic_product_id,
+      :picnic_product_raw,
       :replacement_ingredient_id
     ])
     |> validate_required([:name, :is_essential])
+    |> validate_format(:picnic_product_id, ~r/^s\d+$/)
     |> unique_constraint(:supermarket_product_id)
+    |> unique_constraint(:picnic_product_id, name: :recipe_ingredient_picnic_selling_unit_index)
   end
 
   @doc false
@@ -141,10 +147,25 @@ defmodule Picape.Recipe.Ingredient do
       :is_essential,
       :supermarket_product_id,
       :supermarket_product_raw,
+      :picnic_product_id,
+      :picnic_product_raw,
       :replacement_ingredient_id
     ])
-    |> validate_required([:name, :is_essential, :supermarket_product_id])
+    |> validate_required([:name, :is_essential])
+    |> validate_product_id()
+    |> validate_format(:picnic_product_id, ~r/^s\d+$/)
     |> unique_constraint(:supermarket_product_id)
+    |> unique_constraint(:picnic_product_id, name: :recipe_ingredient_picnic_selling_unit_index)
+  end
+
+  # An ingredient needs a product at one of the stores or it can never be
+  # ordered.
+  defp validate_product_id(changeset) do
+    if get_field(changeset, :supermarket_product_id) || get_field(changeset, :picnic_product_id) do
+      changeset
+    else
+      add_error(changeset, :supermarket_product_id, "or a Picnic product id is required")
+    end
   end
 
   def raw_changeset(%Ingredient{} = ingredient, attrs) do
