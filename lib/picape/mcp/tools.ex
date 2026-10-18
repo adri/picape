@@ -97,7 +97,10 @@ defmodule Picape.MCP.Tools do
           "supermarket cannot deliver right now; `substituted_for` names the ingredient a product " <>
           "replaced. Pass `only_unavailable` to get just the problem items. `is_placed` tells you " <>
           "the order was paid: Picape then freezes its side until delivery, so " <>
-          "set_ingredient_quantity and plan_recipe queue without reaching the supermarket.",
+          "set_ingredient_quantity and plan_recipe queue without reaching the supermarket. In " <>
+          "picnic mode `is_placed` stays false: Picape cannot see a Picnic checkout, so after " <>
+          "checking out in the Picnic app the order is closed by tapping \"Bestelling ontvangen\" " <>
+          "in Picape (start_shopping, or the button in the app).",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -133,20 +136,28 @@ defmodule Picape.MCP.Tools do
     %{
       name: "add_ingredient",
       description:
-        "Teach Picape a new ingredient, backed by a supermarket product. Find the product with " <>
-          "search_supermarket first and pass its `id`. Adding an ingredient does not put it on the " <>
-          "shopping list; use set_ingredient_quantity for that.",
+        "Teach Picape a new ingredient, backed by a product at one of the stores. Find the product " <>
+          "with search_supermarket or search_picnic first and pass its `id`; you can pass both. " <>
+          "Adding an ingredient does not put it on the shopping list; use set_ingredient_quantity " <>
+          "for that.",
       inputSchema: %{
         type: "object",
         properties: %{
           name: %{type: "string", description: "The name Picape shows, in Dutch"},
           supermarket_product_id: %{type: "integer", description: "The `id` from a search_supermarket result"},
+          picnic_product_id: %{
+            type: "string",
+            description: "The `id` from a search_picnic result, like \"s1016186\""
+          },
+          unit_quantity: %{type: "string", description: "The unit size from a search_picnic result"},
+          image_id: %{type: "string", description: "The image id from a search_picnic result"},
+          price: %{type: "integer", description: "The price in cents from a search_picnic result"},
           is_essential: %{
             type: "boolean",
             description: "Essentials are staples you always have; they are left out of recipe totals"
           }
         },
-        required: ["name", "supermarket_product_id"]
+        required: ["name"]
       }
     },
     %{
@@ -345,7 +356,9 @@ defmodule Picape.MCP.Tools do
           "supermarket API is unreachable: plan_recipe, set_ingredient_quantity and " <>
           "get_shopping_list keep working, and items can be ticked off with check_item. Switching " <>
           "to 'ah' or 'picnic' pushes the accumulated list into that basket; if it is still down " <>
-          "the switch still happens and the reply says the push failed.",
+          "the switch still happens and the reply says the push failed. In picnic mode Picape " <>
+          "never checks out: after checking out in the Picnic app, the order is closed by tapping " <>
+          "\"Bestelling ontvangen\" in Picape (start_shopping, or the button in the app).",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -505,6 +518,8 @@ defmodule Picape.MCP.Tools do
     %{
       name: args["name"],
       supermarket_product_id: args["supermarket_product_id"],
+      picnic_product_id: args["picnic_product_id"],
+      picnic_product_raw: picnic_raw(args),
       is_essential: args["is_essential"] || false
     }
     |> Ingredients.add_ingredient()

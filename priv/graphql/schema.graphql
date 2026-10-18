@@ -93,8 +93,8 @@ type RootMutationType {
   """
   activateBonusOffer(offerId: String!): Bonus
 
-  "Add a new ingredient."
-  addIngredient(name: String!, isEssential: Boolean!, supermarketProductId: String!): Ingredient
+  "Add a new ingredient, backed by a supermarket product, a Picnic product, or both."
+  addIngredient(name: String!, isEssential: Boolean!, supermarketProductId: String, picnicProductId: String): Ingredient
 
   "Edit an new ingredient."
   editIngredient(input: EditIngredientInput!): Ingredient

@@ -184,11 +184,12 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(handle_errors(&Resolver.Bonus.activate/2))
     end
 
-    @desc "Add a new ingredient."
+    @desc "Add a new ingredient, backed by a supermarket product, a Picnic product, or both."
     field :add_ingredient, :ingredient do
       arg(:name, non_null(:string))
       arg(:is_essential, non_null(:boolean))
-      arg(:supermarket_product_id, non_null(:string))
+      arg(:supermarket_product_id, :string)
+      arg(:picnic_product_id, :string)
       resolve(handle_errors(&Resolver.Recipe.add_ingredient/3))
     end
 

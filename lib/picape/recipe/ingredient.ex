@@ -146,10 +146,24 @@ defmodule Picape.Recipe.Ingredient do
       :is_essential,
       :supermarket_product_id,
       :supermarket_product_raw,
+      :picnic_product_id,
+      :picnic_product_raw,
       :replacement_ingredient_id
     ])
-    |> validate_required([:name, :is_essential, :supermarket_product_id])
+    |> validate_required([:name, :is_essential])
+    |> validate_product_id()
     |> unique_constraint(:supermarket_product_id)
+    |> unique_constraint(:picnic_product_id)
+  end
+
+  # An ingredient needs a product at one of the stores or it can never be
+  # ordered.
+  defp validate_product_id(changeset) do
+    if get_field(changeset, :supermarket_product_id) || get_field(changeset, :picnic_product_id) do
+      changeset
+    else
+      add_error(changeset, :supermarket_product_id, "or a Picnic product id is required")
+    end
   end
 
   def raw_changeset(%Ingredient{} = ingredient, attrs) do

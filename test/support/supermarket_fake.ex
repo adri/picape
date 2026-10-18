@@ -193,10 +193,36 @@ defmodule Picape.SupermarketFake do
     end
   end
 
+  # Logging in as "needs-2fa" answers the way Picnic does when the account
+  # wants a second factor: a provisional auth key in the header and the flag
+  # set in the body. 2fa/verify accepts the code "123456".
   post "/api/15/user/login" do
-    conn
-    |> put_resp_header("x-picnic-auth", "test-auth-key")
-    |> json(%{"user_id" => "fake-user"})
+    if conn.body_params["key"] == "needs-2fa" do
+      conn
+      |> put_resp_header("x-picnic-auth", "provisional-auth-key")
+      |> json(%{"second_factor_authentication_required" => true})
+    else
+      conn
+      |> put_resp_header("x-picnic-auth", "test-auth-key")
+      |> json(%{"user_id" => "fake-user"})
+    end
+  end
+
+  post "/api/15/user/2fa/generate" do
+    %{"channel" => _channel} = conn.body_params
+    json(conn, %{})
+  end
+
+  post "/api/15/user/2fa/verify" do
+    case conn.body_params["otp"] do
+      "123456" ->
+        json(conn, %{})
+
+      _ ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(400, Jason.encode!(%{"error" => %{"code" => "TWO_FACTOR_AUTHENTICATION_ERROR"}}))
+    end
   end
 
   get "/mobile-services/v4/order/summaries" do

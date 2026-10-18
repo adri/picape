@@ -147,6 +147,9 @@ defmodule Picape.Ingredients do
 
   defp put_product_raw(params, _ingredient), do: {:ok, params}
 
+  # A picnic-only ingredient has no supermarket product to fetch.
+  defp fetch_product_raw(params, nil), do: {:ok, params}
+
   defp fetch_product_raw(params, product_id) do
     {:ok, Map.put(params, :supermarket_product_raw, Supermarket.products_by_id(product_id))}
   rescue

@@ -587,8 +587,17 @@ defmodule Picape.Order do
     {:ok, Enum.into(Repo.all(query), %{})}
   end
 
+  # The cart can carry the same selling unit on two ORDER_LINE groups, so
+  # quantities sum per product id instead of the later row overwriting the
+  # earlier one.
   defp picnic_quantities(line) do
-    for item <- line.items, item.store == "picnic", into: %{}, do: {item.id, item.quantity}
+    Enum.reduce(line.items, %{}, fn
+      %{store: "picnic"} = item, acc ->
+        Map.update(acc, item.id, item.quantity, &(&1 + item.quantity))
+
+      _item, acc ->
+        acc
+    end)
   end
 
   # A line served from the fallback produced no changes to push, and a dead
@@ -603,15 +612,17 @@ defmodule Picape.Order do
   end
 
   # The cart rows carry different keys per mode: a supermarket product id in
-  # ah, a Picnic selling unit id in picnic, the ingredient id itself on the
-  # checklist. Returns `ingredient_id => item id`.
+  # ah, a Picnic selling unit id for cart rows in picnic, and a supermarket
+  # product id again for the checklist rows picnic mode falls back to. Returns
+  # `ingredient_id => item id`.
   defp item_ingredient_ids(item_ids) do
     if Settings.picnic?() do
+      {:ok, by_item} = Recipe.ingredients_by_item_ids_reverse(Enum.filter(item_ids, &is_integer/1))
       {:ok, by_product} = Ingredients.by_picnic_product_ids(item_ids)
 
       items_map =
         Map.merge(
-          Map.new(item_ids, &{&1, &1}),
+          by_item,
           Map.new(by_product, fn {product_id, ingredient} -> {ingredient.id, product_id} end)
         )
 

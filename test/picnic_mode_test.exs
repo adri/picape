@@ -68,6 +68,30 @@ defmodule Picape.PicnicModeTest do
     assert [%{name: "Rijst", quantity: 2, store: "checklist"}] = line.items
   end
 
+  test "an unmapped ingredient reports its ordered quantity" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+
+    {:ok, _} = Order.set_mode("picnic")
+
+    assert {:ok, quantities} = Order.ingredients_ordered_quantity("1", [rijst.id])
+    assert quantities[rijst.id] == 2
+  end
+
+  test "a mapped ingredient reports its ordered quantity from the Picnic cart" do
+    brood =
+      insert!(:ingredient,
+        name: "Brood",
+        supermarket_product_id: 519_017,
+        picnic_product_id: "s2001"
+      )
+
+    {:ok, _} = Order.set_mode("picnic")
+
+    assert {:ok, quantities} = Order.ingredients_ordered_quantity("1", [brood.id])
+    assert quantities[brood.id] == 1
+  end
+
   test "quantity 0 takes the product out of the Picnic cart" do
     brood = insert!(:ingredient, name: "Brood", picnic_product_id: "s2001")
     insert!(:manual_ingredient, ingredient_id: brood.id, quantity: 1)

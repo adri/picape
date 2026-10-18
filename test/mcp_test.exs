@@ -235,6 +235,26 @@ defmodule Picape.MCPTest do
                "Flower Farm Bakken zonder palm"
     end
 
+    test "accepts a Picnic product without a supermarket product" do
+      assert %{"name" => "Wasabinoten", "picnic_product_id" => "s2002"} =
+               call!("add_ingredient", %{
+                 name: "Wasabinoten",
+                 picnic_product_id: "s2002",
+                 unit_quantity: "100 g",
+                 price: 349
+               })
+
+      ingredient = Repo.get_by!(Ingredient, name: "Wasabinoten")
+
+      assert ingredient.supermarket_product_id == nil
+      assert ingredient.picnic_product_id == "s2002"
+      assert ingredient.picnic_product_raw["display_price"] == 349
+    end
+
+    test "refuses an ingredient with no product at either store" do
+      assert call_error("add_ingredient", %{name: "Blaar"}) =~ "supermarket_product_id"
+    end
+
     test "refuses a supermarket product that is already an ingredient" do
       call!("add_ingredient", %{name: "Roomboter", supermarket_product_id: 10_567_923})
 
