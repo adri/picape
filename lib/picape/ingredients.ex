@@ -103,6 +103,16 @@ defmodule Picape.Ingredients do
     |> Map.new(fn ingredient -> {ingredient.supermarket_product_id, ingredient} end)
   end
 
+  @doc "The ingredients behind a set of Picnic product ids, keyed by that id. Non-string ids are dropped: checklist rows key items by ingredient id."
+  def by_picnic_product_ids(picnic_ids) do
+    result =
+      from(i in Ingredient, where: i.picnic_product_id in ^Enum.filter(picnic_ids, &is_binary/1))
+      |> Repo.all()
+      |> Map.new(fn ingredient -> {ingredient.picnic_product_id, ingredient} end)
+
+    {:ok, result}
+  end
+
   def by_supermarket_id(supermarket_id) do
     Repo.one(from(i in Ingredient, where: i.supermarket_product_id == ^supermarket_id))
   end
