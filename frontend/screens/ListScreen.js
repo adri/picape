@@ -217,14 +217,30 @@ export default function ListScreen({ navigation }) {
               </Text>
             </View>
             {currentOrder.mode && (
-              <Text
-                style={[Type.subtitle, { color: Colors.secondaryText }]}
-                onPress={(e) => {
-                  e.preventDefault();
-                  setMode({ variables: { mode: checklistMode ? 'ah' : 'checklist' } });
-                }}>
-                {checklistMode ? 'Naar supermarkt' : 'Naar checklist'}
-              </Text>
+              <View style={styles.storeSwitch}>
+                {[
+                  ['ah', 'AH'],
+                  ['picnic', 'Picnic'],
+                  ['checklist', 'Lijstje'],
+                ].map(([mode, label]) => (
+                  <Text
+                    key={mode}
+                    style={[
+                      Type.subtitle,
+                      {
+                        color: currentOrder.mode === mode ? Colors.text : Colors.secondaryText,
+                      },
+                    ]}
+                    onPress={(e) => {
+                      e.preventDefault();
+                      if (mode !== currentOrder.mode) {
+                        setMode({ variables: { mode } });
+                      }
+                    }}>
+                    {label}
+                  </Text>
+                ))}
+              </View>
             )}
             {currentOrder.totalDiscount > 0 && (
               <Text style={[Type.subtitle, { color: Colors.savingsText }]}>
@@ -272,7 +288,7 @@ export default function ListScreen({ navigation }) {
                     },
                   ]}
                   leading={
-                    checklistMode && ingredient ? (
+                    (checklistMode || item.store === 'checklist') && ingredient ? (
                       <CheckItem id={ingredient.id} checked={item.checked} />
                     ) : null
                   }
@@ -359,6 +375,11 @@ const styles = StyleSheet.create({
   checkedText: {
     color: Colors.secondaryText,
     textDecorationLine: 'line-through',
+  },
+  storeSwitch: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: Spacing.md,
   },
   supermarketDown: {
     color: Colors.secondaryText,

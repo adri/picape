@@ -1,4 +1,4 @@
-import { useLazyQuery, gql } from '@apollo/client';
+import { useLazyQuery, useQuery, gql } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
@@ -15,7 +15,7 @@ import { ListItem } from '../ListItem/ListItem';
 import SearchBar from '../Search/SearchBar';
 
 const SEARCH_INGREDIENTS = gql`
-  query SearchIngredient($query: String!, $supermarket: Boolean!) {
+  query SearchIngredient($query: String!, $supermarket: Boolean!, $picnic: Boolean!) {
     ingredients: searchIngredient(query: $query) @skip(if: $supermarket) {
       id
       name
@@ -26,11 +26,25 @@ const SEARCH_INGREDIENTS = gql`
         description
       }
     }
-    ingredients: searchSupermarket(query: $query) @include(if: $supermarket) {
+    ingredients: searchSupermarket(query: $query) @include(if: $supermarket) @skip(if: $picnic) {
       id
       name
       imageUrl
       unitQuantity
+    }
+    ingredients: searchPicnic(query: $query) @include(if: $picnic) {
+      id
+      name
+      imageUrl
+      unitQuantity
+    }
+  }
+`;
+
+const GET_MODE = gql`
+  query SearchIngredientsMode {
+    currentOrder {
+      mode
     }
   }
 `;
@@ -76,6 +90,10 @@ export function SearchIngredients({
   const navigator = useNavigation();
   const colors = useTheme();
   const bottomInset = useBottomBarInset();
+  // The store search hits whichever store the order lives in: AH's catalogue
+  // normally, Picnic's in picnic mode.
+  const { data: { currentOrder: { mode } = {} } = {} } = useQuery(GET_MODE);
+  const picnic = mode === 'picnic';
   const [
     searchIngredients,
     {
@@ -84,6 +102,11 @@ export function SearchIngredients({
       variables: { query = '' } = {},
     },
   ] = useLazyQuery(SEARCH_INGREDIENTS, { fetchPolicy: 'cache-and-network' });
+
+  const runSearch = (text, toStore) =>
+    searchIngredients({
+      variables: { query: text, supermarket: toStore, picnic: toStore && picnic },
+    });
 
   const ingredients = query === '' ? [] : foundIngredients;
   const renderRow = (item) =>
@@ -98,14 +121,14 @@ export function SearchIngredients({
         placeholder={placeholder}
         showLoading={searchLoading}
         loadingProps={{ color: Colors.tintColor }}
-        onChangeText={(query) => searchIngredients({ variables: { query, supermarket } })}
+        onChangeText={(text) => runSearch(text, supermarket)}
         value={query}
         rightIcon={
           supermarketOnly ? null : (
             <Text
               onPress={() => {
                 setSupermarket(!supermarket);
-                return searchIngredients({ variables: { query, supermarket: !supermarket } });
+                return runSearch(query, !supermarket);
               }}
               style={{
                 color: Colors.text,
@@ -115,7 +138,7 @@ export function SearchIngredients({
                 borderRadius: 7,
                 padding: 5,
               }}>
-              {supermarket ? 'AH' : 'Picape'}
+              {supermarket ? (picnic ? 'Picnic' : 'AH') : 'Picape'}
             </Text>
           )
         }

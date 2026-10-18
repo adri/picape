@@ -2,7 +2,8 @@ defmodule Picape.PicnicModeTest do
   use Picape.DataCase
 
   alias Picape.Recipe.Ingredient
-  alias Picape.{Checklist, Order, Picnic, Repo, Settings, Supermarket}
+  alias Picape.{Checklist, Ingredients, Order, Picnic, Repo, Settings, Supermarket}
+  alias Picape.SupermarketFake
 
   test "picnic mode reads the Picnic cart plus the checklist fallback" do
     brood =
@@ -159,6 +160,24 @@ defmodule Picape.PicnicModeTest do
 
     assert error =~ "unreachable"
     assert Settings.mode() == "picnic"
+  end
+
+  test "remapping to another Picnic product takes the old one out of the cart" do
+    brood = insert!(:ingredient, name: "Brood", picnic_product_id: "s2001")
+    insert!(:manual_ingredient, ingredient_id: brood.id, quantity: 1)
+    {:ok, _} = Order.set_mode("picnic")
+
+    assert {:ok, _} =
+             Ingredients.edit_ingredient(%{ingredient_id: brood.id, picnic_product_id: "s2002"})
+
+    assert %{
+             method: "POST",
+             path: "/api/15/cart/remove_product",
+             body: %{"product_id" => "s2001", "count" => 1}
+           } = List.last(SupermarketFake.requests())
+
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2001") == nil
   end
 
   test "switching back to ah pushes the list into the supermarket basket" do

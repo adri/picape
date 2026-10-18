@@ -134,6 +134,7 @@ defmodule Picape.Recipe.Ingredient do
       :replacement_ingredient_id
     ])
     |> validate_required([:name, :is_essential])
+    |> validate_format(:picnic_product_id, ~r/^s\d+$/)
     |> unique_constraint(:supermarket_product_id)
     |> unique_constraint(:picnic_product_id)
   end
@@ -152,6 +153,7 @@ defmodule Picape.Recipe.Ingredient do
     ])
     |> validate_required([:name, :is_essential])
     |> validate_product_id()
+    |> validate_format(:picnic_product_id, ~r/^s\d+$/)
     |> unique_constraint(:supermarket_product_id)
     |> unique_constraint(:picnic_product_id)
   end

@@ -95,6 +95,12 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(&Resolver.Supermarket.search/3)
     end
 
+    @desc "Search Picnic products using a query string."
+    field :search_picnic, list_of(:supermarket_search_result) do
+      arg(:query, non_null(:string))
+      resolve(&Resolver.Supermarket.search_picnic/3)
+    end
+
     @desc """
     Search ingredients using a query string, excluding of
     ingredient ids possible.

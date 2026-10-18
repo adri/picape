@@ -46,6 +46,9 @@ type RootQueryType {
   "Search Supermarket products using a query string."
   searchSupermarket(query: String!): [SupermarketSearchResult]
 
+  "Search Picnic products using a query string."
+  searchPicnic(query: String!): [SupermarketSearchResult]
+
   """
   Search ingredients using a query string, excluding of
   ingredient ids possible.
@@ -217,6 +220,12 @@ type Ingredient implements Node {
 
   picnicProductId: String
 
+  "The Picnic product's name, cached when the mapping was made."
+  picnicName: String
+
+  "The Picnic product's image, built from the image id cached at mapping time."
+  picnicImageUrl: String
+
   isEssential: Boolean
 
   tags: [IngredientTag]
@@ -309,7 +318,8 @@ enum OrderDirection {
 "Edit an ingredient"
 input EditIngredientInput {
   ingredientId: ID!
-  supermarketProductId: String!
+  supermarketProductId: String
+  picnicProductId: String
   name: String!
   seasonalName: String
   isEssential: Boolean!

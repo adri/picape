@@ -36,8 +36,9 @@ defmodule Picape.MCP.Tools do
     %{
       name: "search_supermarket",
       description:
-        "Search the supermarket's product catalogue for products Picape does not know yet. The `id` " <>
-          "in the result is a supermarket product ID, not a Picape ingredient ID; pass it to add_ingredient.",
+        "Search the active store's product catalogue for products Picape does not know yet: the " <>
+          "supermarket's catalogue, or Picnic's in picnic mode (see set_mode). The `id` in the " <>
+          "result is a store product ID, not a Picape ingredient ID; pass it to add_ingredient.",
       inputSchema: %{
         type: "object",
         properties: %{query: %{type: "string", description: "Part of a product name, in Dutch"}},
@@ -411,12 +412,16 @@ defmodule Picape.MCP.Tools do
   end
 
   defp run("search_supermarket", args) do
-    products =
-      args["query"]
-      |> Supermarket.search()
-      |> Enum.map(&%{id: &1.id, name: &1.name, price: &1.price, unit_quantity: &1.unit_quantity})
+    if Settings.picnic?() do
+      run("search_picnic", args)
+    else
+      products =
+        args["query"]
+        |> Supermarket.search()
+        |> Enum.map(&%{id: &1.id, name: &1.name, price: &1.price, unit_quantity: &1.unit_quantity})
 
-    {:ok, products}
+      {:ok, products}
+    end
   end
 
   defp run("search_picnic", args) do

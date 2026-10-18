@@ -1,8 +1,8 @@
 defmodule Picape.Ingredients do
   import Ecto.Query
+  require Logger
 
-  alias Picape.Repo
-  alias Picape.Supermarket
+  alias Picape.{Picnic, Repo, Settings, Supermarket}
   alias Picape.Recipe.{Ingredient, IngredientTag}
 
   @doc """
@@ -125,11 +125,44 @@ defmodule Picape.Ingredients do
   def edit_ingredient(params) do
     ingredient = Repo.get(Ingredient, params[:ingredient_id]) |> Repo.preload(:tags)
 
-    with {:ok, params} <- put_product_raw(params, ingredient) do
-      ingredient
-      |> Ingredient.edit_changeset(params)
-      |> put_tags(params)
-      |> Repo.update()
+    with {:ok, params} <- put_product_raw(params, ingredient),
+         {:ok, edited} <-
+           ingredient
+           |> Ingredient.edit_changeset(params)
+           |> put_tags(params)
+           |> Repo.update() do
+      remove_replaced_picnic_product(ingredient, edited)
+      {:ok, edited}
+    end
+  end
+
+  # The Picnic cart is keyed by selling unit id, so a remap leaves the old
+  # product in it. In picnic mode the old mapping's product comes out; a sync
+  # adds the new one.
+  defp remove_replaced_picnic_product(%{picnic_product_id: old}, %{picnic_product_id: new})
+       when is_binary(old) and old != new do
+    if Settings.picnic?() do
+      case picnic_cart_quantity(old) do
+        nil -> :ok
+        quantity -> Picnic.remove_product(old, quantity)
+      end
+    end
+  rescue
+    error -> Logger.warning("removing the replaced Picnic product failed: #{Exception.message(error)}")
+  end
+
+  defp remove_replaced_picnic_product(_old, _new), do: :ok
+
+  defp picnic_cart_quantity(product_id) do
+    Picnic.cart()["items"]
+    |> Enum.flat_map(& &1["items"])
+    |> Enum.find(&(&1["id"] == product_id))
+    |> case do
+      nil ->
+        nil
+
+      article ->
+        Enum.find(article["decorators"] || [], &(&1["type"] == "QUANTITY"))["quantity"]
     end
   end
 

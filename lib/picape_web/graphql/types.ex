@@ -97,6 +97,22 @@ defmodule PicapeWeb.Graphql.Types do
     field(:seasonal_name, :string)
     field(:supermarket_product_id, :string)
     field(:picnic_product_id, :string)
+
+    @desc "The Picnic product's name, cached when the mapping was made."
+    field :picnic_name, :string do
+      resolve(fn parent, _args, _ctx ->
+        {:ok, get_in(parent.picnic_product_raw || %{}, ["name"])}
+      end)
+    end
+
+    @desc "The Picnic product's image, built from the image id cached at mapping time."
+    field :picnic_image_url, :string do
+      resolve(fn parent, _args, _ctx ->
+        image_id = get_in(parent.picnic_product_raw || %{}, ["image_id"])
+        {:ok, image_id && Picape.Picnic.image_url(image_id)}
+      end)
+    end
+
     field(:is_essential, :boolean)
     field(:tags, list_of(:ingredient_tag))
     field(:image_url, :string, resolve: from_object(:image_url))
@@ -221,7 +237,8 @@ defmodule PicapeWeb.Graphql.Types do
   @desc "Edit an ingredient"
   input_object :edit_ingredient_input do
     field(:ingredient_id, non_null(:id))
-    field(:supermarket_product_id, non_null(:string))
+    field(:supermarket_product_id, :string)
+    field(:picnic_product_id, :string)
     field(:name, non_null(:string))
     field(:seasonal_name, :string)
     field(:is_essential, non_null(:boolean))

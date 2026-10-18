@@ -32,10 +32,18 @@ defmodule Picape.Picnic.SearchResult do
     %SearchResult{
       id: unit["id"],
       name: unit["name"],
-      price: unit["display_price"],
+      price: unit["display_price"] || price_range(unit["price_ranges"]),
       unit_quantity: unit["unit_quantity"],
       image_id: unit["image_id"],
       max_count: unit["max_count"]
     }
   end
+
+  # Promotional tiles carry price_ranges instead of display_price: a list of
+  # {price, from_quantity} tiers. The earliest tier is the per-piece price.
+  defp price_range([_ | _] = ranges) do
+    ranges |> Enum.min_by(&(&1["from_quantity"] || 0)) |> Map.get("price")
+  end
+
+  defp price_range(_), do: nil
 end
