@@ -1,5 +1,5 @@
 defmodule PicapeWeb.Graphql.Resolver.Recipe do
-  alias Picape.{Recipe, Ingredients, Repo}
+  alias Picape.{Recipe, Ingredients, Repo, Settings}
   alias Absinthe.Relay
 
   # Queries
@@ -58,8 +58,18 @@ defmodule PicapeWeb.Graphql.Resolver.Recipe do
     Recipe.recipes_by_ids(ids)
   end
 
+  # Item ids are keyed per store: a supermarket product id in ah and checklist
+  # mode, a Picnic selling unit id for cart rows in picnic mode. The two key
+  # spaces never collide.
   def ingredients_by_item_ids(_, item_ids) do
-    Recipe.ingredients_by_item_ids(item_ids)
+    if Settings.picnic?() do
+      {:ok, by_product} = Recipe.ingredients_by_item_ids(Enum.filter(item_ids, &is_integer/1))
+      {:ok, by_picnic} = Ingredients.by_picnic_product_ids(item_ids)
+
+      {:ok, Map.merge(by_product, by_picnic)}
+    else
+      Recipe.ingredients_by_item_ids(item_ids)
+    end
   end
 
   def ingredients_by_recipe_ids(_, recipe_ids) do

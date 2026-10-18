@@ -148,14 +148,14 @@ defmodule PicapeWeb.Graphql.Schema do
       resolve(handle_errors(&Resolver.Order.stop_shopping/2))
     end
 
-    @desc "Tick an item off the checklist, or untick it. Checklist mode only."
+    @desc "Tick an item off the checklist, or untick it. Checklist and picnic mode only."
     field :check_item, :order do
       arg(:ingredient_id, non_null(:id))
       arg(:checked, :boolean, default_value: true)
       resolve(handle_errors(&Resolver.Order.check_item/2))
     end
 
-    @desc "Switch where the current order lives: the supermarket basket (ah) or Picape's own checklist."
+    @desc "Switch where the current order lives: the supermarket basket (ah), the Picnic cart (picnic) or Picape's own checklist."
     field :set_mode, :order do
       arg(:mode, non_null(:string))
       resolve(handle_errors(&Resolver.Order.set_mode/2))
