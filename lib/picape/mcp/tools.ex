@@ -63,7 +63,9 @@ defmodule Picape.MCP.Tools do
       description:
         "Set or clear the Picnic product behind an ingredient. In picnic mode (see set_mode) an " <>
           "ingredient with a Picnic product syncs into the Picnic cart; without one it stays on " <>
-          "the checklist. Pass `picnic_product_id` null to clear the mapping. Copy `name`, " <>
+          "the checklist. If the Picnic cart already holds the product, its quantity is added to " <>
+          "the ingredient's quantity on the list — mapping never lowers a quantity either side " <>
+          "asked for. Pass `picnic_product_id` null to clear the mapping. Copy `name`, " <>
           "`unit_quantity`, `image_id` and `price` from a search_picnic result so the shopping " <>
           "list shows them without another lookup. This only writes the mapping; it never places, " <>
           "confirms or checks out a Picnic order.",

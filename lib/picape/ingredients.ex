@@ -2,7 +2,7 @@ defmodule Picape.Ingredients do
   import Ecto.Query
   require Logger
 
-  alias Picape.{Picnic, Repo, Settings, Supermarket}
+  alias Picape.{Order, Picnic, Repo, Settings, Supermarket}
   alias Picape.Recipe.{Ingredient, IngredientTag}
 
   @doc """
@@ -132,9 +132,28 @@ defmodule Picape.Ingredients do
            |> put_tags(params)
            |> Repo.update() do
       remove_replaced_picnic_product(ingredient, edited)
+      adopt_picnic_cart_quantity(ingredient, edited)
       {:ok, edited}
     end
   end
+
+  # A fresh Picnic mapping merges with what the cart already holds of the
+  # product: the list's quantity and the cart's add up, so mapping can never
+  # drop what either side wanted. Mapping outside picnic mode, or to nothing,
+  # changes no quantity.
+  defp adopt_picnic_cart_quantity(%{picnic_product_id: old}, %{
+         id: id,
+         picnic_product_id: new
+       })
+       when is_binary(new) and old != new do
+    if Settings.picnic?() do
+      Order.adopt_picnic_quantity(id, picnic_cart_quantity(new) || 0)
+    end
+  rescue
+    error -> Logger.warning("adopting the Picnic cart quantity failed: #{Exception.message(error)}")
+  end
+
+  defp adopt_picnic_cart_quantity(_old, _new), do: :ok
 
   # The Picnic cart is keyed by selling unit id, so a remap leaves the old
   # product in it. In picnic mode the old mapping's product comes out; a sync

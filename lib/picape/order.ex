@@ -299,6 +299,37 @@ defmodule Picape.Order do
   end
 
   def order_ingredient(order_id, ingredient_id, quantity) do
+    order_id
+    |> put_manual_quantity(ingredient_id, quantity)
+    |> case do
+      {:ok, _planned_recipe} -> sync_supermarket(order_id)
+      err -> err
+    end
+  end
+
+  # Merging a Picnic mapping with what the cart already holds: the quantity the
+  # list wants and the quantity the cart holds add up, so mapping can never
+  # lower what either side asked for. The sum is recorded as the ingredient's
+  # manual quantity — that is what a sync keeps the cart at — unless a manual
+  # row already pins the ingredient at 0, which a mapping does not override.
+  def adopt_picnic_quantity(ingredient_id, cart_quantity) do
+    {:ok, cart} = cart("1")
+
+    wanted =
+      Enum.find_value(cart, 0, fn {_id, item} ->
+        item.ingredient.id == ingredient_id && item.quantity
+      end)
+
+    case Repo.get_by(ManualIngredient, line_id: "1", ingredient_id: ingredient_id) do
+      %{quantity: 0} -> :ok
+      _ when wanted + cart_quantity > 0 -> put_manual_quantity("1", ingredient_id, wanted + cart_quantity)
+      _ -> :ok
+    end
+
+    sync_supermarket("1")
+  end
+
+  defp put_manual_quantity(order_id, ingredient_id, quantity) do
     %ManualIngredient{}
     |> ManualIngredient.changeset(%{
       line_id: order_id,
@@ -309,10 +340,6 @@ defmodule Picape.Order do
       on_conflict: [set: [quantity: quantity]],
       conflict_target: [:line_id, :ingredient_id]
     )
-    |> case do
-      {:ok, _planned_recipe} -> sync_supermarket(order_id)
-      err -> err
-    end
   end
 
   @doc """

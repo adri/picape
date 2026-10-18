@@ -174,10 +174,12 @@ defmodule Picape.PicnicModeTest do
              method: "POST",
              path: "/api/15/cart/remove_product",
              body: %{"product_id" => "s2001", "count" => 1}
-           } = List.last(SupermarketFake.requests())
+           } = Enum.find(SupermarketFake.requests(), &(&1.path =~ "remove_product"))
 
     Picnic.invalidate_cart()
-    assert picnic_article(Picnic.cart(), "s2001") == nil
+    cart = Picnic.cart()
+    assert picnic_article(cart, "s2001") == nil
+    assert picnic_quantity(cart, "s2002") == 1
   end
 
   test "switching back to ah pushes the list into the supermarket basket" do
@@ -249,6 +251,20 @@ defmodule Picape.PicnicModeTest do
     Supermarket.invalidate_cart()
     assert product_quantity(Supermarket.cart(), 10_583_837) == 2
     assert product_quantity(Supermarket.cart(), 519_017) == 1
+  end
+
+  test "mapping in picnic mode pushes the wanted quantity into the cart" do
+    gist = insert!(:ingredient, name: "Gist", supermarket_product_id: 519_017)
+    insert!(:manual_ingredient, ingredient_id: gist.id, quantity: 1)
+
+    {:ok, _} = Order.set_mode("picnic")
+
+    assert {:ok, _} =
+             Ingredients.edit_ingredient(%{ingredient_id: gist.id, picnic_product_id: "s2002"})
+
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+    assert {:ok, quantities} = Order.ingredients_ordered_quantity("1", [gist.id])
+    assert quantities[gist.id] == 1
   end
 
   defp supermarket_down() do
