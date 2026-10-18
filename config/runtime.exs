@@ -26,11 +26,27 @@ if config_env() == :prod do
       "X-Clientname": System.get_env("SUPERMARKET_CLIENT_NAME"),
       "User-Agent": System.get_env("SUPERMARKET_USER_AGENT")
     ]
+
+  config :picape, Picape.Picnic,
+    base_url: System.get_env("PICNIC_BASE_URL"),
+    auth_key: System.get_env("PICNIC_AUTH_KEY"),
+    agent: System.get_env("PICNIC_AGENT"),
+    did: System.get_env("PICNIC_DID"),
+    user_agent: System.get_env("PICNIC_USER_AGENT")
 end
 
 if config_env() == :dev do
   if base_url = System.get_env("SUPERMARKET_BASE_URL") do
     config :picape, Picape.Supermarket, base_url: base_url
+  end
+
+  if System.get_env("PICNIC_BASE_URL") || System.get_env("PICNIC_AUTH_KEY") do
+    config :picape, Picape.Picnic,
+      base_url: System.get_env("PICNIC_BASE_URL"),
+      auth_key: System.get_env("PICNIC_AUTH_KEY"),
+      agent: System.get_env("PICNIC_AGENT"),
+      did: System.get_env("PICNIC_DID"),
+      user_agent: System.get_env("PICNIC_USER_AGENT")
   end
 
   if System.get_env("SUPERMARKET_REFRESH") == "0" do

@@ -27,3 +27,5 @@ config :picape, Picape.Repo,
   ownership_timeout: 60_000
 
 config :picape, Picape.Supermarket, base_url: "http://localhost:4021", headers: []
+
+config :picape, Picape.Picnic, base_url: "http://localhost:4021/api/15", auth_key: "test-auth-key"
