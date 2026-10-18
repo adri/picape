@@ -385,6 +385,24 @@ defmodule Picape.PicnicModeTest do
     assert picnic_article(Picnic.cart(), "s2002") == nil
   end
 
+  test "mapping adopts the live cart quantity, not a stale cached one" do
+    gist = insert!(:ingredient, name: "Gist", supermarket_product_id: 519_017)
+    {:ok, _} = Order.set_mode("picnic")
+
+    # The cached cart predates the two s2002 the Picnic app added since.
+    HTTPoison.post!(
+      "http://localhost:4021/api/15/cart/add_product",
+      Jason.encode!(%{product_id: "s2002", count: 2}),
+      [{"content-type", "application/json"}]
+    )
+
+    assert {:ok, _} =
+             Ingredients.edit_ingredient(%{ingredient_id: gist.id, picnic_product_id: "s2002"})
+
+    assert %{quantity: 2} =
+             Repo.get_by(Order.ManualIngredient, line_id: "1", ingredient_id: gist.id)
+  end
+
   defp supermarket_down() do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()

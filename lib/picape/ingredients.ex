@@ -172,7 +172,11 @@ defmodule Picape.Ingredients do
 
   defp remove_replaced_picnic_product(_old, _new), do: :ok
 
+  # The cached cart can be five hours old; the quantity it reports is adopted
+  # into the plan, so it has to be fresh.
   defp picnic_cart_quantity(product_id) do
+    Picnic.invalidate_cart()
+
     Picnic.cart()["items"]
     |> Enum.flat_map(& &1["items"])
     |> Enum.find(&(&1["id"] == product_id))
