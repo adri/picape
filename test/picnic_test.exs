@@ -82,35 +82,6 @@ defmodule Picape.PicnicTest do
     assert picnic_article(Picnic.cart(), "s2001") == nil
   end
 
-  test "login trades credentials for the auth key header" do
-    assert {:ok, "test-auth-key"} = Picnic.login("user@example.com", "secret")
-  end
-
-  test "a 2FA login returns the provisional key the verify calls need" do
-    assert {:error, {:second_factor_required, "provisional-auth-key"}} =
-             Picnic.login("needs-2fa", "secret")
-
-    assert :ok = Picnic.generate_2fa("provisional-auth-key")
-    assert :ok = Picnic.verify_2fa("provisional-auth-key", "123456")
-
-    [verify, generate] = SupermarketFake.requests() |> Enum.take(-2) |> Enum.reverse()
-    assert generate.path == "/api/15/user/2fa/generate"
-    assert generate.body == %{"channel" => "SMS"}
-    assert generate.headers["x-picnic-auth"] == "provisional-auth-key"
-    assert verify.path == "/api/15/user/2fa/verify"
-    assert verify.body == %{"otp" => "123456"}
-    assert verify.headers["x-picnic-auth"] == "provisional-auth-key"
-  end
-
-  test "a wrong 2FA code raises the shared supermarket error" do
-    error =
-      assert_raise Picape.Supermarket.Error, fn ->
-        Picnic.verify_2fa("provisional-auth-key", "000000")
-      end
-
-    assert error.message =~ "TWO_FACTOR_AUTHENTICATION_ERROR"
-  end
-
   test "a dead Picnic raises the shared supermarket error" do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()

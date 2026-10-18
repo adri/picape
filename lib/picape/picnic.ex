@@ -8,9 +8,10 @@ defmodule Picape.Picnic do
   cart in step with the plan.
 
   Auth is an auth key sent as the `x-picnic-auth` header on every request.
-  `login/2` trades a username and password for one; the key itself is
-  configured with `PICNIC_AUTH_KEY`, the same way the supermarket's secrets
-  come from env vars.
+  The key is the one the Picnic app's own session carries; it is long-lived
+  and the storefront api never refreshes it. It is configured with
+  `PICNIC_AUTH_KEY`, the same way the supermarket's secrets come from env
+  vars.
   """
   use HTTPoison.Base
 
@@ -70,64 +71,6 @@ defmodule Picape.Picnic do
     {:ok, :synced}
   end
 
-  @doc """
-  Trades account credentials for an auth key, the `x-picnic-auth` value every
-  other call needs. Meant to be run by hand to bootstrap `PICNIC_AUTH_KEY`;
-  the app never calls it. When the body says
-  `second_factor_authentication_required`, the key it answered with is only
-  provisional: `{:error, {:second_factor_required, auth_key}}` returns it so
-  `generate_2fa/1` and `verify_2fa/2` can finish the login.
-  """
-  def login(username, password) do
-    secret = :crypto.hash(:md5, password) |> Base.encode16(case: :lower)
-
-    response =
-      post!(
-        "/user/login",
-        %{"key" => username, "secret" => secret, "client_id" => 30_100},
-        "Content-Type": "application/json"
-      )
-
-    auth_key = auth_key_from(response)
-
-    cond do
-      is_binary(auth_key) and is_map(response.body) and
-          response.body["second_factor_authentication_required"] ->
-        {:error, {:second_factor_required, auth_key}}
-
-      is_binary(auth_key) ->
-        {:ok, auth_key}
-
-      true ->
-        {:error, :no_auth_key}
-    end
-  end
-
-  @doc """
-  Sends the second factor to the account holder, `channel` "SMS" or "EMAIL".
-  Takes the provisional key `login/2` returned; a full login replaces it.
-  """
-  def generate_2fa(auth_key, channel \\ "SMS") do
-    post!(
-      "/user/2fa/generate",
-      %{"channel" => channel},
-      [{:"Content-Type", "application/json"}, {:"x-picnic-auth", auth_key}]
-    )
-
-    :ok
-  end
-
-  @doc "Verifies the code Picnic sent; afterwards the provisional key is a working auth key."
-  def verify_2fa(auth_key, otp) do
-    post!(
-      "/user/2fa/verify",
-      %{"otp" => otp},
-      [{:"Content-Type", "application/json"}, {:"x-picnic-auth", auth_key}]
-    )
-
-    :ok
-  end
-
   def invalidate_cart() do
     ConCache.delete(:supermarket, :picnic_cart)
   end
@@ -155,7 +98,7 @@ defmodule Picape.Picnic do
     (config(:base_url) || @default_base_url) <> url
   end
 
-  # Picnic answers some mutations, like the 2FA calls, with an empty 200.
+  # Picnic answers some mutations with an empty 200.
   def process_response_body(""), do: %{}
 
   def process_response_body(body) do
@@ -197,20 +140,11 @@ defmodule Picape.Picnic do
     |> put_auth_key()
   end
 
-  # A request that carries its own key, like the 2FA calls made with the
-  # provisional one, wins over the configured key.
   defp put_auth_key(headers) do
-    cond do
-      Keyword.has_key?(headers, :"x-picnic-auth") -> headers
-      auth_key = config(:auth_key) -> Keyword.put(headers, :"x-picnic-auth", auth_key)
-      true -> headers
-    end
-  end
-
-  defp auth_key_from(response) do
-    case List.keyfind(response.headers, "x-picnic-auth", 0) do
-      {_, auth_key} -> auth_key
-      nil -> nil
+    if auth_key = config(:auth_key) do
+      Keyword.put(headers, :"x-picnic-auth", auth_key)
+    else
+      headers
     end
   end
 
