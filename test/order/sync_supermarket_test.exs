@@ -33,6 +33,52 @@ defmodule Picape.Order.SyncSupermarketTest do
     assert %{519_017 => %Ingredient{name: "Kipfilet"}} = Order.substitutions("1")
   end
 
+  test "a manual quantity on an unavailable product adds onto the planned replacement" do
+    sinaas = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+
+    kip =
+      insert!(:ingredient,
+        name: "Kipfilet",
+        supermarket_product_id: 10_291_994,
+        supermarket_product_raw: %{
+          "productCard" => %{"orderAvailabilityStatus" => "OUT_OF_STOCK"}
+        }
+      )
+
+    replace(kip, sinaas)
+    recipe = insert!(:recipe, title: "Sinaas", ingredients: [sinaas])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+    insert!(:manual_ingredient, ingredient_id: kip.id, quantity: 2)
+
+    assert {:ok, _} = Order.sync_supermarket("1")
+
+    Supermarket.invalidate_cart()
+    assert product_quantity(Supermarket.cart(), 519_017) == 3
+  end
+
+  test "a manual 0 on an unavailable product keeps the planned replacement" do
+    sinaas = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+
+    kip =
+      insert!(:ingredient,
+        name: "Kipfilet",
+        supermarket_product_id: 10_291_994,
+        supermarket_product_raw: %{
+          "productCard" => %{"orderAvailabilityStatus" => "OUT_OF_STOCK"}
+        }
+      )
+
+    replace(kip, sinaas)
+    recipe = insert!(:recipe, title: "Sinaas", ingredients: [sinaas])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+    insert!(:manual_ingredient, ingredient_id: kip.id, quantity: 0)
+
+    assert {:ok, _} = Order.sync_supermarket("1")
+
+    Supermarket.invalidate_cart()
+    assert product_quantity(Supermarket.cart(), 519_017) == 1
+  end
+
   test "an unavailable wanted product without a replacement stays untouched" do
     kip = insert!(:ingredient, name: "Kipfilet", supermarket_product_id: 10_291_994)
 

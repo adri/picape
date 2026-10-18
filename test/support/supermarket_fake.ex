@@ -16,6 +16,7 @@ defmodule Picape.SupermarketFake do
   @picnic __MODULE__.Picnic
   @down __MODULE__.Down
   @picnic_auth_error __MODULE__.PicnicAuthError
+  @picnic_unavailable __MODULE__.PicnicUnavailable
   @requests __MODULE__.Requests
 
   plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
@@ -32,6 +33,7 @@ defmodule Picape.SupermarketFake do
     {:ok, _} = Agent.start_link(fn -> fixture("picnic_cart.json") end, name: @picnic)
     {:ok, _} = Agent.start_link(fn -> false end, name: @down)
     {:ok, _} = Agent.start_link(fn -> false end, name: @picnic_auth_error)
+    {:ok, _} = Agent.start_link(fn -> MapSet.new() end, name: @picnic_unavailable)
     {:ok, _} = Agent.start_link(fn -> [] end, name: @requests)
     Plug.Cowboy.http(__MODULE__, [], port: port)
   end
@@ -52,6 +54,7 @@ defmodule Picape.SupermarketFake do
     Agent.update(@picnic, fn _ -> fixture("picnic_cart.json") end)
     Agent.update(@down, fn _ -> false end)
     Agent.update(@picnic_auth_error, fn _ -> false end)
+    Agent.update(@picnic_unavailable, fn _ -> MapSet.new() end)
     Agent.update(@requests, fn _ -> [] end)
     Picape.Picnic.invalidate_cart()
   end
@@ -166,6 +169,15 @@ defmodule Picape.SupermarketFake do
 
   post "/__up" do
     Agent.update(@down, fn _ -> false end)
+    send_resp(conn, 204, "")
+  end
+
+  # Marks a Picnic product unavailable: its ORDER_ARTICLEs carry an UNAVAILABLE
+  # decorator the way Picnic flags a product it cannot sell, until /__reset.
+  post "/__picnic_unavailable" do
+    %{"product_id" => product_id} = conn.body_params
+    Agent.update(@picnic_unavailable, &MapSet.put(&1, product_id))
+    Agent.update(@picnic, &decorate_picnic_articles(&1, product_id))
     send_resp(conn, 204, "")
   end
 
@@ -308,8 +320,27 @@ defmodule Picape.SupermarketFake do
   end
 
   defp picnic_quantity(article, quantity) do
-    put_in(article["decorators"], [%{"type" => "QUANTITY", "quantity" => quantity}])
+    update_in(article["decorators"], fn decorators ->
+      [%{"type" => "QUANTITY", "quantity" => quantity}] ++
+        Enum.reject(decorators, &(&1["type"] == "QUANTITY"))
+    end)
   end
+
+  defp decorate_picnic_articles(cart, product_id) do
+    update_in(cart["items"], &Enum.map(&1, fn group -> decorate_picnic_group(group, product_id) end))
+  end
+
+  defp decorate_picnic_group(group, product_id) do
+    update_in(group["items"], &Enum.map(&1, fn article -> decorate_picnic_article(article, product_id) end))
+  end
+
+  defp decorate_picnic_article(%{"id" => product_id} = article, product_id) do
+    update_in(article["decorators"], &(&1 ++ [%{"type" => "UNAVAILABLE"}]))
+  end
+
+  defp decorate_picnic_article(article, _product_id), do: article
+
+  defp picnic_unavailable?(product_id), do: Agent.get(@picnic_unavailable, &MapSet.member?(&1, product_id))
 
   defp picnic_group(product_id, count) do
     unit =
@@ -327,7 +358,9 @@ defmodule Picape.SupermarketFake do
           "name" => unit["name"],
           "price" => unit["display_price"] || 0,
           "image_ids" => List.wrap(unit["image_id"]),
-          "decorators" => [%{"type" => "QUANTITY", "quantity" => count}],
+          "decorators" =>
+            [%{"type" => "QUANTITY", "quantity" => count}] ++
+              if(picnic_unavailable?(product_id), do: [%{"type" => "UNAVAILABLE"}], else: []),
           "max_count" => unit["max_count"] || 50,
           "unit_quantity" => unit["unit_quantity"] || ""
         }

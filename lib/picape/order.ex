@@ -21,8 +21,9 @@ defmodule Picape.Order do
   @doc """
   Returns the currently active cart. In checklist mode that is the list Picape
   computed, with the ticked-off state overlaid — no supermarket call happens.
-  In picnic mode it is the Picnic cart plus the planned items that have no
-  Picnic mapping, which stay on the checklist. An `ah` or `picnic` order whose
+  In picnic mode it is the Picnic cart plus the wanted items the cart does
+  not hold — unmapped ones, or ones whose push never landed — which stay on
+  the checklist. An `ah` or `picnic` order whose
   supermarket does not answer is served the same way, flagged
   `supermarket_reachable: false`, so a dead API does not take the list down
   with it.
@@ -123,20 +124,24 @@ defmodule Picape.Order do
 
   def cart(order_id) do
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
-         {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
-         {:ok, manual} <- manual_ingredients(order_id) do
+         {:ok, planned} <- Recipe.ingredient_quantities(recipe_quantities),
+         {:ok, manual} <- manual_ingredient_quantities(order_id) do
       merged =
         Map.merge(planned, manual, fn _id, _quantity1, quantity2 -> quantity2 end)
         |> Enum.reject(fn {_, v} -> v == 0 end)
         |> Map.new()
 
-      {:ok, ingredients} = Recipe.ingredients_by_item_ids(Map.keys(merged))
+      {:ok, ingredients} = Ingredients.ingredients_by_ids(Map.keys(merged))
 
       cart =
-        for {id, quantity} <- merged,
-            ingredient = ingredients[id],
+        for {ingredient_id, quantity} <- merged,
+            ingredient = ingredients[ingredient_id],
             not is_nil(ingredient),
             into: %{} do
+          # An ingredient with no supermarket product keys by its own id: it
+          # cannot be ordered anywhere, but it still belongs on the list.
+          id = ingredient.supermarket_product_id || ingredient_id
+
           {id,
            %{
              id: id,
@@ -214,8 +219,9 @@ defmodule Picape.Order do
              {:ok, manual} <- manual_ingredients(order_id),
              {:ok, line} <- current(),
              {:ok, existing} <- ordered_item_quantities(line),
+             wanted <- merge_wanted(planned, manual),
              {:ok, changes} <-
-               Sync.changes(substitute(planned, line), substitute(manual, line), existing) do
+               Sync.changes(substitute(wanted, line), %{}, existing) do
           push(changes, line)
           current()
         else
@@ -294,6 +300,39 @@ defmodule Picape.Order do
   end
 
   def order_ingredient(order_id, ingredient_id, quantity) do
+    order_id
+    |> put_manual_quantity(ingredient_id, quantity)
+    |> case do
+      {:ok, _planned_recipe} -> sync_supermarket(order_id)
+      err -> err
+    end
+  end
+
+  # Merging a Picnic mapping with what the cart already holds: the quantity the
+  # list wants and the quantity the cart holds add up, so mapping can never
+  # lower what either side asked for. The sum is recorded as the ingredient's
+  # manual quantity — that is what a sync keeps the cart at. Two cases write
+  # nothing: a cart that does not hold the product (pinning the wanted
+  # quantity would survive an unplan) and a manual row already at 0, which a
+  # mapping does not override.
+  def adopt_picnic_quantity(ingredient_id, cart_quantity) do
+    {:ok, cart} = cart("1")
+
+    wanted =
+      Enum.find_value(cart, 0, fn {_id, item} ->
+        item.ingredient.id == ingredient_id && item.quantity
+      end)
+
+    case Repo.get_by(ManualIngredient, line_id: "1", ingredient_id: ingredient_id) do
+      %{quantity: 0} -> :ok
+      _ when cart_quantity > 0 -> put_manual_quantity("1", ingredient_id, wanted + cart_quantity)
+      _ -> :ok
+    end
+
+    sync_supermarket("1")
+  end
+
+  defp put_manual_quantity(order_id, ingredient_id, quantity) do
     %ManualIngredient{}
     |> ManualIngredient.changeset(%{
       line_id: order_id,
@@ -304,10 +343,6 @@ defmodule Picape.Order do
       on_conflict: [set: [quantity: quantity]],
       conflict_target: [:line_id, :ingredient_id]
     )
-    |> case do
-      {:ok, _planned_recipe} -> sync_supermarket(order_id)
-      err -> err
-    end
   end
 
   @doc """
@@ -426,22 +461,22 @@ defmodule Picape.Order do
   """
   def substitutions(order_id) do
     {:ok, line} = current()
-    {:ok, recipe_quantities} = recipe_ingredient_quantities(order_id)
-    {:ok, planned} = Recipe.item_quantities(recipe_quantities)
-    {:ok, manual} = manual_ingredients(order_id)
-    wanted = Map.merge(planned, manual, fn _id, _q1, q2 -> q2 end)
 
-    {:ok, wanted_ingredients} = Recipe.ingredients_by_item_ids(Map.keys(wanted))
-    unavailable = unavailable_product_ids(line, wanted_ingredients)
-    in_cart = MapSet.new(Enum.map(line.items, & &1.id))
+    if Settings.picnic?() do
+      {:ok, wanted} = wanted_picnic_quantities(order_id)
+      {:ok, wanted_ingredients} = Ingredients.by_picnic_product_ids(Map.keys(wanted))
 
-    for {product_id, ingredient} <- wanted_ingredients,
-        MapSet.member?(unavailable, product_id),
-        %{replacement_ingredient_id: rid} when not is_nil(rid) <- [ingredient],
-        {:ok, %{^rid => replacement}} <- [Ingredients.ingredients_by_ids([rid])],
-        MapSet.member?(in_cart, replacement.supermarket_product_id),
-        into: %{} do
-      {replacement.supermarket_product_id, ingredient}
+      substitution_map(line, wanted_ingredients, unavailable_cart_ids(line), :picnic_product_id)
+    else
+      {:ok, recipe_quantities} = recipe_ingredient_quantities(order_id)
+      {:ok, planned} = Recipe.item_quantities(recipe_quantities)
+      {:ok, manual} = manual_ingredients(order_id)
+      wanted = Map.merge(planned, manual, fn _id, _q1, q2 -> q2 end)
+
+      {:ok, wanted_ingredients} = Recipe.ingredients_by_item_ids(Map.keys(wanted))
+      unavailable = unavailable_product_ids(line, wanted_ingredients)
+
+      substitution_map(line, wanted_ingredients, unavailable, :supermarket_product_id)
     end
   end
 
@@ -450,7 +485,7 @@ defmodule Picape.Order do
       from(
         m in ManualIngredient,
         join: i in assoc(m, :ingredient),
-        where: m.line_id == ^order_id,
+        where: m.line_id == ^order_id and not is_nil(i.supermarket_product_id),
         select: {i.supermarket_product_id, m.quantity}
       )
 
@@ -484,19 +519,22 @@ defmodule Picape.Order do
 
   # --- private
 
-  # The Picnic cart plus the planned ingredients that have no Picnic mapping,
-  # which fall back to the checklist. Products added in the Picnic app itself
-  # carry no ingredient, like the supermarket's external items.
+  # The Picnic cart plus the planned ingredients the cart does not hold,
+  # which fall back to the checklist — unmapped ones, but also mapped ones
+  # whose product never made it into the cart: a failed push must not take
+  # the item off the list. Products added in the Picnic app itself carry no
+  # ingredient, like the supermarket's external items.
   defp picnic_line(cart) do
     line = LineFromPicnic.convert(cart)
     {:ok, by_product} = Ingredients.by_picnic_product_ids(Enum.map(line.items, & &1.id))
     {:ok, db_cart} = cart("1")
     checked = Checklist.checked_ids()
+    in_cart = MapSet.new(Enum.map(line.items, & &1.id))
 
     unmapped =
       db_cart
       |> Map.values()
-      |> Enum.filter(&is_nil(&1.ingredient.picnic_product_id))
+      |> Enum.filter(&(is_nil(&1.ingredient.picnic_product_id) or not_in_cart(&1, in_cart)))
       |> Enum.map(&LineFromDb.convert_item/1)
 
     items =
@@ -509,9 +547,13 @@ defmodule Picape.Order do
     %{
       line
       | items: items,
-        total_count: line.total_count + length(unmapped),
+        total_count: line.total_count + Enum.sum(Enum.map(unmapped, & &1.quantity)),
         supermarket_reachable: true
     }
+  end
+
+  defp not_in_cart(item, in_cart) do
+    not MapSet.member?(in_cart, item.ingredient.picnic_product_id)
   end
 
   # Pushes what the plan wants into the Picnic cart. Only the Picnic cart rows
@@ -519,26 +561,19 @@ defmodule Picape.Order do
   # Picnic app added itself are left alone — the diff only names mapped ids.
   defp sync_picnic(order_id) do
     try do
-      {:ok, wanted} = planned_picnic_quantities(order_id)
-      {:ok, manual} = manual_ingredient_quantities(order_id)
-      {:ok, manual_by_id} = Ingredients.ingredients_by_ids(Map.keys(manual))
+      {:ok, wanted} = wanted_picnic_quantities(order_id)
       # The cached cart can be five hours old; the diff is only as correct as
       # the cart it is computed against, so sync reads a fresh one.
       Picnic.invalidate_cart()
       {:ok, line} = current()
 
-      # A manual row wins over the plan, including quantity 0: it takes the
-      # product out of the Picnic cart the same way it empties the AH basket.
-      manual =
-        for {ingredient_id, quantity} <- manual,
-            ingredient = manual_by_id[ingredient_id],
-            not is_nil(ingredient) and not is_nil(ingredient.picnic_product_id),
-            into: %{},
-            do: {ingredient.picnic_product_id, quantity}
-
       existing = picnic_quantities(line)
 
-      with {:ok, changes} <- Sync.changes(wanted, manual, existing) do
+      # Substitution runs after the planned/manual merge so two quantities
+      # landing on the same replacement add up instead of one overwriting
+      # the other.
+      with {:ok, changes} <-
+             Sync.changes(substitute_picnic(wanted, line), %{}, existing) do
         push_picnic(changes, existing, line)
       end
     rescue
@@ -574,6 +609,31 @@ defmodule Picape.Order do
       end)
 
     {:ok, wanted}
+  end
+
+  # Everything the plan asks of Picnic: planned plus manual, the manual row
+  # winning on a clash, both keyed by selling unit id.
+  defp wanted_picnic_quantities(order_id) do
+    with {:ok, planned} <- planned_picnic_quantities(order_id),
+         {:ok, manual} <- manual_picnic_quantities(order_id) do
+      {:ok, Map.merge(planned, manual, fn _id, _q1, q2 -> q2 end)}
+    end
+  end
+
+  # A manual row wins over the plan, including quantity 0: it takes the
+  # product out of the Picnic cart the same way it empties the AH basket.
+  defp manual_picnic_quantities(order_id) do
+    {:ok, manual} = manual_ingredient_quantities(order_id)
+    {:ok, manual_by_id} = Ingredients.ingredients_by_ids(Map.keys(manual))
+
+    manual =
+      for {ingredient_id, quantity} <- manual,
+          ingredient = manual_by_id[ingredient_id],
+          not is_nil(ingredient) and not is_nil(ingredient.picnic_product_id),
+          into: %{},
+          do: {ingredient.picnic_product_id, quantity}
+
+    {:ok, manual}
   end
 
   defp manual_ingredient_quantities(order_id) do
@@ -734,7 +794,7 @@ defmodule Picape.Order do
   defp ordered_item_quantities(line) do
     {:ok,
      Enum.reduce(line.items, %{}, fn item, acc ->
-       Map.update(acc, item.id, item.quantity, &(&1 + 2))
+       Map.update(acc, item.id, item.quantity, &(&1 + item.quantity))
      end)}
   end
 
@@ -817,19 +877,44 @@ defmodule Picape.Order do
     {:ok, by_product} = Recipe.ingredients_by_item_ids(Map.keys(quantities))
     unavailable = unavailable_product_ids(line, by_product)
 
+    substitute(quantities, by_product, unavailable, :supermarket_product_id)
+  end
+
+  # The merge happens before substitution so a manual row wins per original
+  # product while two quantities landing on the same replacement add up.
+  defp merge_wanted(planned, manual) do
+    Map.merge(planned, manual, fn _id, _planned_quantity, manual_quantity -> manual_quantity end)
+  end
+
+  # The Picnic version swaps on selling unit ids: an ORDER_ARTICLE flagged
+  # UNAVAILABLE is replaced by the replacement ingredient's Picnic product.
+  # There is no stored Picnic product card to judge by, so the live cart is
+  # the only signal.
+  defp substitute_picnic(quantities, line) do
+    {:ok, by_product} = Ingredients.by_picnic_product_ids(Map.keys(quantities))
+
+    substitute(quantities, by_product, unavailable_cart_ids(line), :picnic_product_id)
+  end
+
+  defp substitute(quantities, by_product, unavailable, id_field) do
     Enum.reduce(quantities, %{}, fn {product_id, quantity}, acc ->
-      product_id = substitute_product_id(product_id, unavailable, by_product[product_id])
+      product_id = substitute_product_id(product_id, unavailable, by_product[product_id], id_field)
       Map.update(acc, product_id, quantity, &(&1 + quantity))
     end)
   end
 
-  defp substitute_product_id(product_id, unavailable, %{
-         replacement_ingredient_id: replacement_id
-       })
+  defp substitute_product_id(
+         product_id,
+         unavailable,
+         %{
+           replacement_ingredient_id: replacement_id
+         },
+         id_field
+       )
        when not is_nil(replacement_id) do
     if MapSet.member?(unavailable, product_id) do
       case Ingredients.ingredients_by_ids([replacement_id]) do
-        {:ok, %{^replacement_id => %{supermarket_product_id: id}}} when not is_nil(id) -> id
+        {:ok, %{^replacement_id => replacement}} -> Map.get(replacement, id_field) || product_id
         _ -> product_id
       end
     else
@@ -837,19 +922,35 @@ defmodule Picape.Order do
     end
   end
 
-  defp substitute_product_id(product_id, _unavailable, _ingredient), do: product_id
+  defp substitute_product_id(product_id, _unavailable, _ingredient, _id_field), do: product_id
+
+  defp substitution_map(line, wanted_ingredients, unavailable, id_field) do
+    in_cart = MapSet.new(Enum.map(line.items, & &1.id))
+
+    for {product_id, ingredient} <- wanted_ingredients,
+        MapSet.member?(unavailable, product_id),
+        %{replacement_ingredient_id: rid} when not is_nil(rid) <- [ingredient],
+        {:ok, %{^rid => replacement}} <- [Ingredients.ingredients_by_ids([rid])],
+        replacement_id = Map.get(replacement, id_field),
+        MapSet.member?(in_cart, replacement_id),
+        into: %{} do
+      {replacement_id, ingredient}
+    end
+  end
 
   # Live basket availability covers what is in the cart; the productCard the
   # nightly matcher stores covers what is only planned. A product nobody
   # mapped to an ingredient can only be judged by the live read.
   defp unavailable_product_ids(line, by_product) do
-    from_cart = for item <- line.items, not item.is_orderable, do: item.id
-
     from_card =
       for {product_id, ingredient} <- by_product,
           match?({:ok, _}, Recipe.Ingredient.fetch(ingredient, :warning)),
           do: product_id
 
-    MapSet.new(from_cart ++ from_card)
+    MapSet.union(unavailable_cart_ids(line), MapSet.new(from_card))
+  end
+
+  defp unavailable_cart_ids(line) do
+    MapSet.new(for item <- line.items, not item.is_orderable, do: item.id)
   end
 end

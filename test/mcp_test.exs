@@ -154,6 +154,56 @@ defmodule Picape.MCPTest do
       assert call_error("map_ingredient_picnic", %{ingredient_id: ingredient.id, picnic_product_id: "s2001"}) =~
                "has already been taken"
     end
+
+    test "in picnic mode mapping pushes the list's quantity into the Picnic cart" do
+      gist = insert!(:ingredient, name: "Gist", supermarket_product_id: 519_017)
+      insert!(:manual_ingredient, ingredient_id: gist.id, quantity: 1)
+
+      call!("set_mode", %{mode: "picnic"})
+
+      assert %{"ordered_quantity" => 1} =
+               call!("map_ingredient_picnic", %{
+                 ingredient_id: gist.id,
+                 picnic_product_id: "s2002",
+                 name: "Halfvolle melk",
+                 unit_quantity: "1 l",
+                 price: 119
+               })
+
+      item =
+        Enum.find(
+          call!("get_shopping_list")["items"],
+          &(&1["ingredient"] && &1["ingredient"]["id"] == gist.id)
+        )
+
+      assert %{"quantity" => 1, "store" => "picnic"} = item
+    end
+
+    test "mapping a product already in the Picnic cart adds its quantity to the list's" do
+      melk = insert!(:ingredient, name: "Melk", supermarket_product_id: 10_291_994)
+      insert!(:manual_ingredient, ingredient_id: melk.id, quantity: 2)
+
+      call!("set_mode", %{mode: "picnic"})
+
+      # The cart already holds one Volkoren brood (s2001), put there outside
+      # Picape. Mapping melk to it merges both wants — the list's two plus the
+      # cart's one — instead of letting the cart's quantity replace the list's.
+      assert %{"ordered_quantity" => 3} =
+               call!("map_ingredient_picnic", %{
+                 ingredient_id: melk.id,
+                 picnic_product_id: "s2001",
+                 name: "Volkoren brood",
+                 price: 189
+               })
+
+      item =
+        Enum.find(
+          call!("get_shopping_list")["items"],
+          &(&1["ingredient"] && &1["ingredient"]["id"] == melk.id)
+        )
+
+      assert %{"quantity" => 3, "store" => "picnic"} = item
+    end
   end
 
   describe "get_shopping_list" do
@@ -193,6 +243,23 @@ defmodule Picape.MCPTest do
       assert item["ingredient"]["planned_recipes"] == [
                %{"quantity" => 1, "recipe_id" => recipe.id, "title" => "Nasi"}
              ]
+    end
+
+    test "in picnic mode total_price sums the listed items, not the cart's stored total" do
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+
+      call!("set_mode", %{mode: "picnic"})
+
+      # A cart whose stored total does not match its contents, like one read
+      # while the cache was stale.
+      cart = Picape.Picnic.cart() |> Map.put("total_price", 1855)
+      ConCache.put(:supermarket, :picnic_cart, cart)
+
+      list = call!("get_shopping_list")
+
+      # s2001 at 189 cents is the only priced item; checklist rows carry none.
+      assert list["total_price"] == 189
     end
   end
 

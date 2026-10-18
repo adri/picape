@@ -63,7 +63,9 @@ defmodule Picape.MCP.Tools do
       description:
         "Set or clear the Picnic product behind an ingredient. In picnic mode (see set_mode) an " <>
           "ingredient with a Picnic product syncs into the Picnic cart; without one it stays on " <>
-          "the checklist. Pass `picnic_product_id` null to clear the mapping. Copy `name`, " <>
+          "the checklist. If the Picnic cart already holds the product, its quantity is added to " <>
+          "the ingredient's quantity on the list — mapping never lowers a quantity either side " <>
+          "asked for. Pass `picnic_product_id` null to clear the mapping. Copy `name`, " <>
           "`unit_quantity`, `image_id` and `price` from a search_picnic result so the shopping " <>
           "list shows them without another lookup. This only writes the mapping; it never places, " <>
           "confirms or checks out a Picnic order.",
@@ -87,7 +89,10 @@ defmodule Picape.MCP.Tools do
       name: "get_shopping_list",
       description:
         "Read the current order: every item with its quantity, plus the total item count and price " <>
-          "in cents. `mode` says where the list lives: 'ah' (the supermarket basket), 'picnic' " <>
+          "in cents. `total_price` is the sum over the listed items that carry a price — in picnic " <>
+          "mode that is the Picnic cart rows only; 'checklist' items have no price and count " <>
+          "towards `total_count` but not `total_price`. `mode` says where the list lives: 'ah' " <>
+          "(the supermarket basket), 'picnic' " <>
           "(the Picnic cart) or 'checklist' (Picape's own list — see set_mode). `store` says per " <>
           "item which of the three it comes from; in picnic mode an ingredient without a Picnic " <>
           "mapping shows up as a 'checklist' item. In checklist mode `checked` marks the items " <>
