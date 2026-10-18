@@ -192,6 +192,65 @@ defmodule Picape.PicnicModeTest do
     assert product_quantity(Supermarket.cart(), 10_583_837) == 2
   end
 
+  test "an ingredient without a store product stays on the checklist part of the list" do
+    basilicum = insert!(:ingredient, name: "Basilicum")
+    insert!(:manual_ingredient, ingredient_id: basilicum.id, quantity: 2)
+    rucola = insert!(:ingredient, name: "Rucola")
+    recipe = insert!(:recipe, title: "Pasta", ingredients: [rucola])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+
+    {:ok, _} = Order.set_mode("picnic")
+
+    assert {:ok, line} = Order.current()
+
+    assert %{name: "Basilicum", quantity: 2, store: "checklist", ingredient_id: ingredient_id} =
+             Enum.find(line.items, &(&1.name == "Basilicum"))
+
+    assert ingredient_id == basilicum.id
+    assert %{name: "Rucola", quantity: 1, store: "checklist"} = Enum.find(line.items, &(&1.name == "Rucola"))
+  end
+
+  test "a mapped ingredient whose product is not in the cart still shows as a checklist item" do
+    melk = insert!(:ingredient, name: "Melk", picnic_product_id: "s2002")
+    insert!(:manual_ingredient, ingredient_id: melk.id, quantity: 2)
+
+    # Setting the flag directly skips the sync set_mode triggers, so the
+    # product never made it into the cart — like a push that failed.
+    {:ok, _} = Settings.set("mode", "picnic")
+
+    assert {:ok, line} = Order.current()
+    assert %{name: "Melk", quantity: 2, store: "checklist"} = Enum.find(line.items, &(&1.name == "Melk"))
+  end
+
+  test "switching ah -> picnic -> checklist -> ah keeps every quantity" do
+    melk =
+      insert!(:ingredient,
+        name: "Melk",
+        supermarket_product_id: 10_583_837,
+        picnic_product_id: "s2002"
+      )
+
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 519_017)
+    basilicum = insert!(:ingredient, name: "Basilicum")
+
+    insert!(:manual_ingredient, ingredient_id: melk.id, quantity: 2)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 1)
+    insert!(:manual_ingredient, ingredient_id: basilicum.id, quantity: 3)
+
+    for mode <- ["picnic", "checklist", "ah"] do
+      assert {:ok, _} = Order.set_mode(mode)
+    end
+
+    {:ok, cart} = Order.cart("1")
+
+    assert Map.new(Map.values(cart), &{&1.ingredient.name, &1.quantity}) ==
+             %{"Melk" => 2, "Rijst" => 1, "Basilicum" => 3}
+
+    Supermarket.invalidate_cart()
+    assert product_quantity(Supermarket.cart(), 10_583_837) == 2
+    assert product_quantity(Supermarket.cart(), 519_017) == 1
+  end
+
   defp supermarket_down() do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()

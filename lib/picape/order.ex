@@ -21,8 +21,9 @@ defmodule Picape.Order do
   @doc """
   Returns the currently active cart. In checklist mode that is the list Picape
   computed, with the ticked-off state overlaid — no supermarket call happens.
-  In picnic mode it is the Picnic cart plus the planned items that have no
-  Picnic mapping, which stay on the checklist. An `ah` or `picnic` order whose
+  In picnic mode it is the Picnic cart plus the wanted items the cart does
+  not hold — unmapped ones, or ones whose push never landed — which stay on
+  the checklist. An `ah` or `picnic` order whose
   supermarket does not answer is served the same way, flagged
   `supermarket_reachable: false`, so a dead API does not take the list down
   with it.
@@ -123,20 +124,24 @@ defmodule Picape.Order do
 
   def cart(order_id) do
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
-         {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
-         {:ok, manual} <- manual_ingredients(order_id) do
+         {:ok, planned} <- Recipe.ingredient_quantities(recipe_quantities),
+         {:ok, manual} <- manual_ingredient_quantities(order_id) do
       merged =
         Map.merge(planned, manual, fn _id, _quantity1, quantity2 -> quantity2 end)
         |> Enum.reject(fn {_, v} -> v == 0 end)
         |> Map.new()
 
-      {:ok, ingredients} = Recipe.ingredients_by_item_ids(Map.keys(merged))
+      {:ok, ingredients} = Ingredients.ingredients_by_ids(Map.keys(merged))
 
       cart =
-        for {id, quantity} <- merged,
-            ingredient = ingredients[id],
+        for {ingredient_id, quantity} <- merged,
+            ingredient = ingredients[ingredient_id],
             not is_nil(ingredient),
             into: %{} do
+          # An ingredient with no supermarket product keys by its own id: it
+          # cannot be ordered anywhere, but it still belongs on the list.
+          id = ingredient.supermarket_product_id || ingredient_id
+
           {id,
            %{
              id: id,
@@ -450,7 +455,7 @@ defmodule Picape.Order do
       from(
         m in ManualIngredient,
         join: i in assoc(m, :ingredient),
-        where: m.line_id == ^order_id,
+        where: m.line_id == ^order_id and not is_nil(i.supermarket_product_id),
         select: {i.supermarket_product_id, m.quantity}
       )
 
@@ -484,19 +489,22 @@ defmodule Picape.Order do
 
   # --- private
 
-  # The Picnic cart plus the planned ingredients that have no Picnic mapping,
-  # which fall back to the checklist. Products added in the Picnic app itself
-  # carry no ingredient, like the supermarket's external items.
+  # The Picnic cart plus the planned ingredients the cart does not hold,
+  # which fall back to the checklist — unmapped ones, but also mapped ones
+  # whose product never made it into the cart: a failed push must not take
+  # the item off the list. Products added in the Picnic app itself carry no
+  # ingredient, like the supermarket's external items.
   defp picnic_line(cart) do
     line = LineFromPicnic.convert(cart)
     {:ok, by_product} = Ingredients.by_picnic_product_ids(Enum.map(line.items, & &1.id))
     {:ok, db_cart} = cart("1")
     checked = Checklist.checked_ids()
+    in_cart = MapSet.new(Enum.map(line.items, & &1.id))
 
     unmapped =
       db_cart
       |> Map.values()
-      |> Enum.filter(&is_nil(&1.ingredient.picnic_product_id))
+      |> Enum.filter(&(is_nil(&1.ingredient.picnic_product_id) or not_in_cart(&1, in_cart)))
       |> Enum.map(&LineFromDb.convert_item/1)
 
     items =
@@ -509,9 +517,13 @@ defmodule Picape.Order do
     %{
       line
       | items: items,
-        total_count: line.total_count + length(unmapped),
+        total_count: line.total_count + Enum.sum(Enum.map(unmapped, & &1.quantity)),
         supermarket_reachable: true
     }
+  end
+
+  defp not_in_cart(item, in_cart) do
+    not MapSet.member?(in_cart, item.ingredient.picnic_product_id)
   end
 
   # Pushes what the plan wants into the Picnic cart. Only the Picnic cart rows
@@ -734,7 +746,7 @@ defmodule Picape.Order do
   defp ordered_item_quantities(line) do
     {:ok,
      Enum.reduce(line.items, %{}, fn item, acc ->
-       Map.update(acc, item.id, item.quantity, &(&1 + 2))
+       Map.update(acc, item.id, item.quantity, &(&1 + item.quantity))
      end)}
   end
 

@@ -28,12 +28,28 @@ defmodule Picape.Recipe do
   This excludes essentials.
   """
   def item_quantities(recipes_quantities) do
+    quantities_by(recipes_quantities, :supermarket_product_id)
+  end
+
+  @doc """
+  Like `item_quantities/1` but keyed by ingredient id, so an ingredient
+  without a supermarket product still counts.
+  """
+  def ingredient_quantities(recipes_quantities) do
+    quantities_by(recipes_quantities, :id)
+  end
+
+  # An ingredient without a product under the chosen key is left out: there
+  # is nothing to order it by.
+  defp quantities_by(recipes_quantities, key) do
     query =
       from(
         r in IngredientRef,
         join: i in assoc(r, :ingredient),
-        where: r.recipe_id in ^Map.keys(recipes_quantities) and i.is_essential == false,
-        select: {i.supermarket_product_id, {r.recipe_id, r.quantity}}
+        where:
+          r.recipe_id in ^Map.keys(recipes_quantities) and i.is_essential == false and
+            not is_nil(field(i, ^key)),
+        select: {field(i, ^key), {r.recipe_id, r.quantity}}
       )
 
     result =
@@ -52,7 +68,7 @@ defmodule Picape.Recipe do
   end
 
   def ingredients_by_item_ids(item_ids) do
-    result =
+    by_product =
       from(
         i in Ingredient,
         preload: [:tags],
@@ -62,7 +78,21 @@ defmodule Picape.Recipe do
       |> Repo.all()
       |> Enum.into(%{})
 
-    {:ok, result}
+    # A checklist item can be keyed by ingredient id when the ingredient has
+    # no product at all. Only ids no product claimed try that lookup, so an
+    # ingredient id never wins over a product id that happens to match.
+    by_ingredient =
+      case Enum.filter(item_ids -- Map.keys(by_product), &is_integer/1) do
+        [] ->
+          %{}
+
+        ids ->
+          from(i in Ingredient, preload: [:tags], where: i.id in ^ids, select: {i.id, i})
+          |> Repo.all()
+          |> Enum.into(%{})
+      end
+
+    {:ok, Map.merge(by_product, by_ingredient)}
   end
 
   def ingredients_by_item_ids_reverse(item_ids) do
