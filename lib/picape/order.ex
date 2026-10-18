@@ -311,8 +311,10 @@ defmodule Picape.Order do
   # Merging a Picnic mapping with what the cart already holds: the quantity the
   # list wants and the quantity the cart holds add up, so mapping can never
   # lower what either side asked for. The sum is recorded as the ingredient's
-  # manual quantity — that is what a sync keeps the cart at — unless a manual
-  # row already pins the ingredient at 0, which a mapping does not override.
+  # manual quantity — that is what a sync keeps the cart at. Two cases write
+  # nothing: a cart that does not hold the product (pinning the wanted
+  # quantity would survive an unplan) and a manual row already at 0, which a
+  # mapping does not override.
   def adopt_picnic_quantity(ingredient_id, cart_quantity) do
     {:ok, cart} = cart("1")
 
@@ -323,7 +325,7 @@ defmodule Picape.Order do
 
     case Repo.get_by(ManualIngredient, line_id: "1", ingredient_id: ingredient_id) do
       %{quantity: 0} -> :ok
-      _ when wanted + cart_quantity > 0 -> put_manual_quantity("1", ingredient_id, wanted + cart_quantity)
+      _ when cart_quantity > 0 -> put_manual_quantity("1", ingredient_id, wanted + cart_quantity)
       _ -> :ok
     end
 

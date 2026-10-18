@@ -367,6 +367,24 @@ defmodule Picape.PicnicModeTest do
     assert picnic_quantity(Picnic.cart(), "s2002") == 1
   end
 
+  test "mapping an ingredient the cart does not hold pins no quantity" do
+    melk = insert!(:ingredient, name: "Melk", supermarket_product_id: 519_017)
+    recipe = insert!(:recipe, title: "Vla", ingredients: [melk])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+
+    {:ok, _} = Order.set_mode("picnic")
+
+    assert {:ok, _} =
+             Ingredients.edit_ingredient(%{ingredient_id: melk.id, picnic_product_id: "s2002"})
+
+    assert Repo.get_by(Order.ManualIngredient, line_id: "1", ingredient_id: melk.id) == nil
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+
+    # Nothing pinned means unplanning takes the product off the list again.
+    assert {:ok, _} = Order.plan_recipe("1", recipe.id, true)
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+  end
+
   defp supermarket_down() do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()
