@@ -106,7 +106,8 @@ defmodule Picape.MCP.Tools do
           "set_ingredient_quantity and plan_recipe queue without reaching the supermarket. In " <>
           "picnic mode `is_placed` stays false: Picape cannot see a Picnic checkout, so after " <>
           "checking out in the Picnic app the order is closed by tapping \"Bestelling ontvangen\" " <>
-          "in Picape (start_shopping, or the button in the app).",
+          "in Picape (start_shopping, or the button in the app). Closing empties the Picnic cart, " <>
+          "so the next order starts with no lines.",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -129,7 +130,9 @@ defmodule Picape.MCP.Tools do
       name: "set_ingredient_quantity",
       description:
         "Put an ingredient on the shopping list, change how many are on it, or take it off. Quantity 0 " <>
-          "removes the ingredient. This is a manual override on top of what the planned recipes ask for.",
+          "removes the ingredient. This is a manual override on top of what the planned recipes ask for. " <>
+          "In picnic mode the zero also removes a replacement product that was swapped in for it, and " <>
+          "a later sync does not put either product back.",
       inputSchema: %{
         type: "object",
         properties: %{
@@ -364,7 +367,8 @@ defmodule Picape.MCP.Tools do
           "to 'ah' or 'picnic' pushes the accumulated list into that basket; if it is still down " <>
           "the switch still happens and the reply says the push failed. In picnic mode Picape " <>
           "never checks out: after checking out in the Picnic app, the order is closed by tapping " <>
-          "\"Bestelling ontvangen\" in Picape (start_shopping, or the button in the app).",
+          "\"Bestelling ontvangen\" in Picape (start_shopping, or the button in the app), which " <>
+          "empties the Picnic cart so the next order starts empty.",
       inputSchema: %{
         type: "object",
         properties: %{

@@ -434,6 +434,205 @@ defmodule Picape.PicnicModeTest do
     assert line.total_price == 0
   end
 
+  test "closing a picnic order empties the cart and a later sync does not refill it" do
+    melk = insert!(:ingredient, name: "Melk", picnic_product_id: "s2002")
+    brood = insert!(:ingredient, name: "Brood", picnic_product_id: "s2001")
+    recipe = insert!(:recipe, title: "Ontbijt", ingredients: [melk, brood])
+
+    {:ok, _} = Order.set_mode("picnic")
+    assert {:ok, _} = Order.order_ingredient("1", melk.id, 3)
+    assert {:ok, _} = Order.plan_recipe("1", recipe.id)
+
+    # A product the Picnic app added itself, with no ingredient behind it.
+    Picnic.add_product("s9999", 2)
+
+    assert picnic_quantity(Picnic.cart(), "s2002") == 3
+    assert picnic_quantity(Picnic.cart(), "s9999") == 2
+
+    before = Supermarket.cart()
+    logged = length(SupermarketFake.requests())
+
+    assert {:ok, closed} = Order.start_shopping("1")
+
+    close_paths = SupermarketFake.requests() |> Enum.drop(logged) |> Enum.map(& &1.path)
+    assert Enum.count(close_paths, &(&1 == "/api/15/cart/remove_product")) == 3
+    assert Enum.all?(close_paths, &(&1 in ["/api/15/cart", "/api/15/cart/remove_product"]))
+    refute Enum.any?(close_paths, &(&1 =~ ~r/checkout|delivery|slot|payment/))
+
+    # The closed order keeps what was ordered. The live line does not.
+    assert Enum.any?(closed.items, &(&1.ingredient_id == melk.id and &1.quantity == 3))
+    assert {:ok, [planned_id]} = Order.planned_recipes(closed.id)
+    assert planned_id == recipe.id
+    assert {:ok, []} = Order.planned_recipes("1")
+
+    # What the close cached, and a fresh read of the cart, are both empty.
+    assert {:ok, %{items: []}} = Order.current()
+    Picnic.invalidate_cart()
+    assert Picnic.cart()["items"] == []
+
+    # The daily sync must not push the closed order back into the new cart.
+    assert {:ok, %{items: []}} = Order.sync_supermarket("1")
+    Picnic.invalidate_cart()
+    assert Picnic.cart()["items"] == []
+
+    # A product added in the Picnic app after the close is still left alone.
+    Picnic.add_product("s9999", 1)
+    assert {:ok, %{items: [%{id: "s9999", quantity: 1}]}} = Order.sync_supermarket("1")
+
+    Supermarket.invalidate_cart()
+    assert Supermarket.cart() == before
+  end
+
+  test "closing a picnic order still archives it when Picnic is down" do
+    melk = insert!(:ingredient, name: "Melk", picnic_product_id: "s2002")
+    insert!(:manual_ingredient, ingredient_id: melk.id, quantity: 2)
+
+    {:ok, _} = Order.set_mode("picnic")
+    supermarket_down()
+
+    assert {:ok, closed} = Order.start_shopping("1")
+    assert Enum.any?(closed.items, &(&1.ingredient_id == melk.id and &1.quantity == 2))
+    assert {:ok, []} = Order.planned_recipes("1")
+  end
+
+  test "closing an ah order leaves the Picnic cart alone" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    recipe = insert!(:recipe, title: "Nasi", ingredients: [rijst])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+
+    {:ok, _} = Order.start_shopping("1")
+
+    refute Enum.any?(SupermarketFake.requests(), &(&1.path =~ "api/15"))
+    Picnic.invalidate_cart()
+    assert picnic_quantity(Picnic.cart(), "s2001") == 1
+  end
+
+  test "a quantity of 0 sticks when another ingredient substitutes onto that product" do
+    miso = insert!(:ingredient, name: "Miso", picnic_product_id: "s2002")
+
+    other =
+      insert!(:ingredient,
+        name: "Pasta",
+        picnic_product_id: "s2001",
+        replacement_ingredient_id: miso.id
+      )
+
+    insert!(:manual_ingredient, ingredient_id: other.id, quantity: 1)
+    mark_picnic_unavailable("s2001")
+
+    assert {:ok, _} = Order.set_mode("picnic")
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+
+    assert {:ok, _} = Order.order_ingredient("1", miso.id, 0)
+
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+
+    assert {:ok, _} = Order.sync_supermarket("1")
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+
+    assert {:ok, line} = Order.current()
+    refute Enum.any?(line.items, &(&1.ingredient_id == miso.id))
+    assert {:ok, quantities} = Order.ingredients_ordered_quantity("1", [miso.id])
+    assert quantities[miso.id] == 0
+  end
+
+  test "setting the original to 0 removes it and the replacement that was swapped in" do
+    replacement = insert!(:ingredient, name: "Blije Kip", picnic_product_id: "s2002")
+
+    eggs =
+      insert!(:ingredient,
+        name: "Eieren",
+        picnic_product_id: "s2001",
+        replacement_ingredient_id: replacement.id
+      )
+
+    insert!(:manual_ingredient, ingredient_id: eggs.id, quantity: 1)
+    mark_picnic_unavailable("s2001")
+
+    assert {:ok, _} = Order.set_mode("picnic")
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+    assert picnic_article(Picnic.cart(), "s2001")
+
+    assert {:ok, _} = Order.order_ingredient("1", eggs.id, 0)
+
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2001") == nil
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+
+    # A later sync must not swap the replacement back in.
+    assert {:ok, _} = Order.sync_supermarket("1")
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2001") == nil
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+
+    assert {:ok, line} = Order.current()
+    refute Enum.any?(line.items, &(&1.id in ["s2001", "s2002"]))
+  end
+
+  test "setting the original to 0 removes a replacement that is the only cart row" do
+    replacement = insert!(:ingredient, name: "Blije Kip", picnic_product_id: "s2002")
+
+    eggs =
+      insert!(:ingredient,
+        name: "Eieren",
+        picnic_product_id: "s2001",
+        replacement_ingredient_id: replacement.id
+      )
+
+    # The original was already swapped away: the cart holds only the stand-in.
+    Picnic.remove_product("s2001", 1)
+    Picnic.add_product("s2002", 1)
+    {:ok, _} = Settings.set("mode", "picnic")
+
+    assert picnic_article(Picnic.cart(), "s2001") == nil
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+
+    assert {:ok, _} = Order.order_ingredient("1", eggs.id, 0)
+
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+
+    assert {:ok, _} = Order.sync_supermarket("1")
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+  end
+
+  test "a quantity of 0 on the replacement sticks while the original is still wanted" do
+    replacement = insert!(:ingredient, name: "Blije Kip", picnic_product_id: "s2002")
+
+    eggs =
+      insert!(:ingredient,
+        name: "Eieren",
+        picnic_product_id: "s2001",
+        replacement_ingredient_id: replacement.id
+      )
+
+    insert!(:manual_ingredient, ingredient_id: eggs.id, quantity: 1)
+    mark_picnic_unavailable("s2001")
+
+    assert {:ok, _} = Order.set_mode("picnic")
+    assert picnic_quantity(Picnic.cart(), "s2002") == 1
+
+    assert {:ok, _} = Order.order_ingredient("1", replacement.id, 0)
+
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+
+    assert {:ok, _} = Order.sync_supermarket("1")
+    Picnic.invalidate_cart()
+    assert picnic_article(Picnic.cart(), "s2002") == nil
+  end
+
+  defp mark_picnic_unavailable(product_id) do
+    HTTPoison.post!(
+      "http://localhost:4021/__picnic_unavailable",
+      Jason.encode!(%{product_id: product_id}),
+      [{"content-type", "application/json"}]
+    )
+  end
+
   defp supermarket_down() do
     HTTPoison.post!("http://localhost:4021/__down", "")
     Picnic.invalidate_cart()

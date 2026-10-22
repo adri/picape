@@ -265,6 +265,11 @@ defmodule Picape.Order do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
     finish_order(order_id, new_order_id)
     snapshot_order(new_order_id, supermarket_items())
+    # The plan rows have moved off the live line. The Picnic cart is a
+    # separate basket and nothing else empties it, so clear it now — before
+    # the next sync, which leaves unnamed cart rows in place and would
+    # otherwise show this order again.
+    clear_picnic_cart()
 
     last()
   end
@@ -559,6 +564,9 @@ defmodule Picape.Order do
   # Pushes what the plan wants into the Picnic cart. Only the Picnic cart rows
   # (`store == "picnic"`) count as existing; checklist items and products the
   # Picnic app added itself are left alone — the diff only names mapped ids.
+  # A received order is not one of those: `start_shopping/1` empties the cart
+  # after archiving the plan, so the rows from the order that just closed are
+  # gone before this leave-alone rule can carry them into the next one.
   defp sync_picnic(order_id) do
     try do
       {:ok, wanted} = wanted_picnic_quantities(order_id)
@@ -889,11 +897,97 @@ defmodule Picape.Order do
   # The Picnic version swaps on selling unit ids: an ORDER_ARTICLE flagged
   # UNAVAILABLE is replaced by the replacement ingredient's Picnic product.
   # There is no stored Picnic product card to judge by, so the live cart is
-  # the only signal.
+  # the only signal. A direct quantity of 0 is put back afterwards:
+  # substitution moves that 0 onto the replacement and adds it to whatever
+  # else landed there, and drops the original id, so the cart row the user
+  # zeroed is left untouched and comes back at its old quantity.
   defp substitute_picnic(quantities, line) do
     {:ok, by_product} = Ingredients.by_picnic_product_ids(Map.keys(quantities))
+    unavailable = unavailable_cart_ids(line)
+    in_cart = MapSet.new(for %{store: "picnic", id: id} <- line.items, do: id)
 
-    substitute(quantities, by_product, unavailable_cart_ids(line), :picnic_product_id)
+    quantities
+    |> substitute(by_product, unavailable, :picnic_product_id)
+    |> enforce_picnic_zeros(quantities, by_product, unavailable, in_cart)
+  end
+
+  # Zeros from the plan win over quantities substitution added on top of
+  # them, and a zero also removes the replacement when that product is only
+  # in the cart as a stand-in. An independent positive quantity for the
+  # replacement — a planned recipe of its own — is left as it is.
+  defp enforce_picnic_zeros(substituted, quantities, by_product, unavailable, in_cart) do
+    Enum.reduce(quantities, substituted, fn
+      {product_id, 0}, acc ->
+        acc
+        |> Map.put(product_id, 0)
+        |> zero_picnic_stand_in(product_id, quantities, by_product[product_id], unavailable, in_cart)
+
+      {_product_id, _quantity}, acc ->
+        acc
+    end)
+  end
+
+  defp zero_picnic_stand_in(acc, product_id, quantities, ingredient, unavailable, in_cart) do
+    replacement_product_id = picnic_replacement_product_id(ingredient)
+
+    stand_in =
+      is_binary(replacement_product_id) and
+        not positive_quantity?(quantities, replacement_product_id) and
+        picnic_stand_in?(product_id, replacement_product_id, unavailable, in_cart) and
+        (acc[replacement_product_id] || 0) == 0
+
+    if stand_in, do: Map.put(acc, replacement_product_id, 0), else: acc
+  end
+
+  defp picnic_replacement_product_id(%{replacement_ingredient_id: replacement_id})
+       when not is_nil(replacement_id) do
+    case Ingredients.ingredients_by_ids([replacement_id]) do
+      {:ok, %{^replacement_id => %{picnic_product_id: product_id}}} when is_binary(product_id) ->
+        product_id
+
+      _ ->
+        nil
+    end
+  end
+
+  defp picnic_replacement_product_id(_ingredient), do: nil
+
+  defp positive_quantity?(quantities, product_id) do
+    match?(quantity when is_integer(quantity) and quantity > 0, quantities[product_id])
+  end
+
+  # Unavailable, or already swapped out: the cart holds the replacement and
+  # not the original. A zero on the original has to name that stand-in too,
+  # or the row stays and the next sync puts it back.
+  defp picnic_stand_in?(product_id, replacement_product_id, unavailable, in_cart) do
+    MapSet.member?(unavailable, product_id) or
+      (MapSet.member?(in_cart, replacement_product_id) and not MapSet.member?(in_cart, product_id))
+  end
+
+  # Receiving the order archives the plan and leaves the Picnic cart holding
+  # every line. Sync will not remove them: a product the plan does not name
+  # is left untouched, which is what keeps a product the Picnic app added
+  # itself. Empty the cart here, with the same remove delta the sync uses.
+  # There is no checkout, payment or delivery slot in this path.
+  defp clear_picnic_cart() do
+    if Settings.picnic?(), do: empty_picnic_cart()
+  end
+
+  defp empty_picnic_cart() do
+    Picnic.invalidate_cart()
+    existing = picnic_cart_quantities(Picnic.cart())
+    wanted = Map.new(existing, fn {id, _quantity} -> {id, 0} end)
+
+    {:ok, changes} = Sync.changes(wanted, %{}, existing)
+    Picnic.apply_changes(changes, existing)
+  rescue
+    error -> Logger.warning("clearing the Picnic cart failed: #{Exception.message(error)}")
+  end
+
+  defp picnic_cart_quantities(cart) do
+    cart
+    |> LineFromPicnic.convert()
+    |> picnic_quantities()
   end
 
   defp substitute(quantities, by_product, unavailable, id_field) do
