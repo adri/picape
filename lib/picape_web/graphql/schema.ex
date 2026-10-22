@@ -237,6 +237,7 @@ defmodule PicapeWeb.Graphql.Schema do
       trigger(:order_ingredient, topic: fn _ingredient -> "*" end)
       trigger(:plan_recipe, topic: fn _recipe -> "*" end)
       trigger(:unplan_recipe, topic: fn _recipe -> "*" end)
+      trigger(:start_shopping, topic: fn _order -> "*" end)
       trigger(:check_item, topic: fn _order -> "*" end)
       trigger(:set_mode, topic: fn _order -> "*" end)
       resolve(&Resolver.Order.current/3)
