@@ -4,11 +4,14 @@ defmodule Picape.MCPTest do
   import Ecto.Query
   import Picape.Factory
 
+  alias Picape.Checklist
   alias Picape.Order
+  alias Picape.Order.ManualIngredient
   alias Picape.Recipe
   alias Picape.Recipe.Ingredient
   alias Picape.Recipe.IngredientRef
   alias Picape.Repo
+  alias Picape.SupermarketFake
 
   # An order `finish_order/2` archived: history is every line but the live cart.
   @archived_order "1700000000000000"
@@ -48,7 +51,8 @@ defmodule Picape.MCPTest do
                "list_bonus_offers",
                "activate_bonus_offer",
                "set_mode",
-               "check_item"
+               "check_item",
+               "start_shopping"
              ]
 
       assert Enum.all?(tools, &(&1["inputSchema"]["type"] == "object"))
@@ -786,6 +790,124 @@ defmodule Picape.MCPTest do
     NaiveDateTime.utc_now() |> NaiveDateTime.add(-days, :day) |> NaiveDateTime.truncate(:second)
   end
 
+  describe "start_shopping" do
+    test "in ah mode closes the current order and a second call closes nothing" do
+      rijst =
+        insert!(:ingredient,
+          name: "Rijst",
+          supermarket_product_id: 10_583_837,
+          picnic_product_id: "s2001"
+        )
+
+      recipe = insert!(:recipe, title: "Nasi", ingredients: [rijst])
+      insert!(:planned_recipe, recipe_id: recipe.id)
+      insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+
+      before = SupermarketFake.requests()
+      result = call!("start_shopping")
+
+      assert result["closed"]
+      assert result["mode"] == "ah"
+      assert result["current_order_id"] == "1"
+
+      closed_id = result["closed_order_id"]
+      assert closed_id != "1"
+      assert line_id_for(rijst.id) == closed_id
+      assert Order.planned_recipes("1") == {:ok, []}
+      assert Order.planned_recipes(closed_id) == {:ok, [recipe.id]}
+      assert Order.cart("1") == {:ok, %{}}
+
+      reloaded = Repo.get!(Ingredient, rijst.id)
+      assert reloaded.supermarket_product_id == 10_583_837
+      assert reloaded.picnic_product_id == "s2001"
+      refute Enum.any?(requests_after(before), &shop_mutation?/1)
+
+      closed_ids = previous_order_ids()
+      assert closed_id in closed_ids
+
+      again = call!("start_shopping")
+      assert again["closed"] == false
+      assert again["message"] == "Nothing was closed: the current order is empty."
+      assert again["mode"] == "ah"
+      assert previous_order_ids() == closed_ids
+      assert line_id_for(rijst.id) == closed_id
+    end
+
+    test "in picnic mode closes the order without writing to Picnic" do
+      brood =
+        insert!(:ingredient,
+          name: "Brood",
+          supermarket_product_id: 10_583_837,
+          picnic_product_id: "s2001"
+        )
+
+      insert!(:manual_ingredient, ingredient_id: brood.id, quantity: 1)
+      assert %{"mode" => "picnic"} = call!("set_mode", %{mode: "picnic"})
+
+      before = SupermarketFake.requests()
+      result = call!("start_shopping")
+
+      assert result["closed"]
+      assert result["mode"] == "picnic"
+      assert result["current_order_id"] == "1"
+      assert result["closed_order_id"] == line_id_for(brood.id)
+      assert Order.cart("1") == {:ok, %{}}
+      refute Enum.any?(requests_after(before), &shop_mutation?/1)
+
+      reloaded = Repo.get!(Ingredient, brood.id)
+      assert reloaded.supermarket_product_id == 10_583_837
+      assert reloaded.picnic_product_id == "s2001"
+
+      again = call!("start_shopping")
+      assert again["closed"] == false
+      assert again["mode"] == "picnic"
+      assert again["message"] =~ "Nothing was closed"
+      assert line_id_for(brood.id) == result["closed_order_id"]
+    end
+
+    test "in checklist mode closes the list, clears the ticks and keeps the mode" do
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+
+      assert %{"mode" => "checklist"} = call!("set_mode", %{mode: "checklist"})
+      insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 1)
+      assert %{"checked" => true} = call!("check_item", %{ingredient_id: rijst.id})
+
+      before = SupermarketFake.requests()
+      result = call!("start_shopping")
+
+      assert result["closed"]
+      assert result["mode"] == "checklist"
+      assert result["current_order_id"] == "1"
+      assert result["closed_order_id"] == line_id_for(rijst.id)
+      assert call!("get_shopping_list")["items"] == []
+      assert call!("get_shopping_list")["mode"] == "checklist"
+      assert Checklist.checked_ids() == MapSet.new()
+      assert Repo.get!(Ingredient, rijst.id).supermarket_product_id == 10_583_837
+      refute Enum.any?(requests_after(before), &shop_mutation?/1)
+    end
+
+    test "an empty order closes nothing, and calling again still closes nothing" do
+      before = SupermarketFake.requests()
+
+      assert %{
+               "closed" => false,
+               "mode" => "ah",
+               "message" => "Nothing was closed: the current order is empty."
+             } = call!("start_shopping")
+
+      assert previous_order_ids() == []
+      assert requests_after(before) == []
+
+      rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 0)
+
+      assert %{"closed" => false, "message" => message} = call!("start_shopping")
+      assert message =~ "Nothing was closed"
+      assert line_id_for(rijst.id) == "1"
+      assert previous_order_ids() == []
+    end
+  end
+
   describe "seasonal_produce" do
     test "splits the ingredients Picape knows over the Dutch calendar" do
       insert!(:ingredient, name: "Boerenkool")
@@ -867,4 +989,21 @@ defmodule Picape.MCPTest do
   defp content(result) do
     result["content"] |> hd() |> Map.fetch!("text") |> Jason.decode!()
   end
+
+  defp line_id_for(ingredient_id) do
+    Repo.one!(from(m in ManualIngredient, where: m.ingredient_id == ^ingredient_id, select: m.line_id))
+  end
+
+  defp previous_order_ids do
+    Order.previous_orders() |> Enum.map(&to_string(&1.id)) |> Enum.sort()
+  end
+
+  defp requests_after(before) do
+    Enum.drop(SupermarketFake.requests(), length(before))
+  end
+
+  defp shop_mutation?(%{path: "/api/15/cart/add_product"}), do: true
+  defp shop_mutation?(%{path: "/api/15/cart/remove_product"}), do: true
+  defp shop_mutation?(%{body: %{"operationName" => "UpdateMyListBasket"}}), do: true
+  defp shop_mutation?(_request), do: false
 end

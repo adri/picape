@@ -387,6 +387,19 @@ defmodule Picape.MCP.Tools do
         },
         required: ["ingredient_id"]
       }
+    },
+    %{
+      name: "start_shopping",
+      description:
+        "Close the current order the way the app's \"Bestelling ontvangen\" button does " <>
+          "(or \"Boodschappen gedaan\" in checklist mode). The plan moves off the open order " <>
+          "and that order is empty again. Works in ah, picnic and checklist mode. Returns the " <>
+          "closed order id, the current order id and the mode. If the current order is empty, " <>
+          "nothing is closed and the reply says so; calling it again does not close another " <>
+          "order. This only changes Picape's own order: it never places an order, checks out " <>
+          "or picks a delivery slot at the supermarket or at Picnic, and it does not change a " <>
+          "product id.",
+      inputSchema: %{type: "object", properties: %{}}
     }
   ]
 
@@ -661,9 +674,43 @@ defmodule Picape.MCP.Tools do
     end
   end
 
-  # Ticks and mode switches made through MCP change the list, so any open app
-  # gets the new state the same way a mutation in the app would deliver it. The
-  # value is a placeholder: the subscription re-resolves the order itself.
+  # The button calls `Order.start_shopping/1` with the open order. That moves
+  # the plan off line "1" and, in ah mode, copies the basket into Picape. It
+  # does not write to a shop. Calling it on an empty plan still mints an id
+  # and, in ah mode, snapshots the basket again — the basket itself is never
+  # emptied — so an empty order is not closed a second time.
+  defp run("start_shopping", _args) do
+    mode = Settings.mode()
+
+    if open_order?(@order_id) do
+      {:ok, line} = Order.start_shopping(@order_id)
+      publish_order_changed()
+
+      {:ok,
+       %{
+         closed: true,
+         closed_order_id: to_string(line.id),
+         current_order_id: @order_id,
+         mode: mode
+       }}
+    else
+      {:ok, %{closed: false, message: "Nothing was closed: the current order is empty.", mode: mode}}
+    end
+  end
+
+  # Planned recipes and a positive manual quantity are the open order. A
+  # quantity of 0 was taken off the list, and an unplanned recipe was dropped.
+  defp open_order?(order_id) do
+    {:ok, recipes} = Order.planned_recipes(order_id)
+    {:ok, cart} = Order.cart(order_id)
+
+    recipes != [] or cart != %{}
+  end
+
+  # Ticks, mode switches and closing an order through MCP change the list, so
+  # any open app gets the new state the same way a mutation in the app would
+  # deliver it. The value is a placeholder: the subscription re-resolves the
+  # order itself.
   defp publish_order_changed() do
     Absinthe.Subscription.publish(PicapeWeb.Endpoint, :ok, order_changed: "*")
   end
