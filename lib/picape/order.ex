@@ -1085,8 +1085,9 @@ defmodule Picape.Order do
     placed_id = to_string(Supermarket.placed_order_id())
 
     unless Repo.exists?(from(p in PlacedOrder, where: p.order_id == ^placed_id)) do
-      # The fetch comes before the marker: a flaky cart must not leave the
-      # archive half-done, because the marker makes every retry skip it.
+      # ordered_supermarket_items rescues a flaky cart to an empty snapshot,
+      # like the other supermarket reads, so the fetch itself cannot fail;
+      # the marker below is only written once it has run.
       items = ordered_supermarket_items()
 
       Repo.insert!(%PlacedOrder{order_id: placed_id})
