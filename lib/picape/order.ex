@@ -286,6 +286,23 @@ defmodule Picape.Order do
     error -> Logger.warning("remapping the basket product failed: #{Exception.message(error)}")
   end
 
+  @doc """
+  Removes one row from the supermarket basket when no ingredient is linked to
+  it — the rows `get_shopping_list` shows with `ingredient: null`. Refuses a
+  row an ingredient claims (`set_ingredient_quantity` changes those), a
+  product that is not in the basket, and any write while the supermarket is
+  processing a paid order.
+  """
+  def remove_basket_item(product_id) do
+    if Settings.mode() == "ah" do
+      with {:ok, line} <- current() do
+        remove_basket_row(line, product_id)
+      end
+    else
+      {:error, "the shopping list does not live in the supermarket basket in #{Settings.mode()} mode"}
+    end
+  end
+
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
     finish_order(order_id, new_order_id)
@@ -554,6 +571,56 @@ defmodule Picape.Order do
       {:ok, _} -> :ok
       {:error, other} -> Logger.warning("remapping the basket product failed: #{inspect(other)}")
     end
+  end
+
+  defp remove_basket_row(line, product_id) do
+    cond do
+      line.supermarket_reachable == false ->
+        {:error, "the supermarket is unreachable, so the basket cannot be changed"}
+
+      line.is_placed ->
+        {:error, "the order is placed; Picape does not change the basket until it is delivered"}
+
+      true ->
+        remove_unlinked_item(line, product_id)
+    end
+  end
+
+  defp remove_unlinked_item(line, product_id) do
+    case Enum.find(line.items, &(&1.id == product_id)) do
+      nil ->
+        {:error, "the basket has no row with product id #{product_id}"}
+
+      %Item{} = item ->
+        case linked_ingredient(product_id) do
+          nil -> remove_row(item)
+          ingredient -> {:error, linked_item_error(item, ingredient)}
+        end
+    end
+  end
+
+  defp linked_ingredient(product_id) do
+    {:ok, ingredients} = Recipe.ingredients_by_item_ids([product_id])
+    ingredients[product_id]
+  end
+
+  defp linked_item_error(item, ingredient) do
+    "product #{item.id} (#{item.name}) is linked to ingredient '#{ingredient.name}' " <>
+      "(id #{ingredient.id}); use set_ingredient_quantity to change it"
+  end
+
+  defp remove_row(%Item{} = item) do
+    changes = %Sync.Changes{remove: [%Product{id: item.id, quantity: 0}], add: []}
+
+    case Supermarket.apply_changes(changes) do
+      {:ok, _} ->
+        {:ok, %{product_id: item.id, name: item.name, quantity: item.quantity, removed: true}}
+
+      {:error, other} ->
+        {:error, "the supermarket refused to remove the row: #{inspect(other)}"}
+    end
+  rescue
+    error -> {:error, Exception.message(error)}
   end
 
   # The Picnic cart plus the planned ingredients the cart does not hold,

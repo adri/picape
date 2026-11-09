@@ -140,6 +140,21 @@ defmodule Picape.MCP.Tools do
       }
     },
     %{
+      name: "remove_basket_item",
+      description:
+        "Remove one row from the supermarket basket that no Picape ingredient is linked to. " <>
+          "get_shopping_list shows those rows with `ingredient: null`; they are usually leftovers " <>
+          "of a product an ingredient was remapped away from. Pass the row's supermarket product " <>
+          "id. The tool refuses a row that IS linked to an ingredient — use set_ingredient_quantity " <>
+          "for those — a product that is not in the basket, and any change while the order is " <>
+          "placed. It only works in ah mode, and the reply says what was removed.",
+      inputSchema: %{
+        type: "object",
+        properties: %{product_id: @integer},
+        required: ["product_id"]
+      }
+    },
+    %{
       name: "add_ingredient",
       description:
         "Teach Picape a new ingredient, backed by a product at one of the stores. Find the product " <>
@@ -535,6 +550,10 @@ defmodule Picape.MCP.Tools do
          {:ok, _line} <- Order.order_ingredient(@order_id, ingredient.id, args["quantity"]) do
       {:ok, List.first(render_ingredients([ingredient]))}
     end
+  end
+
+  defp run("remove_basket_item", args) do
+    Order.remove_basket_item(args["product_id"])
   end
 
   defp run("add_ingredient", args) do

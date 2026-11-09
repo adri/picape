@@ -36,6 +36,7 @@ defmodule Picape.MCPTest do
                "get_shopping_list",
                "get_previous_orders",
                "set_ingredient_quantity",
+               "remove_basket_item",
                "add_ingredient",
                "edit_ingredient",
                "set_ingredient_replacement",
@@ -446,6 +447,39 @@ defmodule Picape.MCPTest do
 
       Supermarket.invalidate_cart()
       assert product_in_cart?(Supermarket.cart(), 10_583_837)
+    end
+  end
+
+  describe "remove_basket_item" do
+    test "removes a basket row no ingredient is linked to" do
+      result = call!("remove_basket_item", %{product_id: 10_291_994})
+
+      assert %{"removed" => true, "name" => "Kipfilet", "quantity" => 2} = result
+      assert result["product_id"] == 10_291_994
+
+      refute Enum.any?(call!("get_shopping_list")["items"], &(&1["name"] == "Kipfilet"))
+    end
+
+    test "refuses a row that is linked to an ingredient" do
+      insert!(:ingredient, name: "Roomboter", supermarket_product_id: 10_567_923)
+
+      assert call_error("remove_basket_item", %{product_id: 10_567_923}) =~ "set_ingredient_quantity"
+    end
+
+    test "refuses while the order is placed" do
+      place_order()
+
+      assert call_error("remove_basket_item", %{product_id: 10_291_994}) =~ "placed"
+    end
+
+    test "refuses a product that is not in the basket" do
+      assert call_error("remove_basket_item", %{product_id: 1}) =~ "no row"
+    end
+
+    test "refuses while the list does not live in the supermarket basket" do
+      call!("set_mode", %{mode: "checklist"})
+
+      assert call_error("remove_basket_item", %{product_id: 10_291_994}) =~ "checklist"
     end
   end
 
