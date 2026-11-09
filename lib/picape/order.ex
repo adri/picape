@@ -683,11 +683,13 @@ defmodule Picape.Order do
   # is still processing the paid order, like every other basket write.
   defp remove_shopped_products(order_id) do
     if Settings.mode() == "ah" do
+      Supermarket.invalidate_cart()
+
       with {:ok, line} <- current(),
            false <- line.is_placed,
            false <- line.supermarket_reachable == false,
-           {:ok, wanted} <- wanted_basket_quantities(order_id, line) do
-        push_removals(shopped_product_ids(wanted, line))
+           {:ok, wanted, substituted} <- wanted_basket_quantities(order_id, line) do
+        push_removals(shopped_product_ids(wanted, substituted, line))
       else
         _ -> :ok
       end
@@ -698,23 +700,30 @@ defmodule Picape.Order do
     error -> Logger.warning("removing the shopped products failed: #{Exception.message(error)}")
   end
 
-  # The quantities sync would push for the order, keyed by basket product id
-  # after substitution: the wanted set Order.Sync diffs the basket against.
+  # The quantities sync would push for the order, both before and after
+  # substitution, as product id to quantity maps. The pre-substitution keys
+  # name products the plan asked for that may have been pushed while they
+  # were still orderable; the post-substitution ones are what the basket
+  # was actually asked to hold.
   defp wanted_basket_quantities(order_id, line) do
     with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
          {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
          {:ok, manual} <- manual_ingredients(order_id) do
-      {:ok, substitute(merge_wanted(planned, manual), line)}
+      wanted = merge_wanted(planned, manual)
+      {:ok, wanted, substitute(wanted, line)}
     end
   end
 
-  defp shopped_product_ids(wanted, line) do
+  # Every product the closed plan referenced leaves the basket: wanted at a
+  # positive quantity it was pushed there, wanted at zero sync would have
+  # removed it, and either side of a substitution may be the row that sits
+  # there. Anything else may be the user's own addition in the supermarket's
+  # app and stays.
+  defp shopped_product_ids(wanted, substituted, line) do
     in_basket = MapSet.new(Enum.map(line.items, & &1.id))
 
-    wanted
-    |> Enum.filter(fn {_id, quantity} -> quantity > 0 end)
-    |> Map.new()
-    |> Map.keys()
+    (Map.keys(wanted) ++ Map.keys(substituted))
+    |> Enum.uniq()
     |> Enum.filter(&MapSet.member?(in_basket, &1))
   end
 

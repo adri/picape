@@ -211,6 +211,46 @@ defmodule Picape.Order.SyncSupermarketTest do
     assert product_in_cart?(cart, 238_913)
   end
 
+  test "closing an order removes a product the plan wanted at zero" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 0)
+
+    assert product_in_cart?(Supermarket.cart(), 10_583_837)
+
+    assert {:ok, _line} = Order.start_shopping("1")
+
+    Supermarket.invalidate_cart()
+    refute product_in_cart?(Supermarket.cart(), 10_583_837)
+  end
+
+  test "closing an order removes the originally pushed product of a fresh substitution" do
+    kip = insert!(:ingredient, name: "Kipfilet", supermarket_product_id: 10_291_994)
+    sinaas = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+    replace(kip, sinaas)
+    insert!(:manual_ingredient, ingredient_id: kip.id, quantity: 2)
+
+    assert {:ok, _} = Order.sync_supermarket("1")
+    Supermarket.invalidate_cart()
+    assert product_quantity(Supermarket.cart(), 10_291_994) == 2
+
+    # The product flips unavailable with a replacement between sync and close,
+    # so the substituted wanted set names only the replacement's product.
+    kip
+    |> Ecto.Changeset.change(
+      supermarket_product_raw: %{
+        "productCard" => %{"orderAvailabilityStatus" => "OUT_OF_STOCK"}
+      }
+    )
+    |> Repo.update!()
+
+    assert {:ok, _line} = Order.start_shopping("1")
+
+    Supermarket.invalidate_cart()
+    cart = Supermarket.cart()
+    refute product_in_cart?(cart, 10_291_994)
+    refute product_in_cart?(cart, 519_017)
+  end
+
   test "previous orders without a snapshot keep the rebuilt plan items" do
     rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
     insert!(:manual_ingredient, line_id: "42", ingredient_id: rijst.id, quantity: 3)
