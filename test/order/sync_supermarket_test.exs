@@ -162,6 +162,16 @@ defmodule Picape.Order.SyncSupermarketTest do
     assert sinaas_id == sinaas.id
   end
 
+  test "reducing a wanted quantity lowers the basket row instead of removing it" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+
+    assert {:ok, _} = Order.order_ingredient("1", rijst.id, 3)
+    assert {:ok, _} = Order.order_ingredient("1", rijst.id, 1)
+
+    Supermarket.invalidate_cart()
+    assert product_quantity(Supermarket.cart(), 10_583_837) == 1
+  end
+
   test "previous orders without a snapshot keep the rebuilt plan items" do
     rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
     insert!(:manual_ingredient, line_id: "42", ingredient_id: rijst.id, quantity: 3)

@@ -16,7 +16,7 @@ defmodule Picape.Supermarket.CartItems do
       changes.remove
       |> Enum.map_reduce(next_position, fn change, pos ->
         position = Map.get(positions, change.id, pos)
-        {to_basket_mutation(change.id, 0, position), pos}
+        {to_basket_mutation(change.id, change.quantity, position), pos}
       end)
 
     {adds, _} =
