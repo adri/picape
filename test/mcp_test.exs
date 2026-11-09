@@ -481,6 +481,34 @@ defmodule Picape.MCPTest do
 
       assert call_error("remove_basket_item", %{product_id: 10_291_994}) =~ "checklist"
     end
+
+    test "refuses in picnic mode" do
+      call!("set_mode", %{mode: "picnic"})
+
+      assert call_error("remove_basket_item", %{product_id: 10_291_994}) =~ "picnic"
+    end
+
+    test "refuses a string product id" do
+      assert call_error("remove_basket_item", %{product_id: "10291994"}) =~ "no row"
+    end
+
+    test "refuses a missing product id" do
+      assert call_error("remove_basket_item", %{}) =~ "no row"
+    end
+
+    test "reports an error when the supermarket keeps the row" do
+      # externalItems survive UpdateMyListBasket in the fake, like rows the
+      # supermarket manages itself; the tool must not claim it removed one.
+      Agent.update(Picape.SupermarketFake.State, fn response ->
+        update_in(response, ["data", "basket", "externalItems"], fn items ->
+          items ++ [external_item(999_999, "External Thing")]
+        end)
+      end)
+
+      Supermarket.invalidate_cart()
+
+      assert call_error("remove_basket_item", %{product_id: 999_999}) =~ "externalItems"
+    end
   end
 
   describe "set_ingredient_replacement" do
@@ -1124,5 +1152,20 @@ defmodule Picape.MCPTest do
       %{"product" => %{"id" => ^product_id}, "quantity" => quantity} -> quantity
       _ -> nil
     end)
+  end
+
+  defp external_item(product_id, title) do
+    %{
+      "__typename" => "BasketItem",
+      "position" => 99,
+      "originCode" => "EXTERNAL",
+      "quantity" => 1,
+      "product" => %{
+        "__typename" => "Product",
+        "id" => product_id,
+        "title" => title,
+        "availability" => %{"isOrderable" => true, "online" => %{"status" => "AVAILABLE"}}
+      }
+    }
   end
 end

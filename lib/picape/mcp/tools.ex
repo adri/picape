@@ -554,7 +554,14 @@ defmodule Picape.MCP.Tools do
   end
 
   defp run("remove_basket_item", args) do
-    Order.remove_basket_item(args["product_id"])
+    case Order.remove_basket_item(args["product_id"]) do
+      {:ok, _} = removed ->
+        publish_order_changed()
+        removed
+
+      error ->
+        error
+    end
   end
 
   defp run("add_ingredient", args) do

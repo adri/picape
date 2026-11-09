@@ -297,6 +297,8 @@ defmodule Picape.Order do
   """
   def remove_basket_item(product_id) do
     if Settings.mode() == "ah" do
+      Supermarket.invalidate_cart()
+
       with {:ok, line} <- current() do
         remove_basket_row(line, product_id)
       end
@@ -571,8 +573,41 @@ defmodule Picape.Order do
     }
 
     case Supermarket.apply_changes(changes) do
-      {:ok, _} -> :ok
+      {:ok, _} -> confirm_product_swap(old_product_id, new_product_id, quantity)
       {:error, other} -> Logger.warning("remapping the basket product failed: #{inspect(other)}")
+    end
+  end
+
+  defp confirm_product_swap(old_product_id, new_product_id, quantity) do
+    case fresh_cart() do
+      nil ->
+        Logger.warning("remapping the basket product failed: the cart cannot be read back")
+
+      cart ->
+        case basket_row_section(cart["basket"] || %{}, old_product_id) do
+          nil ->
+            confirm_swapped_quantity(cart, new_product_id, quantity)
+
+          section ->
+            Logger.warning(
+              "remapping the basket product failed: product #{old_product_id} is still in the basket (#{section})"
+            )
+        end
+    end
+
+    :ok
+  end
+
+  defp confirm_swapped_quantity(cart, new_product_id, quantity) do
+    case basket_item_quantity(cart, new_product_id) do
+      ^quantity ->
+        :ok
+
+      actual ->
+        Logger.warning(
+          "remapping the basket product failed: product #{new_product_id} shows quantity " <>
+            "#{inspect(actual)} instead of #{quantity}"
+        )
     end
   end
 
@@ -616,14 +651,29 @@ defmodule Picape.Order do
     changes = %Sync.Changes{remove: [%Product{id: item.id, quantity: 0}], add: []}
 
     case Supermarket.apply_changes(changes) do
-      {:ok, _} ->
-        {:ok, %{product_id: item.id, name: item.name, quantity: item.quantity, removed: true}}
-
-      {:error, other} ->
-        {:error, "the supermarket refused to remove the row: #{inspect(other)}"}
+      {:ok, _} -> confirm_row_removed(item)
+      {:error, other} -> {:error, "the supermarket refused to remove the row: #{inspect(other)}"}
     end
   rescue
     error -> {:error, Exception.message(error)}
+  end
+
+  defp confirm_row_removed(%Item{} = item) do
+    case fresh_cart() do
+      nil ->
+        {:error, "the supermarket accepted the removal but the cart cannot be read back, so it is unconfirmed"}
+
+      cart ->
+        case basket_row_section(cart["basket"] || %{}, item.id) do
+          nil ->
+            {:ok, %{product_id: item.id, name: item.name, quantity: item.quantity, removed: true}}
+
+          section ->
+            {:error,
+             "the supermarket kept the #{item.name} row (product #{item.id}) in #{section}; " <>
+               "remove it in the supermarket's own app"}
+        end
+    end
   end
 
   # The basket outlives the order: the rows the closed plan put there would
@@ -677,9 +727,55 @@ defmodule Picape.Order do
     }
 
     case Supermarket.apply_changes(changes) do
-      {:ok, _} -> :ok
+      {:ok, _} -> confirm_rows_removed(product_ids)
       {:error, other} -> Logger.warning("removing the shopped products failed: #{inspect(other)}")
     end
+  end
+
+  defp confirm_rows_removed(product_ids) do
+    case fresh_cart() do
+      nil ->
+        Logger.warning("removing the shopped products failed: the cart cannot be read back")
+
+      cart ->
+        basket = cart["basket"] || %{}
+        survivors = Enum.filter(product_ids, &(basket_row_section(basket, &1) != nil))
+
+        if survivors != [] do
+          Logger.warning("removing the shopped products failed: #{inspect(survivors)} are still in the basket")
+        end
+    end
+
+    :ok
+  end
+
+  # UpdateMyListBasket can answer SUCCESS while a row survives the mutation —
+  # the fake keeps externalItems untouched and the live contract is
+  # unverified. A fresh cart says where a product still sits, or nil when it
+  # is gone; nil also when the cart cannot be read back at all.
+  defp fresh_cart() do
+    Supermarket.invalidate_cart()
+    Supermarket.cart()
+  rescue
+    _ -> nil
+  end
+
+  defp basket_row_section(basket, product_id) when is_map(basket) do
+    Enum.find_value(["itemsInOrder", "itemsInList", "externalItems"], fn section ->
+      if Enum.any?(Map.get(basket, section) || [], &same_basket_product?(&1, product_id)) do
+        section
+      end
+    end)
+  end
+
+  defp same_basket_product?(item, product_id) do
+    to_string(get_in(item, ["product", "id"])) == to_string(product_id)
+  end
+
+  defp basket_item_quantity(cart, product_id) do
+    Enum.find_value(cart["items"] || [], fn item ->
+      if same_basket_product?(item, product_id), do: item["quantity"]
+    end)
   end
 
   # The Picnic cart plus the planned ingredients the cart does not hold,
