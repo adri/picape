@@ -448,6 +448,41 @@ defmodule Picape.MCPTest do
       Supermarket.invalidate_cart()
       assert product_in_cart?(Supermarket.cart(), 10_583_837)
     end
+
+    test "a remap keeps the new product on the shopping list with its quantity" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      recipe = insert!(:recipe, title: "Nasi", ingredients: [ingredient])
+      call!("plan_recipe", %{recipe_id: recipe.id})
+
+      assert %{"ordered_quantity" => 1} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      item = Enum.find(call!("get_shopping_list")["items"], &(&1["name"] == "Product 999999"))
+      assert item["quantity"] == 1
+      assert item["ingredient"]["name"] == "Rijst"
+    end
+
+    test "a remap adds the new product when the old row is already gone" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      recipe = insert!(:recipe, title: "Nasi", ingredients: [ingredient])
+      call!("plan_recipe", %{recipe_id: recipe.id})
+
+      # Drop the old product from the basket directly, like a failed push would.
+      Agent.update(Picape.SupermarketFake.State, fn response ->
+        update_in(response, ["data", "basket", "itemsInList"], fn items ->
+          Enum.reject(items, &(get_in(&1, ["product", "id"]) == 10_583_837))
+        end)
+      end)
+
+      Supermarket.invalidate_cart()
+
+      assert %{"ordered_quantity" => 1} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      item = Enum.find(call!("get_shopping_list")["items"], &(&1["name"] == "Product 999999"))
+      assert item["quantity"] == 1
+      assert item["ingredient"]["name"] == "Rijst"
+    end
   end
 
   describe "remove_basket_item" do

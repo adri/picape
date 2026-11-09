@@ -264,22 +264,24 @@ defmodule Picape.Order do
 
   @doc """
   Moves the basket row of a supermarket product an ingredient was remapped
-  away from onto the new product, keeping the row's quantity.
+  away from onto the new product, at the quantity the plan wants for it.
 
   Runs only while the ingredient is on the current order: a row the plan does
   not want may be the user's own addition in the supermarket's app and stays,
-  like any other external item. Writes nothing while the supermarket is
-  processing a paid order, the same freeze every other basket write obeys.
+  like any other external item. The new product lands even when the old row
+  is already gone, since the plan wants it either way. Writes nothing while
+  the supermarket is processing a paid order, the same freeze every other
+  basket write obeys.
   """
   def remap_basket_product(old_product_id, new_product_id) do
+    Supermarket.invalidate_cart()
+
     with {:ok, line} <- current(),
          false <- line.is_placed,
          false <- line.supermarket_reachable == false,
-         {:ok, wanted} <- wanted_basket_quantities("1", line),
+         {:ok, _wanted, substituted} <- wanted_basket_quantities("1", line),
          new_quantity when is_integer(new_quantity) and new_quantity > 0 <-
-           wanted[new_product_id],
-         {:ok, ordered} <- ordered_item_quantities(line),
-         true <- Map.get(ordered, old_product_id, 0) > 0 do
+           substituted[new_product_id] do
       push_product_swap(old_product_id, new_product_id, new_quantity)
     else
       _ -> :ok
