@@ -307,6 +307,7 @@ defmodule Picape.Order do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
     finish_order(order_id, new_order_id)
     snapshot_order(new_order_id, supermarket_items())
+    remove_shopped_products(new_order_id)
 
     last()
   end
@@ -621,6 +622,56 @@ defmodule Picape.Order do
     end
   rescue
     error -> {:error, Exception.message(error)}
+  end
+
+  # The basket outlives the order: the rows the closed plan put there would
+  # otherwise stay and read as external items of the next one. Removes exactly
+  # the products the plan wanted — anything else may be the user's own
+  # addition in the supermarket's app and stays. Frozen while the supermarket
+  # is still processing the paid order, like every other basket write.
+  defp remove_shopped_products(order_id) do
+    if Settings.mode() == "ah" do
+      with {:ok, line} <- current(),
+           false <- line.is_placed,
+           false <- line.supermarket_reachable == false,
+           {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
+           {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
+           {:ok, manual} <- manual_ingredients(order_id),
+           wanted <- shopped_product_ids(merge_wanted(planned, manual), line) do
+        push_removals(wanted)
+      else
+        _ -> :ok
+      end
+    end
+
+    :ok
+  rescue
+    error -> Logger.warning("removing the shopped products failed: #{Exception.message(error)}")
+  end
+
+  defp shopped_product_ids(wanted, line) do
+    in_basket = MapSet.new(Enum.map(line.items, & &1.id))
+
+    wanted
+    |> Enum.filter(fn {_id, quantity} -> quantity > 0 end)
+    |> Map.new()
+    |> substitute(line)
+    |> Map.keys()
+    |> Enum.filter(&MapSet.member?(in_basket, &1))
+  end
+
+  defp push_removals([]), do: :ok
+
+  defp push_removals(product_ids) do
+    changes = %Sync.Changes{
+      remove: Enum.map(product_ids, &%Product{id: &1, quantity: 0}),
+      add: []
+    }
+
+    case Supermarket.apply_changes(changes) do
+      {:ok, _} -> :ok
+      {:error, other} -> Logger.warning("removing the shopped products failed: #{inspect(other)}")
+    end
   end
 
   # The Picnic cart plus the planned ingredients the cart does not hold,

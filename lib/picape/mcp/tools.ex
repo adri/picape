@@ -408,12 +408,13 @@ defmodule Picape.MCP.Tools do
       description:
         "Close the current order the way the app's \"Bestelling ontvangen\" button does " <>
           "(or \"Boodschappen gedaan\" in checklist mode). The plan moves off the open order " <>
-          "and that order is empty again. Works in ah, picnic and checklist mode. Returns the " <>
-          "closed order id, the current order id and the mode. If the current order is empty, " <>
-          "nothing is closed and the reply says so; calling it again does not close another " <>
-          "order. This only changes Picape's own order: it never places an order, checks out " <>
-          "or picks a delivery slot at the supermarket or at Picnic, and it does not change a " <>
-          "product id.",
+          "and that order is empty again; in ah mode the plan's own products leave the " <>
+          "supermarket basket too, while rows Picape does not own stay. Works in ah, picnic " <>
+          "and checklist mode. Returns the closed order id, the current order id and the " <>
+          "mode. If the current order is empty, nothing is closed and the reply says so; " <>
+          "calling it again does not close another order. This never places an order, " <>
+          "checks out or picks a delivery slot at the supermarket or at Picnic, and it " <>
+          "does not change a product id.",
       inputSchema: %{type: "object", properties: %{}}
     }
   ]
@@ -694,10 +695,11 @@ defmodule Picape.MCP.Tools do
   end
 
   # The button calls `Order.start_shopping/1` with the open order. That moves
-  # the plan off line "1" and, in ah mode, copies the basket into Picape. It
-  # does not write to a shop. Calling it on an empty plan still mints an id
-  # and, in ah mode, snapshots the basket again — the basket itself is never
-  # emptied — so an empty order is not closed a second time.
+  # the plan off line "1", copies the basket into Picape and, in ah mode,
+  # removes the plan's own basket rows; rows Picape does not own stay. Calling
+  # it on an empty plan still mints an id and, in ah mode, snapshots the
+  # basket again — the basket itself is never emptied — so an empty order is
+  # not closed a second time.
   defp run("start_shopping", _args) do
     mode = Settings.mode()
 

@@ -172,6 +172,21 @@ defmodule Picape.Order.SyncSupermarketTest do
     assert product_quantity(Supermarket.cart(), 10_583_837) == 1
   end
 
+  test "closing an order takes the plan's products out of the basket and keeps external rows" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+    assert {:ok, _} = Order.sync_supermarket("1")
+
+    assert {:ok, _line} = Order.start_shopping("1")
+
+    Supermarket.invalidate_cart()
+    cart = Supermarket.cart()
+    refute product_in_cart?(cart, 10_583_837)
+    # Rows Picape never asked for stay: the user may have added them in the
+    # supermarket's own app.
+    assert product_in_cart?(cart, 238_913)
+  end
+
   test "previous orders without a snapshot keep the rebuilt plan items" do
     rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
     insert!(:manual_ingredient, line_id: "42", ingredient_id: rijst.id, quantity: 3)

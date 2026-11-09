@@ -900,7 +900,26 @@ defmodule Picape.MCPTest do
       reloaded = Repo.get!(Ingredient, rijst.id)
       assert reloaded.supermarket_product_id == 10_583_837
       assert reloaded.picnic_product_id == "s2001"
-      refute Enum.any?(requests_after(before), &shop_mutation?/1)
+
+      # Closing clears the rows the plan put in the basket. Rows Picape does
+      # not own stay.
+      assert [
+               %{
+                 "operationName" => "UpdateMyListBasket",
+                 "variables" => %{
+                   "items" => [%{"id" => 10_583_837, "quantity" => 0}]
+                 }
+               }
+             ] =
+               for(
+                 %{body: %{"operationName" => "UpdateMyListBasket"} = body} <-
+                   requests_after(before),
+                 do: body
+               )
+
+      cart = Supermarket.cart()
+      refute product_in_cart?(cart, 10_583_837)
+      assert product_in_cart?(cart, 238_913)
 
       closed_ids = previous_order_ids()
       assert closed_id in closed_ids
