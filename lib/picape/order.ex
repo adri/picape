@@ -275,8 +275,9 @@ defmodule Picape.Order do
     with {:ok, line} <- current(),
          false <- line.is_placed,
          false <- line.supermarket_reachable == false,
-         {:ok, cart} <- cart("1"),
-         %{quantity: new_quantity} <- cart[new_product_id],
+         {:ok, wanted} <- wanted_basket_quantities("1", line),
+         new_quantity when is_integer(new_quantity) and new_quantity > 0 <-
+           wanted[new_product_id],
          {:ok, ordered} <- ordered_item_quantities(line),
          true <- Map.get(ordered, old_product_id, 0) > 0 do
       push_product_swap(old_product_id, new_product_id, new_quantity)
@@ -635,11 +636,8 @@ defmodule Picape.Order do
       with {:ok, line} <- current(),
            false <- line.is_placed,
            false <- line.supermarket_reachable == false,
-           {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
-           {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
-           {:ok, manual} <- manual_ingredients(order_id),
-           wanted <- shopped_product_ids(merge_wanted(planned, manual), line) do
-        push_removals(wanted)
+           {:ok, wanted} <- wanted_basket_quantities(order_id, line) do
+        push_removals(shopped_product_ids(wanted, line))
       else
         _ -> :ok
       end
@@ -650,13 +648,22 @@ defmodule Picape.Order do
     error -> Logger.warning("removing the shopped products failed: #{Exception.message(error)}")
   end
 
+  # The quantities sync would push for the order, keyed by basket product id
+  # after substitution: the wanted set Order.Sync diffs the basket against.
+  defp wanted_basket_quantities(order_id, line) do
+    with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
+         {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
+         {:ok, manual} <- manual_ingredients(order_id) do
+      {:ok, substitute(merge_wanted(planned, manual), line)}
+    end
+  end
+
   defp shopped_product_ids(wanted, line) do
     in_basket = MapSet.new(Enum.map(line.items, & &1.id))
 
     wanted
     |> Enum.filter(fn {_id, quantity} -> quantity > 0 end)
     |> Map.new()
-    |> substitute(line)
     |> Map.keys()
     |> Enum.filter(&MapSet.member?(in_basket, &1))
   end
