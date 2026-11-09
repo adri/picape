@@ -118,6 +118,30 @@ defmodule Picape.Order.SyncSupermarketTest do
     refute product_in_cart?(Supermarket.cart(), 999_999)
   end
 
+  test "a flaky cart during the placed-order archive still closes the order" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    recipe = insert!(:recipe, title: "Nasi", ingredients: [rijst])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+
+    place_order()
+
+    # The orders cache stays warm while the cart endpoint dies. The archive
+    # must still finish: the PlacedOrder marker makes every retry skip it, so
+    # a failure here used to leave the plan on "1" forever.
+    assert Supermarket.placed_order_id() == "12345678"
+
+    HTTPoison.post!(@fake <> "/__down", "")
+    Supermarket.invalidate_cart()
+
+    assert {:ok, _line} = Order.sync_supermarket("1")
+    assert Order.last_order_id() == "12345678"
+    assert Order.planned_recipes("12345678") == {:ok, [recipe.id]}
+
+    HTTPoison.post!(@fake <> "/__up", "")
+    Supermarket.invalidate_cart()
+    Supermarket.invalidate_orders()
+  end
+
   test "delivering the order lifts the freeze and syncs what queued" do
     melk = insert!(:ingredient, name: "Melk", supermarket_product_id: 999_999)
 

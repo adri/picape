@@ -108,18 +108,19 @@ defmodule Picape.Order do
 
   @doc """
   Marks a recipe as cooked or uncooked (cooked = false).
+
+  Only an existing plan row is touched: the flag lives on `order_planned_recipe`,
+  so a recipe that was never planned on the order has nothing to mark. Inserting
+  one anyway would report it as planned on that order too.
   """
   def mark_recipe_as_cooked(order_id, recipe_id, cooked) do
-    %PlannedRecipe{}
-    |> PlannedRecipe.changeset(%{
-      line_id: order_id,
-      recipe_id: recipe_id,
-      cooked: cooked
-    })
-    |> Repo.insert(
-      on_conflict: [set: [cooked: cooked]],
-      conflict_target: [:line_id, :recipe_id]
-    )
+    query =
+      from(p in PlannedRecipe, where: p.line_id == ^order_id and p.recipe_id == ^recipe_id)
+
+    case Repo.update_all(query, set: [cooked: cooked]) do
+      {0, _} -> {:ok, :not_on_order}
+      {_, _} -> {:ok, :updated}
+    end
   end
 
   def cart(order_id) do
@@ -970,8 +971,12 @@ defmodule Picape.Order do
     placed_id = to_string(Supermarket.placed_order_id())
 
     unless Repo.exists?(from(p in PlacedOrder, where: p.order_id == ^placed_id)) do
+      # The fetch comes before the marker: a flaky cart must not leave the
+      # archive half-done, because the marker makes every retry skip it.
+      items = ordered_supermarket_items()
+
       Repo.insert!(%PlacedOrder{order_id: placed_id})
-      snapshot_order(placed_id, get_in(Supermarket.cart(), ["basket", "itemsInOrder"]) || [])
+      snapshot_order(placed_id, items)
 
       if planned_items_in_order?(order_id) do
         finish_order(order_id, placed_id)
@@ -989,6 +994,15 @@ defmodule Picape.Order do
     else
       Supermarket.cart()["items"] || []
     end
+  rescue
+    _ -> []
+  end
+
+  # The paid order's own section of the basket, not the whole cart: during the
+  # freeze the basket already answers for the next order. A flaky fetch
+  # degrades to no snapshot, like `supermarket_items/0` does.
+  defp ordered_supermarket_items() do
+    get_in(Supermarket.cart(), ["basket", "itemsInOrder"]) || []
   rescue
     _ -> []
   end

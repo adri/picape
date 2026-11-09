@@ -644,12 +644,8 @@ defmodule Picape.MCP.Tools do
     order_id = Order.last_order_id()
 
     with {:ok, recipe} <- fetch_recipe(args["recipe_id"]) do
-      order_id
-      |> Order.mark_recipe_as_cooked(recipe.id, Map.get(args, "cooked", true))
-      |> case do
-        {:ok, _planned} -> {:ok, render_cooked(order_id, recipe)}
-        {:error, changeset} -> {:error, inspect(changeset.errors)}
-      end
+      {:ok, _} = Order.mark_recipe_as_cooked(order_id, recipe.id, Map.get(args, "cooked", true))
+      {:ok, render_cooked(order_id, recipe)}
     end
   end
 

@@ -663,6 +663,15 @@ defmodule Picape.MCPTest do
       assert %{"is_cooked" => false} = call!("mark_recipe_as_cooked", %{recipe_id: recipe.id})
     end
 
+    test "does not plan a recipe that was never on the order when marking it cooked" do
+      pizza = insert!(:recipe, title: "Pizza")
+      plan_in_order(pizza, @archived_order, days_ago(2))
+      nasi = insert!(:recipe, title: "Nasi")
+
+      assert %{"is_cooked" => false} = call!("mark_recipe_as_cooked", %{recipe_id: nasi.id})
+      assert Order.planned_recipes(@archived_order) == {:ok, [pizza.id]}
+    end
+
     test "reports an unknown recipe" do
       assert call_error("mark_recipe_as_cooked", %{recipe_id: 999_999}) == "no recipe with id 999999"
     end
