@@ -11,6 +11,7 @@ defmodule Picape.MCPTest do
   alias Picape.Recipe.Ingredient
   alias Picape.Recipe.IngredientRef
   alias Picape.Repo
+  alias Picape.Supermarket
   alias Picape.SupermarketFake
 
   # An order `finish_order/2` archived: history is every line but the live cart.
@@ -406,6 +407,46 @@ defmodule Picape.MCPTest do
       assert call_error("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 238_913}) =~
                "has already been taken"
     end
+
+    test "remapping the supermarket product moves its basket row to the new product" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: ingredient.id, quantity: 2)
+      assert {:ok, _line} = Order.sync_supermarket("1")
+
+      assert product_quantity(Supermarket.cart(), 10_583_837) == 2
+
+      assert %{"supermarket_product_id" => 999_999} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      Supermarket.invalidate_cart()
+      cart = Supermarket.cart()
+      refute product_in_cart?(cart, 10_583_837)
+      assert product_quantity(cart, 999_999) == 2
+    end
+
+    test "a remap while the order is placed leaves the basket alone" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: ingredient.id, quantity: 2)
+      assert {:ok, _line} = Order.sync_supermarket("1")
+
+      place_order()
+
+      call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      Supermarket.invalidate_cart()
+      cart = Supermarket.cart()
+      assert product_quantity(cart, 10_583_837) == 2
+      refute product_in_cart?(cart, 999_999)
+    end
+
+    test "a remap of an ingredient that is not on the list leaves the basket row" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+
+      call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      Supermarket.invalidate_cart()
+      assert product_in_cart?(Supermarket.cart(), 10_583_837)
+    end
   end
 
   describe "set_ingredient_replacement" do
@@ -778,6 +819,11 @@ defmodule Picape.MCPTest do
     Picape.Supermarket.invalidate_orders()
   end
 
+  defp place_order() do
+    HTTPoison.post!("http://localhost:4021/__place_order", "")
+    Supermarket.invalidate_orders()
+  end
+
   defp plan_in_order(recipe, line_id, inserted_at, attrs \\ []) do
     insert!(:planned_recipe, [recipe_id: recipe.id, line_id: line_id, inserted_at: inserted_at] ++ attrs)
   end
@@ -1006,4 +1052,15 @@ defmodule Picape.MCPTest do
   defp shop_mutation?(%{path: "/api/15/cart/remove_product"}), do: true
   defp shop_mutation?(%{body: %{"operationName" => "UpdateMyListBasket"}}), do: true
   defp shop_mutation?(_request), do: false
+
+  defp product_in_cart?(cart, product_id) do
+    Enum.any?(cart["items"], &(&1["product"]["id"] == product_id))
+  end
+
+  defp product_quantity(cart, product_id) do
+    Enum.find_value(cart["items"], fn
+      %{"product" => %{"id" => ^product_id}, "quantity" => quantity} -> quantity
+      _ -> nil
+    end)
+  end
 end

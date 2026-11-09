@@ -261,6 +261,31 @@ defmodule Picape.Order do
 
   def set_mode(mode), do: {:error, "unknown mode #{inspect(mode)}"}
 
+  @doc """
+  Moves the basket row of a supermarket product an ingredient was remapped
+  away from onto the new product, keeping the row's quantity.
+
+  Runs only while the ingredient is on the current order: a row the plan does
+  not want may be the user's own addition in the supermarket's app and stays,
+  like any other external item. Writes nothing while the supermarket is
+  processing a paid order, the same freeze every other basket write obeys.
+  """
+  def remap_basket_product(old_product_id, new_product_id) do
+    with {:ok, line} <- current(),
+         false <- line.is_placed,
+         false <- line.supermarket_reachable == false,
+         {:ok, cart} <- cart("1"),
+         %{quantity: new_quantity} <- cart[new_product_id],
+         {:ok, ordered} <- ordered_item_quantities(line),
+         true <- Map.get(ordered, old_product_id, 0) > 0 do
+      push_product_swap(old_product_id, new_product_id, new_quantity)
+    else
+      _ -> :ok
+    end
+  rescue
+    error -> Logger.warning("remapping the basket product failed: #{Exception.message(error)}")
+  end
+
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
     finish_order(order_id, new_order_id)
@@ -518,6 +543,18 @@ defmodule Picape.Order do
   end
 
   # --- private
+
+  defp push_product_swap(old_product_id, new_product_id, quantity) do
+    changes = %Sync.Changes{
+      add: [%Product{id: new_product_id, quantity: quantity}],
+      remove: [%Product{id: old_product_id, quantity: 0}]
+    }
+
+    case Supermarket.apply_changes(changes) do
+      {:ok, _} -> :ok
+      {:error, other} -> Logger.warning("remapping the basket product failed: #{inspect(other)}")
+    end
+  end
 
   # The Picnic cart plus the planned ingredients the cart does not hold,
   # which fall back to the checklist — unmapped ones, but also mapped ones
