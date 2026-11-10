@@ -11,6 +11,7 @@ defmodule Picape.MCPTest do
   alias Picape.Recipe.Ingredient
   alias Picape.Recipe.IngredientRef
   alias Picape.Repo
+  alias Picape.Supermarket
   alias Picape.SupermarketFake
 
   # An order `finish_order/2` archived: history is every line but the live cart.
@@ -35,6 +36,7 @@ defmodule Picape.MCPTest do
                "get_shopping_list",
                "get_previous_orders",
                "set_ingredient_quantity",
+               "remove_basket_item",
                "add_ingredient",
                "edit_ingredient",
                "set_ingredient_replacement",
@@ -406,6 +408,142 @@ defmodule Picape.MCPTest do
       assert call_error("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 238_913}) =~
                "has already been taken"
     end
+
+    test "remapping the supermarket product moves its basket row to the new product" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: ingredient.id, quantity: 2)
+      assert {:ok, _line} = Order.sync_supermarket("1")
+
+      assert product_quantity(Supermarket.cart(), 10_583_837) == 2
+
+      assert %{"supermarket_product_id" => 999_999} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      Supermarket.invalidate_cart()
+      cart = Supermarket.cart()
+      refute product_in_cart?(cart, 10_583_837)
+      assert product_quantity(cart, 999_999) == 2
+    end
+
+    test "a remap while the order is placed leaves the basket alone" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      insert!(:manual_ingredient, ingredient_id: ingredient.id, quantity: 2)
+      assert {:ok, _line} = Order.sync_supermarket("1")
+
+      place_order()
+
+      call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      Supermarket.invalidate_cart()
+      cart = Supermarket.cart()
+      assert product_quantity(cart, 10_583_837) == 2
+      refute product_in_cart?(cart, 999_999)
+    end
+
+    test "a remap of an ingredient that is not on the list leaves the basket row" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+
+      call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      Supermarket.invalidate_cart()
+      assert product_in_cart?(Supermarket.cart(), 10_583_837)
+    end
+
+    test "a remap keeps the new product on the shopping list with its quantity" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      recipe = insert!(:recipe, title: "Nasi", ingredients: [ingredient])
+      call!("plan_recipe", %{recipe_id: recipe.id})
+
+      assert %{"ordered_quantity" => 1} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      item = Enum.find(call!("get_shopping_list")["items"], &(&1["name"] == "Product 999999"))
+      assert item["quantity"] == 1
+      assert item["ingredient"]["name"] == "Rijst"
+    end
+
+    test "a remap adds the new product when the old row is already gone" do
+      ingredient = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+      recipe = insert!(:recipe, title: "Nasi", ingredients: [ingredient])
+      call!("plan_recipe", %{recipe_id: recipe.id})
+
+      # Drop the old product from the basket directly, like a failed push would.
+      Agent.update(Picape.SupermarketFake.State, fn response ->
+        update_in(response, ["data", "basket", "itemsInList"], fn items ->
+          Enum.reject(items, &(get_in(&1, ["product", "id"]) == 10_583_837))
+        end)
+      end)
+
+      Supermarket.invalidate_cart()
+
+      assert %{"ordered_quantity" => 1} =
+               call!("edit_ingredient", %{ingredient_id: ingredient.id, supermarket_product_id: 999_999})
+
+      item = Enum.find(call!("get_shopping_list")["items"], &(&1["name"] == "Product 999999"))
+      assert item["quantity"] == 1
+      assert item["ingredient"]["name"] == "Rijst"
+    end
+  end
+
+  describe "remove_basket_item" do
+    test "removes a basket row no ingredient is linked to" do
+      result = call!("remove_basket_item", %{product_id: 10_291_994})
+
+      assert %{"removed" => true, "name" => "Kipfilet", "quantity" => 2} = result
+      assert result["product_id"] == 10_291_994
+
+      refute Enum.any?(call!("get_shopping_list")["items"], &(&1["name"] == "Kipfilet"))
+    end
+
+    test "refuses a row that is linked to an ingredient" do
+      insert!(:ingredient, name: "Roomboter", supermarket_product_id: 10_567_923)
+
+      assert call_error("remove_basket_item", %{product_id: 10_567_923}) =~ "set_ingredient_quantity"
+    end
+
+    test "refuses while the order is placed" do
+      place_order()
+
+      assert call_error("remove_basket_item", %{product_id: 10_291_994}) =~ "placed"
+    end
+
+    test "refuses a product that is not in the basket" do
+      assert call_error("remove_basket_item", %{product_id: 1}) =~ "no row"
+    end
+
+    test "refuses while the list does not live in the supermarket basket" do
+      call!("set_mode", %{mode: "checklist"})
+
+      assert call_error("remove_basket_item", %{product_id: 10_291_994}) =~ "checklist"
+    end
+
+    test "refuses in picnic mode" do
+      call!("set_mode", %{mode: "picnic"})
+
+      assert call_error("remove_basket_item", %{product_id: 10_291_994}) =~ "picnic"
+    end
+
+    test "refuses a string product id" do
+      assert call_error("remove_basket_item", %{product_id: "10291994"}) =~ "no row"
+    end
+
+    test "refuses a missing product id" do
+      assert call_error("remove_basket_item", %{}) =~ "no row"
+    end
+
+    test "reports an error when the supermarket keeps the row" do
+      # externalItems survive UpdateMyListBasket in the fake, like rows the
+      # supermarket manages itself; the tool must not claim it removed one.
+      Agent.update(Picape.SupermarketFake.State, fn response ->
+        update_in(response, ["data", "basket", "externalItems"], fn items ->
+          items ++ [external_item(999_999, "External Thing")]
+        end)
+      end)
+
+      Supermarket.invalidate_cart()
+
+      assert call_error("remove_basket_item", %{product_id: 999_999}) =~ "externalItems"
+    end
   end
 
   describe "set_ingredient_replacement" do
@@ -586,6 +724,15 @@ defmodule Picape.MCPTest do
       recipe = insert!(:recipe, title: "Nasi")
 
       assert %{"is_cooked" => false} = call!("mark_recipe_as_cooked", %{recipe_id: recipe.id})
+    end
+
+    test "does not plan a recipe that was never on the order when marking it cooked" do
+      pizza = insert!(:recipe, title: "Pizza")
+      plan_in_order(pizza, @archived_order, days_ago(2))
+      nasi = insert!(:recipe, title: "Nasi")
+
+      assert %{"is_cooked" => false} = call!("mark_recipe_as_cooked", %{recipe_id: nasi.id})
+      assert Order.planned_recipes(@archived_order) == {:ok, [pizza.id]}
     end
 
     test "reports an unknown recipe" do
@@ -778,6 +925,11 @@ defmodule Picape.MCPTest do
     Picape.Supermarket.invalidate_orders()
   end
 
+  defp place_order() do
+    HTTPoison.post!("http://localhost:4021/__place_order", "")
+    Supermarket.invalidate_orders()
+  end
+
   defp plan_in_order(recipe, line_id, inserted_at, attrs \\ []) do
     insert!(:planned_recipe, [recipe_id: recipe.id, line_id: line_id, inserted_at: inserted_at] ++ attrs)
   end
@@ -820,7 +972,26 @@ defmodule Picape.MCPTest do
       reloaded = Repo.get!(Ingredient, rijst.id)
       assert reloaded.supermarket_product_id == 10_583_837
       assert reloaded.picnic_product_id == "s2001"
-      refute Enum.any?(requests_after(before), &shop_mutation?/1)
+
+      # Closing clears the rows the plan put in the basket. Rows Picape does
+      # not own stay.
+      assert [
+               %{
+                 "operationName" => "UpdateMyListBasket",
+                 "variables" => %{
+                   "items" => [%{"id" => 10_583_837, "quantity" => 0}]
+                 }
+               }
+             ] =
+               for(
+                 %{body: %{"operationName" => "UpdateMyListBasket"} = body} <-
+                   requests_after(before),
+                 do: body
+               )
+
+      cart = Supermarket.cart()
+      refute product_in_cart?(cart, 10_583_837)
+      assert product_in_cart?(cart, 238_913)
 
       closed_ids = previous_order_ids()
       assert closed_id in closed_ids
@@ -1006,4 +1177,30 @@ defmodule Picape.MCPTest do
   defp shop_mutation?(%{path: "/api/15/cart/remove_product"}), do: true
   defp shop_mutation?(%{body: %{"operationName" => "UpdateMyListBasket"}}), do: true
   defp shop_mutation?(_request), do: false
+
+  defp product_in_cart?(cart, product_id) do
+    Enum.any?(cart["items"], &(&1["product"]["id"] == product_id))
+  end
+
+  defp product_quantity(cart, product_id) do
+    Enum.find_value(cart["items"], fn
+      %{"product" => %{"id" => ^product_id}, "quantity" => quantity} -> quantity
+      _ -> nil
+    end)
+  end
+
+  defp external_item(product_id, title) do
+    %{
+      "__typename" => "BasketItem",
+      "position" => 99,
+      "originCode" => "EXTERNAL",
+      "quantity" => 1,
+      "product" => %{
+        "__typename" => "Product",
+        "id" => product_id,
+        "title" => title,
+        "availability" => %{"isOrderable" => true, "online" => %{"status" => "AVAILABLE"}}
+      }
+    }
+  end
 end

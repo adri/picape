@@ -118,6 +118,30 @@ defmodule Picape.Order.SyncSupermarketTest do
     refute product_in_cart?(Supermarket.cart(), 999_999)
   end
 
+  test "a flaky cart during the placed-order archive still closes the order" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    recipe = insert!(:recipe, title: "Nasi", ingredients: [rijst])
+    insert!(:planned_recipe, recipe_id: recipe.id)
+
+    place_order()
+
+    # The orders cache stays warm while the cart endpoint dies. The archive
+    # must still finish: the PlacedOrder marker makes every retry skip it, so
+    # a failure here used to leave the plan on "1" forever.
+    assert Supermarket.placed_order_id() == "12345678"
+
+    HTTPoison.post!(@fake <> "/__down", "")
+    Supermarket.invalidate_cart()
+
+    assert {:ok, _line} = Order.sync_supermarket("1")
+    assert Order.last_order_id() == "12345678"
+    assert Order.planned_recipes("12345678") == {:ok, [recipe.id]}
+
+    HTTPoison.post!(@fake <> "/__up", "")
+    Supermarket.invalidate_cart()
+    Supermarket.invalidate_orders()
+  end
+
   test "delivering the order lifts the freeze and syncs what queued" do
     melk = insert!(:ingredient, name: "Melk", supermarket_product_id: 999_999)
 
@@ -160,6 +184,71 @@ defmodule Picape.Order.SyncSupermarketTest do
            ] = sorted(order.items)
 
     assert sinaas_id == sinaas.id
+  end
+
+  test "reducing a wanted quantity lowers the basket row instead of removing it" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+
+    assert {:ok, _} = Order.order_ingredient("1", rijst.id, 3)
+    assert {:ok, _} = Order.order_ingredient("1", rijst.id, 1)
+
+    Supermarket.invalidate_cart()
+    assert product_quantity(Supermarket.cart(), 10_583_837) == 1
+  end
+
+  test "closing an order takes the plan's products out of the basket and keeps external rows" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 2)
+    assert {:ok, _} = Order.sync_supermarket("1")
+
+    assert {:ok, _line} = Order.start_shopping("1")
+
+    Supermarket.invalidate_cart()
+    cart = Supermarket.cart()
+    refute product_in_cart?(cart, 10_583_837)
+    # Rows Picape never asked for stay: the user may have added them in the
+    # supermarket's own app.
+    assert product_in_cart?(cart, 238_913)
+  end
+
+  test "closing an order removes a product the plan wanted at zero" do
+    rijst = insert!(:ingredient, name: "Rijst", supermarket_product_id: 10_583_837)
+    insert!(:manual_ingredient, ingredient_id: rijst.id, quantity: 0)
+
+    assert product_in_cart?(Supermarket.cart(), 10_583_837)
+
+    assert {:ok, _line} = Order.start_shopping("1")
+
+    Supermarket.invalidate_cart()
+    refute product_in_cart?(Supermarket.cart(), 10_583_837)
+  end
+
+  test "closing an order removes the originally pushed product of a fresh substitution" do
+    kip = insert!(:ingredient, name: "Kipfilet", supermarket_product_id: 10_291_994)
+    sinaas = insert!(:ingredient, name: "Sinaasappels", supermarket_product_id: 519_017)
+    replace(kip, sinaas)
+    insert!(:manual_ingredient, ingredient_id: kip.id, quantity: 2)
+
+    assert {:ok, _} = Order.sync_supermarket("1")
+    Supermarket.invalidate_cart()
+    assert product_quantity(Supermarket.cart(), 10_291_994) == 2
+
+    # The product flips unavailable with a replacement between sync and close,
+    # so the substituted wanted set names only the replacement's product.
+    kip
+    |> Ecto.Changeset.change(
+      supermarket_product_raw: %{
+        "productCard" => %{"orderAvailabilityStatus" => "OUT_OF_STOCK"}
+      }
+    )
+    |> Repo.update!()
+
+    assert {:ok, _line} = Order.start_shopping("1")
+
+    Supermarket.invalidate_cart()
+    cart = Supermarket.cart()
+    refute product_in_cart?(cart, 10_291_994)
+    refute product_in_cart?(cart, 519_017)
   end
 
   test "previous orders without a snapshot keep the rebuilt plan items" do

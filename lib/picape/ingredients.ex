@@ -133,6 +133,7 @@ defmodule Picape.Ingredients do
            |> Repo.update() do
       remove_replaced_picnic_product(ingredient, edited)
       adopt_picnic_cart_quantity(ingredient, edited)
+      swap_replaced_basket_product(ingredient, edited)
       {:ok, edited}
     end
   end
@@ -154,6 +155,23 @@ defmodule Picape.Ingredients do
   end
 
   defp adopt_picnic_cart_quantity(_old, _new), do: :ok
+
+  # The supermarket-basket version of the Picnic swap: a remap leaves the old
+  # product in the basket, where it shows as an item no ingredient claims.
+  # While the ingredient is on the order its row moves to the new product;
+  # anything else stays, like a product added in the supermarket's own app.
+  defp swap_replaced_basket_product(%{supermarket_product_id: old}, %{
+         supermarket_product_id: new
+       })
+       when is_integer(old) and is_integer(new) and old != new do
+    if Settings.mode() == "ah" do
+      Order.remap_basket_product(old, new)
+    end
+  rescue
+    error -> Logger.warning("moving the replaced basket product failed: #{Exception.message(error)}")
+  end
+
+  defp swap_replaced_basket_product(_old, _new), do: :ok
 
   # The Picnic cart is keyed by selling unit id, so a remap leaves the old
   # product in it. In picnic mode the old mapping's product comes out; a sync

@@ -108,18 +108,19 @@ defmodule Picape.Order do
 
   @doc """
   Marks a recipe as cooked or uncooked (cooked = false).
+
+  Only an existing plan row is touched: the flag lives on `order_planned_recipe`,
+  so a recipe that was never planned on the order has nothing to mark. Inserting
+  one anyway would report it as planned on that order too.
   """
   def mark_recipe_as_cooked(order_id, recipe_id, cooked) do
-    %PlannedRecipe{}
-    |> PlannedRecipe.changeset(%{
-      line_id: order_id,
-      recipe_id: recipe_id,
-      cooked: cooked
-    })
-    |> Repo.insert(
-      on_conflict: [set: [cooked: cooked]],
-      conflict_target: [:line_id, :recipe_id]
-    )
+    query =
+      from(p in PlannedRecipe, where: p.line_id == ^order_id and p.recipe_id == ^recipe_id)
+
+    case Repo.update_all(query, set: [cooked: cooked]) do
+      {0, _} -> {:ok, :not_on_order}
+      {_, _} -> {:ok, :updated}
+    end
   end
 
   def cart(order_id) do
@@ -261,10 +262,58 @@ defmodule Picape.Order do
 
   def set_mode(mode), do: {:error, "unknown mode #{inspect(mode)}"}
 
+  @doc """
+  Moves the basket row of a supermarket product an ingredient was remapped
+  away from onto the new product, at the quantity the plan wants for it.
+
+  Runs only while the ingredient is on the current order: a row the plan does
+  not want may be the user's own addition in the supermarket's app and stays,
+  like any other external item. The new product lands even when the old row
+  is already gone, since the plan wants it either way. Writes nothing while
+  the supermarket is processing a paid order, the same freeze every other
+  basket write obeys.
+  """
+  def remap_basket_product(old_product_id, new_product_id) do
+    Supermarket.invalidate_cart()
+
+    with {:ok, line} <- current(),
+         false <- line.is_placed,
+         false <- line.supermarket_reachable == false,
+         {:ok, _wanted, substituted} <- wanted_basket_quantities("1", line),
+         new_quantity when is_integer(new_quantity) and new_quantity > 0 <-
+           substituted[new_product_id] do
+      push_product_swap(old_product_id, new_product_id, new_quantity)
+    else
+      _ -> :ok
+    end
+  rescue
+    error -> Logger.warning("remapping the basket product failed: #{Exception.message(error)}")
+  end
+
+  @doc """
+  Removes one row from the supermarket basket when no ingredient is linked to
+  it — the rows `get_shopping_list` shows with `ingredient: null`. Refuses a
+  row an ingredient claims (`set_ingredient_quantity` changes those), a
+  product that is not in the basket, and any write while the supermarket is
+  processing a paid order.
+  """
+  def remove_basket_item(product_id) do
+    if Settings.mode() == "ah" do
+      Supermarket.invalidate_cart()
+
+      with {:ok, line} <- current() do
+        remove_basket_row(line, product_id)
+      end
+    else
+      {:error, "the shopping list does not live in the supermarket basket in #{Settings.mode()} mode"}
+    end
+  end
+
   def start_shopping(order_id) do
     new_order_id = Integer.to_string(:os.system_time(:micro_seconds))
     finish_order(order_id, new_order_id)
     snapshot_order(new_order_id, supermarket_items())
+    remove_shopped_products(new_order_id)
 
     last()
   end
@@ -518,6 +567,227 @@ defmodule Picape.Order do
   end
 
   # --- private
+
+  defp push_product_swap(old_product_id, new_product_id, quantity) do
+    changes = %Sync.Changes{
+      add: [%Product{id: new_product_id, quantity: quantity}],
+      remove: [%Product{id: old_product_id, quantity: 0}]
+    }
+
+    case Supermarket.apply_changes(changes) do
+      {:ok, _} -> confirm_product_swap(old_product_id, new_product_id, quantity)
+      {:error, other} -> Logger.warning("remapping the basket product failed: #{inspect(other)}")
+    end
+  end
+
+  defp confirm_product_swap(old_product_id, new_product_id, quantity) do
+    case fresh_cart() do
+      nil ->
+        Logger.warning("remapping the basket product failed: the cart cannot be read back")
+
+      cart ->
+        case basket_row_section(cart["basket"] || %{}, old_product_id) do
+          nil ->
+            confirm_swapped_quantity(cart, new_product_id, quantity)
+
+          section ->
+            Logger.warning(
+              "remapping the basket product failed: product #{old_product_id} is still in the basket (#{section})"
+            )
+        end
+    end
+
+    :ok
+  end
+
+  defp confirm_swapped_quantity(cart, new_product_id, quantity) do
+    case basket_item_quantity(cart, new_product_id) do
+      ^quantity ->
+        :ok
+
+      actual ->
+        Logger.warning(
+          "remapping the basket product failed: product #{new_product_id} shows quantity " <>
+            "#{inspect(actual)} instead of #{quantity}"
+        )
+    end
+  end
+
+  defp remove_basket_row(line, product_id) do
+    cond do
+      line.supermarket_reachable == false ->
+        {:error, "the supermarket is unreachable, so the basket cannot be changed"}
+
+      line.is_placed ->
+        {:error, "the order is placed; Picape does not change the basket until it is delivered"}
+
+      true ->
+        remove_unlinked_item(line, product_id)
+    end
+  end
+
+  defp remove_unlinked_item(line, product_id) do
+    case Enum.find(line.items, &(&1.id == product_id)) do
+      nil ->
+        {:error, "the basket has no row with product id #{product_id}"}
+
+      %Item{} = item ->
+        case linked_ingredient(product_id) do
+          nil -> remove_row(item)
+          ingredient -> {:error, linked_item_error(item, ingredient)}
+        end
+    end
+  end
+
+  defp linked_ingredient(product_id) do
+    {:ok, ingredients} = Recipe.ingredients_by_item_ids([product_id])
+    ingredients[product_id]
+  end
+
+  defp linked_item_error(item, ingredient) do
+    "product #{item.id} (#{item.name}) is linked to ingredient '#{ingredient.name}' " <>
+      "(id #{ingredient.id}); use set_ingredient_quantity to change it"
+  end
+
+  defp remove_row(%Item{} = item) do
+    changes = %Sync.Changes{remove: [%Product{id: item.id, quantity: 0}], add: []}
+
+    case Supermarket.apply_changes(changes) do
+      {:ok, _} -> confirm_row_removed(item)
+      {:error, other} -> {:error, "the supermarket refused to remove the row: #{inspect(other)}"}
+    end
+  rescue
+    error -> {:error, Exception.message(error)}
+  end
+
+  defp confirm_row_removed(%Item{} = item) do
+    case fresh_cart() do
+      nil ->
+        {:error, "the supermarket accepted the removal but the cart cannot be read back, so it is unconfirmed"}
+
+      cart ->
+        case basket_row_section(cart["basket"] || %{}, item.id) do
+          nil ->
+            {:ok, %{product_id: item.id, name: item.name, quantity: item.quantity, removed: true}}
+
+          section ->
+            {:error,
+             "the supermarket kept the #{item.name} row (product #{item.id}) in #{section}; " <>
+               "remove it in the supermarket's own app"}
+        end
+    end
+  end
+
+  # The basket outlives the order: the rows the closed plan put there would
+  # otherwise stay and read as external items of the next one. Removes exactly
+  # the products the plan wanted — anything else may be the user's own
+  # addition in the supermarket's app and stays. Frozen while the supermarket
+  # is still processing the paid order, like every other basket write.
+  defp remove_shopped_products(order_id) do
+    if Settings.mode() == "ah" do
+      Supermarket.invalidate_cart()
+
+      with {:ok, line} <- current(),
+           false <- line.is_placed,
+           false <- line.supermarket_reachable == false,
+           {:ok, wanted, substituted} <- wanted_basket_quantities(order_id, line) do
+        push_removals(shopped_product_ids(wanted, substituted, line))
+      else
+        _ -> :ok
+      end
+    end
+
+    :ok
+  rescue
+    error -> Logger.warning("removing the shopped products failed: #{Exception.message(error)}")
+  end
+
+  # The quantities sync would push for the order, both before and after
+  # substitution, as product id to quantity maps. The pre-substitution keys
+  # name products the plan asked for that may have been pushed while they
+  # were still orderable; the post-substitution ones are what the basket
+  # was actually asked to hold.
+  defp wanted_basket_quantities(order_id, line) do
+    with {:ok, recipe_quantities} <- recipe_ingredient_quantities(order_id),
+         {:ok, planned} <- Recipe.item_quantities(recipe_quantities),
+         {:ok, manual} <- manual_ingredients(order_id) do
+      wanted = merge_wanted(planned, manual)
+      {:ok, wanted, substitute(wanted, line)}
+    end
+  end
+
+  # Every product the closed plan referenced leaves the basket: wanted at a
+  # positive quantity it was pushed there, wanted at zero sync would have
+  # removed it, and either side of a substitution may be the row that sits
+  # there. Anything else may be the user's own addition in the supermarket's
+  # app and stays.
+  defp shopped_product_ids(wanted, substituted, line) do
+    in_basket = MapSet.new(Enum.map(line.items, & &1.id))
+
+    (Map.keys(wanted) ++ Map.keys(substituted))
+    |> Enum.uniq()
+    |> Enum.filter(&MapSet.member?(in_basket, &1))
+  end
+
+  defp push_removals([]), do: :ok
+
+  defp push_removals(product_ids) do
+    changes = %Sync.Changes{
+      remove: Enum.map(product_ids, &%Product{id: &1, quantity: 0}),
+      add: []
+    }
+
+    case Supermarket.apply_changes(changes) do
+      {:ok, _} -> confirm_rows_removed(product_ids)
+      {:error, other} -> Logger.warning("removing the shopped products failed: #{inspect(other)}")
+    end
+  end
+
+  defp confirm_rows_removed(product_ids) do
+    case fresh_cart() do
+      nil ->
+        Logger.warning("removing the shopped products failed: the cart cannot be read back")
+
+      cart ->
+        basket = cart["basket"] || %{}
+        survivors = Enum.filter(product_ids, &(basket_row_section(basket, &1) != nil))
+
+        if survivors != [] do
+          Logger.warning("removing the shopped products failed: #{inspect(survivors)} are still in the basket")
+        end
+    end
+
+    :ok
+  end
+
+  # UpdateMyListBasket can answer SUCCESS while a row survives the mutation —
+  # the fake keeps externalItems untouched and the live contract is
+  # unverified. A fresh cart says where a product still sits, or nil when it
+  # is gone; nil also when the cart cannot be read back at all.
+  defp fresh_cart() do
+    Supermarket.invalidate_cart()
+    Supermarket.cart()
+  rescue
+    _ -> nil
+  end
+
+  defp basket_row_section(basket, product_id) when is_map(basket) do
+    Enum.find_value(["itemsInOrder", "itemsInList", "externalItems"], fn section ->
+      if Enum.any?(Map.get(basket, section) || [], &same_basket_product?(&1, product_id)) do
+        section
+      end
+    end)
+  end
+
+  defp same_basket_product?(item, product_id) do
+    to_string(get_in(item, ["product", "id"])) == to_string(product_id)
+  end
+
+  defp basket_item_quantity(cart, product_id) do
+    Enum.find_value(cart["items"] || [], fn item ->
+      if same_basket_product?(item, product_id), do: item["quantity"]
+    end)
+  end
 
   # The Picnic cart plus the planned ingredients the cart does not hold,
   # which fall back to the checklist — unmapped ones, but also mapped ones
@@ -815,8 +1085,13 @@ defmodule Picape.Order do
     placed_id = to_string(Supermarket.placed_order_id())
 
     unless Repo.exists?(from(p in PlacedOrder, where: p.order_id == ^placed_id)) do
+      # ordered_supermarket_items rescues a flaky cart to an empty snapshot,
+      # like the other supermarket reads, so the fetch itself cannot fail;
+      # the marker below is only written once it has run.
+      items = ordered_supermarket_items()
+
       Repo.insert!(%PlacedOrder{order_id: placed_id})
-      snapshot_order(placed_id, get_in(Supermarket.cart(), ["basket", "itemsInOrder"]) || [])
+      snapshot_order(placed_id, items)
 
       if planned_items_in_order?(order_id) do
         finish_order(order_id, placed_id)
@@ -834,6 +1109,15 @@ defmodule Picape.Order do
     else
       Supermarket.cart()["items"] || []
     end
+  rescue
+    _ -> []
+  end
+
+  # The paid order's own section of the basket, not the whole cart: during the
+  # freeze the basket already answers for the next order. A flaky fetch
+  # degrades to no snapshot, like `supermarket_items/0` does.
+  defp ordered_supermarket_items() do
+    get_in(Supermarket.cart(), ["basket", "itemsInOrder"]) || []
   rescue
     _ -> []
   end

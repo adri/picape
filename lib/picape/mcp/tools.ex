@@ -140,6 +140,21 @@ defmodule Picape.MCP.Tools do
       }
     },
     %{
+      name: "remove_basket_item",
+      description:
+        "Remove one row from the supermarket basket that no Picape ingredient is linked to. " <>
+          "get_shopping_list shows those rows with `ingredient: null`; they are usually leftovers " <>
+          "of a product an ingredient was remapped away from. Pass the row's supermarket product " <>
+          "id. The tool refuses a row that IS linked to an ingredient — use set_ingredient_quantity " <>
+          "for those — a product that is not in the basket, and any change while the order is " <>
+          "placed. It only works in ah mode, and the reply says what was removed.",
+      inputSchema: %{
+        type: "object",
+        properties: %{product_id: @integer},
+        required: ["product_id"]
+      }
+    },
+    %{
       name: "add_ingredient",
       description:
         "Teach Picape a new ingredient, backed by a product at one of the stores. Find the product " <>
@@ -393,12 +408,13 @@ defmodule Picape.MCP.Tools do
       description:
         "Close the current order the way the app's \"Bestelling ontvangen\" button does " <>
           "(or \"Boodschappen gedaan\" in checklist mode). The plan moves off the open order " <>
-          "and that order is empty again. Works in ah, picnic and checklist mode. Returns the " <>
-          "closed order id, the current order id and the mode. If the current order is empty, " <>
-          "nothing is closed and the reply says so; calling it again does not close another " <>
-          "order. This only changes Picape's own order: it never places an order, checks out " <>
-          "or picks a delivery slot at the supermarket or at Picnic, and it does not change a " <>
-          "product id.",
+          "and that order is empty again; in ah mode the plan's own products leave the " <>
+          "supermarket basket too, while rows Picape does not own stay. Works in ah, picnic " <>
+          "and checklist mode. Returns the closed order id, the current order id and the " <>
+          "mode. If the current order is empty, nothing is closed and the reply says so; " <>
+          "calling it again does not close another order. This never places an order, " <>
+          "checks out or picks a delivery slot at the supermarket or at Picnic, and it " <>
+          "does not change a product id.",
       inputSchema: %{type: "object", properties: %{}}
     }
   ]
@@ -537,6 +553,17 @@ defmodule Picape.MCP.Tools do
     end
   end
 
+  defp run("remove_basket_item", args) do
+    case Order.remove_basket_item(args["product_id"]) do
+      {:ok, _} = removed ->
+        publish_order_changed()
+        removed
+
+      error ->
+        error
+    end
+  end
+
   defp run("add_ingredient", args) do
     %{
       name: args["name"],
@@ -624,12 +651,8 @@ defmodule Picape.MCP.Tools do
     order_id = Order.last_order_id()
 
     with {:ok, recipe} <- fetch_recipe(args["recipe_id"]) do
-      order_id
-      |> Order.mark_recipe_as_cooked(recipe.id, Map.get(args, "cooked", true))
-      |> case do
-        {:ok, _planned} -> {:ok, render_cooked(order_id, recipe)}
-        {:error, changeset} -> {:error, inspect(changeset.errors)}
-      end
+      {:ok, _} = Order.mark_recipe_as_cooked(order_id, recipe.id, Map.get(args, "cooked", true))
+      {:ok, render_cooked(order_id, recipe)}
     end
   end
 
@@ -675,10 +698,11 @@ defmodule Picape.MCP.Tools do
   end
 
   # The button calls `Order.start_shopping/1` with the open order. That moves
-  # the plan off line "1" and, in ah mode, copies the basket into Picape. It
-  # does not write to a shop. Calling it on an empty plan still mints an id
-  # and, in ah mode, snapshots the basket again — the basket itself is never
-  # emptied — so an empty order is not closed a second time.
+  # the plan off line "1", copies the basket into Picape and, in ah mode,
+  # removes the plan's own basket rows; rows Picape does not own stay. Calling
+  # it on an empty plan still mints an id and, in ah mode, snapshots the
+  # basket again — the basket itself is never emptied — so an empty order is
+  # not closed a second time.
   defp run("start_shopping", _args) do
     mode = Settings.mode()
 
